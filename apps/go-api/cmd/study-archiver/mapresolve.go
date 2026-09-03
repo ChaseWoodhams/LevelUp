@@ -26,13 +26,17 @@ type matchMap struct {
 	Range  filmdec.Vec3Range
 }
 
-// resolveMatchMap reads the match's map out of its raw stats payload and looks it up in
-// the title's quant-bounds catalogue.
+// resolveMatchMap looks a match's map name up in the title's quant-bounds catalogue.
+//
+// It takes the NAME rather than the stats payload: the payload is read once, by
+// readMatchFacts, through the repo's own `sync.ExtractRegistry`. This function used to
+// dig the name out itself, which made it a second reader of
+// MatchInfo.MapVariant.PublicName — the duplication #5 recorded as a finding, retired
+// here now that the archiver imports that extractor anyway.
 //
 // Both failure modes come back as a skipError with a NAMED reason: the caller keeps the
 // downloaded film either way, and only the BUILD is skipped.
-func resolveMatchMap(stats map[string]any, cat *filmdec.MapQuantCatalog) (matchMap, error) {
-	name := mapNameFromStats(stats)
+func resolveMatchMap(name string, cat *filmdec.MapQuantCatalog) (matchMap, error) {
 	if name == "" {
 		return matchMap{}, skipError{
 			Reason: skipNoMapInStats,
@@ -48,22 +52,4 @@ func resolveMatchMap(stats map[string]any, cat *filmdec.MapQuantCatalog) (matchM
 		}
 	}
 	return matchMap{Name: name, Module: entry.Module, Range: entry.Range()}, nil
-}
-
-// mapNameFromStats reads MatchInfo.MapVariant.PublicName out of the raw stats payload.
-//
-// A second reader of that path (internal/sync has its own, unexported, serving the
-// canonical row builder). Two copies is the repo's limit, not an invitation to a third:
-// a third caller centralises this into a shared extractor.
-func mapNameFromStats(stats map[string]any) string {
-	info, _ := stats["MatchInfo"].(map[string]any)
-	if info == nil {
-		return ""
-	}
-	variant, _ := info["MapVariant"].(map[string]any)
-	if variant == nil {
-		return ""
-	}
-	name, _ := variant["PublicName"].(string)
-	return name
 }

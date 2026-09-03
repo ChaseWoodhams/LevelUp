@@ -1,3 +1,130 @@
+## [2026-09-03] Archive database (ticket #6) — the archiver remembers what it captured — Complete
+
+**Context**: fork issue #6, "1.3 Archive database: match and participant recording",
+unblocked by #5 on this branch. `data/study/archive.duckdb` (the path #4 reserved) now
+records every match the archiver touches, plus its roster, so the tool can answer "do I
+already have this?" and Spec 2 can browse the archive.
+
+**A prerequisite had to be fixed first, and it was blocking the whole repo, not just this
+ticket.** Any package importing DuckDB refused to LINK on this machine. The prebuilt
+static library shipped by `duckdb-go-bindings` is built against **UCRT**;
+`C:\msys64\mingw64` is the MSVCRT toolchain, and the linker failed on symbols that name
+nothing in this repo (`__stdio_common_vsnprintf_s`, `__emutls_v._ZSt11__once_call`) — the
+kind of error that sends you looking for the defect in your own code. `CLAUDE.md` said
+only "CGO : gcc msys64", which points at exactly the toolchain that does not work.
+Fixed with `CC=/c/msys64/ucrt64/bin/gcc.exe`, verified (`cmd/levelup` links,
+`go test ./internal/platform/duckdb/...` passes), and written into CLAUDE.md in its own
+commit. Before this, only `CGO_ENABLED=0` packages were testable locally — silently
+excluding `persist`, `sync`, `platform/duckdb` and every `cmd/` that opens a database.
+
+**Reuse the repo's own extraction, and accept the dependency that comes with it.**
+`sync.ExtractRegistry` and `sync.ExtractParticipants` are exported and already read this
+payload for the warehouse. Re-deriving map / playlist / duration / xuid / team / outcome /
+K-D-A here would have been a second implementation of well-tested code, and worse than
+duplication: it would let the archive DISAGREE with the warehouse about the same match —
+two numbers for one match and nothing to say which is right. The cost is real and named in
+`facts.go`: importing `internal/sync` pulls its whole tree, DuckDB included, so the
+archiver is no longer the cgo-free binary #5 deliberately made it. That is paid for
+anyway by this ticket's own database. **Bonus**: this retired the duplication #5 recorded
+as a finding — `mapNameFromStats` is deleted, and `resolveMatchMap` now takes the name.
+
+**The write pattern, and the review finding that changed it — the most valuable thing to
+come out of this ticket.** It was first written as delete-then-reinsert in a transaction,
+justified in the file header by "single writer, no concurrency, so the ART index bug
+cannot bite". **That justification was false, and this repo had already written down
+why.** `internal/sync/no_art_patterns_test.go` records that `compactMatchSkillRankSuperseded`
+"déclenchait le bug ART #23046 malgré mono-writer + PK BIGINT (crash JGtm 2026-06-20)",
+and admits a raw DELETE to its allowlist only with "PK BIGINT, pas VARCHAR". Both keys
+here are VARCHAR. Verified on the source before acting, not taken on the reviewer's word.
+DuckDB #23046 is about index maintenance during row removal — it does not care how many
+processes are watching, so being the only writer buys nothing against it.
+
+Rewritten to **SELECT-then-UPDATE-or-INSERT, row by row**, which is the shape the same
+file calls safe ("UPDATE ... row-by-row sérialisés ... sont sûrs") and which CLAUDE.md
+names for a database whose rows are refreshed in place. No row is removed to be written
+again. The one remaining removal is the roster prune, and it is narrowed to the players a
+re-read no longer reports — normally none, since a match's roster is fixed by the match.
+
+The ORIGINAL reason for replace-over-upsert still holds and is preserved: participants are
+a SET, so an upsert keyed on (match_id, xuid) would strand a player left over from an
+earlier wrong read. That is what the prune is for. `ON CONFLICT DO UPDATE` stays out
+regardless — it is what ADR 0019/0026 eradicated, and reaching for it in a new tool would
+make the ticket's exemption look like a loophole.
+
+**Idempotency keys on the ARTIFACT, not on the film state.** A match can be `downloaded`
+and still have no artifact — an unsupported map, whose catalogue entry may have arrived
+since — and that one MUST be retried. So the short-circuit asks "is there a recorded
+artifact, and is it still on disk?". A recorded artifact that has gone missing is not an
+archive, so it is rebuilt rather than trusted. Deliberately NOT implemented here: the
+expired/failed retry policy, which is #7's whole ticket. The test asserts on API CALL
+COUNTS rather than row counts, because "no needless re-download" is a claim about not
+fetching — a second pass that re-downloaded the film and rebuilt it would still leave
+exactly one row and pass a row-count assertion.
+
+**Transport failures record NOTHING, and that is a design decision, not an omission.** An
+error the archiver cannot interpret leaves no row at all; only skips (with their named
+reason) and successes are recorded. A transient 5xx that wrote `expired` would stop #7
+from ever retrying it.
+
+**A real crash found by the tests, not a test artifact.** `ReplayDocument.Coverage` is a
+`*Coverage` with `omitempty`: a document that attached nothing carries none, and an
+artifact read back from disk carries none either. Reading `doc.Coverage.Bridge.LivesNamed`
+blindly panicked — on precisely the degraded match the archive most needs to record.
+Guarded, with a test that pins both branches.
+
+**Decoder revision from the binary, not from a linker flag.** Go stamps `vcs.revision`
+into any binary built inside a work tree, so this needs no `-ldflags` and cannot be
+forgotten at build time. Verified end to end with `go version -m` on a real build
+(`vcs.revision=48227ab77…`, `vcs.modified=true` → recorded as `…-dirty`, since an artifact
+built from uncommitted code is not reproducible from the commit alone). A missing stamp
+(`go run`, `go test`) is NORMAL and records as NULL rather than a fabricated value; the
+parsing is split into `revisionFrom` so all three cases are testable, which a test binary
+driving the real build info could never be.
+
+**Results**: `cmd/study-archiver` 26 tests green (1 fixture-gated skip) — rows and roster
+recorded with team/outcome/K-D-A from stats, mode/playlist/duration/source carried through
+the repo's own extractor, all three skip states recorded distinctly, roster recorded even
+when the build is skipped, second pass fetches and builds nothing, missing artifact
+rebuilt, failing run records nothing. `golangci-lint` 0 issues, gofmt and vet clean, every
+file under 500 lines and every function under 70.
+
+**And the FULL Go suite, for the first time on this machine**: `go test ./...` under the
+UCRT toolchain — 135 packages ok, 0 failures. Worth stating plainly, because #5 could only
+claim the `CGO_ENABLED=0` subset; the toolchain fix above is what turned "the parts that
+can run" into the whole thing.
+
+**`data/study/` added to .gitignore.** #4 reserved the directory and nothing wrote to it;
+this ticket is the first thing that does. The archive grows with every match captured and
+holds player data — it is local state, and without the rule the next `git add data/` would
+have committed it.
+
+**Other review findings acted on**: two doc claims that had become FALSE were corrected in
+the same commit, per this file's own preamble rule — `main.go` still advertised
+`CGO_ENABLED=0 go run`, which `facts.go` had just made impossible, and `archive.go` told
+future readers to open the archive read-only when ART rule 4 requires `OpenReadForQuery`
+(a forced `OpenReadOnly` fails against a file already held RW in-process). Also: a nil
+guard on `deps.Archive` so a future wiring gets an error instead of a panic three frames
+down; a warning when an artifact is recorded with no decoder revision, which is exactly
+what `go run` produces — the column exists to make builds traceable, so silently writing
+NULL defeats it; the stale `--gamertag` help text (it now feeds `source_gamertag`); a
+logged rather than swallowed `Close` on the failed-schema path; the team/outcome encodings
+named in the DDL itself. The new database was missing from CLAUDE.md's data map and from
+the `db-schema` skill that CLAUDE.md designates as the schema reference — both now carry
+it, including the write and read disciplines above.
+
+**Two review findings NOT acted on, checked and rejected**: the duration was reported as
+truncating fractional seconds, but `sync.parsePTDuration` returns `*int` — whole seconds
+already, so `*1000` loses nothing. And `derefStr` was reported as a third copy breaching
+rule 6; the `no_local_ptr_helper` ratchet targets `strPtr` CONSTRUCTORS, and the canonical
+`internal/util/pointers` exposes only `Ptr`, no `Deref`. Centralising would mean editing
+`internal/**`, which epic #1 puts out of scope. **Recorded as a finding**: a `Deref[T]`
+next to `Ptr[T]` is the right home, in a ticket allowed to touch that package.
+
+**Next step**: #7 (expired and failed film state handling), which turns the states this
+ticket records into a retry policy.
+
+---
+
 ## [2026-09-03] study-archiver fetch-one (ticket #5) — one match, film to artifact — Complete
 
 **Context**: fork issue #5, "1.2 fetch-one: archive a single match's film into a replay

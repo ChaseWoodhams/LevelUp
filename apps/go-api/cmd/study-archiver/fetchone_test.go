@@ -18,6 +18,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 
 	"levelup/go-api/internal/analysis/replay"
@@ -39,6 +40,11 @@ type fakeHalo struct {
 	// manifestStatus, when non-zero, replaces the manifest response (410 = film expired).
 	manifestStatus int
 	stats          map[string]any
+	// statsCalls / manifestCalls count what the archiver actually asked the API for.
+	// Idempotency is a claim about NOT fetching, and only a call count can prove it —
+	// row counts alone would still pass if the tool re-downloaded the whole film.
+	statsCalls    atomic.Int32
+	manifestCalls atomic.Int32
 }
 
 func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fakeHalo {
@@ -46,6 +52,7 @@ func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fak
 	f := &fakeHalo{chunks: chunks, stats: stats}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/hi/films/matches/", func(w http.ResponseWriter, r *http.Request) {
+		f.manifestCalls.Add(1)
 		if f.manifestStatus != 0 {
 			w.WriteHeader(f.manifestStatus)
 			return
@@ -67,6 +74,7 @@ func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fak
 		_, _ = w.Write(zlibBytes(t, data))
 	})
 	mux.HandleFunc("/hi/matches/", func(w http.ResponseWriter, r *http.Request) {
+		f.statsCalls.Add(1)
 		w.Header().Set("Content-Type", "application/json")
 		blob, err := json.Marshal(f.stats)
 		if err != nil {
@@ -124,16 +132,18 @@ func (f *fakeHalo) client() *haloclient.HaloAPIClient {
 		WithHTTPClient(&http.Client{Transport: redirectTo(f.Server.URL)})
 }
 
-// deps wires the archiver against the fake server, a throwaway repo root and a build
-// function the test controls.
+// deps wires the archiver against the fake server, a throwaway repo root, a throwaway
+// archive database and a build function the test controls.
 func (f *fakeHalo) deps(t *testing.T, build buildFilm) deps {
 	t.Helper()
 	return deps{
-		Client:  f.client(),
-		Paths:   title.NewPathResolver(t.TempDir()),
-		Title:   title.DefaultSlug,
-		Catalog: testCatalog(),
-		Build:   build,
+		Client:         f.client(),
+		Paths:          title.NewPathResolver(t.TempDir()),
+		Title:          title.DefaultSlug,
+		Catalog:        testCatalog(),
+		Archive:        testArchive(t),
+		Build:          build,
+		SourceGamertag: "JGtm",
 	}
 }
 
@@ -311,7 +321,7 @@ func TestFetchOne_NoTracksDecodedIsANamedSkip(t *testing.T) {
 // nothing here says a rebuild would ever succeed. The film is still kept.
 func TestFetchOne_StatsWithoutAMapNameIsANamedSkip(t *testing.T) {
 	film := map[int][]byte{0: []byte("header"), 1: []byte("replication")}
-	srv := newFakeHalo(t, film, map[string]any{"MatchInfo": map[string]any{}})
+	srv := newFakeHalo(t, film, statsWithMap("")) // a payload naming no map at all
 
 	built := false
 	d := srv.deps(t, func(string, string, string, replay.Options) (replay.ReplayDocument, error) {

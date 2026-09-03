@@ -71,8 +71,16 @@ func newDeps(ctx context.Context, req depsRequest) (deps, error) {
 	if err != nil {
 		return deps{}, err
 	}
+	// Opened LAST, and only once every read-only prerequisite has succeeded: an archive
+	// handle taken before a failing catalogue load would leave a DuckDB file locked by a
+	// process that is about to exit with an error.
+	store, err := openArchiveAt(paths)
+	if err != nil {
+		return deps{}, err
+	}
 	slog.InfoContext(ctx, "study-archiver: ready",
-		"titleSlug", req.Title, "maps", len(catalog.Maps), "repo_root", repoRoot)
+		"titleSlug", req.Title, "maps", len(catalog.Maps), "repo_root", repoRoot,
+		"archive", paths.StudyArchiveDBPath())
 
 	return deps{
 		Client: haloclient.NewHaloAPIClient(
@@ -81,9 +89,11 @@ func newDeps(ctx context.Context, req depsRequest) (deps, error) {
 		Title:   req.Title,
 		Catalog: catalog,
 		Labels:  labels,
+		Archive: store,
 		// Handed over unwrapped: the build lock lives at the call site (runBuild), so a
 		// wiring cannot forget it.
 		Build:           replay.BuildFromFilm,
+		SourceGamertag:  req.Gamertag,
 		FrameIntervalMS: req.FrameIntervalMS,
 	}, nil
 }

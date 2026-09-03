@@ -92,6 +92,7 @@ Tous les chemins passent par `PathResolver` (`internal/domain/title/registry.go`
 | Social (followers, activité) | `data/titles/{slug}/warehouse/shared_social.duckdb` |
 | Enrichissements joueur | `data/titles/{slug}/players/{gamertag}/stats.duckdb` |
 | Aliases Xbox globaux | `data/global/xbox_aliases.duckdb` |
+| Archive de l'outil d'étude (hors app) | `data/study/archive.duckdb` |
 | Tokens auth (source unique) | `data/auth/watcher_tokens/{xuid}.json` |
 | Sessions HTTP | `data/sessions/` |
 | Manifests par titre | `config/titles/{slug}/title.toml` + `mappings/{fields,assets,outcomes,capabilities}.toml` |

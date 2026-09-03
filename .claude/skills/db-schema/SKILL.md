@@ -26,6 +26,28 @@ filepath.Join(repoRoot, "data", "warehouse", "shared_matches_v2.duckdb")
 | `shared_social.duckdb` | `data/titles/{slug}/warehouse/` | Données sociales (followers, activité) |
 | `stats.duckdb` | `data/titles/{slug}/players/{gamertag}/` | Enrichissements individuels uniquement |
 | `xbox_aliases.duckdb` | `data/global/` | **Global** — mapping xuid→gamertag Xbox Services (P5, ADR 0008) |
+| `archive.duckdb` | `data/study/` | **Outil d'étude** — matchs archivés par `cmd/study-archiver` (ticket #6). Hors périmètre app : voir ci-dessous |
+
+## archive.duckdb — la base de l'outil d'étude (hors app)
+
+Base **locale, mono-writer**, écrite UNIQUEMENT par `cmd/study-archiver` (job batch
+sériel). Elle n'est pas dans le circuit `BatchBuilder`/`persist` (ADR 0019/0030) et le
+serveur ne l'ouvre jamais en écriture. Trois tables :
+
+| Table | Contenu |
+|---|---|
+| `matches` | 1 ligne par match archivé : `match_id` (PK), `short_id`, `played_at`, `map_name`, `map_module`, `mode`, `playlist`, `duration_ms`, `source_gamertag`, `film_state`, `skip_reason`, `artifact_path`, `built_at`, `decoder_rev`, compteurs décodés (`tracks`, `points`, `shots`, `named_lives`, `total_lives`), `recorded_at` |
+| `participants` | 1 ligne par (match, joueur) : `xuid`, `gamertag`, `team` (0 Eagle / 1 Cobra), `outcome` (1 nul / 2 victoire / 3 défaite / 4 abandon), `kills`, `deaths`, `assists` — **source : match stats, jamais le film** (le film ne porte aucune information d'équipe) |
+| `watchlist` | `gamertag` (PK), `xuid`, `added_at`, `last_checked` — alimentée par le ticket #8 |
+
+`film_state` : `pending` \| `downloaded` \| `expired` \| `failed`. Les trois états
+terminaux disent des choses différentes à un run ultérieur (politique de reprise : #7).
+
+**Écritures** : SELECT-then-UPDATE-or-INSERT ligne à ligne, JAMAIS `ON CONFLICT DO UPDATE`
+ni delete-then-reinsert. Mono-writer n'est PAS un argument de sûreté vis-à-vis d'ART
+(#23046 a crashé malgré mono-writer + PK BIGINT, cf. `no_art_patterns_test.go`), et les
+deux clés d'ici sont VARCHAR. **Lectures** (serveur d'étude, spec 2) : `OpenReadForQuery`,
+jamais `OpenReadOnly` forcé.
 
 ## shared_matches_v2.duckdb
 

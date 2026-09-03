@@ -49,11 +49,13 @@ func realRepoDeps(t *testing.T, serverURL string) deps {
 	return deps{
 		Client: haloclient.NewHaloAPIClient("spartan-test", "clearance-test", 1000).
 			WithHTTPClient(&http.Client{Transport: redirectTo(serverURL)}),
-		Paths:   title.NewPathResolver(t.TempDir()),
-		Title:   title.DefaultSlug,
-		Catalog: catalog,
-		Labels:  labels,
-		Build:   replay.BuildFromFilm,
+		Paths:          title.NewPathResolver(t.TempDir()),
+		Title:          title.DefaultSlug,
+		Catalog:        catalog,
+		Labels:         labels,
+		Archive:        testArchive(t),
+		Build:          replay.BuildFromFilm,
+		SourceGamertag: "JGtm",
 	}
 }
 
@@ -75,7 +77,11 @@ func TestFetchOne_RealFilmEndToEnd(t *testing.T) {
 	if err := json.Unmarshal(fx.MatchStatsRaw, &stats); err != nil {
 		t.Fatalf("fixture stats: %v", err)
 	}
-	if _, err := resolveMatchMap(stats, d.Catalog); err != nil {
+	facts, err := readMatchFacts(stats, "fixture")
+	if err != nil {
+		t.Fatalf("fixture stats unreadable: %v", err)
+	}
+	if _, err := resolveMatchMap(facts.MapName, d.Catalog); err != nil {
 		t.Skipf("fixture map not in the versioned catalogue: %v", err)
 	}
 

@@ -116,6 +116,10 @@ data/cache/*
 # 272 appels Halo upstream à chaque déploiement (cf. populate-career-rank-images CLI).
 !data/cache/career-rank-image/
 data/sync_cache/
+# Données de l'outil d'étude (cmd/study-archiver, ticket #6) : base d'archive,
+# rasters et images de carte. État LOCAL — la base grossit avec chaque match
+# archivé et porte des données de joueurs. Rien ici n'est versionné.
+data/study/
 data/backup_legacy/
 # État runtime admin par-instance (journal d'actions, snapshot post-sync) — état local
 data/global/admin_state/

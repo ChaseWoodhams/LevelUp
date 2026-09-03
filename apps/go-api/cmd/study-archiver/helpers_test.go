@@ -15,6 +15,61 @@ import (
 // chunkNamePrefix is the blob file name the Halo manifest uses for a film chunk.
 const chunkNamePrefix = "filmChunk"
 
+// statsWithMap builds a match-stats payload shaped like the real one.
+//
+// It has to be the REAL shape, not just the fields the archiver reads: the extraction
+// goes through the repo's own sync.ExtractRegistry / sync.ExtractParticipants, so a
+// fixture missing MatchId or StartTime fails there rather than in the archiver. That is
+// the point of reusing them — the fixture is held to the same standard as the API.
+func statsWithMap(mapName string) map[string]any {
+	stats := map[string]any{
+		"MatchId": testMatchID,
+		"MatchInfo": map[string]any{
+			"StartTime": "2026-05-19T20:15:00.000Z",
+			"EndTime":   "2026-05-19T20:24:13.000Z",
+			"Duration":  "PT9M13S",
+			"Playlist":  map[string]any{"PublicName": "Ranked Arena", "AssetId": "playlist-1"},
+			"UgcGameVariant": map[string]any{
+				"PublicName": "Slayer", "AssetId": "variant-1",
+			},
+			"PlaylistMapModePair": map[string]any{"PublicName": "Slayer on Cliffhanger"},
+		},
+		"Players": []any{
+			statsPlayer("xuid(1)", "JGtm", 0, 2, 15, 9, 4),
+			statsPlayer("xuid(2)", "Rival", 1, 3, 9, 15, 2),
+		},
+	}
+	if mapName != "" {
+		info, _ := stats["MatchInfo"].(map[string]any)
+		info["MapVariant"] = map[string]any{"PublicName": mapName, "AssetId": "map-1"}
+	}
+	return stats
+}
+
+// statsPlayer builds one entry of the stats payload's Players array, in the nesting the
+// API actually uses (PlayerTeamStats -> Stats -> CoreStats).
+func statsPlayer(playerID, gamertag string, team, outcome, kills, deaths, assists int) map[string]any {
+	return map[string]any{
+		"PlayerId":   playerID,
+		"Gamertag":   gamertag,
+		"LastTeamId": float64(team),
+		"Outcome":    float64(outcome),
+		"Rank":       float64(1),
+		"PlayerTeamStats": []any{map[string]any{
+			"TeamId": float64(team),
+			"Stats": map[string]any{
+				"CoreStats": map[string]any{
+					"Kills":         float64(kills),
+					"Deaths":        float64(deaths),
+					"Assists":       float64(assists),
+					"PersonalScore": float64(1000),
+					"Score":         float64(1000),
+				},
+			},
+		}},
+	}
+}
+
 func fmtChunkName(idx int) string { return fmt.Sprintf("%s%d", chunkNamePrefix, idx) }
 
 // parseChunkIndex reads the chunk index back out of a blob file name.

@@ -7,7 +7,7 @@ import (
 	"levelup/go-api/internal/analysis/filmdec"
 )
 
-// testCatalog is a two-map quant-bounds catalogue. Hand-built rather than read from
+// testCatalog is a one-map quant-bounds catalogue. Hand-built rather than read from
 // data/titles/**: this test is about the LOOKUP, and reading the versioned catalogue
 // would make it fail whenever the game ships a new map.
 func testCatalog() *filmdec.MapQuantCatalog {
@@ -24,17 +24,8 @@ func testCatalog() *filmdec.MapQuantCatalog {
 	}
 }
 
-// statsWithMap builds the slice of a match-stats payload the archiver actually reads.
-func statsWithMap(name string) map[string]any {
-	return map[string]any{
-		"MatchInfo": map[string]any{
-			"MapVariant": map[string]any{"PublicName": name},
-		},
-	}
-}
-
 func TestResolveMatchMap_SupportedMapCarriesModuleAndBounds(t *testing.T) {
-	got, err := resolveMatchMap(statsWithMap("Cliffhanger"), testCatalog())
+	got, err := resolveMatchMap("Cliffhanger", testCatalog())
 	if err != nil {
 		t.Fatalf("resolveMatchMap: %v", err)
 	}
@@ -49,7 +40,7 @@ func TestResolveMatchMap_SupportedMapCarriesModuleAndBounds(t *testing.T) {
 // The API suffixes ranked playlists onto the map name; the geometry is the same map.
 // NormalizeMapName owns that rule, and this pins that the archiver goes through it.
 func TestResolveMatchMap_RankedSuffixStillResolves(t *testing.T) {
-	got, err := resolveMatchMap(statsWithMap("Cliffhanger - Ranked"), testCatalog())
+	got, err := resolveMatchMap("Cliffhanger - Ranked", testCatalog())
 	if err != nil {
 		t.Fatalf("resolveMatchMap: %v", err)
 	}
@@ -59,10 +50,10 @@ func TestResolveMatchMap_RankedSuffixStillResolves(t *testing.T) {
 }
 
 // A map absent from the catalogue must yield the NAMED reason, not a bare error:
-// ticket #6 records it and #7 branches on it. Building with another map's bounds
+// #7 branches on it and the archive row records it. Building with another map's bounds
 // would be wrong by an arbitrary scale factor and nothing on screen would say so.
 func TestResolveMatchMap_UnsupportedMapIsANamedSkip(t *testing.T) {
-	_, err := resolveMatchMap(statsWithMap("Forbidden Sands"), testCatalog())
+	_, err := resolveMatchMap("Forbidden Sands", testCatalog())
 
 	var skip skipError
 	if !errors.As(err, &skip) {
@@ -76,21 +67,12 @@ func TestResolveMatchMap_UnsupportedMapIsANamedSkip(t *testing.T) {
 	}
 }
 
-func TestResolveMatchMap_StatsWithoutMapNameIsANamedSkip(t *testing.T) {
-	for _, tc := range []struct {
-		name  string
-		stats map[string]any
-	}{
-		{"no MatchInfo", map[string]any{}},
-		{"no MapVariant", map[string]any{"MatchInfo": map[string]any{}}},
-		{"empty PublicName", statsWithMap("")},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			_, err := resolveMatchMap(tc.stats, testCatalog())
-			var skip skipError
-			if !errors.As(err, &skip) || skip.Reason != skipNoMapInStats {
-				t.Errorf("err = %v, want skipError(%s)", err, skipNoMapInStats)
-			}
-		})
+// Stats that named no map at all: a different reason, because nothing says a rebuild
+// would ever succeed.
+func TestResolveMatchMap_NoMapNameIsANamedSkip(t *testing.T) {
+	_, err := resolveMatchMap("", testCatalog())
+	var skip skipError
+	if !errors.As(err, &skip) || skip.Reason != skipNoMapInStats {
+		t.Errorf("err = %v, want skipError(%s)", err, skipNoMapInStats)
 	}
 }

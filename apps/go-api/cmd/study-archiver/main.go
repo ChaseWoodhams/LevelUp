@@ -10,10 +10,19 @@
 // on, and assembles the 2D replay artifact the existing viewer already reads. The raw
 // chunks are KEPT: the artifact is regenerable, the expired CDN link is not.
 //
-// Example (from apps/go-api, which is also where cmd/replay-build is run from):
+// Example (from apps/go-api):
 //
-//	CGO_ENABLED=0 LEVELUP_REPO_ROOT=<repo> \
+//	LEVELUP_REPO_ROOT=<repo> CC=/c/msys64/ucrt64/bin/gcc.exe \
 //	  go run ./cmd/study-archiver fetch-one --xuid 2533274823110022 <matchId>
+//
+// This binary LINKS DUCKDB (the archive database), so cgo is required — the UCRT
+// toolchain, never mingw64; cf. CLAUDE.md. It was cgo-free until the archive landed.
+//
+// PREFER `go build` OVER `go run` FOR REAL ARCHIVING RUNS. Go stamps the VCS revision
+// into a built binary but not into `go run`, and that stamp is what the archive records
+// as decoder_rev — the only way a later coverage drop can be traced back to the build
+// that caused it. A `go run` archive is still correct; it just cannot answer that
+// question, and the tool says so once per run.
 //
 // Exit codes: 0 archived, 3 skipped for a named reason (expired film, unsupported map,
 // nothing decoded — all normal outcomes, all logged with their reason), 1 failure, 2
@@ -80,7 +89,7 @@ func usage() {
 func runFetchOne(ctx context.Context, args []string) int {
 	fs := flag.NewFlagSet("fetch-one", flag.ContinueOnError)
 	xuid := fs.String("xuid", "", "xuid whose stored token authenticates the run (ADR 0023)")
-	gamertag := fs.String("gamertag", "", "gamertag of --xuid; optional, labels the re-auth flag only")
+	gamertag := fs.String("gamertag", "", "gamertag of --xuid; recorded as the archive row's source_gamertag")
 	titleSlug := fs.String("title", title.DefaultSlug, "title slug")
 	interval := fs.Int("interval", 0, "replay grid step in ms (0 = the replay package's default)")
 	rps := fs.Int("rps", 0, "outgoing requests per second (0 = the Halo client's default)")
@@ -105,6 +114,13 @@ func runFetchOne(ctx context.Context, args []string) int {
 		slog.ErrorContext(ctx, "study-archiver: setup failed", "err", err)
 		return exitFailure
 	}
+	// The archive is a DuckDB file and this process is its only writer: leaving the
+	// handle open past the run would keep it locked against the study server.
+	defer func() {
+		if cErr := d.Archive.Close(); cErr != nil {
+			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
+		}
+	}()
 
 	out, err := fetchOne(ctx, d, matchID)
 	if err != nil {

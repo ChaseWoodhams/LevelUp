@@ -33,6 +33,29 @@ $env:CC = "gcc"
 go test ./... -timeout 5m -count=1
 ```
 
+**Windows — quel gcc exactement (2026-09-03).** « MinGW via MSYS2 » ne suffit pas : les
+libs DuckDB précompilées imposent deux contraintes, et se tromper coûte une heure de
+symboles non résolus.
+
+1. **UCRT64, pas MINGW64.** Utiliser `C:\msys64\ucrt64\bin`
+   (`pacman -S mingw-w64-ucrt-x86_64-gcc`). Le toolchain `mingw64` vise MSVCRT et échoue
+   sur `__stdio_common_vsnprintf_s`, `__stdio_common_vswprintf`, `std::fpos<_Mbstatet>`.
+2. **libstdc++ de GCC 14, pas 16.** GCC 15/16 d'ucrt64 lient nativement les TLS alors que
+   les libs DuckDB référencent des symboles emutls : `undefined reference to
+   __emutls_v._ZSt11__once_call` / `__emutls_v._ZSt15__once_callable`. Remplacer
+   `libstdc++.a` par celui de GCC 14.2.0, en gardant l'original :
+
+```bash
+curl -sSL -o gcc14.pkg.tar.zst \
+  https://repo.msys2.org/mingw/ucrt64/mingw-w64-ucrt-x86_64-gcc-14.2.0-3-any.pkg.tar.zst
+PATH="/c/msys64/usr/bin:$PATH" tar -xf gcc14.pkg.tar.zst ucrt64/lib/libstdc++.a
+cp /c/msys64/ucrt64/lib/libstdc++.a /c/msys64/ucrt64/lib/libstdc++_gcc16_backup.a
+cp ucrt64/lib/libstdc++.a /c/msys64/ucrt64/lib/libstdc++.a
+```
+
+Symptôme si l'un des deux points manque : `go build` passe, `go vet` passe, mais
+`go test` échoue en `[build failed]` — l'erreur est au LINK, que `vet` ne fait pas.
+
 ### Mesurer la couverture localement
 
 ```bash

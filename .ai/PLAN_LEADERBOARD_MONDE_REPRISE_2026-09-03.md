@@ -215,6 +215,15 @@ visuelle = MAIN AU USER (`http://localhost:5173/t/halo_infinite/players/JGtm/com
 - (Lot 4, exécuteur) le ratchet `TestDTOs_NoNilSlicesOnEmptyInput` n'exerce que le chemin
   halo_infinite : le retour « titre sans capability » sérialisait `entries: null` sans
   être attrapé (corrigé par construction au 4.1, le ratchet reste aveugle à ce chemin).
+  **HANDLED OUTSIDE THIS WORKSTREAM** (branch `fix/leaderboard-ratchet-entries-non-nil`,
+  2026-09-03): the ratchet now covers all 4 exit paths of `GetPage` and both of
+  `GetCatalog`, and the non-nil guarantee is carried by the service (it used to rest on
+  each repo's `make(...)`). Two REAL defects fixed along the way, both on the catalog:
+  (1) `GetCatalog` on **Halo 5** — an active title that excludes `world.leaderboard` —
+  returned `{"seasons":null,"playlists":null}`; the trigger is not an unknown slug (the
+  middleware falls back to the default) but a KNOWN title without the capability.
+  (2) `scanCatalogColumn` builds its seasons on a `var out []…`, so `seasons: null` also
+  shipped for halo_infinite on a database with no snapshot yet.
 - (Lot 4, exécuteur) `LeaderboardResponse.total` n'est lu nulle part côté web — champ de
   contrat sans consommateur.
 - (Lot 4, exécuteur) `LeaderboardCatalogRef` sert saisons ET playlists mais porte deux
@@ -225,8 +234,11 @@ visuelle = MAIN AU USER (`http://localhost:5173/t/halo_infinite/players/JGtm/com
 - (revue) `internal/archlint` n'était dans aucun gate de lot — le littéral d'URL du Lot 1
   n'a été attrapé que par la suite complète. Les prochains gates backend qui touchent
   logs/chemins devraient inclure `./internal/archlint/...` (10 s).
-- (revue, mineurs M1-M5 non traités) : garantie Entries-non-nil du chemin nominal portée
-  par les repos, pas le service · `written_at` frais du restore rend la saison « fraîche »
+- (revue, mineurs M1-M5) : **M1 HANDLED OUTSIDE THIS WORKSTREAM** (same branch
+  `fix/leaderboard-ratchet-entries-non-nil`, 2026-09-03) — the nominal path's
+  Entries-non-nil guarantee rested on the repos rather than the service; it is now carried
+  by the service, which normalises before assigning. M2-M5 non traités : `written_at` frais
+  du restore rend la saison « fraîche »
   pour le cron ~20 h · `openSharedRW` du CLI hors provider/dblease (pré-existant, échec
   sûr par verrou) · validation Location limitée au préfixe `csrseason` · coexistence
   `-dry-run`/`-execute` dans l'aide du CLI.

@@ -1,3 +1,139 @@
+## [2026-09-03] Leaderboard nil-slice ratchet — the non-nil guarantee moves from the repos to the service — Complete
+
+> First English entry (rule 1, decided 2026-09-03). Earlier entries stay in French.
+
+**Context**: picked up the deferred finding left by
+`PLAN_LEADERBOARD_MONDE_REPRISE_2026-09-03.md` — "the `TestDTOs_NoNilSlicesOnEmptyInput`
+ratchet only exercises the halo_infinite path". Verified against the source before writing
+any code: the ratchet's `LeaderboardService.GetPage` subtest calls `GetPage` with
+`TitleSlug: "halo_infinite"` and no season or playlist, so it only touches the 4.1 early
+return for an incomplete (season, playlist) couple. Three other exit paths had no guard at
+all: the "title without capability" return, the NOMINAL path (`resp.Entries = entries`),
+and the whole of `GetCatalog`.
+
+**Main technical decision**: move the non-nil guarantee from the repos to the SERVICE
+rather than bolt tests onto the existing shape. The reasoning that settles it: the promise
+"`entries`, having no omitempty, will never be `null`" rested in practice on every repo
+implementation remembering `make([]domain.LeaderboardEntry, 0, limit)` — the service
+overwrote its own construction-time guarantee with `resp.Entries = entries` immediately
+after the call. The contract belongs to the repo's caller, not to its implementations:
+`GetPage` now normalises before assigning, and a single `normalizeLeaderboardCatalog`
+carries the guarantee for both served paths of `GetCatalog`.
+
+**Two REAL defects closed along the way, both on the catalog.** (1) `middleware.resolveTitleSlug`
+only injects slugs that exist in the registry — an unknown `X-LevelUp-Title` header is
+logged and falls back to the default — so the trigger is not an unknown slug but a KNOWN
+title lacking the capability. `halo_5` is exactly that: an ACTIVE slug that explicitly
+excludes `world.leaderboard` (`config/titles/halo_5/title.toml`: "Exclus pour l'instant :
+firefight, forge, world.leaderboard"), an exclusion locked in by an existing test
+(`internal/games/halo_5/skeleton_test.go`). Any Halo 5 session calling
+`GET /players/{slug}/pages/leaderboard/catalog` received `{"seasons":null,"playlists":null}`.
+(2) Found by the review and missed by me at first: `scanCatalogColumn` builds its seasons on
+a `var out []domain.LeaderboardCatalogRef` (`leaderboard_world_repo.go:504`), so nil on an
+empty database — `seasons: null` also shipped for halo_infinite until the first snapshot
+existed (fresh install, before the first scrape). `playlists` was never affected there
+(`make(..., 0, len(plIDs))`). I concluded "the repos already return non-nil" too quickly,
+having read the two ENTRY repos without checking the CATALOG one.
+
+By contrast `entries: null` was NOT reachable: both DuckDB entry repos already use
+`make(..., 0, limit)`. That half is contract hardening, not a defect fix. The frontend
+tolerates the nulls today (`catalog?.seasons?.length`, optional chaining, and
+`generated.ts` types the field `| null`) — but a field without omitempty is promised
+present, which is precisely the invariant the ratchet exists to enforce.
+
+**Observed results**: ratchet widened to 5 subtests
+(`internal/service/jsonshape_dto_smoke_test.go`) — title without capability, csr-world with
+no rows, stat category with no rows, catalog without capability, empty catalog; the repos
+there return `nil` rather than `[]`, which is what a scan with no rows really produces.
+Added a guard at the HTTP boundary (`internal/api/handlers/leaderboard_test.go`,
+`TestLeaderboardPage_EmptyCollectionsOnTheWire`, 4 cases) that reads the JSON actually
+emitted (`map[string]json.RawMessage`, strict equality to `[]`): marshalling is what turns
+a nil into `null`, and an assertion on the struct's `len()` would never have seen it. The
+subtests keep the slug `unknown_title_no_cap` (same code branch, `Get` returning nil)
+rather than `halo_5`, which would depend on the TOML manifests being loaded into the
+default registry at test time — a dependency the existing
+`TestLeaderboardService_NoCapability_EmptyNot500` already avoids deliberately. No existing
+test asserted `null` on these fields (checked by grep), so there is no baseline to
+reconcile. OpenAPI contract unchanged (values only, no type touched).
+
+**`/code-review` (two axes, parallel sub-agents) — corrections applied**:
+(1) Standards, rule 6 / anti-pattern #4: the literal `[]domain.LeaderboardCatalogRef{}` had
+reached 4 copies, so a single `normalizeLeaderboardCatalog(c)` now carries the guarantee for
+both served paths and `emptyLeaderboardCatalog` is gone.
+(2) Anti-pattern #9 "inverted doc": the comment promised `[]` "on ALL paths" while the error
+path returns a zero value — reworded to "both SERVED paths", the error path never being
+marshalled (500).
+(3) Inconsistent idiom between the two fixes (`if entries != nil {assign}` versus
+`if x == nil {x = []}`) — both now normalise before assigning.
+(4) Spec: the scenario the finding NAMES ("title without capability") was covered only at
+struct level; both HTTP cases ran on halo_infinite because `newLeaderboardRouter` mounts no
+`TitleExtractor`. Added `withTitleSlug` (reproduces the middleware's injection) plus two
+cases: page without capability (via the `title_slug` query param) and catalog without
+capability (via the context).
+(5) Spec: the commit silently closed plan minor M1 — M1 now annotated as handled.
+
+**Not addressed, recorded as findings**: the ratchet is still an ENUMERATION of services
+rather than a structural ratchet — a seventh exit path added later will be blind again; a
+reflection-based guard over every service method would be the real answer, out of scope
+here. The ERROR paths (`return domain.LeaderboardResponse{}, err`) keep nil slices: no
+effect (the handler turns them into a 500, the body is never marshalled), untested.
+
+**Gates**: the session's machine had NO toolchain at all (`go`, `node`, `npm`,
+`golangci-lint`, `duckdb`, `docker` all absent), so the work was first delivered on a
+reading review only. The toolchain was then installed at the user's request and the gates
+were actually run — see the toolchain entry below for the two Windows traps that cost an
+hour, now documented in `docs/testing.md`.
+
+Results once the toolchain worked: `gofmt` clean on the 3 changed files;
+`go build ./internal/service/ ./internal/api/handlers/` exit 0; `go vet ./internal/service/`
+exit 0; `go test ./internal/service/ -run TestDTOs_NoNilSlicesOnEmptyInput` PASS with all
+5 new subtests green; `go test ./internal/api/handlers/ -run TestLeaderboard` PASS
+including the 4 new wire cases.
+
+**RED/GREEN actually observed** (both guards reverted, tests re-run, guards restored). The
+guards are not decorative — reverting them fails exactly the right subtests:
+- service ratchet: `csr-world_with_no_rows` and `stat_category_with_no_rows` →
+  `root.entries: slice field is nil`; `GetCatalog/title_without_capability` and
+  `GetCatalog/empty_catalog` → `root.seasons` AND `root.playlists` nil.
+- wire test: `served_page` → `entries = null`; `catalog_with_no_snapshot` and
+  `catalog, title_without_capability` → `seasons = null` / `playlists = null`.
+
+Two things this proves that the reading review could not. (1) `catalog_with_no_snapshot`
+failing on the wire CONFIRMS the second defect empirically: an empty database really did
+ship `{"seasons":null,"playlists":null}` on halo_infinite, it was not just an inference
+from reading `var out []…`. (2) The subtests named `…/title_without_capability` on GetPage
+do NOT fail when the guard is reverted — correctly so: that path returns early with the
+construction-time guarantee of 4.1 intact, exactly as the plan claimed. The finding's own
+wording ("the no-capability return marshalled entries: null") was therefore already stale
+for GetPage; the real hole was the nominal path and the whole of GetCatalog.
+
+**Windows cgo toolchain — two traps, now documented in `docs/testing.md`.** Setting up
+this machine from zero (Go 1.27.0, Node 24, MSYS2, all via winget) hit two failures that
+`docs/testing.md`'s "MinGW via MSYS2" line does not distinguish, and both present the same
+misleading way: `go build` passes, `go vet` passes, `go test` fails with `[build failed]`.
+The error is at LINK, and `vet` does not link — so a green `vet` proves the test code
+compiles but says nothing about whether the binary can be produced.
+1. **UCRT64, not MINGW64.** `mingw-w64-x86_64-gcc` targets MSVCRT and fails on
+   `__stdio_common_vsnprintf_s`, `__stdio_common_vswprintf`, `std::fpos<_Mbstatet>` — all
+   UCRT symbols the prebuilt DuckDB lib needs. Use `mingw-w64-ucrt-x86_64-gcc`.
+2. **libstdc++ from GCC 14, not 16.** Even on ucrt64, GCC 16.2.0 leaves
+   `__emutls_v._ZSt11__once_call` / `__emutls_v._ZSt15__once_callable` undefined: DuckDB's
+   lib was built with emulated TLS, GCC 15/16 link TLS natively. Fix (already recorded in
+   `.ai/archive/thought_log_2026-Q2.md` for GCC 16.1.0 / DuckDB 1.5.3, and confirmed again
+   here for 16.2.0 / 1.5.5): swap `ucrt64/lib/libstdc++.a` for the GCC 14.2.0 one, keeping
+   the original as `libstdc++_gcc16_backup.a`. Exact commands now in `docs/testing.md`.
+The archived entry had the answer; it was not discoverable from the docs where a newcomer
+would look. That is why the fix went into `docs/testing.md` rather than staying in a log.
+
+**Conclusion / next step**: branch `fix/leaderboard-ratchet-entries-non-nil` (1 commit);
+the finding and minor M1 are annotated as handled in the originating plan. Next: pass the
+gates. The other three Lot 4 findings remain open (`LeaderboardResponse.total` with no web
+consumer, `LeaderboardCatalogRef` carrying two season-only fields, signature asymmetry in
+`leaderboard_world_batch_stats.go`).
+
+---
+
+
 ## [2026-08-26] Hygiene secrets — seed de demo n'extrait plus aucun credential — Complete
 
 **Contexte** : lot A, worktree dedie `wt/lot-a-secrets-demo` (base 3177a57a2). La revue du

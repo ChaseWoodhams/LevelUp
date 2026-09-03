@@ -39,7 +39,8 @@ en Go ou TypeScript. **SQLite interdit** : DuckDB uniquement.
 **THOUGHT LOG — RÈGLE OBLIGATOIRE** : avant tout commit (ou à défaut avant de rendre la
 main), ajouter une entrée dans `.ai/thought_log.md` avec : date `[YYYY-MM-DD]`, titre,
 statut (En cours / Complété), décision technique principale, résultats observés,
-conclusion / prochaine étape. L'absence d'entrée = tâche non terminée. **Rotation
+conclusion / prochaine étape. **New entries are written in English** (rule 1); the
+existing French backlog of entries stays as it is. L'absence d'entrée = tâche non terminée. **Rotation
 trimestrielle** : quand un trimestre est clos, déplacer ses entrées vers
 `.ai/archive/thought_log_<AAAA>-Q<N>.md` — le journal actif ne garde que le
 trimestre courant + le précédent.
@@ -186,9 +187,18 @@ Référence complète des commandes : `docs/COMMANDS.md`. Déploiement : `docs/R
 
 ## Règles
 
-1. **Répondre en français.** UI : FR sans anglicismes (« série » pas « streak »,
-   « Taux de victoire » pas « WR ») ; toute string UI en FR **et** EN (`i18n.ts`,
-   parité par typage `Record<Locale, T>`).
+1. **English going forward (decided 2026-09-03).** Everything written from now on is in
+   English: agent replies, code comments, commit messages, ADRs, plans, `.ai/` entries,
+   new docs. **Existing French stays untouched** — no retroactive translation campaign
+   (it would rewrite ~91 % of the Go files and `git blame` with them, and this fork sits
+   commit-for-commit on `upstream/main`). Mixed-language files are the expected outcome
+   of the transition, not a defect: translate a French comment only when you are already
+   rewriting that code for another reason.
+   **Product exception — UI strings stay FR + EN.** French is a shipped locale, not a
+   dev convention: every UI string is still required in FR **and** EN (`i18n.ts`, parity
+   enforced by the `Record<Locale, T>` typing), FR without anglicisms (« série » not
+   « streak », « Taux de victoire » not « WR »). Same for the `docs/FR/` user guides,
+   which keep their existing bilingual policy (rule 15).
 2. **Go/TS uniquement.** Pas de nouveau Python, pas de SQLite, pas de Pandas/Polars (morts
    avec la migration).
 3. **Logging Go** : `slog.InfoContext/ErrorContext(ctx, "...", "err", err)` structuré.

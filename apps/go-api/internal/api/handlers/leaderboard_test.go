@@ -19,6 +19,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"levelup/go-api/internal/api/handlers"
+	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 	"levelup/go-api/internal/port"
 	"levelup/go-api/internal/service"
@@ -27,6 +28,10 @@ import (
 // strictLeaderboardRepo reproduit le contrat INTERNE du repo DuckDB : le couple
 // (saison, playlist) est obligatoire côté lecture, sinon erreur. C'est justement
 // cette erreur qui ne doit plus atteindre la couche HTTP.
+//
+// Its ZERO value doubles as the "repo with no rows at all" fixture: nil entries
+// and a zero-value catalog, which is exactly what an empty DuckDB scan produces
+// (see TestLeaderboardPage_EmptyCollectionsOnTheWire).
 type strictLeaderboardRepo struct {
 	entries []domain.LeaderboardEntry
 	calls   int
@@ -52,16 +57,34 @@ func (r *strictLeaderboardRepo) GetWorldLeaderboardCatalog(_ context.Context, _ 
 	return domain.LeaderboardCatalog{}, nil
 }
 
-func newLeaderboardRouter(repo port.LeaderboardRepository) *chi.Mux {
+// newLeaderboardRouter mounts the leaderboard routes. Optional middlewares are
+// installed before the routes (a chi constraint); they exist to reproduce what
+// middleware.TitleExtractor does in production, see withTitleSlug.
+func newLeaderboardRouter(repo port.LeaderboardRepository, mw ...func(http.Handler) http.Handler) *chi.Mux {
 	factory := func(_ context.Context, _ string) (port.LeaderboardService, string, string, error) {
 		return service.NewLeaderboardService(repo), testXUID1, testGamertag, nil
 	}
 	r := chi.NewRouter()
+	for _, m := range mw {
+		r.Use(m)
+	}
 	h := handlers.NewLeaderboardHandler(factory)
 	r.Route("/players/{player_slug}", func(r chi.Router) {
 		h.Mount(r)
 	})
 	return r
+}
+
+// withTitleSlug reproduces what middleware.TitleExtractor injects. Without it,
+// ctxkeys.TitleSlug falls back to "halo_infinite" and GetCatalog's "title without
+// capability" path — it reads the title from the CONTEXT, not from a query param
+// the way GetPage does — stays unreachable from an HTTP test.
+func withTitleSlug(slug string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r.WithContext(ctxkeys.WithTitleSlug(r.Context(), slug)))
+		})
+	}
 }
 
 func getLeaderboard(t *testing.T, r *chi.Mux, query string) (int, domain.LeaderboardResponse) {
@@ -158,5 +181,82 @@ func TestLeaderboardPage_TotalFieldNameOnTheWire(t *testing.T) {
 	}
 	if total != float64(1) {
 		t.Errorf("total = %v, want 1", total)
+	}
+}
+
+// TestLeaderboardPage_EmptyCollectionsOnTheWire (Lot 4 finding): `entries`,
+// `seasons` and `playlists` are fields WITHOUT omitempty — the contract promises
+// the field is present, so `[]` and never `null`. A DuckDB scan with no rows
+// returns a NIL Go slice: the service ratchet (TestDTOs_NoNilSlicesOnEmptyInput)
+// only exercised GetPage's "incomplete couple" early return, leaving the NOMINAL
+// path unguarded (the service assigned the repo's nil slice over its
+// construction-time guarantee) along with the whole of GetCatalog.
+//
+// This test reads the JSON ACTUALLY emitted, not the struct: marshalling is what
+// turns a nil into `null`, and that `null` is what reaches the frontend.
+func TestLeaderboardPage_EmptyCollectionsOnTheWire(t *testing.T) {
+	const pageWithCouple = "/players/test-player/pages/leaderboard?season=csrseason13-3&playlist=pl-a"
+	const catalogPath = "/players/test-player/pages/leaderboard/catalog"
+
+	cases := []struct {
+		name string
+		// ctxTitleSlug: title injected into the CONTEXT (empty = no middleware, so
+		// ctxkeys falls back to halo_infinite). Only GetCatalog reads it; GetPage
+		// takes its own from the `title_slug` query param.
+		ctxTitleSlug string
+		path         string
+		fields       []string
+	}{
+		{
+			name:   "served page, repo with no rows",
+			path:   pageWithCouple,
+			fields: []string{"entries"},
+		},
+		{
+			name:   "catalog with no snapshot",
+			path:   catalogPath,
+			fields: []string{"seasons", "playlists"},
+		},
+		{
+			// The scenario the Lot 4 finding NAMES, exercised on the wire.
+			name:   "page, title without capability",
+			path:   pageWithCouple + "&title_slug=unknown_title_no_cap",
+			fields: []string{"entries"},
+		},
+		{
+			name:         "catalog, title without capability",
+			ctxTitleSlug: "unknown_title_no_cap",
+			path:         catalogPath,
+			fields:       []string{"seasons", "playlists"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Repo with no data: nil entries AND a zero-value catalog (nil slices).
+			var mw []func(http.Handler) http.Handler
+			if tc.ctxTitleSlug != "" {
+				mw = append(mw, withTitleSlug(tc.ctxTitleSlug))
+			}
+			req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+			w := httptest.NewRecorder()
+			newLeaderboardRouter(&strictLeaderboardRepo{}, mw...).ServeHTTP(w, req)
+			if w.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200 (body: %s)", w.Code, w.Body.String())
+			}
+			var raw map[string]json.RawMessage
+			if err := json.Unmarshal(w.Body.Bytes(), &raw); err != nil {
+				t.Fatalf("body not decodable: %v", err)
+			}
+			for _, field := range tc.fields {
+				v, ok := raw[field]
+				if !ok {
+					t.Errorf("field %q missing from body although it has no omitempty: %s", field, w.Body.String())
+					continue
+				}
+				if string(v) != "[]" {
+					t.Errorf("%s = %s, want [] (a `null` breaks the typed consumer)", field, v)
+				}
+			}
+		})
 	}
 }

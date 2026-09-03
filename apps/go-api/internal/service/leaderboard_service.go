@@ -90,6 +90,13 @@ func (s *LeaderboardService) GetPage(ctx context.Context, req domain.Leaderboard
 		return domain.LeaderboardResponse{}, err
 	}
 
+	// A scan with no rows can return a NIL slice, not `[]`: normalise BEFORE
+	// assigning, otherwise the assignment overwrites the non-nil guarantee set at
+	// construction above and `entries` marshals as `null`. This is the nominal
+	// path — the "by construction" guarantee only covered the early returns.
+	if entries == nil {
+		entries = []domain.LeaderboardEntry{}
+	}
 	resp.Entries = entries
 	resp.TotalLocal = len(entries)
 	return resp, nil
@@ -104,10 +111,39 @@ func titleHasWorldLeaderboard(slug string) bool {
 
 // GetCatalog retourne les saisons + playlists disponibles (sélecteurs dynamiques)
 // pour le titre courant (ctx). Titre sans world.leaderboard → catalogue vide.
+//
+// `seasons` and `playlists` have no omitempty: an empty catalog must marshal as
+// `[]` and never `null` on both SERVED paths — title without the capability, and
+// repo without a snapshot (ratchet TestDTOs_NoNilSlicesOnEmptyInput). The error
+// path returns a zero value that is never marshalled: the handler turns it into
+// a 500.
+//
+// Neither path is theoretical. (1) Halo 5 is an ACTIVE title that excludes
+// `world.leaderboard` (config/titles/halo_5/title.toml). (2) `scanCatalogColumn`
+// builds its seasons on a `var out []…`: a database with no snapshot (fresh
+// install, before the first scrape) yields a nil `Seasons`. Both returned
+// `{"seasons":null,...}` before this fix.
 func (s *LeaderboardService) GetCatalog(ctx context.Context) (domain.LeaderboardCatalog, error) {
 	titleSlug := ctxkeys.TitleSlug(ctx)
 	if !titleHasWorldLeaderboard(titleSlug) {
-		return domain.LeaderboardCatalog{}, nil
+		return normalizeLeaderboardCatalog(domain.LeaderboardCatalog{}), nil
 	}
-	return s.repo.GetWorldLeaderboardCatalog(ctx, titleSlug)
+	catalog, err := s.repo.GetWorldLeaderboardCatalog(ctx, titleSlug)
+	if err != nil {
+		return domain.LeaderboardCatalog{}, err
+	}
+	return normalizeLeaderboardCatalog(catalog), nil
+}
+
+// normalizeLeaderboardCatalog makes the catalog safe to marshal: non-nil
+// collections, so `[]` and never `null`. Single source of that guarantee — both
+// served paths of GetCatalog go through it.
+func normalizeLeaderboardCatalog(c domain.LeaderboardCatalog) domain.LeaderboardCatalog {
+	if c.Seasons == nil {
+		c.Seasons = []domain.LeaderboardCatalogRef{}
+	}
+	if c.Playlists == nil {
+		c.Playlists = []domain.LeaderboardCatalogRef{}
+	}
+	return c
 }

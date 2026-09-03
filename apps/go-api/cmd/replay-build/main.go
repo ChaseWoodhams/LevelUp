@@ -64,7 +64,12 @@ func main() {
 		os.Exit(1)
 	}
 	worldRange := entry.Range()
-	filmDir := filepath.Join(repoRoot, "data", "cache", "film_chunks", matchID)
+	// Via le PathResolver, comme toute donnée du dépôt. CORRECTION DE COMPORTEMENT au
+	// passage : la jointure faite ici à la main utilisait le match_id COMPLET, alors que
+	// le cache écrit sous la forme COURTE (`film_chunks/000d5950/`) — un matchId complet
+	// sans filmDir explicite désignait donc un répertoire que rien n'écrit jamais. Le
+	// chemin ne change QUE pour cette forme-là, et il change pour devenir le bon.
+	filmDir := title.NewPathResolver(repoRoot).FilmChunksDir(matchID)
 	if len(args) >= 2 {
 		filmDir = args[1]
 	}

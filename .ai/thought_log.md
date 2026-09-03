@@ -1,3 +1,62 @@
+## [2026-09-03] Study prefactor (ticket #4) — one owner for the film-chunk path, and a study data root — Complete
+
+**Context**: fork issue #4, "1.1 Prefactor: shared path resolution for film chunks and
+study data", the first unblocked ticket of the study-tool epic (#1). Goal: one place that
+knows where a match's film chunks live and where the study tool's own data lives, so the
+coming archiver and the existing offline tools agree instead of each hand-building the
+same join.
+
+**Main technical decision — this is a behaviour FIX, not a byte-identical refactor.** The
+ticket asks for paths "byte-identical to before". Verified against the source first, and
+that criterion could not be met honestly: `cmd/replay-build/main.go:67` built
+`data/cache/film_chunks/<matchID>` from the FULL match id, while the cache writes under
+the SHORT form (`film_chunks/000d5950/`, cf. `FilmShortMatchID`) and every other consumer
+reads the short form. So the hand-built join was not merely a second copy of the rule, it
+was a latent bug: hand `replay-build` a full-length id with no explicit `filmDir` and it
+looked in a directory nothing ever wrote. It went unnoticed because callers pass `filmDir`
+as `args[1]` or pass an already-short id. Routing through `PathResolver.FilmChunksDir`
+therefore CHANGES the resolved path for full-length ids — from a directory that never
+existed to the one the cache actually wrote — and is byte-identical for short ones. Taken
+deliberately, the ticket's own instruction being to make the scope call explicitly and
+record it.
+
+**Placement**: new files `internal/domain/title/film_paths.go` and `study_paths.go` rather
+than more methods in `registry.go` (846 L, far past the repo's 500 L threshold; rule 5
+forbids growing frozen debt). Same reasoning `film_id.go` already records for itself.
+Shared-file route over the study-local wrapper fallback, as epic #1 recommends: a wrapper
+would have left `replay-build` broken for the fork's own tools.
+
+**Study root**: `data/study/` with `archive.duckdb`, `rasters/`, `map_images/` under it —
+one directory to back up or delete, nothing interleaved with the per-title warehouses. A
+test pins that every study path stays under the root, since a later sibling path would
+break teardown without breaking compilation.
+
+**Results**: `internal/domain/title` suite green; `cmd/replay-build` builds; gofmt clean.
+TDD observed: the new tests failed to compile (methods undefined) before the
+implementation existed.
+
+**The guard-rail earned its keep immediately.** Rule 6 says a centralisation without a
+guard re-diverges, so the new `TestUneSeuleJointureFilmChunks` walks `internal/` and `cmd/`
+for the `"film_chunks"` literal. It found FIVE copies beyond the two I had seen by grep
+(`local_film_cache.go`, `fetch_film_chunks`, `frontb_coverage`, `killsource`,
+`probe_pi_reconcile`). Each was then CHECKED rather than assumed: all resolve chunks under
+an arbitrary root (`c.rootDir` = the legacy Python cache, or a `-cache` flag), not under
+repoRoot, and `local_film_cache.go` already calls `FilmShortMatchID`. They are therefore
+not PathResolver callers — pointing them at it would change which directory they read, not
+rename a path. Allowlisted per-directory with a dated justification (rule 3) rather than
+migrated inside a prefactor (rule 5).
+
+**Finding, not treated**: whether those five arbitrary-root tools should share one
+root-parameterised derivation is a real question, but it is a behaviour decision per tool,
+not a rename. Left for a dedicated pass.
+
+**Conclusion / next step**: branch `feat/study-path-resolution` from `main`. Ticket #4's
+acceptance criteria are met except "byte-identical paths", which is superseded by the
+correction above and recorded here as the ticket's last criterion requires. Next
+unblocked tickets: #5 (1.2 fetch-one), #6 (1.3 archive database).
+
+---
+
 ## [2026-08-26] Hygiene secrets — seed de demo n'extrait plus aucun credential — Complete
 
 **Contexte** : lot A, worktree dedie `wt/lot-a-secrets-demo` (base 3177a57a2). La revue du

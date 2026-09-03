@@ -1,3 +1,118 @@
+## [2026-09-03] study-archiver fetch-one (ticket #5) — one match, film to artifact — Complete
+
+**Context**: fork issue #5, "1.2 fetch-one: archive a single match's film into a replay
+artifact", the second ticket of the study-tool epic (#1), unblocked by #4 on this same
+branch. Goal: `study-archiver fetch-one <matchId>` downloads a match's whole film into
+the existing chunk cache, works out which map it was played on, and builds the 2D replay
+artifact the existing viewer already reads.
+
+**What the two-axis review changed, and it was worth running.** The spec axis found a
+real defect: the build lock was applied at CONSTRUCTION (`newDeps` handed over
+`serialized(replay.BuildFromFilm)`), which made serialisation a property of one wiring
+rather than of the archiver. `watch` (#8), or any second wiring assembling `deps` itself,
+would have dropped it silently with no test failing. Moved to the CALL SITE (`runBuild`
+in build.go), and the guard now drives concurrent `fetchOne` calls rather than the lock in
+isolation — verified it can still fail: with the mutex removed the test reports 8
+concurrent builds, with it, 1. The standards axis found a write-only `outcome.MapModule`
+field kept "for #6" (deleted — rule 7), four `slog` calls that had dropped their `ctx`
+(threaded through `buildOptions`), a bare `"unknown"` reason literal outside the declared
+set (now a constant, and the reason set is a defined type so a literal cannot re-appear),
+and — the sharpest one — that the file permissions had already diverged from
+`cmd/replay-build` writing into the SAME directories (0o750/0o600 here against
+0o755/0o644 there). Aligned on the existing tree's values, named as constants: the
+artifact has to stay readable by the study server that will serve it.
+
+**The serialisation question the ticket owed an answer to: filmdec does NOT self-
+serialise, so the archiver does.** `killsource.Decode` documents a package-level mutex
+because the bit decoder's replication parameters are package globals. Checked whether
+`internal/analysis/filmdec` — the decoder `replay.BuildFromFilm` drives — does the same:
+it does not. It holds the same class of mutable package-level state
+(`PositionFullPrecision`, `PositionDeltaHasHandleTail`, `PositionCalibratedSkip`,
+`DeltaQuantum`, `DeltaAxisWidth`, `MobilityActionBodyPorted`, the frame-chain counters)
+and imports `"sync"` nowhere — neither does `internal/analysis/replay`. Nothing
+serialises those globals today because every existing caller is a single-threaded offline
+tool: `cmd/replay-build` builds exactly one match per process. So the archiver owns the
+lock, and it is package-level rather than a field on a struct: the state being protected
+is package-level in `filmdec`, so two archiver instances in one process would collide
+exactly as two goroutines do. `TestFetchOne_BuildsNeverOverlap` is the guard.
+
+**Download the film BEFORE judging the map supported.** An unsupported map skips only the
+BUILD; the chunks are fetched and kept. It costs bandwidth on a match that cannot be
+built today and it is the whole point of the tool: the CDN link expires in weeks, the
+quant-bounds catalogue grows whenever `cmd/mapquant-build` is run on a new map.
+Downloading first turns "this map has no bounds yet" into a rebuild (#10) instead of a
+permanent loss.
+
+**A skip is an outcome, not an error.** Four named reasons — `unsupported_map`,
+`no_map_in_stats`, `film_absent`, `no_tracks_decoded` — carried by a `skipError` that
+still unwraps to the underlying sentinel (`filmdec.ErrUnknownMapBounds` survives
+`errors.Is`). The names are the archiver's contract with #6 (which records them as the
+archive row) and #7 (which branches on them for retry policy); free text would have to be
+re-parsed and a bare error would collapse the three retry policies into one. A build that
+returns an ERROR stays an error, so a decoder bug never looks like an ordinary archiving
+outcome. Exit codes follow: 0 archived, 3 skipped, 1 failed, 2 usage.
+
+**No `internal/config`, hence `--xuid` and not `--player`.** `config` is the only package
+that reads `db_profiles.json` (gamertag -> xuid), and it pulls DuckDB — hence cgo — into
+whatever imports it. `cmd/replay-build`, the offline tool this one extends, is
+deliberately cgo-free; this one stays so too, and `CGO_ENABLED=0 go test
+./cmd/study-archiver/` runs with no C toolchain. That mattered concretely here: the
+DuckDB static lib in the module cache does not link against this machine's mingw-w64 GCC
+16.2 (`undefined reference to __emutls_v._ZSt11__once_call`, and others), so ANY
+cgo-linking package of this repo — `cmd/levelup` included, verified — cannot be built or
+tested locally today. Ticket #6 brings the archive database in and with it cgo; that is
+when `--player <Gamertag>` becomes free and can replace `--xuid`.
+
+**Test seam: `fetchOne(ctx, deps, matchID)`, with the catalogues arriving LOADED.** `deps`
+carries an already-parsed quant-bounds catalogue and label catalogue rather than paths, so
+the orchestration can be driven against a throwaway repo root while the reference data
+comes from the real one — and so `watch` (#8) will load them once instead of once per
+match. The build itself is a named function type (`buildFilm`), which is what lets the
+always-running end-to-end test assert the chunk files and the artifact without a 20 MB
+film. The decoder has its own suites (golden assembly, mini-reel); re-testing it here
+would test somebody else's code.
+
+**Results**: `cmd/study-archiver` suite green, 12 tests, 3 consecutive runs — every chunk
+type written at the resolved path with the bytes the CDN served, artifact written at
+`ReplayArtifactPath`, unsupported map keeps the film and writes no artifact, stats with no
+map name and zero-track decode each land their own named reason, expired film (410) writes
+nothing, build error propagates as an error, concurrent fetch-one calls never overlap a
+build.
+`internal/archlint` and `internal/domain/title` green (the `film_chunks` guard-rail from
+#4 stays satisfied: every path goes through `PathResolver`). `make go-api-test` scope
+(`internal/domain/... internal/analysis/... contracttest/...`) green.
+`golangci-lint run ./cmd/study-archiver/...` 0 issues, gofmt clean, `go vet` clean.
+TDD observed on both seams: `resolveMatchMap` and the fetch-one tests failed to compile
+before the implementations existed.
+
+**Not verified locally, and why**: `TestFetchOne_RealFilmEndToEnd` drives the REAL
+`replay.BuildFromFilm` over the repo's existing fake Halo server and the `jgtm_full_match`
+fixture. The fixture is gitignored (6 MB of binaries) and absent from this machine, so
+the test skips — the same convention every other fixture-backed suite here follows. It is
+written, it is not proven. Regenerate with `go run ./cmd/gen_test_fixtures
+download-full-match` (tokens required) to exercise it. The repo's mini-reel
+(`internal/analysis/replay/testdata/minifilm_000d5950`) was evaluated as a stand-in and
+rejected on measurement: its packets are concatenated out of continuity, so
+`bipedSlotBand` — which reads only the FIRST keyframe packet of each chunk — finds no
+biped slot and the build fails with "aucun slot biped (ti=35)". It locks decoders, it
+cannot stand in for a film.
+
+**Findings recorded, not acted on** (rule 5, zero out-of-scope fixes):
+- `mapNameFromStats` is the SECOND reader of `MatchInfo.MapVariant.PublicName` (the first
+  is `extractPublicName` in `internal/sync`, unexported). Two copies is the repo's limit;
+  a third caller must centralise it.
+- `writeArtifact` / `loadGeometry` / `loadStructure` are the second copies of
+  `cmd/replay-build`'s. `rebuild` (#10) lands in this same binary and reuses these, so
+  the count stays at two — but a third offline builder means extracting them.
+- `cmd/study-archiver` is not in `docs/COMMANDS.md`, deliberately: neither
+  `cmd/replay-build` nor `cmd/mapobj-build` is either, and the offline film tools are
+  documented in their own package doc comments.
+
+**Next step**: #6 (archive database: match and participant recording), which persists the
+outcome this ticket returns as a value.
+
+---
+
 ## [2026-09-03] Study prefactor (ticket #4) — one owner for the film-chunk path, and a study data root — Complete
 
 **Context**: fork issue #4, "1.1 Prefactor: shared path resolution for film chunks and

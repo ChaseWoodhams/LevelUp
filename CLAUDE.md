@@ -175,11 +175,29 @@ make dev                    # go-api (air) + vite
 
 # Requêtes DuckDB ad hoc (pas de Python)
 duckdb data/titles/halo_infinite/warehouse/metadata.duckdb "SELECT ..."
-go run apps/go-api/cmd/inspect_bp/main.go            # outil Go (CGO : gcc msys64)
+go run apps/go-api/cmd/inspect_bp/main.go            # outil Go (CGO — cf. chaîne UCRT ci-dessous)
 
 # CLI principal
 go run ./apps/go-api/cmd/levelup --help              # sync, backfill, diag
 ```
+
+### Chaîne CGO sous Windows — UCRT, PAS mingw64 (constaté 2026-09-03)
+
+Tout paquet qui importe DuckDB (donc `internal/config`, donc la quasi-totalité des
+binaires) se lie en CGO. La bibliothèque statique livrée par `duckdb-go-bindings` est
+construite contre **UCRT** : la lier avec `C:\msys64\mingw64` (chaîne MSVCRT) échoue à
+l'édition de liens, sur des symboles qui n'ont rien à voir avec le code du dépôt
+(`undefined reference to __stdio_common_vsnprintf_s`,
+`__emutls_v._ZSt11__once_call`). Le message ne nomme jamais la cause — d'où cette note.
+
+```bash
+export CC=/c/msys64/ucrt64/bin/gcc.exe   # ucrt64, JAMAIS mingw64
+CGO_ENABLED=1 go build ./cmd/levelup
+```
+
+Vérifié : `cmd/levelup` se lie, `go test ./internal/platform/duckdb/...` passe. Sans ça,
+seuls les paquets sans DuckDB sont testables (`CGO_ENABLED=0`), ce qui exclut en silence
+`persist`, `sync`, `platform/duckdb` et tous les `cmd/` qui ouvrent une base.
 
 Référence complète des commandes : `docs/COMMANDS.md`. Déploiement : `docs/RUNBOOK_GO_LIVE*`
 — **push sur `main` = déploiement prod automatique** : prévenir l'utilisateur avant.

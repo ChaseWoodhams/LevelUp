@@ -40,8 +40,10 @@
 // needed: match history, film and stats for any xuid are readable with the owner's
 // token. Alternatively set SPARTAN_TOKEN (and CLEARANCE_TOKEN) in the environment.
 //
-// The later subcommands of the epic (`watch`, `status`, `rebuild`) land in #8, #9 and
-// #10 and reuse the same fetchOne seam.
+// `watch` (#8) turns a watchlist into an unattended hourly pass over the same fetchOne
+// seam. `status` (#9) and `rebuild` (#10) make NO network call and need no credential at
+// all: one reads the archive, the other re-assembles an artifact from chunks already on
+// disk, which is what keeps the archive useful long after every CDN link in it has died.
 package main
 
 import (
@@ -49,6 +51,7 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"time"
 
 	"levelup/go-api/internal/domain/title"
 )
@@ -73,6 +76,10 @@ func main() {
 		os.Exit(runFetchOne(context.Background(), os.Args[2:]))
 	case "watch":
 		os.Exit(runWatch(context.Background(), os.Args[2:]))
+	case "status":
+		os.Exit(runStatus(context.Background(), os.Args[2:]))
+	case "rebuild":
+		os.Exit(runRebuild(context.Background(), os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 		os.Exit(exitOK)
@@ -95,6 +102,13 @@ func usage() {
 		"[--interval MS] [--rps N] - one pass over " + watchlistFileName + " at the repo " +
 		"root: pull each tracked player's recent history and archive the 4v4 matches not " +
 		"already known. Exits when done; run it from the OS scheduler, hourly.")
+	slog.Info("usage: study-archiver status - what is in the archive and what went wrong, " +
+		"on stdout. Read-only: safe to run while a capture is in progress. No credential " +
+		"needed.")
+	slog.Info("usage: study-archiver rebuild [--title slug] [--interval MS] <matchId> - " +
+		"re-assemble a match's replay artifact from the film chunks already on disk. Makes " +
+		"NO network call and needs no credential; a match whose chunks are gone fails rather " +
+		"than re-downloading.")
 }
 
 // commonFlags are the options EVERY archiving subcommand takes: they all authenticate the
@@ -173,6 +187,68 @@ func runWatch(ctx context.Context, args []string) int {
 
 	if sum := watchPass(ctx, d, newWatchDeps(d.Paths, common.request()), wl); sum.Failed > 0 {
 		return exitFailure
+	}
+	return exitOK
+}
+
+// runStatus prints the archive's health. It opens NOTHING read-write and authenticates
+// nothing: it is the command an operator runs at any moment, including mid-capture.
+func runStatus(ctx context.Context, args []string) int {
+	// No --title: there is ONE archive, at data/study/, and it holds every title's
+	// matches. Accepting a flag it would have to ignore would be a lie in the help text.
+	fs := flag.NewFlagSet("status", flag.ContinueOnError)
+	if err := fs.Parse(args); err != nil {
+		return exitUsage
+	}
+	repoRoot, err := title.FindRepoRoot()
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: repo root", "err", err)
+		return exitFailure
+	}
+	report, err := openStatusReport(ctx, title.NewPathResolver(repoRoot))
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: status failed", "err", err)
+		return exitFailure
+	}
+	if err := report.render(os.Stdout, time.Now()); err != nil {
+		slog.ErrorContext(ctx, "study-archiver: writing the report", "err", err)
+		return exitFailure
+	}
+	return exitOK
+}
+
+// runRebuild re-assembles one match's artifact from cached chunks, offline.
+func runRebuild(ctx context.Context, args []string) int {
+	fs := flag.NewFlagSet("rebuild", flag.ContinueOnError)
+	common := registerCommonFlags(fs)
+	if err := fs.Parse(args); err != nil {
+		return exitUsage
+	}
+	if fs.NArg() != 1 {
+		slog.ErrorContext(ctx, "study-archiver: rebuild takes exactly one match id "+
+			"(options must precede it)", "args", fs.Args())
+		return exitUsage
+	}
+	matchID := fs.Arg(0)
+
+	d, err := newOfflineDeps(ctx, common.request())
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: setup failed", "err", err)
+		return exitFailure
+	}
+	defer func() {
+		if cErr := d.Archive.Close(); cErr != nil {
+			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
+		}
+	}()
+
+	out, err := rebuildOne(ctx, d, matchID)
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: rebuild failed", "err", err, "match_id", matchID)
+		return exitFailure
+	}
+	if out.SkipReason != "" {
+		return exitSkipped
 	}
 	return exitOK
 }

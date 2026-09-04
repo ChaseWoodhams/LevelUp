@@ -30,6 +30,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 )
 
 // recordMatch writes a match and its roster, refreshing anything previously recorded.
@@ -96,6 +97,39 @@ func writeMatchRow(ctx context.Context, tx *sql.Tx, rec matchRecord) error {
 	}
 	if err != nil {
 		return fmt.Errorf("recording match %s: %w", rec.MatchID, err)
+	}
+	return nil
+}
+
+// updateBuild refreshes ONLY the columns a build produced, on a match already recorded.
+//
+// WHY NOT recordMatch. That one writes every column, from a matchRecord assembled out of a
+// fresh reading of the match stats. A rebuild (#10) has no such reading — it never touches
+// the network — and `archive.recorded` is a PARTIAL reader by design, so round-tripping
+// through recordMatch would blank mode, playlist, played-at and source_gamertag on every
+// rebuild. Those facts belong to the match, not to the build, and a rebuild has nothing new
+// to say about them.
+//
+// The roster is untouched for the same reason: a rebuild cannot have changed who played.
+func (a *archive) updateBuild(ctx context.Context, out outcome, builtAt *time.Time, decoderRev string) error {
+	res, err := a.db.Exec(ctx, `
+        UPDATE matches SET
+            film_state = ?, skip_reason = ?, artifact_path = ?, built_at = ?, decoder_rev = ?,
+            tracks = ?, points = ?, shots = ?, named_lives = ?, total_lives = ?,
+            recorded_at = now()
+        WHERE match_id = ?`,
+		string(filmStateOf(out)), nullString(string(out.SkipReason)),
+		nullString(out.ArtifactPath), builtAt, nullString(decoderRev),
+		out.Tracks, out.Points, out.Shots, out.NamedLives, out.TotalLives,
+		out.MatchID)
+	if err != nil {
+		return fmt.Errorf("recording the rebuild of %s: %w", out.MatchID, err)
+	}
+	// A rebuild that matched no row would otherwise report success having changed nothing:
+	// the caller checked the match was recorded, so zero rows here means it went away
+	// underneath us, which the operator has to be told about rather than left to infer.
+	if n, rErr := res.RowsAffected(); rErr == nil && n == 0 {
+		return fmt.Errorf("recording the rebuild of %s: the archive row disappeared mid-run", out.MatchID)
 	}
 	return nil
 }

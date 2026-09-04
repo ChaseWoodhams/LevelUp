@@ -44,8 +44,24 @@ type depsRequest struct {
 	RequestsPerSec  int
 }
 
+// newOfflineDeps is newDeps WITHOUT the Halo client, for the subcommands that make no
+// network call: `rebuild` (#10) and `status` (#9).
+//
+// NO CREDENTIAL IS REQUIRED, and that is the point rather than a shortcut. `rebuild` exists
+// for the day the decoder improves, when every match worth rebuilding has a CDN link that
+// died months ago — a rebuild that needed a token would fail on machines and in situations
+// where the bytes on disk are perfectly sufficient. deps.Client stays nil: any path that
+// reaches for it panics loudly in a test rather than quietly downloading.
+func newOfflineDeps(ctx context.Context, req depsRequest) (deps, error) {
+	return newDepsWith(ctx, req, false)
+}
+
 // newDeps loads the catalogues and authenticates the Halo client.
 func newDeps(ctx context.Context, req depsRequest) (deps, error) {
+	return newDepsWith(ctx, req, true)
+}
+
+func newDepsWith(ctx context.Context, req depsRequest, withClient bool) (deps, error) {
 	repoRoot, err := title.FindRepoRoot()
 	if err != nil {
 		return deps{}, fmt.Errorf("repo root: %w", err)
@@ -67,9 +83,14 @@ func newDeps(ctx context.Context, req depsRequest) (deps, error) {
 		return deps{}, fmt.Errorf("title label catalogue (%s): %w", req.Title, err)
 	}
 
-	tokens, err := resolveTokens(ctx, paths, req)
-	if err != nil {
-		return deps{}, err
+	var client filmAPI
+	if withClient {
+		tokens, tErr := resolveTokens(ctx, paths, req)
+		if tErr != nil {
+			return deps{}, tErr
+		}
+		client = haloclient.NewHaloAPIClient(
+			tokens.SpartanToken, tokens.ClearanceToken, req.RequestsPerSec)
 	}
 	// Opened LAST, and only once every read-only prerequisite has succeeded: an archive
 	// handle taken before a failing catalogue load would leave a DuckDB file locked by a
@@ -80,11 +101,10 @@ func newDeps(ctx context.Context, req depsRequest) (deps, error) {
 	}
 	slog.InfoContext(ctx, "study-archiver: ready",
 		"titleSlug", req.Title, "maps", len(catalog.Maps), "repo_root", repoRoot,
-		"archive", paths.StudyArchiveDBPath())
+		"archive", paths.StudyArchiveDBPath(), "network", withClient)
 
 	return deps{
-		Client: haloclient.NewHaloAPIClient(
-			tokens.SpartanToken, tokens.ClearanceToken, req.RequestsPerSec),
+		Client:  client,
 		Paths:   paths,
 		Title:   req.Title,
 		Catalog: catalog,

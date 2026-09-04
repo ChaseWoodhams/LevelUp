@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"net/url"
 	"testing"
+
+	"levelup/go-api/internal/sync/haloclient"
 )
 
 // chunkNamePrefix is the blob file name the Halo manifest uses for a film chunk.
@@ -95,6 +97,16 @@ func statsPlayer(playerID, gamertag string, team, outcome, kills, deaths, assist
 				},
 			},
 		}},
+	}
+}
+
+// testChunks is a two-chunk film, in the shape writeFilmChunks takes: a header and one
+// replication chunk. Enough to be "captured" as far as everything but the decoder is
+// concerned, which is what the offline rebuild tests need.
+func testChunks() []haloclient.FilmChunk {
+	return []haloclient.FilmChunk{
+		{Index: 0, ChunkType: haloclient.FilmChunkTypeHeader, Data: []byte("header")},
+		{Index: 1, ChunkType: haloclient.FilmChunkTypeReplicationData, Data: []byte("replication")},
 	}
 }
 

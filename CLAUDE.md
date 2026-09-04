@@ -197,13 +197,19 @@ aucun credential. Liste des joueurs suivis : `watchlist.toml` à la racine (git-
 modèle `watchlist.example.toml`).
 
 `study-server` expose l'archive en LECTURE SEULE (`GET /matches`,
-`/matches/{match_id}/replay`, `/matches/{match_id}/participants`) : ouverture via
-`duckdb.OpenReadForQuery`, donc consultable pendant une passe `watch`. Il écoute sur la
-boucle locale par défaut — l'archive contient les films et rosters de parties d'autrui.
+`/matches/{match_id}/replay`, `/matches/{match_id}/participants`). Il écoute sur la boucle
+locale par défaut — l'archive contient les films et rosters de parties d'autrui.
 L'artefact est résolu par `PathResolver.ReplayArtifactPath` (jamais par la colonne
 `artifact_path`, qui est un chemin ABSOLU de la machine qui l'a construit) et servi
 tel quel, octet pour octet : la garde de version de schéma est côté client.
 `{match_id}` accepte la forme complète ou la forme courte.
+
+**DuckDB est mono-instance par fichier ENTRE PROCESSUS** (cf. `RUNBOOK_OPS_DUCKDB_CLI_TOOLS`) :
+un serveur qui garderait le handle empêcherait la capture horaire d'écrire — des films perdus.
+`study-server` emprunte donc l'archive le temps d'une requête et la rend aussitôt (jamais
+d'ouverture au démarrage) ; pendant qu'une capture la tient, il répond `503 archive_busy`.
+Garde-rail : `cmd/study-server/crossprocess_test.go` (le test échoue si le serveur reprend le
+handle à vie).
 
 ### Chaîne CGO sous Windows — UCRT, PAS mingw64 (constaté 2026-09-03)
 

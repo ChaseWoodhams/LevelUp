@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -32,7 +33,7 @@ func newTestServer(t *testing.T) *chi.Mux {
 func newTestServerWithArtifacts(t *testing.T) (*chi.Mux, artifacts) {
 	t.Helper()
 	art := newTestArtifacts(t)
-	h := &studyHandler{archive: newTestArchive(t), artifacts: art}
+	h := &studyHandler{archive: newTestSource(t), artifacts: art}
 	r := chi.NewRouter()
 	h.mount(r)
 	return r, art
@@ -199,6 +200,90 @@ func TestParticipantsRoute_ShapeIsTheScoreboardSubset(t *testing.T) {
 	}
 	if len(got) != 6 {
 		t.Errorf("participant carries %d keys, want the 6 the roster logic reads: %v", len(got), got)
+	}
+}
+
+// TestParticipantsRoute_UnknownValuesAreNullNotMissing is the case the shape test above cannot
+// see on its own, because every player in the Cliffhanger fixture has a team and counters.
+//
+// WHY IT MATTERS. The consumer's type declares these as `T | null`
+// (`apps/web/src/lib/api/types.ts`: `team_side: string | null`, `kills: number | null`), so a
+// null is a value it already models — while a MISSING KEY is not. `omitempty` on those fields
+// made the key vanish for exactly the player this endpoint has to represent honestly: one the
+// match stats named no team for.
+func TestParticipantsRoute_UnknownValuesAreNullNotMissing(t *testing.T) {
+	// The Aquarius fixture carries a player with no team and no counters at all.
+	w := get(t, newTestServer(t), "/matches/333c4d5e/participants")
+	expectStatus(t, w, http.StatusOK, "")
+
+	body := decode[struct {
+		Participants []map[string]any `json:"participants"`
+	}](t, w)
+
+	var unknown map[string]any
+	for _, p := range body.Participants {
+		if p["gamertag"] == "Inconnu" {
+			unknown = p
+		}
+	}
+	if unknown == nil {
+		t.Fatalf("the fixture's team-less player is missing from %v", body.Participants)
+	}
+	for _, key := range []string{"team_side", "kills", "deaths", "assists"} {
+		value, present := unknown[key]
+		if !present {
+			t.Errorf("key %q dropped instead of published as null: %v", key, unknown)
+			continue
+		}
+		if value != nil {
+			t.Errorf("%q = %v, want null", key, value)
+		}
+	}
+}
+
+// TestParticipantsRoute_ServesARecordedButUnbuiltMatch — the roster does not depend on the
+// artifact. Participants come from the match stats; the film carries no team information at
+// all, so a build that never happened says nothing about who played.
+func TestParticipantsRoute_ServesARecordedButUnbuiltMatch(t *testing.T) {
+	r := newTestServer(t)
+
+	w := get(t, r, "/matches/"+unbuiltID+"/participants")
+	expectStatus(t, w, http.StatusOK, "")
+	body := decode[struct {
+		Participants []participantRow `json:"participants"`
+	}](t, w)
+	if len(body.Participants) != 1 || body.Participants[0].Gamertag != "JGtm" {
+		t.Errorf("participants = %+v, want the unbuilt match's recorded roster", body.Participants)
+	}
+
+	// The replay of that same match is still a 404: there is nothing built to serve.
+	expectStatus(t, get(t, r, "/matches/"+unbuiltID+"/replay"), http.StatusNotFound, "match_not_found")
+}
+
+// TestRoutes_BusyArchiveIs503 — while a capture holds the archive, every route says "busy"
+// rather than "broken". A 503 is retryable in humacore's error contract; a 500 would send the
+// operator hunting a fault that is not there.
+func TestRoutes_BusyArchiveIs503(t *testing.T) {
+	art := newTestArtifacts(t)
+	path := filepath.Join(t.TempDir(), "archive.duckdb")
+	seedArchive(t, path)
+	src, err := newArchiveSource(path)
+	if err != nil {
+		t.Fatalf("newArchiveSource: %v", err)
+	}
+	holdArchiveInAnotherProcess(t, path, "rw")
+
+	r := chi.NewRouter()
+	(&studyHandler{archive: src, artifacts: art}).mount(r)
+
+	for _, route := range []string{
+		"/matches",
+		"/matches/000d5950/replay",
+		"/matches/000d5950/participants",
+	} {
+		t.Run(route, func(t *testing.T) {
+			expectStatus(t, get(t, r, route), http.StatusServiceUnavailable, "archive_busy")
+		})
 	}
 }
 

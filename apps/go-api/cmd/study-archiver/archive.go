@@ -24,10 +24,16 @@ package main
 // explicitly refuses. The write discipline in archive_write.go is what keeps this
 // database safe, not the writer count.
 //
-// READERS (the study server of Spec 2) must open through `duckdb.OpenReadForQuery`, NOT
-// a forced `OpenReadOnly`: DuckDB refuses a read-only handle on a file already held
-// read-write in the same process, which is the rule ADR 0013/0016 and CLAUDE.md's ART
-// rule 4 already state for every other database here.
+// READERS (cmd/study-server) must open through `duckdb.OpenReadForQuery`, NOT a forced
+// `OpenReadOnly`: DuckDB refuses a read-only handle on a file already held read-write in the
+// same process, which is the rule ADR 0013/0016 and CLAUDE.md's ART rule 4 already state for
+// every other database here.
+//
+// AND THEY MUST NOT HOLD IT. DuckDB is single-instance-per-file ACROSS PROCESSES too, in both
+// directions (measured 2026-09-04, `cmd/study-server/crossprocess_test.go`): a reader that
+// keeps the handle open stops THIS tool from writing, and a pass that cannot write is films
+// lost to expiry. A long-lived reader borrows the archive per query and gives it back; this
+// binary, being a batch job that opens and exits, needs no such discipline.
 
 import (
 	"context"

@@ -1,3 +1,95 @@
+## [2026-09-04] study-server: the review findings, and the one that was a real bug — Complete
+
+**Context**: the two-axis review of #12. Eight findings across Standards and Spec. Most were
+small; one was a defect that would have cost films, and finding it required doubting a comment
+this session had itself written with confidence.
+
+**THE COMMENT WAS WRONG, AND THE TEST THAT "PROVED" IT WAS TESTING THE WRONG PROCESS.**
+`archive.go` claimed that "across processes OpenReadForQuery opens READ_ONLY beside the
+archiver's writer", and `TestOpenArchive_WhileAWriterHoldsIt` appeared to confirm it. But that
+test stood the writer up IN THE SAME PROCESS, where `OpenReadForQuery` borrows the cached
+read-write handle — the one arrangement that never occurs in production, since `watch` is a
+separate invocation from the OS scheduler. The spec reviewer caught the gap. Re-executing the
+test binary as a genuine second process settled it in thirty seconds:
+
+    IO Error: Cannot open file "archive.duckdb": The process cannot access the file
+    because it is being used by another process.
+
+DuckDB is single-instance-per-file across processes — `docs/RUNBOOK_OPS_DUCKDB_CLI_TOOLS.md`
+says so, and this session had read that file earlier without connecting it. The claim was
+inherited from `study-archiver/status.go`'s own header, which carries the same error; both are
+corrected now.
+
+**AND IT BIT IN THE DIRECTION THAT MATTERED MOST.** The reviewer flagged "a server started
+mid-capture exits 1", which is annoying. The measurement found the other half: a study server
+left running **took the archive and stopped the next hourly capture from writing at all**. This
+tool exists to beat an expiry clock. A browsing aid that silently blocked the archiver would
+have cost films, and films do not come back — the worst possible failure for this epic, from
+the most innocuous-looking line in the change.
+
+**The fix is structural, not a retry.** The server holds the archive's ADDRESS, never a handle:
+`newArchiveSource` locates it with a `Stat` and nothing more, and each request borrows the file
+through `withArchive` and gives it straight back (`Close` at refCount 0 really does close the
+`sql.DB`). The server's lock windows are milliseconds, which the hourly pass wins essentially
+always. What remains is honest and stated in the file header: the archiver holds the archive for
+its WHOLE pass, so during a capture this server cannot read — that degrades to a retryable
+`503 archive_busy`, not a 500 and not a hang. Narrowing the archiver's own hold is the real
+fix and belongs to the archiver.
+
+**Two cross-process tests now stand where a comment used to.**
+`TestArchiverCanStillWrite_WhileThisServerReads` FAILED against the first design and is the
+guard-rail; `TestServerStartsWhileACaptureRuns` and `TestRequestDuringACaptureIsBusyNotBroken`
+cover the rest. Verified against the real binary too: a second process took the archive
+read-write while the live server was up and had already served requests.
+
+**`omitempty` made a key VANISH where the consumer expected `null`.** `team_side`, `kills`,
+`deaths` and `assists` carried it, so a player the match stats named no team for lost the key
+entirely — and `apps/web/src/lib/api/types.ts` declares those as `T | null`, a value it models,
+where a missing key is not. The fixture hid it: every player in it had a team. There is now a
+player who has none, and the assertion is on nulls rather than on key count alone.
+
+**Where the review's reasoning did not survive checking.** The spec axis argued the payload
+"must be assignable to `MatchScoreboardRow`, or the copied type must be forked". Full
+assignability was never available: that type declares some twenty non-optional fields (`rank`,
+`score`, `accuracy`, `damage_dealt`, `shots_fired`, …) and the archive stores six. The ticket
+asks for six by name, and what must work unchanged is the LOGIC, not the type. Publishing
+fifteen nulls to satisfy a compiler would be inventing a scoreboard. The concrete defect inside
+the argument was real and is fixed; the conclusion was not adopted, and the file says why.
+
+**The roster does not depend on the artifact.** `/participants` required a built match, which
+was an accident of sharing one lookup with `/replay`. Participants come from the MATCH STATS —
+the film carries no team information at all — so a match whose map had no quant bounds still
+has eight players, their teams and their K/D/A, correctly recorded. Split into
+`lookupBuiltMatch` (replay) and `lookupRecordedMatch` (roster).
+
+**A collision nobody would have seen until it mattered.** `lookupMatch` took one row with no
+ordering, and `short_id` is the first 8 characters of a match id, not a key. Two matches can
+share one, and the same URL would then have served a different replay on different days. An
+exact full-id hit now wins outright; among short-id hits, the lowest id, every time.
+
+**Standards, all small**: client-facing refusals in `filter.go` were English while the 404s ten
+lines away were French — one endpoint, two languages (rule 1); two `slog` calls in `main.go`
+dropped their context (rule 3); `docs/COMMANDS.md` had no study section at all, so both
+binaries are now documented there, FR and EN (rule 15). The `t%d` `team_side` literal is the
+second copy of the app's and cannot be centralised while `internal/service` is out of bounds —
+so it gets what rule 6 asks for at the second copy: `TestTeamSideEncodingMatchesTheApp` reads
+the app's source and fails on any drift, plus a test proving that guard is not vacuous.
+
+**Kept, and argued rather than removed**: `limit`/`offset`/`total`, the extra summary columns,
+the `replay_not_available` code, `--title`, graceful shutdown. The spec axis listed them as
+scope, correctly — none was asked for. An unbounded list endpoint hands back the whole archive
+on a typo, and a browser needs columns to identify a row by. They stay, named as deliberate.
+
+**Results**: `cmd/study-server` 37 tests green, `cmd/study-archiver` green, `go test ./...`
+across the module clean, `golangci-lint` 0 issues, largest file 328 lines. Live run re-verified:
+nulls published, the unbuilt match's roster served while its replay still 404s, French
+refusals, thirty rapid requests all 200 with an open and a release each.
+
+**Next**: #11, the `apps/study` scaffold. It should also carry a note that the archiver's
+whole-pass hold is what makes the server unavailable mid-capture — a candidate ticket of its own.
+
+---
+
 ## [2026-09-04] study-server: matches, replay and participants (ticket #12) — Complete
 
 **Context**: the first ticket of epic #2. The archive of epic #1 is full of matches; nothing

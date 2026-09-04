@@ -9,6 +9,11 @@ package main
 //
 // EVERY VALUE IS BOUND, NEVER INTERPOLATED. The clause is assembled from fixed fragments and
 // `?` placeholders; nothing from the query string reaches the SQL text itself.
+//
+// THE REFUSALS ARE IN FRENCH because they are the CLIENT'S message, not a log line: the
+// handler hands `err.Error()` straight to the caller as the body of a 400, exactly as
+// `internal/api/handlers/replay.go` does with "match_id est requis" (CLAUDE.md rule 1). The
+// comments around them stay in the language of the rest of this package.
 
 import (
 	"fmt"
@@ -84,7 +89,7 @@ func parseFilter(raw rawFilter) (matchFilter, error) {
 		return matchFilter{}, err
 	}
 	if f.From != nil && f.To != nil && !f.From.Before(*f.To) {
-		return matchFilter{}, fmt.Errorf("from (%s) must precede to (%s)",
+		return matchFilter{}, fmt.Errorf("from (%s) doit précéder to (%s)",
 			f.From.Format(time.RFC3339), f.To.Format(time.RFC3339))
 	}
 	if f.MinCoverage, err = parseCoverage(raw.MinCoverage); err != nil {
@@ -94,7 +99,7 @@ func parseFilter(raw rawFilter) (matchFilter, error) {
 		return matchFilter{}, err
 	}
 	if raw.Offset < 0 {
-		return matchFilter{}, fmt.Errorf("offset must not be negative, got %d", raw.Offset)
+		return matchFilter{}, fmt.Errorf("offset ne peut pas être négatif (reçu %d)", raw.Offset)
 	}
 	f.Offset = raw.Offset
 	return f, nil
@@ -118,7 +123,7 @@ func parseBound(name, raw string, upper bool) (*time.Time, error) {
 	}
 	t, err := time.ParseInLocation(dateOnlyLayout, raw, time.UTC)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %q is neither an RFC 3339 instant nor a %s date",
+		return nil, fmt.Errorf("%s : %q n'est ni un instant RFC 3339 ni une date %s",
 			name, raw, dateOnlyLayout)
 	}
 	if upper {
@@ -137,10 +142,11 @@ func parseCoverage(raw string) (*float64, error) {
 	}
 	v, err := strconv.ParseFloat(raw, 64)
 	if err != nil {
-		return nil, fmt.Errorf("min_coverage: %q is not a number", raw)
+		return nil, fmt.Errorf("min_coverage : %q n'est pas un nombre", raw)
 	}
 	if v < 0 || v > 1 {
-		return nil, fmt.Errorf("min_coverage must be a fraction between 0 and 1 (0.85, not 85), got %v", v)
+		return nil, fmt.Errorf(
+			"min_coverage doit être une fraction entre 0 et 1 (0.85, pas 85) ; reçu %v", v)
 	}
 	return &v, nil
 }
@@ -153,9 +159,9 @@ func parseLimit(limit int) (int, error) {
 	case limit == 0:
 		return defaultLimit, nil
 	case limit < 0:
-		return 0, fmt.Errorf("limit must not be negative, got %d", limit)
+		return 0, fmt.Errorf("limit ne peut pas être négatif (reçu %d)", limit)
 	case limit > maxLimit:
-		return 0, fmt.Errorf("limit must not exceed %d, got %d", maxLimit, limit)
+		return 0, fmt.Errorf("limit ne peut pas dépasser %d (reçu %d)", maxLimit, limit)
 	}
 	return limit, nil
 }

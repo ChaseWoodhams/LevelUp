@@ -55,9 +55,16 @@ aucune ligne — écrire `expired` sur un incident réseau enterrerait le match 
 ni delete-then-reinsert. Mono-writer n'est PAS un argument de sûreté vis-à-vis d'ART
 (#23046 a crashé malgré mono-writer + PK BIGINT, cf. `no_art_patterns_test.go`), et les
 deux clés d'ici sont VARCHAR. **Lectures** (`cmd/study-server` #12, `status` #9) :
-`OpenReadForQuery`, jamais `OpenReadOnly` forcé — DuckDB refuse un handle read-only sur un
-fichier déjà tenu en RW dans le même process, donc un `OpenReadOnly` forcé casserait
-précisément le cas que la lecture seule sert (consulter pendant une passe `watch`).
+`OpenReadForQuery`, jamais `OpenReadOnly` forcé (DuckDB refuse un handle read-only sur un
+fichier déjà tenu en RW dans le MÊME process).
+
+**Piège cross-process — mesuré le 2026-09-04, `cmd/study-server/crossprocess_test.go`.**
+`OpenReadForQuery` n'ouvre PAS « en READ_ONLY à côté » du writer d'un autre processus : DuckDB
+est mono-instance par fichier entre processus, et le verrou joue dans les DEUX sens. Un lecteur
+qui garde le handle empêche la passe `watch` suivante d'écrire — donc des films perdus. Tout
+lecteur long doit emprunter l'archive le temps d'une requête et la rendre (`Close()` libère
+réellement : refCount à 0 → sortie du cache + fermeture du `sql.DB`), jamais l'ouvrir au
+démarrage. Pendant qu'une capture la tient, la bonne réponse est « occupé », pas « en panne ».
 
 **Couverture d'un match archivé** : `named_lives / total_lives`, fraction de 1 (ADR 0006) —
 il n'y a PAS de colonne `coverage`. `total_lives = 0` signifie « inconnue », pas « nulle » :

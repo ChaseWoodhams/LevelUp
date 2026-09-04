@@ -167,6 +167,58 @@ Liste complète : `go run ./cmd/levelup help`.
 
 ---
 
+## Outil d'étude (hors app)
+
+Un outil local d'analyse adossé à une archive de films de match, capturés avant l'expiration de
+leurs liens CDN. Il vit à côté de l'app et ne partage aucune de ses données : une seule archive
+sous `data/study/`, écrite par l'archiveur et lue par le serveur.
+
+### `study-archiver` — la capture (`cmd/study-archiver`)
+
+```bash
+# Archiver un match : télécharger tout son film dans le cache de chunks et bâtir l'artefact 2D
+go run ./cmd/study-archiver fetch-one --xuid <xuid> <matchId>
+
+# Une passe sur watchlist.toml à la racine. Sort une fois terminée — à lancer toutes les
+# heures depuis le planificateur de l'OS, pas en démon.
+go run ./cmd/study-archiver watch --xuid <xuid>
+
+# Ce que contient l'archive et ce qui a échoué. Aucun appel réseau, aucun credential.
+go run ./cmd/study-archiver status
+
+# Ré-assembler un artefact depuis les chunks déjà sur disque. Hors ligne ; jamais de
+# re-téléchargement.
+go run ./cmd/study-archiver rebuild <matchId>
+```
+
+Joueurs suivis : `watchlist.toml` à la racine (git-ignoré ; modèle `watchlist.example.toml`).
+Codes de sortie : 0 archivé, 3 ignoré pour une raison nommée, 1 échec, 2 usage.
+
+### `study-server` — le service (`cmd/study-server`)
+
+```bash
+# HTTP en lecture seule sur l'archive. Boucle locale par défaut : elle contient les parties
+# d'autres joueurs.
+go run ./cmd/study-server [--addr 127.0.0.1:8100] [--title halo_infinite]
+
+# GET /matches?map=&mode=&player=&from=&to=&min_coverage=&limit=&offset=
+# GET /matches/{match_id}/replay        l'artefact, octet pour octet
+# GET /matches/{match_id}/participants  xuid, team_side, gamertag, kills, deaths, assists
+```
+
+`{match_id}` accepte la forme complète comme la forme courte du film. `from`/`to` acceptent une
+date `AAAA-MM-JJ` (l'intervalle est semi-ouvert : `from=D&to=D` couvre donc le jour D entier) ou
+un instant RFC 3339. `min_coverage` est une fraction de 1 (`0.85`, pas `85`).
+
+**DuckDB est mono-instance par fichier entre processus.** Le serveur emprunte donc l'archive le
+temps d'une requête et la rend aussitôt : il n'empêche jamais une capture horaire d'écrire.
+Pendant qu'une capture tient l'archive, le serveur répond `503 archive_busy` — c'est le
+comportement attendu, pas une panne.
+
+Les deux binaires se lient à DuckDB : chaîne UCRT requise sous Windows (cf. CLAUDE.md).
+
+---
+
 ## Tests
 
 ### Go (voir [../testing.md](../testing.md))

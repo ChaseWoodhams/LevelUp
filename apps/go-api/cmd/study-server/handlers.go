@@ -39,9 +39,28 @@ import (
 )
 
 // studyHandler serves the archive: its database, and the artifacts it points at.
+//
+// It holds the archive's ADDRESS, not an open handle — see archive.go for why that is the one
+// structural decision in this server. Every handler therefore goes through `withArchive`.
 type studyHandler struct {
-	archive   *archive
+	archive   archiveSource
 	artifacts artifacts
+}
+
+// withArchive borrows the archive for one request and gives it back.
+//
+// A free function rather than a method because it is generic in the answer, and one seam
+// rather than three open/defer pairs because the giving-back is what keeps the hourly capture
+// unblocked: a handler that forgot its `Close` would hold the file until the process died, and
+// nothing else in the request would look wrong.
+func withArchive[T any](ctx context.Context, src archiveSource, fn func(*archive) (T, error)) (T, error) {
+	var zero T
+	a, err := src.open(ctx)
+	if err != nil {
+		return zero, err
+	}
+	defer a.Close()
+	return fn(a)
 }
 
 // mount registers the three routes on the router.
@@ -82,9 +101,11 @@ func (h *studyHandler) handleListMatches(ctx context.Context, in *listMatchesInp
 	if err != nil {
 		return nil, humacore.NewError(http.StatusBadRequest, "invalid_filter", err.Error())
 	}
-	page, err := h.archive.listMatches(ctx, f)
+	page, err := withArchive(ctx, h.archive, func(a *archive) (matchPage, error) {
+		return a.listMatches(ctx, f)
+	})
 	if err != nil {
-		return nil, serverError(ctx, "archive_error", err)
+		return nil, archiveError(ctx, err)
 	}
 	return &listMatchesOutput{Body: page}, nil
 }
@@ -104,9 +125,11 @@ type replayOutput struct {
 }
 
 func (h *studyHandler) handleGetReplay(ctx context.Context, in *matchInput) (*replayOutput, error) {
-	match, err := h.archive.lookupMatch(ctx, in.MatchID)
+	match, err := withArchive(ctx, h.archive, func(a *archive) (matchIdentity, error) {
+		return a.lookupBuiltMatch(ctx, in.MatchID)
+	})
 	if err != nil {
-		return nil, matchLookupError(ctx, err)
+		return nil, archiveError(ctx, err)
 	}
 	blob, err := h.artifacts.read(match.ShortID)
 	if errors.Is(err, errArtifactMissing) {
@@ -128,26 +151,40 @@ type participantsOutput struct {
 	}
 }
 
+// handleGetParticipants serves the roster of any RECORDED match, built or not — the roster
+// comes from the match stats and does not depend on the artifact (cf. lookupRecordedMatch).
 func (h *studyHandler) handleGetParticipants(ctx context.Context, in *matchInput) (*participantsOutput, error) {
-	match, err := h.archive.lookupMatch(ctx, in.MatchID)
+	rows, err := withArchive(ctx, h.archive, func(a *archive) ([]participantRow, error) {
+		match, err := a.lookupRecordedMatch(ctx, in.MatchID)
+		if err != nil {
+			return nil, err
+		}
+		return a.readParticipants(ctx, match.MatchID)
+	})
 	if err != nil {
-		return nil, matchLookupError(ctx, err)
-	}
-	rows, err := h.archive.readParticipants(ctx, match.MatchID)
-	if err != nil {
-		return nil, serverError(ctx, "archive_error", err)
+		return nil, archiveError(ctx, err)
 	}
 	out := &participantsOutput{}
 	out.Body.Participants = rows
 	return out, nil
 }
 
-// matchLookupError keeps "no such match" a 404 and everything else a 500 — the ticket's
-// criterion, in one place so the two routes cannot answer it differently.
-func matchLookupError(ctx context.Context, err error) error {
-	if errors.Is(err, errMatchUnknown) {
+// archiveError maps every way reading the archive can fail onto one answer per cause, in one
+// place so the three routes cannot answer the same condition differently.
+//
+//   - an unknown match is a clean 404, never a 500 — the ticket's own criterion;
+//   - a busy archive is a 503: a capture holds the file, nothing is broken, and the caller's
+//     move is to come back rather than to report a fault. Retryable, which is exactly what
+//     humacore's error contract publishes on a 5xx;
+//   - anything else is a logged 500.
+func archiveError(ctx context.Context, err error) error {
+	switch {
+	case errors.Is(err, errMatchUnknown):
 		return humacore.NewError(http.StatusNotFound, "match_not_found",
 			"aucun match archivé sous cet identifiant")
+	case errors.Is(err, errArchiveBusy):
+		return humacore.NewError(http.StatusServiceUnavailable, "archive_busy",
+			"l'archive est momentanément tenue par un autre processus (capture en cours)")
 	}
 	return serverError(ctx, "archive_error", err)
 }

@@ -34,11 +34,10 @@ func TestNewHandler_ResolvesArchiveAndArtifactFromTheRepoRoot(t *testing.T) {
 	seedArchive(t, paths.StudyArchiveDBPath())
 	writeTestArtifact(t, artifacts{paths: paths, titleSlug: title.DefaultSlug}, cliffhangerID)
 
-	h, closeArchive, err := newHandler(title.DefaultSlug)
+	h, err := newHandler(title.DefaultSlug)
 	if err != nil {
 		t.Fatalf("newHandler: %v", err)
 	}
-	defer closeArchive()
 
 	r := chi.NewRouter()
 	h.mount(r)
@@ -61,7 +60,7 @@ func TestNewHandler_ResolvesArchiveAndArtifactFromTheRepoRoot(t *testing.T) {
 // message has to name the command that fixes it.
 func TestNewHandler_NoArchiveYet(t *testing.T) {
 	t.Setenv("LEVELUP_REPO_ROOT", t.TempDir())
-	_, _, err := newHandler(title.DefaultSlug)
+	_, err := newHandler(title.DefaultSlug)
 	if !errors.Is(err, errNoArchive) {
 		t.Fatalf("err = %v, want errNoArchive", err)
 	}

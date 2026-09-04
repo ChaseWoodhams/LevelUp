@@ -101,28 +101,74 @@ func TestListMatches_TotalIgnoresPaging(t *testing.T) {
 	}
 }
 
-func TestLookupMatch(t *testing.T) {
+func TestLookupBuiltMatch(t *testing.T) {
 	a := newTestArchive(t)
 	ctx := context.Background()
 
 	// Either form of the identifier reaches the row: the app speaks full match ids, the
 	// film cache and its artifacts speak the short form.
 	for _, id := range []string{cliffhangerID, "000d5950"} {
-		got, err := a.lookupMatch(ctx, id)
+		got, err := a.lookupBuiltMatch(ctx, id)
 		if err != nil {
-			t.Fatalf("lookupMatch(%q): %v", id, err)
+			t.Fatalf("lookupBuiltMatch(%q): %v", id, err)
 		}
 		if got.MatchID != cliffhangerID || got.ShortID != "000d5950" {
-			t.Errorf("lookupMatch(%q) = %+v", id, got)
+			t.Errorf("lookupBuiltMatch(%q) = %+v", id, got)
 		}
 	}
 
-	// A match the archiver recorded but never built is NOT servable: it has no artifact.
-	if _, err := a.lookupMatch(ctx, unbuiltID); !errors.Is(err, errMatchUnknown) {
+	// A match the archiver recorded but never built has no replay to serve.
+	if _, err := a.lookupBuiltMatch(ctx, unbuiltID); !errors.Is(err, errMatchUnknown) {
 		t.Errorf("a match with no artifact must read as unknown, got %v", err)
 	}
-	if _, err := a.lookupMatch(ctx, "deadbeef"); !errors.Is(err, errMatchUnknown) {
+	if _, err := a.lookupBuiltMatch(ctx, "deadbeef"); !errors.Is(err, errMatchUnknown) {
 		t.Errorf("an absent match must read as unknown, got %v", err)
+	}
+}
+
+// TestLookupRecordedMatch — the roster's lookup does NOT require an artifact. Participants come
+// from the match stats; a build that never happened says nothing about who played.
+func TestLookupRecordedMatch(t *testing.T) {
+	a := newTestArchive(t)
+	ctx := context.Background()
+
+	got, err := a.lookupRecordedMatch(ctx, unbuiltID)
+	if err != nil {
+		t.Fatalf("a recorded match with no artifact must still resolve: %v", err)
+	}
+	if got.MatchID != unbuiltID {
+		t.Errorf("lookupRecordedMatch = %+v, want the unbuilt match", got)
+	}
+	if _, err := a.lookupRecordedMatch(ctx, "deadbeef"); !errors.Is(err, errMatchUnknown) {
+		t.Errorf("an absent match must still read as unknown, got %v", err)
+	}
+}
+
+// TestLookup_ShortIDCollisionIsDeterministic — short_id is the first 8 characters of a match
+// id and is NOT a key; two matches can share one. Without an order the winner would be
+// whichever row the engine handed back, so the same URL could serve a different replay on
+// different days. An exact full-id hit wins outright; among short-id hits, the lowest id.
+func TestLookup_ShortIDCollisionIsDeterministic(t *testing.T) {
+	a := newCollisionArchive(t)
+	ctx := context.Background()
+
+	for range 5 {
+		got, err := a.lookupBuiltMatch(ctx, sharedShortID)
+		if err != nil {
+			t.Fatalf("lookupBuiltMatch(%q): %v", sharedShortID, err)
+		}
+		if got.MatchID != collisionLowID {
+			t.Fatalf("short-id lookup = %s, want the lowest colliding id %s", got.MatchID, collisionLowID)
+		}
+	}
+
+	// The full id names one of the two exactly, and must never lose to its twin.
+	got, err := a.lookupBuiltMatch(ctx, collisionHighID)
+	if err != nil {
+		t.Fatalf("lookupBuiltMatch(full id): %v", err)
+	}
+	if got.MatchID != collisionHighID {
+		t.Errorf("full-id lookup = %s, want %s", got.MatchID, collisionHighID)
 	}
 }
 
@@ -153,47 +199,87 @@ func TestReadParticipants_RosterShape(t *testing.T) {
 	}
 }
 
-// TestOpenArchive_MissingFile — the state every machine is in before the first capture. The
-// message has to name the tool that creates the archive, because DuckDB's own error names
+// TestNewArchiveSource_MissingFile — the state every machine is in before the first capture.
+// The message has to name the tool that creates the archive, because DuckDB's own error names
 // only the driver and the path.
-func TestOpenArchive_MissingFile(t *testing.T) {
-	_, err := openArchive(filepath.Join(t.TempDir(), "archive.duckdb"))
+func TestNewArchiveSource_MissingFile(t *testing.T) {
+	_, err := newArchiveSource(filepath.Join(t.TempDir(), "archive.duckdb"))
 	if err == nil {
-		t.Fatal("opening an archive that does not exist must fail")
+		t.Fatal("pointing at an archive that does not exist must fail")
 	}
 	if !errors.Is(err, errNoArchive) {
 		t.Errorf("err = %v, want errNoArchive", err)
 	}
 }
 
-// TestOpenArchive_WhileAWriterHoldsIt is the ticket's read-only criterion, stated as the
-// thing it is actually for: browsing the archive during an hourly capture must work.
+// TestArchiveSource_DoesNotHoldTheFile is the structural guarantee, asserted where it can
+// actually be broken: locating the archive must not open it.
 //
-// A FORCED `OpenReadOnly` WOULD FAIL THIS TEST. DuckDB refuses a read-only handle on a file
-// already held read-write, so the open has to go through `OpenReadForQuery`, which borrows
-// the existing handle instead — and reads fine on it, because a SELECT does.
-func TestOpenArchive_WhileAWriterHoldsIt(t *testing.T) {
+// If `newArchiveSource` ever went back to opening at startup, the archiver could no longer
+// take the file — cf. TestArchiverCanStillWrite_WhileThisServerReads, which proves that from
+// a second process. This one fails faster and says why.
+func TestArchiveSource_DoesNotHoldTheFile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "archive.duckdb")
 	seedArchive(t, path)
 
-	writer, err := ddb.OpenReadWrite(path)
-	if err != nil {
-		t.Fatalf("standing in for the archiver's writer: %v", err)
+	if _, err := newArchiveSource(path); err != nil {
+		t.Fatalf("newArchiveSource: %v", err)
 	}
-	defer func() { _ = writer.Close() }()
+	if _, held := ddb.LookupCachedDB(path); held {
+		t.Error("locating the archive left a handle open: the archiver would be locked out")
+	}
+}
 
-	a, err := openArchive(path)
+// TestArchiveSource_ReleasesAfterEachRequest — the handle lasts one borrow and no longer. This
+// is what makes the server's lock windows milliseconds rather than hours.
+func TestArchiveSource_ReleasesAfterEachRequest(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "archive.duckdb")
+	seedArchive(t, path)
+	src, err := newArchiveSource(path)
 	if err != nil {
-		t.Fatalf("opening the archive while it is held read-write: %v", err)
+		t.Fatalf("newArchiveSource: %v", err)
 	}
-	defer a.Close()
 
-	page, err := a.listMatches(context.Background(), mustFilter(t, rawFilter{}))
-	if err != nil {
-		t.Fatalf("listing while a writer holds the archive: %v", err)
+	for i := range 3 {
+		a, err := src.open(context.Background())
+		if err != nil {
+			t.Fatalf("open %d: %v", i, err)
+		}
+		page, err := a.listMatches(context.Background(), mustFilter(t, rawFilter{}))
+		if err != nil {
+			t.Fatalf("listMatches %d: %v", i, err)
+		}
+		if page.Total != 3 {
+			t.Fatalf("total = %d, want 3", page.Total)
+		}
+		a.Close()
+		if _, held := ddb.LookupCachedDB(path); held {
+			t.Fatalf("borrow %d did not give the archive back", i)
+		}
 	}
-	if page.Total != 3 {
-		t.Errorf("total = %d, want the 3 archived matches", page.Total)
+}
+
+// TestIsLocked names the failures that mean "somebody else has it" and, just as importantly,
+// the ones that do not: reporting a corrupt file as "busy, try again later" would send the
+// operator away from the only message that could help them.
+func TestIsLocked(t *testing.T) {
+	locked := []string{
+		`IO Error: Cannot open file "archive.duckdb": The process cannot access the file because it is being used by another process.`,
+		"IO Error: Could not set lock on file \"/data/study/archive.duckdb\": Resource temporarily unavailable",
+		"File is already open in study-server.exe (PID 13552)",
+	}
+	for _, msg := range locked {
+		if !isLocked(errors.New(msg)) {
+			t.Errorf("must read as locked: %s", msg)
+		}
+	}
+	for _, msg := range []string{"", "IO Error: Corrupt database file", "no such table: matches"} {
+		if isLocked(errors.New(msg)) {
+			t.Errorf("must NOT read as locked: %s", msg)
+		}
+	}
+	if isLocked(nil) {
+		t.Error("nil is not a lock")
 	}
 }
 

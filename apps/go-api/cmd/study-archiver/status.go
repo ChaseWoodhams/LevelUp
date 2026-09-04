@@ -7,12 +7,20 @@ package main
 // looks exactly like a `watch` loop with nothing to capture, and the only thing that tells
 // them apart is a report somebody can read at a glance.
 //
-// READ-ONLY, AND SAFE TO RUN DURING A PASS. The handle comes from
-// `duckdb.OpenReadForQuery`, never a forced `OpenReadOnly`: in the same process it reuses
-// an existing handle (DuckDB refuses a read-only handle on a file already held read-write
-// there), and across processes it opens READ_ONLY beside the archiver's writer. That is
-// CLAUDE.md's ART rule 4 and ADR 0013/0016, and it is what makes "run it while a capture is
-// in progress" true rather than hopeful.
+// READ-ONLY. The handle comes from `duckdb.OpenReadForQuery`, never a forced `OpenReadOnly`:
+// in the same process it reuses an existing handle (DuckDB refuses a read-only handle on a
+// file already held read-write there). That is CLAUDE.md's ART rule 4 and ADR 0013/0016.
+//
+// CORRECTION (2026-09-04): this header used to claim that "across processes it opens READ_ONLY
+// beside the archiver's writer", and therefore that running this command during a capture was
+// safe. THAT IS FALSE. DuckDB is single-instance-per-file ACROSS PROCESSES, in both directions
+// — measured in `cmd/study-server/crossprocess_test.go`, and stated in
+// `docs/RUNBOOK_OPS_DUCKDB_CLI_TOOLS.md`. While a `watch` pass holds the archive, `status`
+// cannot open it and reports the driver's lock error.
+//
+// It is nonetheless HARMLESS to try: this command opens and exits in milliseconds, so it never
+// takes the file from the pass that needs it. What it does not do is succeed mid-capture. The
+// same finding is why cmd/study-server borrows the archive per request rather than holding it.
 //
 // THE REPORT GOES TO STDOUT, the logs to slog on stderr — the split every other `cmd/`
 // tool here uses. Repo rule 3 forbids `fmt.Println` as a LOGGING mechanism; this is the

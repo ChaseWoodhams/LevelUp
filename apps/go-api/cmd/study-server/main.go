@@ -91,29 +91,30 @@ func run(ctx context.Context, args []string) int {
 		return exitUsage
 	}
 
-	h, closeArchive, err := newHandler(*titleSlug)
+	h, err := newHandler(*titleSlug)
 	if err != nil {
 		slog.ErrorContext(ctx, "study-server: setup failed", "err", err)
 		return exitFailure
 	}
-	defer closeArchive()
-
 	return serve(ctx, *addr, h)
 }
 
-// newHandler opens the archive and wires the routes over it.
-func newHandler(titleSlug string) (*studyHandler, func(), error) {
+// newHandler locates the archive and wires the routes over it.
+//
+// IT DOES NOT OPEN THE ARCHIVE, and there is nothing to close: the file is borrowed per
+// request (archive.go). A server that took the handle at startup would refuse to boot during
+// a capture and, far worse, would keep the next hourly capture from writing at all.
+func newHandler(titleSlug string) (*studyHandler, error) {
 	repoRoot, err := title.FindRepoRoot()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	paths := title.NewPathResolver(repoRoot)
-	a, err := openArchive(paths.StudyArchiveDBPath())
+	src, err := newArchiveSource(paths.StudyArchiveDBPath())
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	h := &studyHandler{archive: a, artifacts: artifacts{paths: paths, titleSlug: titleSlug}}
-	return h, a.Close, nil
+	return &studyHandler{archive: src, artifacts: artifacts{paths: paths, titleSlug: titleSlug}}, nil
 }
 
 // serve runs the HTTP server until the process is asked to stop.
@@ -148,13 +149,13 @@ func serve(ctx context.Context, addr string, h *studyHandler) int {
 			return exitFailure
 		}
 	case <-ctx.Done():
-		slog.Info("study-server: shutting down")
 		// A fresh context: the one that carries the signal is already cancelled, and passing
 		// it would turn the grace period into an immediate close.
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownGrace)
 		defer cancel()
+		slog.InfoContext(shutdownCtx, "study-server: shutting down")
 		if err := srv.Shutdown(shutdownCtx); err != nil {
-			slog.Error("study-server: shutdown did not complete", "err", err)
+			slog.ErrorContext(shutdownCtx, "study-server: shutdown did not complete", "err", err)
 			return exitFailure
 		}
 	}

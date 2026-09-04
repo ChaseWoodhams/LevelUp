@@ -1,3 +1,73 @@
+## [2026-09-03] watch / status / rebuild (tickets #8, #9, #10) — the archiver runs itself — Complete
+
+**Context**: the last three tickets of epic #1, all unblocked once #7 landed. Together they
+turn `fetch-one` into a tool that runs unattended and stays useful: `watch` captures films
+before they expire, `status` says whether it is still working, `rebuild` re-assembles
+artifacts long after every CDN link is dead.
+
+**THE CONTRADICTION BETWEEN #7 AND #8, DECIDED AND WRITTEN DOWN ON THE TICKET.** #8 asked
+that "matches already marked expired or failed are not retried"; #7 delivered "a failed
+match remains eligible for a later rebuild once its chunks are on disk". They reconcile by
+putting the skip in the DISCOVERY filter rather than in the archiving path: `watch` declines
+to enqueue a `failed` match, because re-running a decoder known to be broken against the
+same bytes every hour is waste that would drown the log the run is judged by — while
+`fetch-one` and `rebuild` stay willing, because those are deliberate acts taken when
+something has changed. `failed` therefore means "waiting on a decoder fix, and a human
+decides when one has landed", not "abandoned". Both tickets' criteria survive intact; the
+reasoning is a comment on #8 so the next reader does not re-litigate it.
+
+**The 4v4 filter is the ROSTER SHAPE, not a playlist name.** Two teams of four is what
+"4v4 Arena" MEANS, it is what the heat maps of epic #3 aggregate over, and it survives
+every rename Halo has done between seasons. A playlist-name test would also have put a
+hard-coded, localised label in Go, which CLAUDE.md rule 1 forbids — the rule and the
+correct engineering agree here.
+
+**The history endpoint demands `xuid(N)`, and this is the one thing in the tool that needs
+an Xbox Live token rather than a Halo one.** Passing a textual gamertag does NOT 404: the
+API returns a stale frozen response (documented on `GetMatchHistory` from Grunt + SPNKr +
+prod experience), which is the worst possible failure shape for an unattended job — it
+looks like data. Resolution goes through the repo's own canonical chain
+(`ResolveMSAccessTokenStoreFirst` -> `AcquireXSTSForRTA` -> `XboxProfileResolver`), memoised
+by `CachedHeaderProvider`, built LAZILY: a watchlist whose players are all resolved — the
+steady state of an hourly job — makes no Xbox call at all, and the resolution is recorded
+in the `watchlist` table so it happens once ever.
+
+**A pass never aborts on one failure.** Not a player's, not a match's. The whole run exists
+to beat an expiry clock, and the films of everybody else are expiring while it would be
+giving up. Failures are counted and reported in the exit code.
+
+**`status` reports failed and expired as SEPARATE numbers.** Summing them into "errors"
+would hide the only distinction that decides what to do next. A rendering bug caught by
+actually looking at the output: "downloaded" counts every successfully archived match too,
+so printing it as "downloaded but unbuilt" showed a backlog of four where there was one.
+Now counted as `film_state = 'downloaded' AND artifact_path IS NULL`.
+
+**`rebuild` makes no network call, and that is a hard property.** On the day the decoder is
+fixed, every match worth rebuilding has a CDN link that died months ago; a rebuild that
+could quietly re-download would collect 404s and report failures that say nothing about the
+decoder. So it takes no client and needs no credential (`newOfflineDeps`), and a match whose
+chunks are gone fails with a message that says exactly that rather than reaching for the
+network. `status` is offline for the same reason and gets it for free.
+
+**A trap #6 documented and this ticket nearly walked into.** `archive.recorded` is a PARTIAL
+reader by design — it selects only what the idempotency check needs — so handing its result
+back to `recordMatch` blanks mode, playlist, played-at and source_gamertag. A rebuild has no
+fresh reading of the match stats and nothing new to say about who played, so it writes
+through `updateBuild()`, which touches only what the build produced and leaves the roster
+alone. The file header of #6 warned about exactly this; reading it was cheaper than the bug.
+
+**Results**: `cmd/study-archiver` green — 22 tests added across the three tickets (a pass
+archives the unseen 4v4s from both histories and skips the rest; a second pass re-processes
+nothing and re-resolves nothing, asserted on stats/history/build call counts; expired and
+failed are never retried by the loop; an unsupported map still is; a player failure and a
+match failure each leave the pass running; the shape filter; watchlist loading, dedup and
+its three refusals; the report's counts, its empty state and its long-tail summary; the
+rebuild's six cases, every one wired with a NIL Halo client so any reach for the network
+would panic). `golangci-lint` 0 issues, gofmt clean, every file under 500 lines.
+
+**Next step**: epic #1 is complete. Spec 2 (`apps/study`, tickets #11-#18) reads this
+archive — through `OpenReadForQuery`, never a forced read-only handle.
+
 ## [2026-09-03] Expired vs failed films (ticket #7) — the archiver stops chasing dead links — Complete
 
 **Context**: fork issue #7, "1.4 Expired and failed film state handling", unblocked by #6

@@ -180,7 +180,18 @@ go run apps/go-api/cmd/inspect_bp/main.go            # outil Go (CGO — cf. cha
 
 # CLI principal
 go run ./apps/go-api/cmd/levelup --help              # sync, backfill, diag
+
+# Outil d'étude (archive de films, hors app — épopée #1)
+go run ./apps/go-api/cmd/study-archiver fetch-one --xuid <xuid> <matchId>
+go run ./apps/go-api/cmd/study-archiver watch --xuid <xuid>   # 1 passe sur watchlist.toml
+go run ./apps/go-api/cmd/study-archiver status                # santé de l'archive (sans token)
+go run ./apps/go-api/cmd/study-archiver rebuild <matchId>     # hors ligne, depuis les chunks
 ```
+
+`watch` est prévu pour le planificateur de l'OS (horaire), pas en démon : une invocation =
+une passe, puis sortie. `status` et `rebuild` ne font AUCUN appel réseau et ne demandent
+aucun credential. Liste des joueurs suivis : `watchlist.toml` à la racine (git-ignoré,
+modèle `watchlist.example.toml`).
 
 ### Chaîne CGO sous Windows — UCRT, PAS mingw64 (constaté 2026-09-03)
 

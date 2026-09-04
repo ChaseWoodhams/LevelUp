@@ -38,7 +38,7 @@ serveur ne l'ouvre jamais en écriture. Trois tables :
 |---|---|
 | `matches` | 1 ligne par match archivé : `match_id` (PK), `short_id`, `played_at`, `map_name`, `map_module`, `mode`, `playlist`, `duration_ms`, `source_gamertag`, `film_state`, `skip_reason`, `artifact_path`, `built_at`, `decoder_rev`, compteurs décodés (`tracks`, `points`, `shots`, `named_lives`, `total_lives`), `recorded_at` |
 | `participants` | 1 ligne par (match, joueur) : `xuid`, `gamertag`, `team` (0 Eagle / 1 Cobra), `outcome` (1 nul / 2 victoire / 3 défaite / 4 abandon), `kills`, `deaths`, `assists` — **source : match stats, jamais le film** (le film ne porte aucune information d'équipe) |
-| `watchlist` | `gamertag` (PK), `xuid`, `added_at`, `last_checked` — alimentée par le ticket #8 |
+| `watchlist` | `gamertag` (PK), `xuid`, `added_at`, `last_checked` — alimentée par `watch` (#8). `xuid` : résolu UNE fois via l'endpoint profil Xbox Live puis relu de la base (aucun appel ultérieur). `added_at` n'est écrit qu'à l'insertion ; `last_checked` est estampillé à chaque passe réussie — c'est ce qui distingue « rien de neuf » de « le job ne tourne plus ». Correspondance gamertag **insensible à la casse** (les gamertags Xbox le sont). |
 
 `film_state` : `pending` \| `downloaded` \| `expired` \| `failed`. **Politique de reprise
 (#7, `cmd/study-archiver/filmstate.go`)** : `expired` est le SEUL état terminal — le film
@@ -54,8 +54,16 @@ aucune ligne — écrire `expired` sur un incident réseau enterrerait le match 
 **Écritures** : SELECT-then-UPDATE-or-INSERT ligne à ligne, JAMAIS `ON CONFLICT DO UPDATE`
 ni delete-then-reinsert. Mono-writer n'est PAS un argument de sûreté vis-à-vis d'ART
 (#23046 a crashé malgré mono-writer + PK BIGINT, cf. `no_art_patterns_test.go`), et les
-deux clés d'ici sont VARCHAR. **Lectures** (serveur d'étude, spec 2) : `OpenReadForQuery`,
-jamais `OpenReadOnly` forcé.
+deux clés d'ici sont VARCHAR. **Lectures** (serveur d'étude spec 2, `status` #9) :
+`OpenReadForQuery`, jamais `OpenReadOnly` forcé.
+
+**Piège — `recorded()` est un lecteur PARTIEL** (`archive.go`) : il ne SELECT que ce dont
+le contrôle d'idempotence a besoin, donc `mode`, `playlist`, `played_at`, `source_gamertag`,
+`built_at` et `decoder_rev` reviennent à ZÉRO quelle que soit la ligne. Le repasser à
+`recordMatch` EFFACERAIT ces colonnes. C'est pourquoi `rebuild` (#10) écrit via
+`updateBuild()`, qui ne touche que ce que la construction a produit (artefact, compteurs,
+état, révision) et laisse le roster intact — une reconstruction n'a rien de neuf à dire sur
+qui a joué.
 
 ## shared_matches_v2.duckdb
 

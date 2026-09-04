@@ -35,6 +35,10 @@ type filmAPI interface {
 	// GetMatchStats returns the raw match-stats payload; the archiver reads the map,
 	// the mode, the playlist and the whole roster out of it.
 	GetMatchStats(ctx context.Context, matchID string) (map[string]any, error)
+	// GetMatchHistory lists a player's recent matches, most recent first. Used only by
+	// `watch` (#8) for discovery; the id must be in the xuid(N) form the API demands.
+	GetMatchHistory(ctx context.Context, xuidForm, matchType string, start, count int) (
+		[]haloclient.MatchHistoryEntry, error)
 }
 
 // deps is everything fetch-one needs, already resolved. The catalogues arrive LOADED
@@ -94,6 +98,16 @@ type outcome struct {
 // chunks are on disk and the fault is deterministic — and it is STILL returned as an
 // error, so a decoder regression never reads as an ordinary archiving outcome.
 func fetchOne(ctx context.Context, d deps, matchID string) (outcome, error) {
+	return fetchOneWithStats(ctx, d, matchID, nil)
+}
+
+// fetchOneWithStats is fetchOne for a caller that has ALREADY read the match stats.
+//
+// `watch` (#8) has to: it reads the payload to decide whether the match is the 4v4 the
+// archive is for, and re-reading it here would double the stats calls of every unattended
+// pass against an API the tool is rate-limited on. A nil payload means "read it yourself",
+// which is the ordinary fetch-one path.
+func fetchOneWithStats(ctx context.Context, d deps, matchID string, stats map[string]any) (outcome, error) {
 	out := outcome{MatchID: matchID, ShortID: title.FilmShortMatchID(matchID)}
 
 	prior, done, err := settledEarlier(ctx, d, &out)
@@ -104,9 +118,10 @@ func fetchOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 	// Stats first, and a failure here is an ERROR rather than a skip: the map name has no
 	// other source, and a stats call that fails is a transport problem the next run
 	// retries — not a statement about this match.
-	stats, err := d.Client.GetMatchStats(ctx, matchID)
-	if err != nil {
-		return out, fmt.Errorf("match stats: %w", err)
+	if stats == nil {
+		if stats, err = d.Client.GetMatchStats(ctx, matchID); err != nil {
+			return out, fmt.Errorf("match stats: %w", err)
+		}
 	}
 	facts, err := readMatchFacts(stats, d.SourceGamertag)
 	if err != nil {

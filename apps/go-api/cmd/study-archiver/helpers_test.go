@@ -15,15 +15,46 @@ import (
 // chunkNamePrefix is the blob file name the Halo manifest uses for a film chunk.
 const chunkNamePrefix = "filmChunk"
 
-// statsWithMap builds a match-stats payload shaped like the real one.
+// statsWithMap builds a match-stats payload shaped like the real one, for testMatchID.
+func statsWithMap(mapName string) map[string]any {
+	return statsFor(testMatchID, mapName, twoPlayerRoster())
+}
+
+// twoPlayerRoster is the smallest honest roster: one player per team.
+func twoPlayerRoster() []any {
+	return []any{
+		statsPlayer("xuid(1)", "JGtm", 0, 2, 15, 9, 4),
+		statsPlayer("xuid(2)", "Rival", 1, 3, 9, 15, 2),
+	}
+}
+
+// fourVFourRoster is the shape the archive exists for: two teams of four. `watch` keeps
+// only these, so the fixture has to be able to produce both this and something else.
+func fourVFourRoster(firstGamertag string) []any {
+	roster := make([]any, 0, 8)
+	for i := 0; i < 8; i++ {
+		gt := fmt.Sprintf("Player%d", i+1)
+		if i == 0 && firstGamertag != "" {
+			gt = firstGamertag
+		}
+		team, outcome := 0, 2
+		if i >= 4 {
+			team, outcome = 1, 3
+		}
+		roster = append(roster, statsPlayer(fmt.Sprintf("xuid(%d)", i+1), gt, team, outcome, 15, 9, 4))
+	}
+	return roster
+}
+
+// statsFor builds a match-stats payload shaped like the real one.
 //
 // It has to be the REAL shape, not just the fields the archiver reads: the extraction
 // goes through the repo's own sync.ExtractRegistry / sync.ExtractParticipants, so a
 // fixture missing MatchId or StartTime fails there rather than in the archiver. That is
 // the point of reusing them — the fixture is held to the same standard as the API.
-func statsWithMap(mapName string) map[string]any {
+func statsFor(matchID, mapName string, players []any) map[string]any {
 	stats := map[string]any{
-		"MatchId": testMatchID,
+		"MatchId": matchID,
 		"MatchInfo": map[string]any{
 			"StartTime": "2026-05-19T20:15:00.000Z",
 			"EndTime":   "2026-05-19T20:24:13.000Z",
@@ -34,10 +65,7 @@ func statsWithMap(mapName string) map[string]any {
 			},
 			"PlaylistMapModePair": map[string]any{"PublicName": "Slayer on Cliffhanger"},
 		},
-		"Players": []any{
-			statsPlayer("xuid(1)", "JGtm", 0, 2, 15, 9, 4),
-			statsPlayer("xuid(2)", "Rival", 1, 3, 9, 15, 2),
-		},
+		"Players": players,
 	}
 	if mapName != "" {
 		info, _ := stats["MatchInfo"].(map[string]any)

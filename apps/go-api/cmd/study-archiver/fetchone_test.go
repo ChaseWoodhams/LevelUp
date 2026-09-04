@@ -21,6 +21,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -50,6 +51,12 @@ type fakeHalo struct {
 	// statsStatus, when non-zero, replaces the match-stats response.
 	statsStatus int
 	stats       map[string]any
+	// statsByMatch overrides `stats` per match id. `watch` drives several matches in one
+	// pass, and the whole point of its filter is that they are not all the same shape.
+	statsByMatch map[string]map[string]any
+	// history is what the match-history route serves, keyed by match type
+	// ("matchmaking", "custom"): the ids, most recent first.
+	history map[string][]string
 	// statsCalls / manifestCalls / blobCalls count what the archiver actually asked the API
 	// for. Idempotency and "never retried" are claims about NOT fetching, and only a call
 	// count can prove them — row counts alone would still pass if the tool re-downloaded
@@ -57,6 +64,7 @@ type fakeHalo struct {
 	statsCalls    atomic.Int32
 	manifestCalls atomic.Int32
 	blobCalls     atomic.Int32
+	historyCalls  atomic.Int32
 }
 
 func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fakeHalo {
@@ -97,12 +105,18 @@ func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fak
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		blob, err := json.Marshal(f.stats)
+		blob, err := json.Marshal(f.statsOf(matchIDFromStatsPath(r.URL.Path)))
 		if err != nil {
 			t.Errorf("encoding stats: %v", err)
 			return
 		}
 		_, _ = w.Write(blob)
+	})
+	// Match history: /hi/players/xuid(N)/matches?type=matchmaking&start=&count=
+	mux.HandleFunc("/hi/players/", func(w http.ResponseWriter, r *http.Request) {
+		f.historyCalls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write(f.historyJSON(r.URL.Query().Get("type")))
 	})
 	f.Server = httptest.NewServer(mux)
 	t.Cleanup(f.Server.Close)
@@ -144,6 +158,37 @@ func (f *fakeHalo) manifestJSON() []byte {
 		},
 	}
 	blob, _ := json.Marshal(body)
+	return blob
+}
+
+// statsOf serves the payload for one match: the per-match override when the test set one,
+// the single payload otherwise (every fetch-one test drives exactly one match).
+func (f *fakeHalo) statsOf(matchID string) map[string]any {
+	if s, ok := f.statsByMatch[matchID]; ok {
+		return s
+	}
+	return f.stats
+}
+
+// matchIDFromStatsPath reads the id out of /hi/matches/{id}/stats.
+func matchIDFromStatsPath(path string) string {
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	if len(parts) < 3 {
+		return ""
+	}
+	return parts[2]
+}
+
+// historyJSON answers the match-history endpoint in the shape the real one uses.
+func (f *fakeHalo) historyJSON(matchType string) []byte {
+	results := make([]map[string]any, 0, len(f.history[matchType]))
+	for _, id := range f.history[matchType] {
+		results = append(results, map[string]any{
+			"MatchId":   id,
+			"MatchInfo": map[string]any{"StartTime": "2026-05-19T20:15:00.000Z"},
+		})
+	}
+	blob, _ := json.Marshal(map[string]any{"Results": results})
 	return blob
 }
 

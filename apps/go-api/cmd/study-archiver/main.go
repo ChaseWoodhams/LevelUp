@@ -71,6 +71,8 @@ func main() {
 	switch os.Args[1] {
 	case "fetch-one":
 		os.Exit(runFetchOne(context.Background(), os.Args[2:]))
+	case "watch":
+		os.Exit(runWatch(context.Background(), os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 		os.Exit(exitOK)
@@ -89,16 +91,96 @@ func usage() {
 		"[--interval MS] [--rps N] <matchId> - archive one match: download its whole film " +
 		"into the chunk cache and build the 2D replay artifact. Options must precede " +
 		"<matchId>. SPARTAN_TOKEN in the environment replaces --xuid.")
+	slog.Info("usage: study-archiver watch --xuid <xuid> [--gamertag GT] [--title slug] " +
+		"[--interval MS] [--rps N] - one pass over " + watchlistFileName + " at the repo " +
+		"root: pull each tracked player's recent history and archive the 4v4 matches not " +
+		"already known. Exits when done; run it from the OS scheduler, hourly.")
+}
+
+// commonFlags are the options EVERY archiving subcommand takes: they all authenticate the
+// same way, against the same title, and write the same archive.
+//
+// Registered in one place rather than copied per subcommand, because the failure of a copy
+// is silent: a flag added to fetch-one and forgotten in watch does not break a build, it
+// just makes the unattended pass quietly ignore an option the operator passed it.
+type commonFlags struct {
+	xuid, gamertag, titleSlug *string
+	interval, rps             *int
+}
+
+func registerCommonFlags(fs *flag.FlagSet) commonFlags {
+	return commonFlags{
+		xuid:      fs.String("xuid", "", "xuid whose stored token authenticates the run (ADR 0023)"),
+		gamertag:  fs.String("gamertag", "", "gamertag of --xuid; recorded as the archive row's source_gamertag"),
+		titleSlug: fs.String("title", title.DefaultSlug, "title slug"),
+		interval:  fs.Int("interval", 0, "replay grid step in ms (0 = the replay package's default)"),
+		rps:       fs.Int("rps", 0, "outgoing requests per second (0 = the Halo client's default)"),
+	}
+}
+
+func (c commonFlags) request() depsRequest {
+	return depsRequest{
+		XUID:            *c.xuid,
+		Gamertag:        *c.gamertag,
+		Title:           *c.titleSlug,
+		FrameIntervalMS: *c.interval,
+		RequestsPerSec:  *c.rps,
+	}
+}
+
+// runWatch runs ONE pass over the watchlist and exits. The OS scheduler owns the clock.
+//
+// EXIT CODES SAY WHAT THE SCHEDULER NEEDS TO KNOW: 0 when the pass completed, whether or
+// not it found anything new — a quiet hour is a success, not a skip — and 1 when any
+// player or match failed. A pass never aborts on a single failure: the films of every
+// other player are expiring while it would be giving up.
+func runWatch(ctx context.Context, args []string) int {
+	fs := flag.NewFlagSet("watch", flag.ContinueOnError)
+	common := registerCommonFlags(fs)
+	if err := fs.Parse(args); err != nil {
+		return exitUsage
+	}
+	if fs.NArg() != 0 {
+		slog.ErrorContext(ctx, "study-archiver: watch takes no positional argument "+
+			"(the players come from "+watchlistFileName+")", "args", fs.Args())
+		return exitUsage
+	}
+
+	// The watchlist is read BEFORE anything is authenticated or opened: a missing or empty
+	// one is an operator mistake, and failing on it should cost no token and leave no
+	// DuckDB handle behind.
+	repoRoot, err := title.FindRepoRoot()
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: repo root", "err", err)
+		return exitFailure
+	}
+	wl, err := loadWatchlist(repoRoot)
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: watchlist", "err", err)
+		return exitUsage
+	}
+
+	d, err := newDeps(ctx, common.request())
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: setup failed", "err", err)
+		return exitFailure
+	}
+	defer func() {
+		if cErr := d.Archive.Close(); cErr != nil {
+			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
+		}
+	}()
+
+	if sum := watchPass(ctx, d, newWatchDeps(d.Paths, common.request()), wl); sum.Failed > 0 {
+		return exitFailure
+	}
+	return exitOK
 }
 
 // runFetchOne parses the subcommand's flags, wires the archiver and reports what it did.
 func runFetchOne(ctx context.Context, args []string) int {
 	fs := flag.NewFlagSet("fetch-one", flag.ContinueOnError)
-	xuid := fs.String("xuid", "", "xuid whose stored token authenticates the run (ADR 0023)")
-	gamertag := fs.String("gamertag", "", "gamertag of --xuid; recorded as the archive row's source_gamertag")
-	titleSlug := fs.String("title", title.DefaultSlug, "title slug")
-	interval := fs.Int("interval", 0, "replay grid step in ms (0 = the replay package's default)")
-	rps := fs.Int("rps", 0, "outgoing requests per second (0 = the Halo client's default)")
+	common := registerCommonFlags(fs)
 	if err := fs.Parse(args); err != nil {
 		return exitUsage
 	}
@@ -109,13 +191,7 @@ func runFetchOne(ctx context.Context, args []string) int {
 	}
 	matchID := fs.Arg(0)
 
-	d, err := newDeps(ctx, depsRequest{
-		XUID:            *xuid,
-		Gamertag:        *gamertag,
-		Title:           *titleSlug,
-		FrameIntervalMS: *interval,
-		RequestsPerSec:  *rps,
-	})
+	d, err := newDeps(ctx, common.request())
 	if err != nil {
 		slog.ErrorContext(ctx, "study-archiver: setup failed", "err", err)
 		return exitFailure

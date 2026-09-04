@@ -186,12 +186,24 @@ go run ./apps/go-api/cmd/study-archiver fetch-one --xuid <xuid> <matchId>
 go run ./apps/go-api/cmd/study-archiver watch --xuid <xuid>   # 1 passe sur watchlist.toml
 go run ./apps/go-api/cmd/study-archiver status                # santé de l'archive (sans token)
 go run ./apps/go-api/cmd/study-archiver rebuild <matchId>     # hors ligne, depuis les chunks
+
+# Serveur de l'outil d'étude (sert l'archive à apps/study — épopée #2)
+go run ./apps/go-api/cmd/study-server                         # 127.0.0.1:8100, lecture seule
 ```
 
 `watch` est prévu pour le planificateur de l'OS (horaire), pas en démon : une invocation =
 une passe, puis sortie. `status` et `rebuild` ne font AUCUN appel réseau et ne demandent
 aucun credential. Liste des joueurs suivis : `watchlist.toml` à la racine (git-ignoré,
 modèle `watchlist.example.toml`).
+
+`study-server` expose l'archive en LECTURE SEULE (`GET /matches`,
+`/matches/{match_id}/replay`, `/matches/{match_id}/participants`) : ouverture via
+`duckdb.OpenReadForQuery`, donc consultable pendant une passe `watch`. Il écoute sur la
+boucle locale par défaut — l'archive contient les films et rosters de parties d'autrui.
+L'artefact est résolu par `PathResolver.ReplayArtifactPath` (jamais par la colonne
+`artifact_path`, qui est un chemin ABSOLU de la machine qui l'a construit) et servi
+tel quel, octet pour octet : la garde de version de schéma est côté client.
+`{match_id}` accepte la forme complète ou la forme courte.
 
 ### Chaîne CGO sous Windows — UCRT, PAS mingw64 (constaté 2026-09-03)
 

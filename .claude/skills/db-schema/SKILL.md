@@ -54,8 +54,21 @@ aucune ligne — écrire `expired` sur un incident réseau enterrerait le match 
 **Écritures** : SELECT-then-UPDATE-or-INSERT ligne à ligne, JAMAIS `ON CONFLICT DO UPDATE`
 ni delete-then-reinsert. Mono-writer n'est PAS un argument de sûreté vis-à-vis d'ART
 (#23046 a crashé malgré mono-writer + PK BIGINT, cf. `no_art_patterns_test.go`), et les
-deux clés d'ici sont VARCHAR. **Lectures** (serveur d'étude spec 2, `status` #9) :
-`OpenReadForQuery`, jamais `OpenReadOnly` forcé.
+deux clés d'ici sont VARCHAR. **Lectures** (`cmd/study-server` #12, `status` #9) :
+`OpenReadForQuery`, jamais `OpenReadOnly` forcé — DuckDB refuse un handle read-only sur un
+fichier déjà tenu en RW dans le même process, donc un `OpenReadOnly` forcé casserait
+précisément le cas que la lecture seule sert (consulter pendant une passe `watch`).
+
+**Couverture d'un match archivé** : `named_lives / total_lives`, fraction de 1 (ADR 0006) —
+il n'y a PAS de colonne `coverage`. `total_lives = 0` signifie « inconnue », pas « nulle » :
+l'artefact n'a rapporté aucune vie. Les deux lecteurs le distinguent (`coverageRatio`,
+`cmd/study-server/filter.go` : un `CASE` qui rend NULL, donc jamais retenu par un plancher
+de couverture).
+
+**`artifact_path` est un chemin ABSOLU de la machine qui a construit l'artefact** : c'est
+une trace, pas une adresse. Un lecteur résout le fichier par
+`PathResolver.ReplayArtifactPath` (même appel que l'écrivain), et n'utilise la colonne que
+comme drapeau « construit / pas construit ».
 
 **Piège — `recorded()` est un lecteur PARTIEL** (`archive.go`) : il ne SELECT que ce dont
 le contrôle d'idempotence a besoin, donc `mode`, `playlist`, `played_at`, `source_gamertag`,

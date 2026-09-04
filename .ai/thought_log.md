@@ -1,3 +1,101 @@
+## [2026-09-04] study-server: matches, replay and participants (ticket #12) — Complete
+
+**Context**: the first ticket of epic #2. The archive of epic #1 is full of matches; nothing
+could read it. The app's own replay route cannot: it resolves a service per `player_slug` and
+joins the roster against the scoreboard of a player declared in `db_profiles.json`, and the
+archive is deliberately full of OTHER PEOPLE'S matches. Three read-only endpoints on
+`cmd/study-server`, over the archive the archiver writes.
+
+**THE ARTIFACT'S PATH IS RESOLVED, NOT READ OUT OF THE ARCHIVE.** `matches.artifact_path`
+holds the ABSOLUTE path of the machine that built the file — a record of what happened, not
+an address. Restore an archive beside a repository at another location and every one of those
+paths is wrong. The address comes from `PathResolver.ReplayArtifactPath`, the same call the
+archiver used to write it, so the two agree by construction; the column survives only as the
+"was this built" flag. That resolution is also where the short-film-ID rule lives, which is
+the whole reason the ticket asked for Go rather than a second implementation in Node.
+
+**And the path is built from a `short_id` READ OFF A ROW, never from the URL.** Not a
+sanitising step — a shape. `lookupMatch` resolves the request's identifier against the
+database first, so an identifier that names no archived match never reaches the filesystem at
+all, and the 404 the ticket asks for and the closure of the traversal question are the same
+line of code. `TestReplayRoute_PathComesFromTheArchive` states it: an artifact sitting in the
+cache for a match the archive does not hold is unreachable.
+
+**The bytes are passed through, not decoded and re-encoded.** A round trip through
+`replay.ReplayDocument` silently DROPS anything the struct does not model — an artifact from a
+newer decoder would arrive at the viewer quietly shorn of its new fields, which is exactly
+what the client's schema-version guard (#13) exists to catch, and it cannot catch what the
+server already discarded. Huma writes a `[]byte` body straight to the wire, so this also skips
+a reflect-walk float sanitisation over megabytes of trajectories per request.
+
+**Coverage is `named_lives / total_lives`, and `total_lives = 0` is UNKNOWN, not zero.** There
+is no coverage column; the ratio is computed, once, in a `CASE` that yields NULL when there
+were no lives (`coverageRatio`, shared by the SELECT and the WHERE so a filter can never
+disagree with the number shown). SQL's three-valued logic then does the rest: `NULL >= 0.8` is
+unknown, so a match whose coverage cannot be computed never satisfies a floor, whatever the
+floor is. The unit is a fraction of 1 (ADR 0006): `min_coverage=0.85`, and 85 is refused
+rather than clamped, because it is far likelier to be a percentage than an intent.
+
+**A bare date is a DAY, not an instant.** `to=2026-05-19` becomes the following midnight and
+the range is half-open, which is what makes `from=D&to=D` mean the whole of day D — read as a
+plain instant it would have meant the empty span at the start of it, and the most natural
+thing anyone types would have returned nothing. Half-open also lets two consecutive ranges
+tile a month without a match landing in both.
+
+**The participants payload is a SUBSET of `MatchScoreboardRow`, and the two fields it omits
+are the two it cannot answer honestly.** `xuid`, `gamertag`, `team_side` ("t{N}", the app's own
+encoding, which `rosterLogic.ts` groups on), `kills`, `deaths`, `assists` — exactly what the
+copied roster logic reads. NOT `is_me`: studying an archive is always looking at a match from
+outside it, and `false` for everyone would be a claim rather than an omission. NOT
+`outcome_label`: turning Halo's raw outcome code into words is the TitleSemanticAdapter's job
+against a versioned TOML, and rule 1 forbids an FR/EN label written into Go.
+
+**The binding is the boundary.** The listener is on the loopback by default rather than
+carrying a local-only middleware like the app's replay route: that guard exists because the
+app's route hangs off a server listening for the whole machine. Here one rule beats a rule
+plus a guard that can disagree with it. Same reasoning for CORS — the study app will reach
+this through Vite's dev proxy, as `apps/web` already reaches the Go API.
+
+**The test fixture EXECUTES the archiver's own DDL rather than copying it.** This server owns
+no part of the archive's shape. A fixture with its own `CREATE TABLE` would be a second
+declaration whose failure is the quiet kind: the archiver renames a column, the server breaks
+in production, and every test stays green against the schema the fixture still remembers. So
+`helpers_test.go` lifts the `archiveSchema` const out of `cmd/study-archiver/archive.go`. One
+schema, and a rename that breaks this server breaks these tests in the same commit.
+
+**A gap found while re-reading, not by a test.** Every 5xx went through `humacore.NewError`,
+which replaces the message with a generic "internal error" so nothing internal leaks — and
+this binary carries none of the app's HTTP logging middleware, so the cause existed NOWHERE.
+A swallowed error (rule 3, anti-pattern 10) on the one path where the operator has nothing
+else to go on. `serverError` now logs before returning.
+
+**Results**: `cmd/study-server` green — 26 tests (the filter's rules with no database at all;
+the list's ordering, its five filters and its paging against a temp archive; coverage present,
+absent and as a floor; both forms of the identifier; the roster's shape and its six keys; the
+artifact read verbatim, resolved from the short form, and missing; every route including the
+two distinct 404s; the wiring from a repo root on disk). `go test ./...` across the module:
+136 packages, 0 failures. `golangci-lint` 0 issues, gofmt clean, largest file 219 lines,
+largest function under 60.
+
+**Verified by running it**, not only by testing it: the built binary served a seeded archive
+over HTTP — `/matches` with filters, `/matches/000d5950/participants`, the artifact with
+`Content-Type: application/json` and its exact byte length, a 404 carrying `match_not_found`
+and a 400 carrying `invalid_filter`.
+
+**Beyond the ticket, deliberately**: `limit`/`offset`/`total` on the list. Nothing in the
+criteria asks for paging, but a list endpoint with no ceiling hands back the whole archive on
+a typo; the default is 200, the cap 1000, and a limit past the cap is REFUSED rather than
+clamped — silently returning fewer rows than asked reads, at the other end, like "that is all
+there is", the one answer a browsing tool must never give by accident.
+
+**Not done here, and not this ticket's**: `apps/study` itself (#11 and after) — including the
+Vite dev proxy this server assumes. The review agents for this change died on an account rate
+limit; the review above is the author's own second pass.
+
+**Next**: #11, the `apps/study` scaffold with the copied replay modules.
+
+---
+
 ## [2026-09-03] watch / status / rebuild (tickets #8, #9, #10) — the archiver runs itself — Complete
 
 **Context**: the last three tickets of epic #1, all unblocked once #7 landed. Together they

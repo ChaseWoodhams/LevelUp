@@ -210,10 +210,11 @@ go run ./cmd/study-server [--addr 127.0.0.1:8100] [--title halo_infinite]
 date `AAAA-MM-JJ` (l'intervalle est semi-ouvert : `from=D&to=D` couvre donc le jour D entier) ou
 un instant RFC 3339. `min_coverage` est une fraction de 1 (`0.85`, pas `85`).
 
-**DuckDB est mono-instance par fichier entre processus.** Le serveur emprunte donc l'archive le
-temps d'une requête et la rend aussitôt : il n'empêche jamais une capture horaire d'écrire.
-Pendant qu'une capture tient l'archive, le serveur répond `503 archive_busy` — c'est le
-comportement attendu, pas une panne.
+**DuckDB est mono-instance par fichier entre processus.** Le serveur n'ouvre donc rien au
+démarrage : il emprunte l'archive tant qu'une requête est en vol et la rend au dernier emprunt,
+laissant le fichier libre entre deux salves — une capture horaire trouve toujours un créneau.
+Pendant qu'une capture tient l'archive, le serveur répond `503 archive_busy` avec un
+`Retry-After` — c'est le comportement attendu, pas une panne.
 
 Les deux binaires se lient à DuckDB : chaîne UCRT requise sous Windows (cf. CLAUDE.md).
 

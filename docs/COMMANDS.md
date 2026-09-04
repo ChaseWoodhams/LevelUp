@@ -206,9 +206,10 @@ go run ./cmd/study-server [--addr 127.0.0.1:8100] [--title halo_infinite]
 `YYYY-MM-DD` date (the range is half-open, so `from=D&to=D` is the whole of day D) or an
 RFC 3339 instant. `min_coverage` is a fraction of 1 (`0.85`, not `85`).
 
-**DuckDB is single-instance-per-file across processes.** The server therefore borrows the
-archive for the length of one request and gives it straight back, so it never keeps an hourly
-capture from writing. While a capture holds the archive the server answers `503 archive_busy` —
+**DuckDB is single-instance-per-file across processes.** The server therefore opens nothing at
+startup: it borrows the archive while a request is in flight and releases it when the last one
+finishes, so it leaves the file free between bursts and an hourly capture always finds a gap.
+While a capture holds the archive the server answers `503 archive_busy` with a `Retry-After` —
 that is expected, not a fault.
 
 Both binaries link DuckDB, so they need the UCRT toolchain on Windows (cf. CLAUDE.md).

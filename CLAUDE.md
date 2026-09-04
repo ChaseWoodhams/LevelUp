@@ -206,10 +206,12 @@ tel quel, octet pour octet : la garde de version de schéma est côté client.
 
 **DuckDB est mono-instance par fichier ENTRE PROCESSUS** (cf. `RUNBOOK_OPS_DUCKDB_CLI_TOOLS`) :
 un serveur qui garderait le handle empêcherait la capture horaire d'écrire — des films perdus.
-`study-server` emprunte donc l'archive le temps d'une requête et la rend aussitôt (jamais
-d'ouverture au démarrage) ; pendant qu'une capture la tient, il répond `503 archive_busy`.
-Garde-rail : `cmd/study-server/crossprocess_test.go` (le test échoue si le serveur reprend le
-handle à vie).
+`study-server` n'ouvre donc RIEN au démarrage : il emprunte l'archive tant qu'une requête est
+en vol et la rend au dernier emprunt (`archiveSource`, compteur de références tenu par le
+lecteur — `OpenReadForQuery` seul ne suffit pas, son emprunt de cache est non-possédant).
+Pendant qu'une capture la tient, il répond `503 archive_busy` + `Retry-After`. Garde-rails :
+`crossprocess_test.go` (l'archiveur peut écrire entre deux requêtes) et
+`TestArchiveSource_ConcurrentBorrows` (des requêtes parallèles ne se ferment pas la base).
 
 ### Chaîne CGO sous Windows — UCRT, PAS mingw64 (constaté 2026-09-03)
 

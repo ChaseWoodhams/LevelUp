@@ -7,8 +7,8 @@ package main
 // `duckdb.OpenReadForQuery`, the repo's helper for reading a database somebody else may be
 // holding read-write (CLAUDE.md ART rule 4, ADR 0013/0016).
 //
-// THE HANDLE IS HELD FOR ONE REQUEST, NOT FOR THE LIFE OF THE SERVER, and that is the whole
-// design of this file. It was first written the obvious way — open at startup, keep it — with
+// THE HANDLE IS HELD WHILE A REQUEST IS IN FLIGHT, NOT FOR THE LIFE OF THE SERVER, and that is
+// the whole design of this file. It was first written the obvious way — open at startup, keep it — with
 // a comment claiming that "across processes OpenReadForQuery opens READ_ONLY beside the
 // archiver's writer". THAT CLAIM IS FALSE, and a cross-process test now proves it
 // (crossprocess_test.go). DuckDB is single-instance-per-file ACROSS PROCESSES — the repo's own
@@ -20,8 +20,12 @@ package main
 //
 // The second one is the one that matters. This tool exists to beat an expiry clock; a study
 // server that quietly blocked the archiver would cost films, and films do not come back. So
-// the server yields by construction: it holds the archive for the milliseconds of a query and
-// gives it straight back, which is a window the hourly pass can essentially always win.
+// the server yields by construction: it takes the file when a request needs it and releases it
+// as soon as the last in-flight request is done, leaving it free between bursts — which is a
+// window an hourly pass has all day to find. It is NOT a guarantee that the archiver can take
+// the file at any instant: while a request is being served, the archiver waits, exactly as
+// this server waits during a capture. The asymmetry that makes it work is duration — requests
+// last milliseconds, a capture lasts minutes.
 //
 // WHAT REMAINS, HONESTLY STATED: the archiver holds the archive open for its WHOLE pass, so
 // while a capture runs this server cannot read at all. That is DuckDB's model, not a bug here,
@@ -39,7 +43,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strings"
+	"sync"
 	"time"
 
 	ddb "levelup/go-api/internal/platform/duckdb"
@@ -64,35 +68,84 @@ const (
 	archiveOpenBackoff  = 40 * time.Millisecond
 )
 
-// archiveSource is the archive as an ADDRESS, not an open handle. Holding the address rather
-// than the file is what lets the server exist alongside the archiver at all.
-type archiveSource struct{ path string }
+// archiveSource is the archive as an ADDRESS plus a REFERENCE COUNT — never an open handle
+// the server keeps. Holding the address rather than the file is what lets this server exist
+// alongside the archiver at all; the count is what makes concurrent requests safe.
+//
+// WHY THE COUNT IS OURS AND NOT THE DUCKDB CACHE'S. `duckdb.OpenReadForQuery` looks the path
+// up in the process-wide cache first, and that lookup is documented as "un emprunt
+// NON-POSSÉDANT ... le caller ne doit pas appeler Close()" (LookupCachedDB) — it hands back a
+// borrowed handle with a NO-OP release and takes no reference. So with a naive open/close per
+// request, the first request owns the handle and the rest borrow it; when the OWNER finishes
+// and closes, the borrowers' `*sql.DB` closes underneath them. Measured on the first version
+// of this file: 111 of 320 concurrent borrows failed with "sql: database is closed", and eight
+// parallel HTTP loops produced 180 responses of 500.
+//
+// So the reference count lives HERE, where the borrows actually are: the underlying handle is
+// opened on the first in-flight request and released when the last one finishes. The file is
+// held while the server is working and free the rest of the time, which is what the archiver
+// needs — and no borrower is ever closed out from under.
+type archiveSource struct {
+	path string
+
+	mu sync.Mutex
+	// borrows counts the requests currently holding the archive. db and release are set
+	// exactly while borrows > 0.
+	borrows int
+	db      *sql.DB
+	release func()
+}
 
 // newArchiveSource checks that an archive exists, WITHOUT opening it.
 //
 // Not opening is the point: a startup that took the file would be the very thing this design
 // avoids, and a server started mid-capture would fail to boot for no good reason. A stat is
 // enough to give the operator the one message they need on a fresh machine.
-func newArchiveSource(path string) (archiveSource, error) {
+func newArchiveSource(path string) (*archiveSource, error) {
 	// Checked here because DuckDB's own failure on an absent file names the driver and the
 	// path and nothing an operator can act on, and this is the state every machine is in
 	// until the first capture runs.
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		return archiveSource{}, fmt.Errorf("%w at %s: run `study-archiver watch` or `fetch-one` to create it",
+		return nil, fmt.Errorf("%w at %s: run `study-archiver watch` or `fetch-one` to create it",
 			errNoArchive, path)
 	}
-	return archiveSource{path: path}, nil
+	return &archiveSource{path: path}, nil
 }
 
-// archive is an open read handle on the archive database, for the length of one request.
+// archive is a borrowed read handle on the archive database, for the length of one request.
 type archive struct {
-	db      *sql.DB
-	release func()
-	path    string
+	db  *sql.DB
+	src *archiveSource
+	// closed makes Close idempotent, so a double release can never drop the count twice and
+	// pull the handle out from under another request.
+	closed bool
 }
 
-// open borrows the archive, retrying briefly if another process holds it.
-func (s archiveSource) open(ctx context.Context) (*archive, error) {
+// open borrows the archive, retrying briefly if another PROCESS holds it.
+func (s *archiveSource) open(ctx context.Context) (*archive, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Already held by another in-flight request: share it and count the borrow. Reads are
+	// concurrent on one handle, which is what the driver's pool is for.
+	if s.borrows > 0 {
+		s.borrows++
+		return &archive{db: s.db, src: s}, nil
+	}
+
+	db, release, err := s.openLocked(ctx)
+	if err != nil {
+		return nil, err
+	}
+	s.db, s.release, s.borrows = db, release, 1
+	return &archive{db: db, src: s}, nil
+}
+
+// openLocked performs the actual open, with the lock held. The retry sits inside the lock on
+// purpose: a second request arriving mid-retry has nothing better to do than wait for the
+// outcome of the first, and N independent retry loops on one file would only multiply the
+// contention they are trying to ride out.
+func (s *archiveSource) openLocked(ctx context.Context) (*sql.DB, func(), error) {
 	var err error
 	for attempt := range archiveOpenAttempts {
 		var (
@@ -100,56 +153,56 @@ func (s archiveSource) open(ctx context.Context) (*archive, error) {
 			release func()
 		)
 		if db, release, err = ddb.OpenReadForQuery(s.path); err == nil {
-			return &archive{db: db, release: release, path: s.path}, nil
+			return db, release, nil
 		}
 		// Only a LOCK is worth retrying. A corrupt or unreadable file will not heal in
 		// 200 ms, and retrying it would replace a precise error with a vague one.
-		if !isLocked(err) {
-			return nil, fmt.Errorf("opening the archive %s for reading: %w", s.path, err)
+		//
+		// `ddb.IsFileLockError` is the repo's own recogniser, exported from the package this
+		// file already imports. An earlier version of this code wrote a fourth copy of it —
+		// in the same commit that added a guard-rail against a duplicated literal — and the
+		// copy was also missing two of the signatures the canonical one matches.
+		if !ddb.IsFileLockError(err) {
+			return nil, nil, fmt.Errorf("opening the archive %s for reading: %w", s.path, err)
 		}
 		if attempt < archiveOpenAttempts-1 {
 			select {
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				return nil, nil, ctx.Err()
 			case <-time.After(archiveOpenBackoff):
 			}
 		}
 	}
 	slog.WarnContext(ctx, "study-server: the archive is held by another process - a capture is "+
 		"probably running", "path", s.path, "err", err)
-	return nil, fmt.Errorf("%w: %s", errArchiveBusy, s.path)
+	return nil, nil, fmt.Errorf("%w: %s", errArchiveBusy, s.path)
 }
 
-// isLocked recognises DuckDB's single-instance-per-file refusal.
-//
-// BY MESSAGE, because the driver offers nothing else: the failure arrives as a generic
-// `database/sql/driver` connect error wrapping DuckDB's own IO error text. Both platform
-// wordings are matched — Windows names the sharing violation, POSIX names the lock — and an
-// unrecognised error is deliberately NOT treated as a lock, so a real fault stays a real fault
-// rather than being reported to the operator as "busy, try later".
-func isLocked(err error) bool {
-	if err == nil {
-		return false
-	}
-	msg := strings.ToLower(err.Error())
-	for _, sign := range []string{
-		"being used by another process", // Windows sharing violation
-		"could not set lock",            // POSIX flock
-		"file is already open",          // DuckDB's own wording, both platforms
-	} {
-		if strings.Contains(msg, sign) {
-			return true
-		}
-	}
-	return false
-}
-
-// Close gives the archive back. Called at the end of every request, and the reason the
-// archiver can take the file whenever it needs it.
+// Close gives this request's borrow back, releasing the file once the last one is done.
 func (a *archive) Close() {
-	if a != nil && a.release != nil {
-		a.release()
+	if a == nil || a.src == nil || a.closed {
+		return
 	}
+	a.closed = true
+
+	a.src.mu.Lock()
+	defer a.src.mu.Unlock()
+	a.src.borrows--
+	if a.src.borrows > 0 {
+		return
+	}
+	if a.src.release != nil {
+		a.src.release()
+	}
+	a.src.db, a.src.release = nil, nil
+}
+
+// heldForTest reports whether the source currently holds the file. Test-only introspection,
+// kept beside the invariant it is about.
+func (s *archiveSource) heldForTest() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.borrows > 0
 }
 
 // matchSummary is one row of the archive browser: what was played, and what the decoder got
@@ -272,7 +325,7 @@ func scanMatch(rows *sql.Rows) (matchSummary, error) {
 // match" lead to the same place, and the archive's own `status` command is where the
 // difference is reported.
 func (a *archive) lookupBuiltMatch(ctx context.Context, id string) (matchIdentity, error) {
-	return a.lookup(ctx, id, "AND artifact_path IS NOT NULL")
+	return a.lookup(ctx, id, true)
 }
 
 // lookupRecordedMatch resolves an identifier to ANY match the archive recorded, built or not.
@@ -284,7 +337,7 @@ func (a *archive) lookupBuiltMatch(ctx context.Context, id string) (matchIdentit
 // recorded. Refusing to serve them because a DIFFERENT layer failed would be an accident of
 // implementation, not a fact about the match.
 func (a *archive) lookupRecordedMatch(ctx context.Context, id string) (matchIdentity, error) {
-	return a.lookup(ctx, id, "")
+	return a.lookup(ctx, id, false)
 }
 
 // lookup resolves either form of a match identifier, deterministically.
@@ -294,11 +347,19 @@ func (a *archive) lookupRecordedMatch(ctx context.Context, id string) (matchIden
 // order, a collision would resolve to whichever row the engine happened to hand back — a
 // different replay on different days. An exact full-id hit therefore always wins, and among
 // short-id hits the lowest id wins, every time.
-func (a *archive) lookup(ctx context.Context, id, extra string) (matchIdentity, error) {
+// `mustBeBuilt` is a BOOLEAN rather than a SQL fragment the caller passes in. The fragment
+// version worked and was safe — the only two call sites were constants — but it put a
+// caller-supplied string into the query text ten lines from filter.go's promise that nothing
+// from outside ever reaches the SQL. A flag keeps that promise literal.
+func (a *archive) lookup(ctx context.Context, id string, mustBeBuilt bool) (matchIdentity, error) {
+	built := ""
+	if mustBeBuilt {
+		built = "AND artifact_path IS NOT NULL"
+	}
 	var got matchIdentity
 	err := a.db.QueryRowContext(ctx, `
         SELECT match_id, short_id FROM matches
-        WHERE (match_id = ? OR short_id = ?) `+extra+`
+        WHERE (match_id = ? OR short_id = ?) `+built+`
         ORDER BY CASE WHEN match_id = ? THEN 0 ELSE 1 END, match_id
         LIMIT 1`, id, id, id).
 		Scan(&got.MatchID, &got.ShortID)

@@ -38,22 +38,35 @@ import (
 	"levelup/go-api/internal/api/humacore"
 )
 
+// clientGoneStatus is nginx's 499, and the status huma writes itself when a client
+// disconnects mid-response. Not an IANA code, but the one this stack already speaks.
+const clientGoneStatus = 499
+
+// The 503's retry hint, in the same shape the app's own busy-database refusal uses
+// (`handlers.errDBBusy`: 503 + `Retry-After: 5`). A caller that already knows how to back off
+// from one of them backs off from the other without being taught twice.
+const (
+	headerRetryAfter = "Retry-After"
+	retryAfterBusy   = "5"
+)
+
 // studyHandler serves the archive: its database, and the artifacts it points at.
 //
 // It holds the archive's ADDRESS, not an open handle — see archive.go for why that is the one
 // structural decision in this server. Every handler therefore goes through `withArchive`.
 type studyHandler struct {
-	archive   archiveSource
+	archive   *archiveSource
 	artifacts artifacts
 }
 
 // withArchive borrows the archive for one request and gives it back.
 //
 // A free function rather than a method because it is generic in the answer, and one seam
-// rather than three open/defer pairs because the giving-back is what keeps the hourly capture
-// unblocked: a handler that forgot its `Close` would hold the file until the process died, and
-// nothing else in the request would look wrong.
-func withArchive[T any](ctx context.Context, src archiveSource, fn func(*archive) (T, error)) (T, error) {
+// rather than three open/defer pairs because a handler that forgot its `Close` would leave the
+// borrow counted forever — the file held until the process died — and nothing else in the
+// request would look wrong. The seam makes the release structural; `archiveSource` is what
+// makes it CORRECT when several requests overlap.
+func withArchive[T any](ctx context.Context, src *archiveSource, fn func(*archive) (T, error)) (T, error) {
 	var zero T
 	a, err := src.open(ctx)
 	if err != nil {
@@ -183,8 +196,18 @@ func archiveError(ctx context.Context, err error) error {
 		return humacore.NewError(http.StatusNotFound, "match_not_found",
 			"aucun match archivé sous cet identifiant")
 	case errors.Is(err, errArchiveBusy):
-		return humacore.NewError(http.StatusServiceUnavailable, "archive_busy",
-			"l'archive est momentanément tenue par un autre processus (capture en cours)")
+		return huma.ErrorWithHeaders(
+			humacore.NewError(http.StatusServiceUnavailable, "archive_busy",
+				"l'archive est momentanément tenue par un autre processus (capture en cours)"),
+			http.Header{headerRetryAfter: []string{retryAfterBusy}},
+		)
+	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+		// The CALLER went away mid-request — a closed tab, a cancelled fetch. Nothing here
+		// is wrong, so it must not be logged as an error and must not be reported as
+		// `archive_error`: doing either sends the operator hunting a fault that never
+		// happened. 499 is the status huma itself writes for a disconnected client.
+		slog.DebugContext(ctx, "study-server: caller went away mid-request", "err", err)
+		return humacore.NewError(clientGoneStatus, "client_gone", "requête abandonnée par l'appelant")
 	}
 	return serverError(ctx, "archive_error", err)
 }

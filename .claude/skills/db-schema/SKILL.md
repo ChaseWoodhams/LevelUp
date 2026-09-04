@@ -62,9 +62,18 @@ fichier déjà tenu en RW dans le MÊME process).
 `OpenReadForQuery` n'ouvre PAS « en READ_ONLY à côté » du writer d'un autre processus : DuckDB
 est mono-instance par fichier entre processus, et le verrou joue dans les DEUX sens. Un lecteur
 qui garde le handle empêche la passe `watch` suivante d'écrire — donc des films perdus. Tout
-lecteur long doit emprunter l'archive le temps d'une requête et la rendre (`Close()` libère
-réellement : refCount à 0 → sortie du cache + fermeture du `sql.DB`), jamais l'ouvrir au
-démarrage. Pendant qu'une capture la tient, la bonne réponse est « occupé », pas « en panne ».
+lecteur long doit donc emprunter l'archive le temps d'une requête et la rendre, jamais
+l'ouvrir au démarrage. Pendant qu'une capture la tient, la bonne réponse est « occupé », pas
+« en panne » (503 + `Retry-After`, même enveloppe que `handlers.errDBBusy`).
+
+**Piège dans le piège — `OpenReadForQuery` ne suffit PAS à un lecteur concurrent.** Il consulte
+d'abord le cache process (`LookupCachedDB`), documenté « emprunt NON-POSSÉDANT ... le caller ne
+doit pas appeler `Close()` » : le 2e appelant reçoit un handle emprunté et un `release` NO-OP,
+sans incrément de refCount. Un open/close naïf par requête fait donc fermer le `*sql.DB` sous
+les autres requêtes en vol — mesuré : 111 emprunts concurrents sur 320 en `sql: database is
+closed`. Le comptage de références doit être tenu PAR LE LECTEUR
+(`cmd/study-server/archive.go`, `archiveSource`) : ouverture au 1er emprunt en vol, libération
+au dernier.
 
 **Couverture d'un match archivé** : `named_lives / total_lives`, fraction de 1 (ADR 0006) —
 il n'y a PAS de colonne `coverage`. `total_lives = 0` signifie « inconnue », pas « nulle » :

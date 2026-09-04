@@ -64,8 +64,8 @@ func newTestArchive(t *testing.T) *archive {
 	return a
 }
 
-// newTestSource is the archive as the handler holds it: an address, opened per request.
-func newTestSource(t *testing.T) archiveSource {
+// newTestSource is the archive as the handler holds it: an address, borrowed per request.
+func newTestSource(t *testing.T) *archiveSource {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "archive.duckdb")
 	seedArchive(t, path)

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"path/filepath"
 	"reflect"
+	"sync"
 	"testing"
 
 	ddb "levelup/go-api/internal/platform/duckdb"
@@ -230,6 +231,28 @@ func TestArchiveSource_DoesNotHoldTheFile(t *testing.T) {
 	}
 }
 
+// TestIsLockedUsesTheRepoRecogniser — the lock test is the repo's own exported one, not a
+// fourth local copy of the same substring list. Asserted on the signatures that matter here,
+// including the two an earlier hand-rolled version had dropped.
+func TestIsLockedUsesTheRepoRecogniser(t *testing.T) {
+	locked := []string{
+		`IO Error: Cannot open file "archive.duckdb": ... File is already open in study-server.exe (PID 13552)`,
+		`IO Error: Could not set lock on file "/data/study/archive.duckdb"`,
+		"Conflicting lock is held",
+		"Can't open a connection to same database file with a different configuration",
+	}
+	for _, msg := range locked {
+		if !ddb.IsFileLockError(errors.New(msg)) {
+			t.Errorf("must read as locked: %s", msg)
+		}
+	}
+	for _, msg := range []string{"", "IO Error: Corrupt database file", "no such table: matches"} {
+		if ddb.IsFileLockError(errors.New(msg)) {
+			t.Errorf("must NOT read as locked: %s", msg)
+		}
+	}
+}
+
 // TestArchiveSource_ReleasesAfterEachRequest — the handle lasts one borrow and no longer. This
 // is what makes the server's lock windows milliseconds rather than hours.
 func TestArchiveSource_ReleasesAfterEachRequest(t *testing.T) {
@@ -253,34 +276,60 @@ func TestArchiveSource_ReleasesAfterEachRequest(t *testing.T) {
 			t.Fatalf("total = %d, want 3", page.Total)
 		}
 		a.Close()
-		if _, held := ddb.LookupCachedDB(path); held {
+		if src.heldForTest() {
 			t.Fatalf("borrow %d did not give the archive back", i)
+		}
+		if _, held := ddb.LookupCachedDB(path); held {
+			t.Fatalf("borrow %d left the file open", i)
 		}
 	}
 }
 
-// TestIsLocked names the failures that mean "somebody else has it" and, just as importantly,
-// the ones that do not: reporting a corrupt file as "busy, try again later" would send the
-// operator away from the only message that could help them.
-func TestIsLocked(t *testing.T) {
-	locked := []string{
-		`IO Error: Cannot open file "archive.duckdb": The process cannot access the file because it is being used by another process.`,
-		"IO Error: Could not set lock on file \"/data/study/archive.duckdb\": Resource temporarily unavailable",
-		"File is already open in study-server.exe (PID 13552)",
+// TestArchiveSource_OverlappingBorrowsShareOneHandle is the invariant the concurrency bug
+// violated: while several requests overlap they share ONE handle, and the file is released
+// only when the LAST of them is done. Closing the first must not close the others' database.
+func TestArchiveSource_OverlappingBorrowsShareOneHandle(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "archive.duckdb")
+	seedArchive(t, path)
+	src, err := newArchiveSource(path)
+	if err != nil {
+		t.Fatalf("newArchiveSource: %v", err)
 	}
-	for _, msg := range locked {
-		if !isLocked(errors.New(msg)) {
-			t.Errorf("must read as locked: %s", msg)
-		}
+	ctx := context.Background()
+
+	first, err := src.open(ctx)
+	if err != nil {
+		t.Fatalf("first borrow: %v", err)
 	}
-	for _, msg := range []string{"", "IO Error: Corrupt database file", "no such table: matches"} {
-		if isLocked(errors.New(msg)) {
-			t.Errorf("must NOT read as locked: %s", msg)
-		}
+	second, err := src.open(ctx)
+	if err != nil {
+		t.Fatalf("second borrow: %v", err)
 	}
-	if isLocked(nil) {
-		t.Error("nil is not a lock")
+
+	// The first borrower leaves. The second is still working.
+	first.Close()
+	if !src.heldForTest() {
+		t.Fatal("the archive was released while a request still held it")
 	}
+	if _, err := second.listMatches(ctx, mustFilter(t, rawFilter{})); err != nil {
+		t.Fatalf("the surviving borrow must still work, got: %v", err)
+	}
+
+	second.Close()
+	if src.heldForTest() {
+		t.Error("the last borrow did not release the archive")
+	}
+
+	// Idempotent: a second Close must not drop the count again and strand a later request.
+	second.Close()
+	third, err := src.open(ctx)
+	if err != nil {
+		t.Fatalf("a borrow after a double close: %v", err)
+	}
+	if _, err := third.listMatches(ctx, mustFilter(t, rawFilter{})); err != nil {
+		t.Errorf("listMatches after a double close: %v", err)
+	}
+	third.Close()
 }
 
 func mustFilter(t *testing.T, raw rawFilter) matchFilter {
@@ -290,4 +339,50 @@ func mustFilter(t *testing.T, raw rawFilter) matchFilter {
 		t.Fatalf("parseFilter(%+v): %v", raw, err)
 	}
 	return f
+}
+
+// TestArchiveSource_ConcurrentBorrows — the case a local viewer produces on every page load:
+// several requests in flight at once.
+func TestArchiveSource_ConcurrentBorrows(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "archive.duckdb")
+	seedArchive(t, path)
+	src, err := newArchiveSource(path)
+	if err != nil {
+		t.Fatalf("newArchiveSource: %v", err)
+	}
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 8*40)
+	for range 8 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for range 40 {
+				a, err := src.open(context.Background())
+				if err != nil {
+					errs <- err
+					continue
+				}
+				_, err = a.listMatches(context.Background(), mustFilter(t, rawFilter{}))
+				a.Close()
+				if err != nil {
+					errs <- err
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	close(errs)
+
+	var first error
+	n := 0
+	for e := range errs {
+		if first == nil {
+			first = e
+		}
+		n++
+	}
+	if n > 0 {
+		t.Fatalf("%d of 320 concurrent borrows failed; first: %v", n, first)
+	}
 }

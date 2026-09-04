@@ -1,3 +1,83 @@
+## [2026-09-04] study-server: the fix for the lock bug had a worse bug in it — Complete
+
+**Context**: the re-review of `a088a8f95`. Eight prior findings were confirmed addressed. The
+re-review then found that the FIX had introduced a defect worse than the one it repaired, and
+it was right.
+
+**PER-REQUEST OPEN/CLOSE IS NOT CONCURRENCY-SAFE, AND `OpenReadForQuery` SAYS SO IN ITS OWN
+DOCSTRING.** It consults the process-wide cache first, and `LookupCachedDB` is documented —
+in French, three lines above the function this code had been calling all day — as
+"un emprunt NON-POSSÉDANT ... le caller ne doit pas appeler `Close()` sur le `*DB` retourné".
+So the first in-flight request opens and OWNS the handle; every overlapping request gets a
+borrowed handle and a no-op release. When the owner finishes and closes, it closes the
+`*sql.DB` out from under everyone still using it.
+
+Reproduced before fixing anything: **111 of 320 concurrent borrows** failed with
+`sql: database is closed`, and eight parallel HTTP clients produced **180 responses of 500**.
+The startup-open design this had replaced did not have that failure. Two review rounds, two
+opposite bugs, both in the same twenty lines — the first held the file too long, the second
+released it out from under itself.
+
+**The reference count belongs where the borrows are.** `archiveSource` now owns one: the
+handle opens on the first in-flight request and is released when the last one finishes, under a
+mutex, with an idempotent `Close` so a double release cannot drop the count twice. Requests
+share one handle while they overlap — DuckDB reads concurrently on a pool, which is the point of
+having one — and the file is free between bursts, which is what the archiver needs. Verified
+live where it had failed: 8 parallel clients × 30 requests, **240 of 240 at 200**, zero server
+errors, and a second process then took the archive read-write with the server still up.
+
+**The name was doing work the test wasn't.** `TestArchiverCanStillWrite_WhileThisServerReads`
+opened, read, closed, and only THEN started the writer — nothing read while the archiver wrote,
+so the name claimed an overlap the test never created, and by construction it could not have
+caught the bug above. Renamed `TestArchiverCanWriteBetweenRequests`, which is the property that
+is actually true and actually tested. The honest statement is in the file header now: while a
+request is in flight the archiver waits, exactly as this server waits during a capture. What
+makes the trade work is duration, not priority — milliseconds against minutes.
+
+**A fourth copy of a helper, in the commit that added a duplication guard-rail.** `isLocked`
+was hand-written from the DuckDB error text; `ddb.IsFileLockError` is exported from the package
+`archive.go` already imports, and the hand-rolled version was missing two of its signatures
+("Conflicting lock is held", "different configuration"). Deleted, replaced by the canonical
+call. The irony is recorded in the code comment so the next reader sees the trap rather than
+just the fix.
+
+**Three smaller ones from the same pass**: a caller that disconnects mid-request produced
+`ctx.Canceled`, which fell through to a logged ERROR and a 500 `archive_error` — now a 499
+`client_gone` logged at debug, because nothing is wrong when somebody closes a tab. The 503
+carries `Retry-After: 5`, the same envelope as the app's own `handlers.errDBBusy`, so a client
+that backs off from one backs off from the other. And `lookup` took a SQL fragment as a
+parameter — safe, both call sites constant, but it put a caller-supplied string into query text
+ten lines from filter.go's promise that nothing from outside reaches the SQL; a boolean keeps
+the promise literal.
+
+**What was overclaimed, and is now not.** The previous commit's comments said the server "holds
+the archive for the milliseconds of a query and gives it straight back", and the db-schema
+skill cited `Close()`'s refcount contract as the safety argument — while the borrowers this
+design creates are exactly the ones that never take a refcount. Both corrected. The live check
+in that commit message ("a second process took the archive read-write while the server was up
+and serving") was true but weaker than it sounded: the server was idle between requests. It is
+re-verified properly here, after a 240-request burst.
+
+**And one thing this session tried to verify live and could not.** The 503-while-held path was
+checked by hand twice; both attempts hit a sequencing artifact (the holder process had already
+exited, or `go test -v` buffered its readiness line), and both returned 200 for the right
+reason. It is covered by `TestRoutes_BusyArchiveIs503`, which does the handshake over the
+child's stdout pipe and passes against a real second process. Recorded as tested, not as
+hand-verified.
+
+**Open, and belonging to #12 rather than to a comment**: the acceptance criterion reads "opened
+read-only, **so serving while an archive run is writing is safe**". The code now proves the
+second half is impossible while the archiver holds the archive for its whole pass, and answers
+503 instead. That is a renegotiation of the criterion and should be said on the ticket.
+
+**Results**: `cmd/study-server` 40 tests green including `-race`, `golangci-lint` 0 issues,
+`go test ./...` clean across the module.
+
+**Next**: #11, the `apps/study` scaffold. Two candidate tickets fall out of this one: narrowing
+the archiver's whole-pass hold on the archive, and a note on the ticket about the criterion.
+
+---
+
 ## [2026-09-04] study-server: the review findings, and the one that was a real bug — Complete
 
 **Context**: the two-axis review of #12. Eight findings across Standards and Spec. Most were

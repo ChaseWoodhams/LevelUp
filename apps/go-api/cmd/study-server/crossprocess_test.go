@@ -143,13 +143,19 @@ func TestRequestDuringACaptureIsBusyNotBroken(t *testing.T) {
 	}
 }
 
-// TestArchiverCanStillWrite_WhileThisServerReads is the direction that matters MOST, and it is
-// about the archiver rather than about this server: a study server left running overnight must
-// not be what stops the next hourly capture. Films expire; a blocked pass costs them.
+// TestArchiverCanWriteBetweenRequests is the direction that matters MOST, and it is about the
+// archiver rather than about this server: a study server left running overnight must not be
+// what stops the next hourly capture. Films expire; a blocked pass costs them.
 //
 // THIS TEST FAILED against the first design, which held the handle for the server's lifetime.
 // That is the bug it exists to keep out.
-func TestArchiverCanStillWrite_WhileThisServerReads(t *testing.T) {
+//
+// AND ITS NAME IS THE EXACT CLAIM. It proves the archiver can take the file BETWEEN requests,
+// not during one — while a request is in flight the archiver waits, exactly as this server
+// waits during a capture, and no arrangement of two DuckDB processes avoids that. What makes
+// the trade work is duration, not priority: a request lasts milliseconds and a capture lasts
+// minutes, so the hourly pass has all day to find a gap.
+func TestArchiverCanWriteBetweenRequests(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "archive.duckdb")
 	seedArchive(t, path)
 	src, err := newArchiveSource(path)

@@ -13,6 +13,7 @@
 |---|---|---|
 | API + sync + analyse | **Go** (chi + Huma, slog, DuckDB) | `apps/go-api/` |
 | Frontend | **React/TypeScript** (Vite, TanStack Router/Query/Table, ECharts) | `apps/web/` |
+| Outil d'étude (hors app) | **React/TypeScript** (Vite) — app séparée, port 5174 | `apps/study/` |
 | Stockage | **DuckDB** par titre + Parquet (archives) | `data/titles/{slug}/` |
 | Config | JSON + TOML | `db_profiles.json`, `app_settings.json`, `.env.local`, `config/titles/` |
 
@@ -189,6 +190,10 @@ go run ./apps/go-api/cmd/study-archiver rebuild <matchId>     # hors ligne, depu
 
 # Serveur de l'outil d'étude (sert l'archive à apps/study — épopée #2)
 go run ./apps/go-api/cmd/study-server                         # 127.0.0.1:8100, lecture seule
+
+# Visionneuse de l'outil d'étude (app séparée — ne partage aucun build avec apps/web)
+cd apps/study && npm install && npm run dev                   # http://localhost:5174
+cd apps/study && npm run typecheck && npm run test:run
 ```
 
 `watch` est prévu pour le planificateur de l'OS (horaire), pas en démon : une invocation =
@@ -212,6 +217,14 @@ lecteur — `OpenReadForQuery` seul ne suffit pas, son emprunt de cache est non-
 Pendant qu'une capture la tient, il répond `503 archive_busy` + `Retry-After`. Garde-rails :
 `crossprocess_test.go` (l'archiveur peut écrire entre deux requêtes) et
 `TestArchiveSource_ConcurrentBorrows` (des requêtes parallèles ne se ferment pas la base).
+
+`apps/study` est une app Vite/React **séparée** (port 5174, aucun build partagé avec
+`apps/web`). Ses modules de rendu du rejeu sous `src/features/replay/` sont des **copies**
+de `apps/web/src/features/match-replay/` : pas de workspace câblant les imports inter-apps,
+et `apps/web/**` ne se modifie pas depuis ici. Chaque copie porte en tête son chemin
+d'origine et le commit copié. **Un correctif dans du code copié se fait D'ABORD en amont**
+(`apps/web`), puis on re-copie le fichier et on met à jour le SHA de l'en-tête — sinon les
+deux versions divergent en silence. Détail : `apps/study/src/features/replay/README.md`.
 
 ### Chaîne CGO sous Windows — UCRT, PAS mingw64 (constaté 2026-09-03)
 

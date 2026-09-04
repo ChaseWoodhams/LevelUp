@@ -25,6 +25,7 @@ eggs/
 lib/
 lib64/
 !apps/web/src/lib/
+!apps/study/src/lib/
 parts/
 sdist/
 var/

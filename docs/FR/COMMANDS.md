@@ -218,6 +218,26 @@ Pendant qu'une capture tient l'archive, le serveur répond `503 archive_busy` av
 
 Les deux binaires se lient à DuckDB : chaîne UCRT requise sous Windows (cf. CLAUDE.md).
 
+### `apps/study` — la visionneuse (Vite + React + TS)
+
+Son application, son serveur de dev, son port. Elle ne partage aucun build avec `apps/web`.
+
+```bash
+cd apps/study
+npm install            # première fois (nécessite .npmrc : legacy-peer-deps)
+npm run dev            # http://localhost:5174
+npm run typecheck      # tsc -b
+npm run test:run       # vitest, une passe
+npm run build          # bundle de production dans dist/
+npm run generate-types # openapi.yaml -> src/lib/api/generated.ts
+```
+
+Les modules de rendu du rejeu sous `src/features/replay/` sont des **copies** de
+`apps/web/src/features/match-replay/`, chacune portant son chemin d'origine et le commit auquel
+elle a été copiée ; le `README.md` du dossier dit pourquoi, et comment tenir la copie honnête.
+Tant que la visionneuse n'est pas branchée sur `study-server`, l'écran dessine un artefact écrit
+à la main sous `src/features/replay/fixtures/` — aucune donnée réelle n'est en jeu.
+
 ---
 
 ## Tests

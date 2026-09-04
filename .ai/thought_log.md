@@ -1,3 +1,118 @@
+## [2026-09-04] apps/study: the scaffold, and the modules that came across with it — Complete
+
+**Context**: issue #11, the foundation of the study viewer (epic #2). A new Vite/React/TS app
+that boots and draws a replay artifact on canvas, using the rendering and logic modules that
+already work in `apps/web`'s match replay. Tracer bullet: a real artifact on a real canvas in a
+new app, before any of it is wired to live data.
+
+**COPIED, NOT IMPORTED — AND THE FILE LIST WAS VERIFIED, NOT ASSUMED.** There is no workspace
+in this repository wiring cross-app imports, and `apps/web/**` is out of bounds from here, so
+adding exports there to make a live import work is not available either. The epic named ten
+files; the directory holds twenty-two. Reading the import graph rather than the spec added
+three the spec had missed and that nothing would run without: `replayMarkers.ts` (the whole
+player layer — trails, aim cone, spawn and death marks), `canvasInk.ts` (the layout inks
+`ReplayCanvas` reads for the floor edge) and `ReplayCoverage.tsx` (the banner that is
+`coverageLogic`'s only consumer). Seven test files came with them. Twenty-one files in
+`features/replay/`, plus seven shared modules under their ORIGINAL paths — `lib/accessibility/`,
+`lib/i18n/locale.ts`, `components/ui/button.tsx` — which is what lets every copied import line
+stay byte-identical to its origin. Each file carries its origin path and the commit it was
+copied at; `git diff <sha> HEAD -- <origin>` is then the handle for spotting drift.
+
+**`queries.ts` did NOT come across**, and that is the one deliberate omission: it is the web
+app's fetch layer (its API client, its query keys, its app shell store). The viewer's own
+fetch layer is #13's work, against `study-server`, not a copy of a path that does not exist here.
+
+**THE TYPES ARE GENERATED, NOT TRANSCRIBED.** The replay modules read `@/lib/api/types`, whose
+own header says in so many words that keeping a hand-written second copy of the contract is
+giving yourself two truths that diverge at the first field added on the Go side. Hand-copying
+the eighteen `Replay*` shapes into this app would have been exactly that — and it would have
+gutted `replayContract.test.ts`, whose entire purpose is to check the nullability frontier
+against the CONTRACT. So `apps/study` runs the same `openapi-typescript` command against the
+same `apps/go-api/api/openapi.yaml`, and its `types.ts` is a small extract holding the aliases
+and `MatchScoreboardRow` verbatim. The scoreboard row is the hand-written one on purpose: the
+generated schema types its counters as `number | undefined` where the frontend type says
+`number | null`, and the copied `rosterLogic.test.ts` fixtures would not compile against it.
+
+**Colours: the CSS fallback IS the palette here.** The copied components read two systems — the
+design-system layout variables (`--border`, `--card`, `--muted-foreground`, read as Tailwind
+utilities and directly by `canvasInk`) and the `--ac-*` semantic tokens. The web app overwrites
+the second from the accessibility settings at runtime; this app has no palette picker, so
+`styles/tokens.css` carries the values the copied modules actually read. One is not in the web
+app's CSS at all: `--ac-compare-c`, which only ever arrives there through `applyPalette()`. It
+is the third team colour, and the third group — a player the archive has no participants row
+for — is an ordinary case when you are watching somebody else's match, so leaving it unset
+would have painted that group with a var that resolves to nothing.
+
+**The fixture is shaped like the real artifact, and says so.** Same contract type, same
+`schemaVersion` (2, re-read from `document.go` rather than trusted from the spec), same nullable
+arrays — so it crosses `normalizeReplayDocument` exactly as a fetched one will, and swapping it
+for a fetch is a one-line change. It is written to exercise layers, not to resemble a match:
+a floor with real relief, eight lives over five players, a player who dies for good (respawn
+must read as a gap, never a guessed delay), an unmatched xuid the film names and the scoreboard
+does not, shots with and without a readable heading, one weapon whose `fx` is outside the drawn
+families, an ability index outside the label table, and a coverage block whose rejects sum
+exactly to `available`.
+
+**Verified**: `tsc -b` clean; `vitest run` 12 files, 204 tests, all passing — the seven copied
+test files pass unchanged in the new location; `vite build` produces a bundle; `npm run dev`
+serves on 5174 and returns the document. Drawing is proved without a browser: jsdom hands the
+canvas no 2D context, so `App.test.tsx` can only show the element mounts. `replayFixture.test.ts`
+therefore drives the layers against a recording context and asserts work is emitted — floor
+fills and strokes, an aim cone (which only draws off a heading the film replicated), shots
+inside the hold window and none outside it, a grenade and its projectile.
+
+**THE REVIEW PASS FOUND THE SAME THING TWICE, AND IT WAS RIGHT.** Both axes landed on the same
+structural gap: every rule this app is supposed to follow was written in prose and enforced by
+nothing. `tools/lint-no-hardcoded-colors.mjs` hardcodes `apps/web/src`;
+`check-generated-types-fresh.mjs` and `lint-contract-ratchet.mjs` pin `apps/web`; the CI
+frontend job runs `working-directory: apps/web`. So "the copies stay byte-identical", "no hex
+literal", "generated.ts derives from the contract" were all conventions — and this repository
+has a documented opinion about a convention without a guard-rail (rule 6: it re-diverges).
+Three guards now assert them inside this app's own suite: `copies.guard.test.ts`,
+`colors.guard.test.ts`, and a `generated-types-fresh.guard.test.ts` calling the SHARED script,
+which took an app-directory parameter (defaulted to `apps/web`, so the existing caller and
+`make openapi-check` are untouched) rather than being copied a second time.
+
+**The copy guard caught a real bug on its first run, and it is the kind nothing else would
+have caught.** `--ac-divergent-neutral` had been taken from the `--ac-*` block in
+`globals.css` — `#60A5FA`. The palette says `#8A9099`, and its comment says why: the blue
+"read as a positive value and competed with the player colours". The CSS block is only a
+FALLBACK the web app overwrites at runtime from the palette, so nothing there fails when the
+two disagree — and they have. This app has no palette pass, so what is written in `tokens.css`
+IS the palette, and that token is the MAP FLOOR. The viewer would have shipped a blue floor,
+silently, matching nothing. Fixed to the palette value, both origins now named in the header,
+and the values checked against the palette rather than trusted.
+
+**Four smaller ones from the same pass**: the `<title>` was FR-only and `lang="fr-FR"` was
+frozen while the screen offers a locale toggle — both now follow the chosen language, and the
+static title is the brand alone so the pre-hydration flash is not in a language the reader did
+not pick. `App.test.tsx` was asserting coverage arithmetic, which is a property of the FIXTURE,
+not of `App` — moved beside the fixture's other invariants. And the extract header on
+`lib/api/types.ts` claimed nothing in it was rewritten, without disclosing the one thing that
+matters: `MatchScoreboardRow` is the origin's HAND-WRITTEN interface and it disagrees with the
+contract schema of the same name (`number | undefined` vs `number | null`, no `average_life`).
+It is copied that way on purpose — the copied `rosterLogic` fixtures are written against it,
+and the study server publishes participants in that shape to fit them — but it is the one
+declaration in the file where a Go contract change will not arrive on its own, and the header
+says so now.
+
+**One repo-level trap found on the way**: `.gitignore` has a bare `lib/` with a single
+exception, `!apps/web/src/lib/`. Every file under `apps/study/src/lib/` was invisible to git —
+eight copied modules, silently. Exception added.
+
+**Deliberately NOT done, and it is the one real gap left**: nothing in
+`.github/workflows/ci.yml` or the `Makefile` runs this app. Its 204 tests — the three new
+guards included — pass locally and in no gate. The guards exist and are correct; nobody is
+made to run them. The epic already names this ("this fork's own lint config won't reach a new
+app unless separately wired in"); it is out of #11's acceptance, and adding a job to the shared
+pipeline is a change to the gate that this issue did not ask for. Worth its own ticket, and it
+should land before the viewer carries anything real — a guard that runs nowhere is a guard
+whose first failure is discovered by a person, not by CI.
+
+**Next**: #13 (fetch layer against `study-server`) and #18, both of which this unblocks.
+
+---
+
 ## [2026-09-04] study-server: the fix for the lock bug had a worse bug in it — Complete
 
 **Context**: the re-review of `a088a8f95`. Eight prior findings were confirmed addressed. The

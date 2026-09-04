@@ -214,6 +214,26 @@ that is expected, not a fault.
 
 Both binaries link DuckDB, so they need the UCRT toolchain on Windows (cf. CLAUDE.md).
 
+### `apps/study` — the viewer (Vite + React + TS)
+
+Its own app, its own dev server, its own port. It never shares a build with `apps/web`.
+
+```bash
+cd apps/study
+npm install            # first time (needs .npmrc: legacy-peer-deps)
+npm run dev            # http://localhost:5174
+npm run typecheck      # tsc -b
+npm run test:run       # vitest, once
+npm run build          # production bundle into dist/
+npm run generate-types # openapi.yaml -> src/lib/api/generated.ts
+```
+
+The replay rendering modules under `src/features/replay/` are **copies** of
+`apps/web/src/features/match-replay/`, each carrying its origin path and the commit it was
+copied at; the folder's `README.md` says why, and how to keep the copy honest. Until the
+viewer is wired to `study-server`, the screen draws a hand-written artifact from
+`src/features/replay/fixtures/` — no real match data is involved.
+
 ---
 
 ## Tests

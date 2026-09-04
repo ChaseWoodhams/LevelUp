@@ -196,6 +196,15 @@ export CC=/c/msys64/ucrt64/bin/gcc.exe   # ucrt64, JAMAIS mingw64
 CGO_ENABLED=1 go build ./cmd/levelup
 ```
 
+`internal/ooz` (seul paquet **C++** du dépôt, tiré par `himodule`/`himap`/`mapquant-build`/
+`mapstruct-build`) demande en plus un `CXX`, et le chemin absolu ne suffit pas : le driver
+ne trouve pas ses outils frères et cgo échoue sur un `cgo.exe: exit status 2` qui ne nomme
+aucune cause. Pour une suite complète (`go test ./...`), mettre le répertoire sur le PATH :
+
+```bash
+export PATH="/c/msys64/ucrt64/bin:$PATH" CC=gcc CXX=g++   # constaté 2026-09-03
+```
+
 Vérifié : `cmd/levelup` se lie, `go test ./internal/platform/duckdb/...` passe. Sans ça,
 seuls les paquets sans DuckDB sont testables (`CGO_ENABLED=0`), ce qui exclut en silence
 `persist`, `sync`, `platform/duckdb` et tous les `cmd/` qui ouvrent une base.

@@ -219,8 +219,12 @@ func runStatus(ctx context.Context, args []string) int {
 
 // runRebuild re-assembles one match's artifact from cached chunks, offline.
 func runRebuild(ctx context.Context, args []string) int {
+	// NOT registerCommonFlags: rebuild authenticates nothing and calls nothing, so
+	// accepting --xuid, --gamertag or --rps would advertise credentials on the one command
+	// documented as needing none.
 	fs := flag.NewFlagSet("rebuild", flag.ContinueOnError)
-	common := registerCommonFlags(fs)
+	titleSlug := fs.String("title", title.DefaultSlug, "title slug")
+	interval := fs.Int("interval", 0, "replay grid step in ms (0 = the replay package's default)")
 	if err := fs.Parse(args); err != nil {
 		return exitUsage
 	}
@@ -231,7 +235,7 @@ func runRebuild(ctx context.Context, args []string) int {
 	}
 	matchID := fs.Arg(0)
 
-	d, err := newOfflineDeps(ctx, common.request())
+	d, err := newOfflineDeps(ctx, depsRequest{Title: *titleSlug, FrameIntervalMS: *interval})
 	if err != nil {
 		slog.ErrorContext(ctx, "study-archiver: setup failed", "err", err)
 		return exitFailure

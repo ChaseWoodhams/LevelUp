@@ -10,6 +10,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -310,6 +311,126 @@ func TestIsArenaFourVFour(t *testing.T) {
 	teamless = append(teamless, participantRecord{XUID: "x"})
 	if isArenaFourVFour(teamless) {
 		t.Error("a roster with a team-less player passed for a 4v4")
+	}
+}
+
+// A quitter and their backfill make NINE entries in the stats payload. Counting them
+// naively drops a real 4v4, and the loss is permanent: the film expires while the tool
+// decides it was not interested. Halo marks the quitter did-not-finish, so the four who
+// played it out are countable.
+func TestIsArenaFourVFour_ToleratesAQuitterAndTheirBackfill(t *testing.T) {
+	player := func(team, outcome int) participantRecord {
+		return participantRecord{XUID: "x", Team: &team, Outcome: &outcome}
+	}
+	const won, lost = 2, 3
+
+	fourVFour := []participantRecord{
+		player(0, won), player(0, won), player(0, won), player(0, won),
+		player(1, lost), player(1, lost), player(1, lost), player(1, lost),
+	}
+	withQuitter := append([]participantRecord{player(1, outcomeDidNotFinish)}, fourVFour...)
+	if !isArenaFourVFour(withQuitter) {
+		t.Error("a 4v4 with a quitter and a backfill was dropped - its film will expire unseen")
+	}
+
+	// A quitter who is NOT replaced leaves a 4v3, which really is not what the archive
+	// is for.
+	fourVThree := append([]participantRecord{}, fourVFour[:7]...)
+	fourVThree = append(fourVThree, player(1, outcomeDidNotFinish))
+	if isArenaFourVFour(fourVThree) {
+		t.Error("a 4v3 passed for a 4v4")
+	}
+}
+
+// A recorded artifact that is no longer on disk must be rebuilt by the watch loop too.
+// fetch-one has always done this; watch trusting the path alone would leave a deleted
+// artifact invisible forever.
+func TestWatch_RebuildsAMatchWhoseArtifactWasDeleted(t *testing.T) {
+	f := newWatchFixture(t)
+	f.srv.history = map[string][]string{"matchmaking": {arenaMatchID}, "custom": nil}
+
+	if sum := f.pass(t); sum.Archived != 1 {
+		t.Fatalf("first pass archived %d, want 1", sum.Archived)
+	}
+	rec, _ := f.row(t, arenaMatchID)
+	if err := os.Remove(rec.ArtifactPath); err != nil {
+		t.Fatalf("removing the artifact: %v", err)
+	}
+	buildsBefore := f.buildRuns
+
+	if sum := f.pass(t); sum.Archived != 1 {
+		t.Errorf("second pass archived %d, want 1 - the deleted artifact was not rebuilt", sum.Archived)
+	}
+	if f.buildRuns != buildsBefore+1 {
+		t.Errorf("%d builds, want %d", f.buildRuns, buildsBefore+1)
+	}
+	if after, _ := f.row(t, arenaMatchID); !artifactOnDisk(after) {
+		t.Error("the artifact was not written again")
+	}
+}
+
+// A player the resolver cannot resolve is still FOLLOWED, and `status` has to say so:
+// otherwise a broken token chain reads as "no player followed yet" while the names sit in
+// the file failing every hour.
+func TestWatch_AnUnresolvablePlayerStillAppearsInTheWatchlist(t *testing.T) {
+	f := newWatchFixture(t)
+	f.list = watchlist{Gamertags: []string{"Unresolvable"}}
+	f.watch = watchDeps{ResolveXUID: func(context.Context, string) (string, error) {
+		return "", errors.New("no such xbox profile")
+	}}
+
+	if sum := f.pass(t); sum.Failed != 1 {
+		t.Fatalf("failed = %d, want 1", sum.Failed)
+	}
+	player, found, err := f.deps.Archive.watched(context.Background(), "Unresolvable")
+	if err != nil || !found {
+		t.Fatalf("the player left no watchlist row: found=%v err=%v", found, err)
+	}
+	if player.XUID != "" || player.LastChecked != nil {
+		t.Errorf("row = %+v, want it unresolved and never checked", player)
+	}
+}
+
+// A pass that comes back after a long gap keeps paging while it still finds matches it has
+// not seen. One page is 25; a weekend of play is more, and everything past the window would
+// otherwise expire unseen with a healthy last_checked to show for it.
+func TestWatch_PagesTheHistoryToCatchUp(t *testing.T) {
+	f := newWatchFixture(t)
+	// A full first page of matches the archive has never seen, then a short second page.
+	full := make([]string, 0, historyPageSize)
+	for i := 0; i < historyPageSize; i++ {
+		full = append(full, fmt.Sprintf("%08d-1234-4abc-9def-0123456789ab", i))
+	}
+	f.srv.pagedHistory = map[string][][]string{
+		"matchmaking": {full, {arenaMatchID}},
+	}
+	f.srv.history = map[string][]string{"custom": nil}
+
+	f.pass(t)
+
+	// Three calls: two pages of matchmaking, one of customs. Without paging the second
+	// page - and the match on it - would never be read.
+	if got := f.srv.historyCalls.Load(); got != 3 {
+		t.Errorf("%d history calls, want 3 (two matchmaking pages + one custom)", got)
+	}
+	if _, found := f.row(t, arenaMatchID); !found {
+		t.Error("the match on the second page was never examined")
+	}
+}
+
+// The steady state: a first page the pass has already seen stops the walk at one call, so
+// the catch-up costs nothing on an hourly run.
+func TestWatch_StopsPagingWhenAPageAddsNothing(t *testing.T) {
+	f := newWatchFixture(t)
+	f.srv.history = map[string][]string{"matchmaking": {arenaMatchID}, "custom": nil}
+	f.pass(t)
+	callsAfterFirst := f.srv.historyCalls.Load()
+
+	f.pass(t)
+
+	if got := f.srv.historyCalls.Load(); got != callsAfterFirst*2 {
+		t.Errorf("%d history calls after two passes, want %d - the second pass kept paging "+
+			"through matches it had already handled", got, callsAfterFirst*2)
 	}
 }
 

@@ -21,6 +21,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -55,8 +56,13 @@ type fakeHalo struct {
 	// pass, and the whole point of its filter is that they are not all the same shape.
 	statsByMatch map[string]map[string]any
 	// history is what the match-history route serves, keyed by match type
-	// ("matchmaking", "custom"): the ids, most recent first.
+	// ("matchmaking", "custom"): the ids, most recent first, as ONE page.
 	history map[string][]string
+	// pagedHistory overrides `history` for a match type, one entry per page, so a test
+	// can drive the catch-up walk. Real Halo pages by ?start=; serving the pages
+	// explicitly keeps the fixture readable and lets a test make page 2 differ from a
+	// slice of page 1.
+	pagedHistory map[string][][]string
 	// statsCalls / manifestCalls / blobCalls count what the archiver actually asked the API
 	// for. Idempotency and "never retried" are claims about NOT fetching, and only a call
 	// count can prove them — row counts alone would still pass if the tool re-downloaded
@@ -115,8 +121,9 @@ func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fak
 	// Match history: /hi/players/xuid(N)/matches?type=matchmaking&start=&count=
 	mux.HandleFunc("/hi/players/", func(w http.ResponseWriter, r *http.Request) {
 		f.historyCalls.Add(1)
+		start, _ := strconv.Atoi(r.URL.Query().Get("start"))
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write(f.historyJSON(r.URL.Query().Get("type")))
+		_, _ = w.Write(f.historyJSON(r.URL.Query().Get("type"), start))
 	})
 	f.Server = httptest.NewServer(mux)
 	t.Cleanup(f.Server.Close)
@@ -179,10 +186,12 @@ func matchIDFromStatsPath(path string) string {
 	return parts[2]
 }
 
-// historyJSON answers the match-history endpoint in the shape the real one uses.
-func (f *fakeHalo) historyJSON(matchType string) []byte {
-	results := make([]map[string]any, 0, len(f.history[matchType]))
-	for _, id := range f.history[matchType] {
+// historyJSON answers the match-history endpoint in the shape the real one uses, for the
+// page beginning at `start`.
+func (f *fakeHalo) historyJSON(matchType string, start int) []byte {
+	ids := f.historyPage(matchType, start)
+	results := make([]map[string]any, 0, len(ids))
+	for _, id := range ids {
 		results = append(results, map[string]any{
 			"MatchId":   id,
 			"MatchInfo": map[string]any{"StartTime": "2026-05-19T20:15:00.000Z"},
@@ -190,6 +199,22 @@ func (f *fakeHalo) historyJSON(matchType string) []byte {
 	}
 	blob, _ := json.Marshal(map[string]any{"Results": results})
 	return blob
+}
+
+// historyPage serves one page: the explicit pages when a test set them, otherwise the
+// single `history` list on the first page and nothing after it.
+func (f *fakeHalo) historyPage(matchType string, start int) []string {
+	if pages, ok := f.pagedHistory[matchType]; ok {
+		page := start / historyPageSize
+		if page < 0 || page >= len(pages) {
+			return nil
+		}
+		return pages[page]
+	}
+	if start > 0 {
+		return nil
+	}
+	return f.history[matchType]
 }
 
 // client builds a real Halo client whose every request lands on the fake server.

@@ -207,12 +207,11 @@ func settledEarlier(ctx context.Context, d deps, out *outcome) (matchRecord, boo
 		reportExpired(ctx, rec, out)
 		return rec, true, nil
 	}
-	if rec.ArtifactPath == "" {
-		return rec, false, nil
-	}
-	if _, statErr := os.Stat(rec.ArtifactPath); statErr != nil {
-		slog.WarnContext(ctx, "study-archiver: recorded artifact missing from disk - re-archiving",
-			"match_id", out.MatchID, "path", rec.ArtifactPath, "err", statErr)
+	if !artifactOnDisk(rec) {
+		if rec.ArtifactPath != "" {
+			slog.WarnContext(ctx, "study-archiver: recorded artifact missing from disk - re-archiving",
+				"match_id", out.MatchID, "path", rec.ArtifactPath)
+		}
 		return rec, false, nil
 	}
 	out.MapName, out.MapModule = rec.MapName, rec.MapModule
@@ -224,6 +223,21 @@ func settledEarlier(ctx context.Context, d deps, out *outcome) (matchRecord, boo
 		"match_id", out.MatchID, "short_id", out.ShortID, "map", out.MapName,
 		"path", out.ArtifactPath, "tracks", out.Tracks)
 	return rec, true, nil
+}
+
+// artifactOnDisk reports whether a recorded artifact is actually there.
+//
+// A RECORDED PATH IS NOT AN ARCHIVE. The cache is a directory an operator can empty, and
+// a row pointing at a file that is gone must send the match back through the build rather
+// than pass for finished. Shared by fetch-one and by `watch`'s discovery filter (#8) so the
+// two cannot drift into disagreeing about what "already archived" means — an earlier
+// version had watch skipping matches that fetch-one would have rebuilt.
+func artifactOnDisk(rec matchRecord) bool {
+	if rec.ArtifactPath == "" {
+		return false
+	}
+	_, err := os.Stat(rec.ArtifactPath)
+	return err == nil
 }
 
 // reportExpired fills in the outcome of a match whose film a previous run found gone.

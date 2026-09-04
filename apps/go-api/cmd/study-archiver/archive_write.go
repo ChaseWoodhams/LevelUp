@@ -111,14 +111,16 @@ func writeMatchRow(ctx context.Context, tx *sql.Tx, rec matchRecord) error {
 // to say about them.
 //
 // The roster is untouched for the same reason: a rebuild cannot have changed who played.
-func (a *archive) updateBuild(ctx context.Context, out outcome, builtAt *time.Time, decoderRev string) error {
+func (a *archive) updateBuild(ctx context.Context, prior matchRecord, out outcome,
+	builtAt *time.Time, decoderRev string) error {
+	state, why := stateAfterRebuild(prior, out)
 	res, err := a.db.Exec(ctx, `
         UPDATE matches SET
             film_state = ?, skip_reason = ?, artifact_path = ?, built_at = ?, decoder_rev = ?,
             tracks = ?, points = ?, shots = ?, named_lives = ?, total_lives = ?,
             recorded_at = now()
         WHERE match_id = ?`,
-		string(filmStateOf(out)), nullString(string(out.SkipReason)),
+		string(state), nullString(string(why)),
 		nullString(out.ArtifactPath), builtAt, nullString(decoderRev),
 		out.Tracks, out.Points, out.Shots, out.NamedLives, out.TotalLives,
 		out.MatchID)

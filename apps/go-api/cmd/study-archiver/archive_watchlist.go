@@ -69,11 +69,17 @@ func (a *archive) rememberWatched(ctx context.Context, gamertag, xuid string) er
 		return fmt.Errorf("looking up the watchlist row of %s: %w", gamertag, err)
 	}
 	if exists {
+		// THE PRIMARY KEY IS NOT TOUCHED. An earlier version also rewrote `gamertag` here,
+		// to normalise a re-typed capitalisation — for a cosmetic gain, on a VARCHAR key,
+		// which is exactly the index removal-and-reinsert that `no_art_patterns_test.go`
+		// records as having crashed a database despite a single writer (#23046). The
+		// spelling in the file is the operator's business; the row's identity is not.
+		//
 		// COALESCE keeps a known xuid when the caller has none to offer: a resolution that
 		// failed this run must not erase the one an earlier run succeeded at.
 		_, err = a.db.Exec(ctx, `
-            UPDATE watchlist SET gamertag = ?, xuid = COALESCE(?, xuid)
-            WHERE lower(gamertag) = lower(?)`, gamertag, nullString(xuid), gamertag)
+            UPDATE watchlist SET xuid = COALESCE(?, xuid)
+            WHERE lower(gamertag) = lower(?)`, nullString(xuid), gamertag)
 	} else {
 		_, err = a.db.Exec(ctx, `
             INSERT INTO watchlist (gamertag, xuid, added_at, last_checked)

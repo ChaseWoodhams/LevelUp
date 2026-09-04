@@ -50,6 +50,26 @@ func (s filmState) terminal() bool { return s == stateExpired }
 // rebuild neither costs a CDN request nor depends on a link that may already be dead.
 func (s filmState) filmCaptured() bool { return s == stateDownloaded || s == stateFailed }
 
+// stateAfterRebuild is filmStateOf for a rebuild, which starts from a state already
+// recorded rather than from nothing.
+//
+// A REBUILD THAT PRODUCED NO ARTIFACT NEVER CLEARS A TERMINAL VERDICT. Rebuilding an
+// `expired` match from chunks another tool left in the cache is exactly what `rebuild` is
+// for — but if it does not succeed, the film is still gone from the CDN, and writing
+// `downloaded` (which "the chunks are on disk" would otherwise imply) would quietly make
+// the match retryable again. The hourly loop would then chase a link known to be dead, the
+// precise waste #7 exists to prevent. Only an ARTIFACT settles the match, and that path
+// short-circuits on the artifact rather than on the state.
+//
+// The reason is carried over with the state for the same reason: a row saying `expired`
+// with a reason of `unsupported_map` contradicts itself, and the two are read together.
+func stateAfterRebuild(prior matchRecord, out outcome) (filmState, reason) {
+	if out.ArtifactPath == "" && prior.State.terminal() {
+		return prior.State, prior.SkipReason
+	}
+	return filmStateOf(out), out.SkipReason
+}
+
 // filmStateOf maps a finished outcome onto the state the archive records.
 func filmStateOf(out outcome) filmState {
 	switch out.SkipReason {

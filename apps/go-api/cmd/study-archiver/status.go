@@ -23,6 +23,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
 	"levelup/go-api/internal/domain/title"
@@ -87,7 +88,7 @@ func readStatus(ctx context.Context, db *sql.DB, path string) (statusReport, err
 		return rep, fmt.Errorf("counting matches: %w", err)
 	}
 
-	// The three breakdowns count ARCHIVED matches: "what have I actually got to study?".
+	// The breakdowns count ARCHIVED matches: "what have I actually got to study?".
 	// A match that failed to build is reported below, under its reason, not as coverage.
 	for _, b := range []struct {
 		column string
@@ -95,7 +96,6 @@ func readStatus(ctx context.Context, db *sql.DB, path string) (statusReport, err
 	}{
 		{"map_name", &rep.ByMap},
 		{"mode", &rep.ByMode},
-		{"source_gamertag", &rep.ByPlayer},
 	} {
 		rows, err := countBy(ctx, db, b.column)
 		if err != nil {
@@ -105,6 +105,9 @@ func readStatus(ctx context.Context, db *sql.DB, path string) (statusReport, err
 	}
 
 	var err error
+	if rep.ByPlayer, err = countByTrackedPlayer(ctx, db); err != nil {
+		return rep, err
+	}
 	if rep.UnArchived, err = countUnArchived(ctx, db); err != nil {
 		return rep, err
 	}
@@ -125,6 +128,32 @@ func countBy(ctx context.Context, db *sql.DB, column string) ([]countedRow, erro
 		return nil, fmt.Errorf("counting by %s: %w", column, err)
 	}
 	return scanCounted(rows, column)
+}
+
+// countByTrackedPlayer counts archived matches each followed player APPEARED IN.
+//
+// NOT `source_gamertag`, which was the obvious reading and the wrong one. That column
+// records whose pass DISCOVERED the match, and the watch loop skips a match already
+// archived before it writes anything — so when two tracked players scrim each other, the
+// first one's pass takes credit for all fifty games and the second reads as zero, forever,
+// while sitting in the roster of every one of them. The roster is the fact; the discoverer
+// is an accident of ordering.
+//
+// Matched on xuid when the player has been resolved, and on gamertag otherwise, so a
+// watchlist entry counts from its first pass rather than from its first resolution.
+func countByTrackedPlayer(ctx context.Context, db *sql.DB) ([]countedRow, error) {
+	rows, err := db.QueryContext(ctx, `
+        SELECT w.gamertag AS label, count(DISTINCT m.match_id) AS n
+        FROM watchlist w
+        JOIN participants p
+          ON (w.xuid IS NOT NULL AND w.xuid <> '' AND p.xuid = w.xuid)
+          OR lower(p.gamertag) = lower(w.gamertag)
+        JOIN matches m ON m.match_id = p.match_id AND m.artifact_path IS NOT NULL
+        GROUP BY label ORDER BY n DESC, label`)
+	if err != nil {
+		return nil, fmt.Errorf("counting by tracked player: %w", err)
+	}
+	return scanCounted(rows, "tracked player")
 }
 
 // countUnArchived breaks down what produced no artifact, by its named reason.
@@ -185,6 +214,14 @@ func readWatchlistStatus(ctx context.Context, db *sql.DB) ([]watchlistStatus, er
 // openStatusReport opens the archive for reading and gathers the report.
 func openStatusReport(ctx context.Context, paths *title.PathResolver) (statusReport, error) {
 	path := paths.StudyArchiveDBPath()
+	// Checked BEFORE opening, because DuckDB's read-only failure on a file that does not
+	// exist names the driver and the path and nothing an operator can act on. This is the
+	// state every machine is in until the first capture runs, so it is the message a new
+	// user is most likely to see first.
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return statusReport{}, fmt.Errorf(
+			"no archive at %s yet: run `study-archiver fetch-one` or `watch` to create it", path)
+	}
 	db, release, err := ddb.OpenReadForQuery(path)
 	if err != nil {
 		return statusReport{}, fmt.Errorf("opening the archive %s for reading: %w", path, err)

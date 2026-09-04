@@ -60,7 +60,7 @@ func rebuildOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 		// Still not a failure of the decoder: the map's bounds have not arrived yet, and
 		// building with another map's would be wrong by an arbitrary scale factor.
 		out = skipped(ctx, out, mapErr)
-		return out, recordRebuild(ctx, d, out)
+		return out, recordRebuild(ctx, d, rec, out)
 	}
 
 	if out, err = buildArtifact(ctx, d, out, mapInfo); err != nil {
@@ -75,21 +75,22 @@ func rebuildOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 			Detail: "the cached film was rebuilt but the decoder refused it",
 			Cause:  err,
 		})
-		if recErr := recordRebuild(ctx, d, out); recErr != nil {
+		if recErr := recordRebuild(ctx, d, rec, out); recErr != nil {
 			slog.ErrorContext(ctx, "study-archiver: could not record a failed rebuild",
 				"err", recErr, "match_id", matchID)
 		}
 		return out, err
 	}
-	return out, recordRebuild(ctx, d, out)
+	return out, recordRebuild(ctx, d, rec, out)
 }
 
 // recordRebuild writes ONLY what the rebuild changed.
 //
-// film_state is recomputed from the outcome, which is what moves a match OUT of `failed`
-// when a fixed decoder finally reads it — the state is derived from what just happened,
-// never patched by hand.
-func recordRebuild(ctx context.Context, d deps, out outcome) error {
+// film_state is recomputed from what just happened, which is what moves a match OUT of
+// `failed` when a fixed decoder finally reads it — never patched by hand. The one thing it
+// will not do is clear a TERMINAL verdict on a rebuild that produced no artifact; see
+// stateAfterRebuild for why.
+func recordRebuild(ctx context.Context, d deps, prior matchRecord, out outcome) error {
 	var (
 		builtAt *time.Time
 		rev     string
@@ -98,12 +99,13 @@ func recordRebuild(ctx context.Context, d deps, out outcome) error {
 		now := time.Now().UTC()
 		builtAt, rev = &now, decoderRevision()
 	}
-	if err := d.Archive.updateBuild(ctx, out, builtAt, rev); err != nil {
+	if err := d.Archive.updateBuild(ctx, prior, out, builtAt, rev); err != nil {
 		return err
 	}
+	state, why := stateAfterRebuild(prior, out)
 	slog.InfoContext(ctx, "study-archiver: rebuild recorded",
-		"match_id", out.MatchID, "film_state", string(filmStateOf(out)),
-		"skip_reason", string(out.SkipReason), "artifact", out.ArtifactPath,
+		"match_id", out.MatchID, "film_state", string(state),
+		"skip_reason", string(why), "artifact", out.ArtifactPath,
 		"tracks", out.Tracks, "decoder_rev", rev)
 	return nil
 }

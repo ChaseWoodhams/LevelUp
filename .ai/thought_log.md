@@ -65,6 +65,55 @@ its three refusals; the report's counts, its empty state and its long-tail summa
 rebuild's six cases, every one wired with a NIL Halo client so any reach for the network
 would panic). `golangci-lint` 0 issues, gofmt clean, every file under 500 lines.
 
+**THE REVIEW ROUND, AND SIX THINGS IT CHANGED.** Two defects, two acceptance criteria that
+were satisfied only in the easy case, one standards breach, and one silent data-loss window.
+
+1. **`rebuild` could clear a terminal `expired` verdict.** `updateBuild` wrote
+   `filmStateOf(out)` unconditionally, so rebuilding an `expired` match whose map is still
+   absent from the quant-bounds catalogue produced `downloaded`/`unsupported_map` — the
+   match became retryable again, and once the chunk cache was pruned the hourly loop would
+   go back to a link known to be dead. Now `stateAfterRebuild`: only an ARTIFACT settles a
+   match, so a rebuild that produced none carries the prior terminal state AND its reason
+   forward (a row saying `expired` with reason `unsupported_map` would contradict itself).
+2. **An UPDATE on a PRIMARY KEY column.** `rememberWatched` rewrote `gamertag` to normalise
+   a re-typed capitalisation — a cosmetic gain bought with an index removal-and-reinsert on
+   a VARCHAR key, which is the #23046 path `no_art_patterns_test.go` records as having
+   crashed a database DESPITE a single writer. The same trap #6 avoided in `writeMatchRow`,
+   walked into two files later. The column is no longer touched.
+3. **"Archived counts by tracked player" was counting the DISCOVERER.** `source_gamertag`
+   records whose pass found the match, and the loop skips a match already archived before
+   writing anything — so two tracked players who scrim each other would show as 50 and 0
+   forever, the second sitting in the roster of every one of those fifty games. Counted
+   from `participants` now, joined on xuid where resolved and gamertag otherwise.
+4. **A player whose token chain is broken never reached the watchlist table**, because the
+   row was only written after a SUCCESSFUL resolution. `status` would then print "no player
+   followed yet" while five names failed every hour — precisely the "the job stopped
+   working" case the report exists to surface. The row is now written before the attempt.
+5. **One history page, no catch-up.** 25 matches is about a day of heavy play, which makes
+   an hourly pass overlap itself many times over — until the passes stop. A weekend the
+   scheduler missed, a player who then plays thirty games, and everything past the first
+   page expires unseen with a healthy `last_checked` to show for it. The pass now walks
+   pages while they still carry unseen matches, bounded at four. The steady state still
+   costs one call, asserted.
+6. **The 4v4 filter dropped real 4v4s.** A quitter and their backfill make NINE entries in
+   the stats payload, and `len(roster) != 8` threw the match away — permanently, since the
+   film expires while the tool decides it was not interested. Halo marks the quitter
+   did-not-finish (outcome 4, the encoding the `participants` DDL already documents), so
+   the four per side who played it out are countable. A quitter who is NOT replaced still
+   leaves a 4v3, which is correctly declined.
+
+Also: `watch` now applies the same artifact-on-disk test as `fetch-one` (it trusted the
+recorded path, so a deleted artifact was invisible to the loop but rebuilt by fetch-one),
+and `rebuild` no longer advertises `--xuid/--gamertag/--rps` on the one command documented
+as needing no credential. Every fix carries a test, and the paging one was verified to fail
+against a single-page implementation before being kept.
+
+**Judged and NOT changed**: `markChecked` stamps `last_checked` even when every match in
+that player's pass failed to archive — the stamp means "the history was read", which is
+true, and it is the history read that `status` is reporting the freshness of. Non-4v4
+matches still leave no row and are re-examined while they sit in the history window; giving
+them one would put matches the archive is not for into every count #9 reports.
+
 **Next step**: epic #1 is complete. Spec 2 (`apps/study`, tickets #11-#18) reads this
 archive — through `OpenReadForQuery`, never a forced read-only handle.
 

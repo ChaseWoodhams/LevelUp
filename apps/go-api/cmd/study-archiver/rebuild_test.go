@@ -174,8 +174,41 @@ func TestRebuild_AStillBrokenDecoderStaysFailed(t *testing.T) {
 	}
 }
 
+// A rebuild that produces NO artifact must not clear a terminal verdict. The film is still
+// gone from the CDN whatever the local cache holds, and writing `downloaded` would make the
+// match retryable again — sending the hourly loop back to a link known to be dead, the
+// exact waste #7 exists to prevent.
+func TestRebuild_DoesNotClearAnExpiredVerdictWhenItBuildsNothing(t *testing.T) {
+	d := offlineDeps(t, stubBuild(nil))
+	captured(t, d, stateExpired, skipFilmAbsent)
+	// The map's bounds have not arrived: the rebuild produces nothing, through the path
+	// that is neither a decoder failure nor a disk failure.
+	rec, roster := sampleRecord()
+	rec.MapName, rec.MapModule = "Forbidden Sands", ""
+	rec.ArtifactPath, rec.BuiltAt, rec.DecoderRev = "", nil, ""
+	rec.State, rec.SkipReason = stateExpired, skipFilmAbsent
+	if err := d.Archive.recordMatch(context.Background(), rec, roster); err != nil {
+		t.Fatalf("seeding the archive: %v", err)
+	}
+
+	out, err := rebuildOne(context.Background(), d, testMatchID)
+	if err != nil {
+		t.Fatalf("rebuildOne: %v", err)
+	}
+	if out.SkipReason != skipUnsupportedMap {
+		t.Fatalf("skip reason = %q, want %q", out.SkipReason, skipUnsupportedMap)
+	}
+	after, _, _ := d.Archive.recorded(context.Background(), testMatchID)
+	if after.State != stateExpired || after.SkipReason != skipFilmAbsent {
+		t.Errorf("state/reason = %q/%q, want %q/%q left standing - the terminal verdict was "+
+			"cleared by a rebuild that built nothing",
+			after.State, after.SkipReason, stateExpired, skipFilmAbsent)
+	}
+}
+
 // An expired film whose chunks were captured before the link died is EXACTLY what this
-// command is for: the archive says `expired`, and the bytes are still on disk.
+// command is for: the archive says `expired`, and the bytes are still on disk. Here the
+// rebuild SUCCEEDS, and an artifact is what settles the match - so the state moves.
 func TestRebuild_RescuesAMatchWhoseFilmHasExpired(t *testing.T) {
 	d := offlineDeps(t, stubBuild(nil))
 	captured(t, d, stateExpired, skipFilmAbsent)

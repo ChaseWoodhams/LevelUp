@@ -28,6 +28,12 @@
 // nothing decoded — all normal outcomes, all logged with their reason), 1 failure, 2
 // usage.
 //
+// WHAT A SECOND RUN DOES depends on what the first one recorded, and the rule is in
+// filmstate.go: a match whose film EXPIRED is never touched again, while one that failed
+// to build, or whose map had no bounds yet, is re-attempted every time — its chunks are on
+// disk, and a decoder fix or a catalogue update is exactly what rescues it. A transient
+// failure (5xx, a timeout) records nothing at all, so it never becomes either verdict.
+//
 // Authentication follows ADR 0023: MultiUserTokenStore via
 // auth.RefreshHaloTokensViaStoreFirst, the owner's own token. NO token re-capture — a
 // dead refresh token is diagnosed, not worked around. No per-player credential is

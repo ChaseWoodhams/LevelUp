@@ -27,18 +27,24 @@ const (
 	skipUnsupportedMap reason = "unsupported_map"
 	// skipNoMapInStats : the match-stats payload carries no map name at all. Distinct
 	// from unsupported_map — nothing here says a rebuild would ever succeed.
-	skipNoMapInStats = "no_map_in_stats"
-	// skipFilmAbsent : the film manifest or its blobs answered 404/410. This is the
-	// expiry this whole tool exists to race. Ticket #7 owns turning it into a permanent
-	// `expired` state that watch never retries.
-	skipFilmAbsent = "film_absent"
+	skipNoMapInStats reason = "no_map_in_stats"
+	// skipFilmAbsent : the film manifest or its blobs answered 404/410. This is the expiry
+	// this whole tool exists to race, and it is PERMANENT — it records `expired`, the one
+	// state no later run may re-attempt (filmstate.go).
+	skipFilmAbsent reason = "film_absent"
 	// skipNoTracks : the film downloaded and decoded but yielded no trajectory. The
 	// chunks are on disk, so a later decoder fix can rebuild (#10) without the CDN.
-	skipNoTracks = "no_tracks_decoded"
+	skipNoTracks reason = "no_tracks_decoded"
+	// skipBuildFailed : the film downloaded and the decoder REFUSED it — an error rather
+	// than an empty document. Kept apart from no_tracks_decoded because the two are
+	// different bugs to chase (a decoder that crashed, a decoder that read nothing), and
+	// only the recorded reason can tell them apart afterwards. Both record `failed`: the
+	// chunks are on disk either way, so both stay rebuildable.
+	skipBuildFailed reason = "build_failed"
 	// skipUnknown : a skip that reached the recorder without a named reason. Declared
 	// rather than written as a literal at the guard that produces it, so that a reason
 	// added later without a name still lands inside this set instead of beside it.
-	skipUnknown = "unknown"
+	skipUnknown reason = "unknown"
 )
 
 // skipError is a named, NON-FATAL reason a match produced no artifact. It wraps the

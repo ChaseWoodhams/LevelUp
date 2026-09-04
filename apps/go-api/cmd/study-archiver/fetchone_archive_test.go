@@ -5,6 +5,9 @@ package main
 // archive_test.go covers the store on its own. This file covers the ticket's own claim:
 // that running fetch-one against the fake Halo server produces the right ROWS, on every
 // path, and that running it twice does not fetch anything a second time.
+//
+// What those rows then MEAN to a later run — which states are retried, which one is
+// terminal, and what a transient failure must not write — is fetchone_expiry_test.go.
 
 import (
 	"context"
@@ -118,7 +121,7 @@ func TestFetchOne_SecondPassFetchesAndBuildsNothing(t *testing.T) {
 
 	second, rec := archived(t, d)
 
-	if !second.AlreadyArchived {
+	if !second.Settled {
 		t.Error("the second pass did not recognise the match as already archived")
 	}
 	if builds != 1 {
@@ -170,7 +173,7 @@ func TestFetchOne_MissingArtifactIsRebuilt(t *testing.T) {
 	}
 
 	second, rec := archived(t, d)
-	if second.AlreadyArchived {
+	if second.Settled {
 		t.Error("a match whose artifact is gone was reported as already archived")
 	}
 	if builds != 2 {
@@ -233,25 +236,6 @@ func TestFetchOne_SkipsAreRecordedWithTheirState(t *testing.T) {
 			t.Errorf("roster = %d rows, want 2", n)
 		}
 	})
-}
-
-// A transport failure must NOT leave a terminal state behind: #7 retries those, and a
-// row saying `expired` would stop it forever.
-func TestFetchOne_TransportFailureRecordsNothing(t *testing.T) {
-	srv := newFakeHalo(t, map[int][]byte{0: []byte("header")}, statsWithMap("Cliffhanger"))
-	empty := replay.ReplayDocument{}
-	d := srv.deps(t, stubBuild(&empty))
-	// A build that errors stands in for any mid-run failure the archiver cannot interpret.
-	d.Build = func(string, string, string, replay.Options) (replay.ReplayDocument, error) {
-		return replay.ReplayDocument{}, os.ErrDeadlineExceeded
-	}
-
-	if _, err := fetchOne(context.Background(), d, testMatchID); err == nil {
-		t.Fatal("fetchOne reported success on a failing build")
-	}
-	if _, found, err := d.Archive.recorded(context.Background(), testMatchID); err != nil || found {
-		t.Errorf("a failed run left a row behind (found=%v err=%v)", found, err)
-	}
 }
 
 // The decoded counts come from the document's own coverage report — including when there

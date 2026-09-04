@@ -15,10 +15,38 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"levelup/go-api/internal/domain/title"
 	"levelup/go-api/internal/sync/haloclient"
 )
+
+// cachedFilmChunks counts the chunks already in the match's film-chunk directory.
+//
+// It answers "is the film still on disk?", and a COUNT rather than a boolean because the
+// number is what the outcome reports and the archive records. Read against a directory the
+// operator can empty at any time — the recorded state alone is not evidence the bytes are
+// still there, exactly as a recorded artifact path is not evidence of an artifact.
+func cachedFilmChunks(paths *title.PathResolver, matchID string) int {
+	entries, err := os.ReadDir(paths.FilmChunksDir(matchID))
+	if err != nil {
+		// An unreadable or absent directory is simply "nothing cached": the caller
+		// re-downloads, and a real permission problem surfaces on the write that follows.
+		return 0
+	}
+	n := 0
+	for _, e := range entries {
+		if !e.IsDir() && strings.HasSuffix(e.Name(), filmChunkSuffix) {
+			n++
+		}
+	}
+	return n
+}
+
+// filmChunkSuffix is the extension PathResolver.FilmChunkPath writes
+// (`chunk_NN.bin`). Counting only these keeps a stray note or a partial download from
+// passing for a chunk.
+const filmChunkSuffix = ".bin"
 
 // writeFilmChunks writes every downloaded chunk into the match's film-chunk directory
 // and returns how many were written.

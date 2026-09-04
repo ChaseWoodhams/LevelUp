@@ -6,7 +6,9 @@ package haloclient
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"sort"
 	"strings"
@@ -187,10 +189,45 @@ type FilmChunk struct {
 //     « voie propre » que le guide du décodeur nommait : exposer une méthode qui
 //     rend les types en une passe, PAS mettre le manifeste en cache global.)
 //
-// Retourne (nil, false, nil) si le film est absent (404/410) — cas NORMAL, tous
+// Retourne (nil, false, nil) si le MANIFESTE est absent (404/410) — cas NORMAL, tous
 // les matchs n'ont pas de film.
+//
+// ATTENTION, ce n'est pas la seule forme d'expiration : le manifeste et les BLOBS
+// pré-signés meurent sur des calendriers séparés. Un manifeste qui répond encore alors
+// que ses blobs rendent 404/410 ressort donc en ERREUR, pas en (nil, false, nil) — un
+// appelant qui doit distinguer « définitivement perdu » de « réessayer plus tard » teste
+// cette erreur avec IsFilmGoneErr.
 func (c *HaloAPIClient) GetFilmChunks(ctx context.Context, matchID string) ([]FilmChunk, bool, error) {
 	return c.fetchFilmChunks(ctx, matchID, "GetFilmChunks", func(int) bool { return true })
+}
+
+// IsFilmGoneErr indique qu'une erreur de téléchargement de film est DÉFINITIVE : le
+// manifeste ou l'un des blobs a répondu 404/410, et un lien CDN expiré ne revient jamais.
+// Tout le reste (5xx, timeouts, coupures réseau) est transitoire et doit être réessayé.
+//
+// Exporté pour cmd/study-archiver (#7) : l'archiveur enregistre l'un en état terminal
+// `expired` — plus jamais retenté — et laisse l'autre repasser au run suivant. Sans ce
+// prédicat, la seule lecture possible d'un blob expiré serait « échec de transport », et
+// la passe horaire retaperait indéfiniment un lien mort.
+//
+// Une expiration PARTIELLE (certains blobs vivants, d'autres non) compte comme définitive :
+// un film incomplet ne se décode pas, et les blobs manquants ne reviendront pas. Corollaire
+// assumé : si un blob rend 404 pendant qu'un autre rend 503, l'erreur que remonte
+// l'errgroup n'est pas déterministe — la passe lit alors « transitoire », ne grave rien, et
+// converge à la passe suivante quand le 503 a disparu. Un faux « transitoire » se corrige
+// tout seul ; un faux `expired` serait définitif.
+//
+// LE STATUT TYPÉ D'ABORD. `doGet` (manifeste) rend un *HTTPError : le code HTTP y est une
+// donnée, pas du texte. `downloadBlob` (blobs) formate encore « downloadBlob HTTP %d » —
+// le typer changerait le comportement du POOL, qui branche sur *HTTPError pour ses
+// cooldowns 429/503 et son marquage 401/403, ce qui n'est pas du ressort de #7. Le repli
+// textuel ne couvre donc que des erreurs formatées DANS ce paquet.
+func IsFilmGoneErr(err error) bool {
+	var he *HTTPError
+	if errors.As(err, &he) {
+		return he.StatusCode == http.StatusNotFound || he.StatusCode == http.StatusGone
+	}
+	return isNotFoundErr(err)
 }
 
 // fetchFilmChunks : le chemin de téléchargement COMMUN (cache-first puis CDN en

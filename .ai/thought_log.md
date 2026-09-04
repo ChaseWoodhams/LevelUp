@@ -1,3 +1,129 @@
+## [2026-09-03] Expired vs failed films (ticket #7) — the archiver stops chasing dead links — Complete
+
+**Context**: fork issue #7, "1.4 Expired and failed film state handling", unblocked by #6
+on the same branch. #6 recorded four film states; this ticket turns them into a retry
+policy. It exists for the unattended hourly run of #8 — the one place where a silent retry
+loop against a link that will never come back would go unnoticed.
+
+**The bug the ticket names was real, and it was in the CLIENT, not in the archiver.** The
+archiver's `filmAPI` documents `GetFilmChunks` as reporting `found=false` on 404/410, and
+`downloadFilm` was written against that promise. The client only keeps it for the
+MANIFEST: `fetchFilmManifest` maps 404/410 to `(nil, false, nil)`, but the parallel BLOB
+downloads inside `fetchFilmChunks` hand the 404 back as an ordinary error. Halo serves the
+two from different places on different schedules — the spectate endpoint from its own
+store, the chunks from pre-signed CDN blobs — so the COMMONEST shape of expiry (the
+manifest still answers, the blobs are gone) reached the archiver as "transport failure",
+which is exactly the reading that records nothing and retries forever. Not a hypothesis:
+`GetHighlightEventsChunk` had already hit it and worked around it locally with
+`isNotFoundErr`, with a comment saying so.
+
+**Fixed by naming the verdict, not by changing the shared path.** `haloclient` now exports
+`IsFilmGoneErr` — 404/410 is permanent, everything else (5xx, timeouts, dropped
+connections) is transient — and `downloadFilm` records `expired` on the first, returns an
+error on the second. Deliberately NOT changed: `fetchFilmChunks` still returns the blob
+404 as an error rather than as `found=false`. `sync/killcollector` reads the same call, and
+converting a blob 404 into "this match has no film" there is a sync-pipeline behaviour
+change this ticket has no mandate for. **Recorded as a finding**: killcollector today
+treats an expired blob as a retryable error too, and would benefit from the same verdict —
+in a ticket allowed to touch the sync pipeline.
+
+**Expired is the ONLY terminal state, and that asymmetry IS the ticket.** `filmstate.go`
+now owns the life cycle (type, constants, `filmStateOf`, `terminal()`), and the policy is
+one line of code and twenty of why: `expired` stops every later run; `failed` and a
+`downloaded` match with no artifact do not. The two failures mean opposite things — an
+expired film is gone whatever anyone does next, while a failed one is a decoder problem
+whose raw material is still on disk, and a catalogue update or a decoder fix is exactly
+what rescues it. #6 keyed idempotency on the ARTIFACT alone, which was right then and
+wrong now: an expired match has no artifact, so it was re-downloaded on every pass. The
+short-circuit now asks two questions, and `outcome.AlreadyArchived` became `Settled`
+because "already archived" is false of a match that was never archived and never will be.
+
+**A decoder that ERRORS is now recorded, which reverses a #6 decision.** #6 recorded only
+skips, and a build error left no row — the same treatment as a transport failure. But the
+chunks are on disk and the inputs are fixed: the next run decodes the same bytes into the
+same failure, and the run after that too. It is now recorded as `failed` with its own
+reason (`build_failed`, distinct from `no_tracks_decoded` — a decoder that crashed and one
+that read nothing are different bugs to chase), and the error is STILL returned, so a
+decoder regression never passes for an ordinary archiving outcome. The row does not
+suppress a retry: `failed` is explicitly not terminal.
+
+**And the disk is not the decoder.** `buildArtifact` fails two ways — the decoder refuses
+the film, or the disk refuses the artifact — and recording the second as `failed` would
+blame the decoder for a full disk, leaving a match reported as needing a fix it does not
+need. The decoder's own failure is wrapped in a `decodeFailure`; only that one is
+recorded. A wrapper rather than a boolean so the distinction survives being passed around
+and `errors.Is` still reaches the decoder's sentinels.
+
+**The claim cannot be proved by rows, so the tests do not try.** "Never re-attempted" is a
+claim about NOT fetching: a tool that re-downloaded the whole film every hour and rewrote
+the same verdict would leave exactly one row and pass any row assertion. The fake Halo
+server therefore counts manifest, blob and stats calls, and the expiry test asserts all
+three are unchanged by the second pass. Two old tests were removed rather than adapted:
+both used a build error as a STAND-IN for a transport failure, which this ticket makes
+false — the transient cases are now driven through the server's own failure modes (429 on
+the stats call, 503 on the blobs).
+
+**Results**: `cmd/study-archiver` green — tests added for: expiry recorded and never
+retried (asserted on manifest/blob/stats CALL COUNTS), transient blob 503 leaves no row and
+recovers, transient stats 429 leaves no row, build failure recorded as `failed` and still
+returned, artifact-write failure NOT recorded, both flavours of `failed` rebuilt FROM DISK
+with the CDN answering 404/410, a dead CDN not overwriting a captured film, unsupported map
+still retried, plus the state-mapping table, the terminal-state invariant and
+`IsFilmGoneErr`'s own table. `internal/sync/haloclient`, `internal/sync` and
+`internal/archlint` green; full `go test ./...` green. `golangci-lint` reports 0 issues on
+both changed packages (the 2 goconst hits in `halo_client_career.go` are pre-existing and
+untouched). Every file under 500 lines, every function well under 80.
+
+**A toolchain footnote worth writing down, because it wasted a diagnosis.** `go test ./...`
+first came back with 5 build failures, all downstream of `internal/ooz` — the repo's only
+C++ package (`kraken.cpp`, `-static-libstdc++`) — reporting nothing but
+`cgo.exe: exit status 2`, a message that names no cause. `CC=/c/msys64/ucrt64/bin/gcc.exe`
+alone is NOT enough for it: cgo also needs a `CXX`, and pointing at the compilers by
+absolute path still fails. What works is putting `/c/msys64/ucrt64/bin` on PATH and
+setting `CC=gcc CXX=g++`, so the driver finds its own sibling tools. CLAUDE.md's CGO note
+(added by #6) gives the absolute-path form, which covers every C package in the repo and
+fails on the one C++ one.
+
+**THE REVIEW CAUGHT A BUG THAT WOULD HAVE DEFEATED THE TICKET'S OWN ACCEPTANCE CRITERION,
+and it is worth recording in full because the first implementation looked complete and
+passed every test written for it.** `fetchOne` re-downloaded the film on every pass — the
+archiver never wires `WithLocalFilmCache`, so the chunks under `FilmChunksDir` were read
+only by the decoder, never as a download source. So a match recorded `failed` and retried
+after a decoder fix went back to the CDN. Months later that link is dead, the pass collects
+a 404, and `recordOutcome` rewrites `film_state` unconditionally: `failed` → `expired`,
+which the new terminal check then makes permanent. The match with its film intact ON DISK
+would have been buried forever, by the very feature meant to protect it. The first version
+of `TestFetchOne_FailedMatchesStayRebuildable` passed only because the fake server was
+still serving the film on the second pass.
+
+**Fixed at the cause, not with a guard.** `downloadFilm` now rebuilds from the chunk cache
+when the recorded state says the film was captured (`filmCaptured()` — `downloaded` or
+`failed`, both written only after `writeFilmChunks` returned clean) and the chunks are
+still on disk. No CDN request, so no 404, so no decay — rather than a special case
+forbidding the `failed → expired` transition, which would have left the pointless
+re-download in place. If the cache HAS been emptied, the re-fetch happens and a 404 then
+records `expired` correctly: neither copy of the bytes exists any more. Both new tests were
+verified to FAIL against the previous implementation before the fix landed.
+
+**Review findings judged and not acted on, with reasons.** (1) A 403 on a blob — an expired
+SAS signature — is not treated as terminal. 403 is also what a stale token returns, and
+retrying a refusable auth error is the safe side of that coin; nothing observed in this
+repo says Halo's film blobs are SAS-signed at all. Left transient, flagged here. (2) The
+partial-expiry race is real: one blob 404 and another 503 in flight, and which error the
+errgroup returns is nondeterministic. It converges — a false "transient" retries and the
+404 wins once the 503 clears, whereas a false `expired` would be permanent — so the
+asymmetry is deliberate, and now documented on the predicate. (3) `IsFilmGoneErr` was pure
+substring matching on `err.Error()`, deciding a permanent state from prose. It now reads
+the TYPED status first (`*HTTPError`, the manifest path); the blob path keeps the textual
+fallback, because typing `downloadBlob`'s error would route blob 429/503/401 into
+`PooledHaloClient.notifyPoolOnError` and change pool cooldown behaviour across the sync
+pipeline — out of this ticket's mandate. **Recorded as a finding.** The predicate now has
+its own table test covering both halves.
+
+**Next step**: #8 (watch loop), which is the run this policy was written for: it assembles
+its own `deps` and archives many matches per pass, so the expiry short-circuit has to live
+in `fetchOne` — where it now is — rather than in a caller.
+
 ## [2026-09-03] Archive database (ticket #6) — the archiver remembers what it captured — Complete
 
 **Context**: fork issue #6, "1.3 Archive database: match and participant recording",

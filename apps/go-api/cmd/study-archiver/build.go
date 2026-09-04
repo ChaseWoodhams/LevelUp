@@ -44,6 +44,19 @@ type buildFilm func(matchID, titleSlug, filmDir string, opt replay.Options) (rep
 // is package-level and why it is the archiver's job at all.
 var buildMu sync.Mutex
 
+// decodeFailure marks an error the DECODER raised, as opposed to one the disk raised
+// while storing what the decoder produced. The two look alike at the call site and mean
+// opposite things to the archive (#7): a decoder that refuses this film says something
+// permanent about the match — recorded as `failed`, rebuildable after a decoder fix — while
+// a disk that refuses the write says nothing about the match at all and must leave no
+// state behind. A wrapper rather than a boolean return so the distinction survives being
+// passed around, and `errors.Is` still reaches the decoder's own sentinels.
+type decodeFailure struct{ err error }
+
+func (e decodeFailure) Error() string { return e.err.Error() }
+
+func (e decodeFailure) Unwrap() error { return e.err }
+
 // runBuild runs one build under the process-wide lock.
 //
 // EVERY build goes through here, which is the point: the lock belongs to the CALL SITE,

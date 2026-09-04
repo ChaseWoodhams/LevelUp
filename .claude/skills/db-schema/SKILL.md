@@ -40,8 +40,16 @@ serveur ne l'ouvre jamais en écriture. Trois tables :
 | `participants` | 1 ligne par (match, joueur) : `xuid`, `gamertag`, `team` (0 Eagle / 1 Cobra), `outcome` (1 nul / 2 victoire / 3 défaite / 4 abandon), `kills`, `deaths`, `assists` — **source : match stats, jamais le film** (le film ne porte aucune information d'équipe) |
 | `watchlist` | `gamertag` (PK), `xuid`, `added_at`, `last_checked` — alimentée par le ticket #8 |
 
-`film_state` : `pending` \| `downloaded` \| `expired` \| `failed`. Les trois états
-terminaux disent des choses différentes à un run ultérieur (politique de reprise : #7).
+`film_state` : `pending` \| `downloaded` \| `expired` \| `failed`. **Politique de reprise
+(#7, `cmd/study-archiver/filmstate.go`)** : `expired` est le SEUL état terminal — le film
+CDN est perdu, aucun run ultérieur ne retente le match. `failed` (décodeur en erreur ou
+zéro trajectoire) et `downloaded` sans artefact (carte absente du catalogue de bornes)
+restent repris à chaque passe : les chunks sont sur disque, un correctif décodeur ou une
+mise à jour du catalogue les récupère. Un échec TRANSITOIRE (5xx, timeout, disque) n'écrit
+aucune ligne — écrire `expired` sur un incident réseau enterrerait le match pour toujours.
+
+`skip_reason` : `film_absent` (→ `expired`), `no_tracks_decoded` et `build_failed`
+(→ `failed`), `unsupported_map` et `no_map_in_stats` (→ `downloaded`, repris plus tard).
 
 **Écritures** : SELECT-then-UPDATE-or-INSERT ligne à ligne, JAMAIS `ON CONFLICT DO UPDATE`
 ni delete-then-reinsert. Mono-writer n'est PAS un argument de sûreté vis-à-vis d'ART

@@ -8,12 +8,15 @@ package main
 // needs a whole film, the decoder has its own suites (golden assembly, mini-reel), and
 // re-testing it here would test somebody else's code. The real decoder is exercised by
 // the fixture-gated test in fetchone_realfilm_test.go.
+//
+// What a SECOND pass does with what the first one recorded — expiry never retried, a
+// failed build rebuilt from the chunk cache, a transient failure leaving no state — lives
+// in fetchone_expiry_test.go, which owns the retry policy end to end.
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -39,12 +42,21 @@ type fakeHalo struct {
 	chunks map[int][]byte
 	// manifestStatus, when non-zero, replaces the manifest response (410 = film expired).
 	manifestStatus int
-	stats          map[string]any
-	// statsCalls / manifestCalls count what the archiver actually asked the API for.
-	// Idempotency is a claim about NOT fetching, and only a call count can prove it —
-	// row counts alone would still pass if the tool re-downloaded the whole film.
+	// chunkStatus, when non-zero, replaces every BLOB response while the manifest keeps
+	// resolving. That is the expiry shape the CDN actually serves and the one the manifest
+	// status cannot express: Halo answers the spectate endpoint from its own store, and the
+	// pre-signed blobs behind it die on their own schedule (404/410).
+	chunkStatus int
+	// statsStatus, when non-zero, replaces the match-stats response.
+	statsStatus int
+	stats       map[string]any
+	// statsCalls / manifestCalls / blobCalls count what the archiver actually asked the API
+	// for. Idempotency and "never retried" are claims about NOT fetching, and only a call
+	// count can prove them — row counts alone would still pass if the tool re-downloaded
+	// the whole film.
 	statsCalls    atomic.Int32
 	manifestCalls atomic.Int32
+	blobCalls     atomic.Int32
 }
 
 func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fakeHalo {
@@ -61,6 +73,11 @@ func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fak
 		_, _ = w.Write(f.manifestJSON())
 	})
 	mux.HandleFunc("/ugcstorage/", func(w http.ResponseWriter, r *http.Request) {
+		f.blobCalls.Add(1)
+		if f.chunkStatus != 0 {
+			w.WriteHeader(f.chunkStatus)
+			return
+		}
 		idx, err := parseChunkIndex(filepath.Base(r.URL.Path))
 		if err != nil {
 			http.NotFound(w, r)
@@ -75,6 +92,10 @@ func newFakeHalo(t *testing.T, chunks map[int][]byte, stats map[string]any) *fak
 	})
 	mux.HandleFunc("/hi/matches/", func(w http.ResponseWriter, r *http.Request) {
 		f.statsCalls.Add(1)
+		if f.statsStatus != 0 {
+			w.WriteHeader(f.statsStatus)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		blob, err := json.Marshal(f.stats)
 		if err != nil {
@@ -341,19 +362,5 @@ func TestFetchOne_StatsWithoutAMapNameIsANamedSkip(t *testing.T) {
 	}
 	if out.ChunksWritten != len(film) {
 		t.Errorf("wrote %d chunks, want %d - the film must be kept", out.ChunksWritten, len(film))
-	}
-}
-
-// A build that FAILS is not a skip: it is an error for the caller to handle, so a bug in
-// the decoder never looks like an ordinary archiving outcome.
-func TestFetchOne_BuildErrorIsReturned(t *testing.T) {
-	srv := newFakeHalo(t, map[int][]byte{0: []byte("header")}, statsWithMap("Cliffhanger"))
-	boom := errors.New("decoder exploded")
-	d := srv.deps(t, func(string, string, string, replay.Options) (replay.ReplayDocument, error) {
-		return replay.ReplayDocument{}, boom
-	})
-
-	if _, err := fetchOne(context.Background(), d, testMatchID); !errors.Is(err, boom) {
-		t.Errorf("err = %v, want the decoder's error", err)
 	}
 }

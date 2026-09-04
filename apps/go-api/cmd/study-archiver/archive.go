@@ -43,19 +43,6 @@ import (
 	ddb "levelup/go-api/internal/platform/duckdb"
 )
 
-// filmState is the life-cycle of a match's film. The four values come from the epic and
-// mean four different things to a later run (#7 turns them into a retry policy):
-// `pending` nothing fetched yet, `downloaded` chunks are on disk, `expired` the CDN is
-// gone for good, `failed` the film arrived but would not decode.
-type filmState string
-
-const (
-	statePending    filmState = "pending"
-	stateDownloaded filmState = "downloaded"
-	stateExpired    filmState = "expired"
-	stateFailed     filmState = "failed"
-)
-
 // archiveSchema is the whole shape of the archive, applied on every open.
 //
 // The primary keys are declared HERE, in the initial CREATE, and that is deliberate:
@@ -73,6 +60,8 @@ CREATE TABLE IF NOT EXISTS matches (
     playlist        VARCHAR,
     duration_ms     BIGINT,
     source_gamertag VARCHAR,
+    -- film_state: the life cycle of filmstate.go - pending / downloaded / failed /
+    -- expired. Only expired is terminal: it stops every later run, the others do not.
     film_state      VARCHAR NOT NULL,
     skip_reason     VARCHAR,
     artifact_path   VARCHAR,

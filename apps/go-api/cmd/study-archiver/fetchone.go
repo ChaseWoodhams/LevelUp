@@ -74,9 +74,11 @@ type outcome struct {
 	Shots      int
 	NamedLives int
 	TotalLives int
-	// AlreadyArchived marks a match a previous run had already finished with: nothing
-	// was fetched, built or written this time.
-	AlreadyArchived bool
+	// Settled marks a match a previous run had already reached a FINAL answer on: either
+	// its artifact is on disk, or its film is permanently expired. Nothing was fetched,
+	// built or written this time. A `failed` or skipped match is NOT settled — those are
+	// the ones a later decoder or catalogue rescues.
+	Settled bool
 }
 
 // fetchOne archives a single match: download the whole film into the chunk cache, build
@@ -85,12 +87,16 @@ type outcome struct {
 // A SKIP IS NOT AN ERROR. An expired film, a map with no bounds, a film that decodes to
 // nothing — each comes back as an outcome carrying a named reason, and each is RECORDED.
 // An error is reserved for what the archiver cannot interpret: a failed API call, a disk
-// it cannot write, a decoder that returned an error. Those are deliberately NOT recorded:
-// a transient failure must not leave a terminal state behind (#7 owns that distinction).
+// it cannot write. Those are deliberately NOT recorded: a transient failure must not leave
+// a terminal state behind (filmstate.go holds the whole policy).
+//
+// A DECODER THAT ERRORS IS BOTH. It is recorded — `failed`, with its reason, because the
+// chunks are on disk and the fault is deterministic — and it is STILL returned as an
+// error, so a decoder regression never reads as an ordinary archiving outcome.
 func fetchOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 	out := outcome{MatchID: matchID, ShortID: title.FilmShortMatchID(matchID)}
 
-	done, err := alreadyArchived(ctx, d, &out)
+	prior, done, err := settledEarlier(ctx, d, &out)
 	if err != nil || done {
 		return out, err
 	}
@@ -110,64 +116,163 @@ func fetchOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 	mapInfo, mapErr := resolveMatchMap(facts.MapName, d.Catalog)
 	out.MapModule = mapInfo.Module
 
-	if err := downloadFilm(ctx, d, &out); err != nil {
+	if err := downloadFilm(ctx, d, prior, &out); err != nil {
 		return out, err
 	}
 	if out.SkipReason == "" && mapErr != nil {
 		out = skipped(ctx, out, mapErr)
 	}
 	if out.SkipReason == "" {
-		if out, err = buildArtifact(ctx, d, out, mapInfo); err != nil {
-			return out, err
+		var buildErr error
+		if out, buildErr = buildArtifact(ctx, d, out, mapInfo); buildErr != nil {
+			var refused decodeFailure
+			if !errors.As(buildErr, &refused) {
+				// The decoder produced a document and the DISK refused it. Nothing about
+				// this match is settled, so nothing is recorded: the next run retries.
+				return out, buildErr
+			}
+			return recordBuildFailure(ctx, d, out, facts, buildErr)
 		}
 	}
 	return out, recordOutcome(ctx, d, out, facts)
 }
 
-// alreadyArchived short-circuits a match a previous run already finished with: no
-// re-download, no rebuild, no second row.
+// recordBuildFailure records a refused decode as `failed` and hands the decoder's error
+// back unchanged.
 //
-// The test is the ARTIFACT, not the film state. A match can be `downloaded` and still
-// have no artifact — an unsupported map, whose catalogue entry may have arrived since —
-// and that one MUST be retried. And a recorded artifact that has gone missing from disk
-// is not an archive, so it is rebuilt rather than trusted.
-func alreadyArchived(ctx context.Context, d deps, out *outcome) (bool, error) {
+// WHY RECORD AT ALL, when every other error leaves no row. Because this one is not
+// transient: the chunks are on disk, the inputs are fixed, and the next run would decode
+// the same bytes into the same failure. Recording it is what lets #9 report "these matches
+// need a decoder fix" instead of "these matches keep erroring", and the state chosen —
+// `failed`, never `expired` — is what keeps the match eligible for the rebuild that fixes
+// it.
+//
+// A failure to record is logged and dropped: the caller must see the DECODER's error, not
+// a database error raised while writing it down.
+func recordBuildFailure(ctx context.Context, d deps, out outcome, facts matchFacts, buildErr error) (outcome, error) {
+	out = skipped(ctx, out, skipError{
+		Reason: skipBuildFailed,
+		Detail: "the film downloaded but the decoder refused it",
+		Cause:  buildErr,
+	})
+	if err := recordOutcome(ctx, d, out, facts); err != nil {
+		slog.ErrorContext(ctx, "study-archiver: could not record a failed build - the match "+
+			"will be re-attempted from scratch", "err", err, "match_id", out.MatchID)
+	}
+	return out, buildErr
+}
+
+// settledEarlier short-circuits a match a previous run already reached a FINAL answer on:
+// no stats call, no re-download, no rebuild, no second row.
+//
+// TWO WAYS TO BE FINAL, and they are the two ends of the epic. Either the artifact is
+// built and on disk — there is nothing left to do — or the film is `expired` and there
+// never will be. Everything else is retried: a `downloaded` match with no artifact is one
+// the quant-bounds catalogue may make buildable at any time, and a `failed` one is waiting
+// on a decoder fix. That is why the artifact test is not simply "is there a row".
+//
+// A recorded artifact that has gone missing from disk is not an archive, so it is rebuilt
+// rather than trusted.
+//
+// It also RETURNS the row when it does not short-circuit, because a match that is not
+// settled may still be half done — the film captured, the artifact not built — and the
+// rest of the run needs to know that to avoid re-downloading it.
+func settledEarlier(ctx context.Context, d deps, out *outcome) (matchRecord, bool, error) {
 	if d.Archive == nil {
 		// deps.Archive is documented as required. A wiring that forgets it (#8 assembling
 		// its own deps, say) must be told so, not panic three frames deeper.
-		return false, errors.New("deps.Archive is nil: the archiver cannot run without its database")
+		return matchRecord{}, false,
+			errors.New("deps.Archive is nil: the archiver cannot run without its database")
 	}
 	rec, found, err := d.Archive.recorded(ctx, out.MatchID)
-	if err != nil || !found || rec.ArtifactPath == "" {
-		return false, err
+	if err != nil || !found {
+		return matchRecord{}, false, err
+	}
+	if rec.State.terminal() {
+		reportExpired(ctx, rec, out)
+		return rec, true, nil
+	}
+	if rec.ArtifactPath == "" {
+		return rec, false, nil
 	}
 	if _, statErr := os.Stat(rec.ArtifactPath); statErr != nil {
 		slog.WarnContext(ctx, "study-archiver: recorded artifact missing from disk - re-archiving",
 			"match_id", out.MatchID, "path", rec.ArtifactPath, "err", statErr)
-		return false, nil
+		return rec, false, nil
 	}
 	out.MapName, out.MapModule = rec.MapName, rec.MapModule
 	out.ArtifactPath = rec.ArtifactPath
 	out.Tracks, out.Points, out.Shots = rec.Tracks, rec.Points, rec.Shots
 	out.NamedLives, out.TotalLives = rec.NamedLives, rec.TotalLives
-	out.AlreadyArchived = true
+	out.Settled = true
 	slog.InfoContext(ctx, "study-archiver: already archived - nothing to do",
 		"match_id", out.MatchID, "short_id", out.ShortID, "map", out.MapName,
 		"path", out.ArtifactPath, "tracks", out.Tracks)
-	return true, nil
+	return rec, true, nil
+}
+
+// reportExpired fills in the outcome of a match whose film a previous run found gone.
+//
+// The row is NOT rewritten. There is nothing new to say about it, and rewriting would
+// move recorded_at forward every hour, making a match settled months ago look freshly
+// examined to anything reading the archive.
+func reportExpired(ctx context.Context, rec matchRecord, out *outcome) {
+	out.MapName, out.MapModule = rec.MapName, rec.MapModule
+	out.SkipReason = rec.SkipReason
+	if out.SkipReason == "" {
+		// An expired row with no reason predates nothing and should not exist, but reading
+		// it as "archived successfully" is the one interpretation that would be dangerous.
+		out.SkipReason = skipFilmAbsent
+	}
+	out.Settled = true
+	slog.InfoContext(ctx, "study-archiver: film expired in an earlier run - not re-attempted",
+		"match_id", out.MatchID, "short_id", out.ShortID, "map", out.MapName,
+		"reason", string(out.SkipReason))
 }
 
 // downloadFilm fetches the whole film and writes it into the chunk cache. An absent film
 // stamps the named skip onto the outcome rather than returning an error.
-func downloadFilm(ctx context.Context, d deps, out *outcome) error {
+//
+// A FILM ALREADY CAPTURED IS NEVER FETCHED AGAIN, and that is not merely an optimisation.
+// A match recorded `failed` is waiting for a decoder fix that may be months away, by which
+// time its CDN link is certainly dead — and a rebuild that went back to the CDN would get
+// a 404 and record `expired`, burying, permanently, a match whose film is sitting on disk
+// intact. Rebuilding from the cache is what makes the `failed` state mean what it says.
+//
+// THE TWO SHAPES OF EXPIRY, AND WHY BOTH LAND HERE. Halo serves the film manifest from
+// its own store and the chunks from pre-signed CDN blobs, and the two die on separate
+// schedules. A dead manifest comes back as `found=false`; a dead blob comes back as an
+// ERROR, because the client cannot know that its caller reads 404 as a verdict rather than
+// a fault. Both mean the same thing — the bytes will never exist again — so both record
+// `expired`. Reading the second as a transport fault is what would have the hourly run
+// re-download a dead link forever.
+func downloadFilm(ctx context.Context, d deps, prior matchRecord, out *outcome) error {
+	if prior.State.filmCaptured() {
+		if cached := cachedFilmChunks(d.Paths, out.MatchID); cached > 0 {
+			out.ChunksWritten = cached
+			slog.InfoContext(ctx, "study-archiver: film already captured - rebuilding from the chunk cache",
+				"match_id", out.MatchID, "short_id", out.ShortID, "chunks", cached,
+				"dir", d.Paths.FilmChunksDir(out.MatchID), "prior_state", string(prior.State))
+			return nil
+		}
+		// The row says captured and the disk disagrees: the cache was emptied. Fall through
+		// and re-fetch — which may well find the film expired by now, and that verdict is
+		// then correct, since neither copy of the bytes exists any more.
+		slog.WarnContext(ctx, "study-archiver: recorded film missing from the chunk cache - re-downloading",
+			"match_id", out.MatchID, "dir", d.Paths.FilmChunksDir(out.MatchID),
+			"prior_state", string(prior.State))
+	}
 	chunks, found, err := d.Client.GetFilmChunks(ctx, out.MatchID)
-	if err != nil {
+	if err != nil && !haloclient.IsFilmGoneErr(err) {
+		// Everything else — 5xx, timeouts, a dropped connection — is transient, and stays
+		// an error precisely so that NO state is recorded and the next run starts over.
 		return fmt.Errorf("film download: %w", err)
 	}
-	if !found {
+	if err != nil || !found {
 		*out = skipped(ctx, *out, skipError{
 			Reason: skipFilmAbsent,
 			Detail: "the film manifest or its blobs answered 404/410",
+			Cause:  err,
 		})
 		return nil
 	}
@@ -181,11 +286,14 @@ func downloadFilm(ctx context.Context, d deps, out *outcome) error {
 }
 
 // buildArtifact runs the (serialised) decode and writes the replay artifact.
+//
+// Its two failures are different facts, and the caller has to tell them apart: the
+// decoder's refusal is wrapped in a decodeFailure and gets recorded, the disk's is not.
 func buildArtifact(ctx context.Context, d deps, out outcome, mapInfo matchMap) (outcome, error) {
 	filmDir := d.Paths.FilmChunksDir(out.MatchID)
 	doc, err := runBuild(d.Build, out.MatchID, d.Title, filmDir, d.buildOptions(ctx, mapInfo))
 	if err != nil {
-		return out, fmt.Errorf("replay build: %w", err)
+		return out, decodeFailure{fmt.Errorf("replay build: %w", err)}
 	}
 	if len(doc.Tracks) == 0 {
 		return skipped(ctx, out, skipError{
@@ -242,23 +350,6 @@ func recordOutcome(ctx context.Context, d deps, out outcome, facts matchFacts) e
 		"skip_reason", string(rec.SkipReason), "participants", len(facts.Roster),
 		"decoder_rev", rec.DecoderRev)
 	return nil
-}
-
-// filmStateOf maps an outcome onto the film's life-cycle state. The three terminal
-// answers mean different things to a later run, which is why they are not one flag:
-// `expired` will never succeed, `failed` may succeed after a decoder fix, `downloaded`
-// with a skip reason may succeed once the map catalogue grows.
-func filmStateOf(out outcome) filmState {
-	switch out.SkipReason {
-	case skipFilmAbsent:
-		return stateExpired
-	case skipNoTracks:
-		return stateFailed
-	}
-	if out.ChunksWritten > 0 {
-		return stateDownloaded
-	}
-	return statePending
 }
 
 // skipped stamps the named reason onto the outcome and logs it. Every skip goes through

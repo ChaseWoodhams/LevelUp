@@ -71,6 +71,9 @@ interface ParticipantsBody {
  * ABSENT when the artifact reported no lives at all, which is "unknown", not "zero".
  */
 export interface MatchSummary {
+  /** Final game scores for Eagle (t0) and Cobra (t1); absent in older archives. */
+  team0_score?: number
+  team1_score?: number
   match_id: string
   short_id: string
   played_at?: string
@@ -196,19 +199,7 @@ async function getSummaryOrNull(
   }
 }
 
-/**
- * How many rows the browser asks for.
- *
- * THE SERVER'S OWN CEILING, deliberately, and asked for in ONE request. This archive is one
- * person's captures on one machine, read over the loopback: a thousand rows is a JSON payload
- * of a few hundred kilobytes and a single round trip, and it is what lets every filter and
- * every sort in the browser act on the WHOLE archive at once rather than on whatever page
- * happened to be loaded — the failure mode of a filtered table that filters a page is that it
- * looks like it worked.
- *
- * An archive past this is not a bug and not silently truncated: `total` says how many rows
- * matched, the browser compares it against what it holds, and the screen says so.
- */
+/** The server's per-request ceiling; larger archives are read in successive pages. */
 export const ARCHIVE_PAGE_LIMIT = 1000
 
 /**
@@ -220,6 +211,7 @@ export const ARCHIVE_PAGE_LIMIT = 1000
 export type ArchiveLoad =
   | { kind: 'ready'; matches: MatchSummary[]; total: number }
   | { kind: 'busy' }
+  | { kind: 'changed' }
   | { kind: 'failed'; message: string }
 
 /** The envelope `GET /matches` answers with. */
@@ -229,22 +221,32 @@ interface MatchPageBody {
 }
 
 /**
- * listArchivedMatches reads the archive's table.
- *
- * NO QUERY PARAMETERS, AND THAT IS THE DESIGN. The server can filter — by map, mode, player,
- * date and coverage — and this browser deliberately does not ask it to: filtering and sorting
- * happen over the rows in hand (`browserLogic.ts`), which is instant, which is testable against
- * fixture rows with no server anywhere near, and which above all is ONE implementation of each
- * rule instead of one in SQL and a second in TypeScript. The server's filters remain for any
- * caller with a bigger archive than a browser can hold.
+ * Read all pages before exposing rows to the local filters and sort. Requests are sequential
+ * so each releases the archive before the next opens it. A failed page discards the partial
+ * result; a changed count or empty intermediate page asks the reader to reload, without retries.
  */
 export async function listArchivedMatches(
   init: { fetch?: typeof fetch; signal?: AbortSignal } = {},
 ): Promise<ArchiveLoad> {
   const doFetch = init.fetch ?? fetch
   try {
-    const body = await getJSON<MatchPageBody>(doFetch, `/matches?limit=${ARCHIVE_PAGE_LIMIT}`, init.signal)
-    return { kind: 'ready', matches: body.matches ?? [], total: body.total }
+    const matches: MatchSummary[] = []
+    let total: number | undefined
+    do {
+      const offset = matches.length === 0 ? '' : `&offset=${matches.length}`
+      const body = await getJSON<MatchPageBody>(
+        doFetch, `/matches?limit=${ARCHIVE_PAGE_LIMIT}${offset}`, init.signal,
+      )
+      if (total !== undefined && body.total !== total) {
+        return { kind: 'changed' }
+      }
+      total = body.total
+      if (!body.matches?.length && matches.length < total) {
+        return { kind: 'changed' }
+      }
+      matches.push(...(body.matches ?? []))
+    } while (matches.length < total)
+    return { kind: 'ready', matches, total }
   } catch (err) {
     if (err instanceof StudyApiError && err.code === 'archive_busy') return { kind: 'busy' }
     return { kind: 'failed', message: err instanceof Error ? err.message : String(err) }

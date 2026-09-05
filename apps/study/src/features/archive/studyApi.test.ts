@@ -15,7 +15,7 @@ import { describe, expect, it } from 'vitest'
 
 import { FIXTURE_REPLAY_DOCUMENT } from '../replay/fixtures/replayFixture'
 
-import { loadArchivedMatch, toScoreboardRow, type ParticipantRow } from './studyApi'
+import { listArchivedMatches, loadArchivedMatch, toScoreboardRow, type ParticipantRow } from './studyApi'
 
 const MATCH = '000d5950'
 
@@ -191,6 +191,50 @@ describe('loadArchivedMatch', () => {
     const { impl, calls } = stubFetch({ '/replay': () => fail(404, 'match_not_found') })
     await loadArchivedMatch('a b/c', { fetch: impl })
     expect(calls[0]).toBe('/study/matches/a%20b%2Fc/replay')
+  })
+})
+
+describe('listArchivedMatches', () => {
+  it('discards partial rows when a capture takes the archive between pages', async () => {
+    const { impl } = stubFetch({
+      '/matches?limit=1000': () => ok({ matches: [SUMMARY], total: 2 }),
+      '/matches?limit=1000&offset=1': () => fail(503, 'archive_busy'),
+    })
+    expect(await listArchivedMatches({ fetch: impl })).toEqual({ kind: 'busy' })
+  })
+
+  it('rejects a changed archive rather than skipping rows across shifted offsets', async () => {
+    const { impl } = stubFetch({
+      '/matches?limit=1000': () => ok({ matches: [SUMMARY], total: 2 }),
+      '/matches?limit=1000&offset=1': () => ok({ matches: [], total: 1 }),
+    })
+    expect(await listArchivedMatches({ fetch: impl })).toEqual({
+      kind: 'changed',
+    })
+  })
+
+  it('fails instead of continuing when a page makes no progress', async () => {
+    let requests = 0
+    const { impl } = stubFetch({
+      '/matches?limit=1000': () => {
+        if (++requests > 1) throw new Error('Unexpected extra request')
+        return ok({ matches: null, total: 1 })
+      },
+    })
+    expect(await listArchivedMatches({ fetch: impl })).toEqual({
+      kind: 'changed',
+    })
+  })
+
+  it('loads every page so filters can find matches beyond the first page', async () => {
+    const later = { ...SUMMARY, match_id: 'later', short_id: 'later', map_name: 'Streets' }
+    const { impl } = stubFetch({
+      '/matches?limit=1000': () => ok({ matches: [SUMMARY], total: 2 }),
+      '/matches?limit=1000&offset=1': () => ok({ matches: [later], total: 2 }),
+    })
+    expect(await listArchivedMatches({ fetch: impl })).toEqual({
+      kind: 'ready', matches: [SUMMARY, later], total: 2,
+    })
   })
 })
 

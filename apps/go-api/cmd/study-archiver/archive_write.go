@@ -64,6 +64,7 @@ func matchColumnValues(rec matchRecord) []any {
 		string(rec.State), nullString(string(rec.SkipReason)),
 		nullString(rec.ArtifactPath), rec.BuiltAt, nullString(rec.DecoderRev),
 		rec.Tracks, rec.Points, rec.Shots, rec.NamedLives, rec.TotalLives,
+		rec.Team0Score, rec.Team1Score,
 	}
 }
 
@@ -83,6 +84,7 @@ func writeMatchRow(ctx context.Context, tx *sql.Tx, rec matchRecord) error {
                 playlist = ?, duration_ms = ?, source_gamertag = ?, film_state = ?,
                 skip_reason = ?, artifact_path = ?, built_at = ?, decoder_rev = ?,
                 tracks = ?, points = ?, shots = ?, named_lives = ?, total_lives = ?,
+                team0_score = ?, team1_score = ?,
                 recorded_at = now()
             WHERE match_id = ?`, args...)
 	} else {
@@ -92,8 +94,8 @@ func writeMatchRow(ctx context.Context, tx *sql.Tx, rec matchRecord) error {
                 match_id, short_id, played_at, map_name, map_module, mode, playlist,
                 duration_ms, source_gamertag, film_state, skip_reason, artifact_path,
                 built_at, decoder_rev, tracks, points, shots, named_lives, total_lives,
-                recorded_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())`, args...)
+                team0_score, team1_score, recorded_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())`, args...)
 	}
 	if err != nil {
 		return fmt.Errorf("recording match %s: %w", rec.MatchID, err)

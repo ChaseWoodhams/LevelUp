@@ -1,4 +1,44 @@
-﻿## [2026-09-05] apps/study: drawing layers, the floor fallback chain, and the archive browser — Complete
+﻿## [2026-09-05] apps/study: #18's browser gets real final scores and a complete archive read — Complete
+
+**Context**: a follow-up pass on #18, done directly against #16/#17/#18's own commit while a
+rate-limited session was down. The prior pass had labelled the browser's numeric column "kills
+by team" because the archive stored no final score at the time — this pass adds one.
+
+**THE SCORE COMES FROM THE REPO'S OWN CANONICAL EXTRACTION, NOT A NEW READING OF THE PAYLOAD.**
+`sync.ExtractRegistry` already produces `Team0Score`/`Team1Score` for the warehouse from the same
+match-stats payload the archiver already reads (`cmd/study-archiver/facts.go`'s own header: "the
+repo's own extraction, not a copy of it" — re-deriving it here would let the archive disagree
+with the warehouse about the same match). The archiver's schema grows two nullable columns via
+`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, applied on every open; an archive from before this
+change reads back with both null rather than needing a migration step, and `study-server` reads
+the same way — `matchColumns` checks `information_schema.columns` once per request and selects
+`NULL, NULL` on an old shape rather than upgrading a database it only has read access to (CLAUDE.md's
+mono-process DuckDB rule: a reader must never write).
+
+**THE BROWSER NOW READS THE WHOLE ARCHIVE, IN PAGES, NOT JUST THE FIRST THOUSAND ROWS.** The
+previous pass took the server's page ceiling as a hard cutoff and said so in the screen; this one
+loops `GET /matches?limit=1000&offset=N` until every row is in hand, so a filter or a sort is
+never silently scoped to whichever page loaded first. The new failure mode that pagination
+introduces — the archive changing between two page reads — gets its own screen state (`changed`)
+rather than a silent skip or a duplicate: a total that moves between requests, or an intermediate
+page that comes back empty while rows are still expected, both refuse the load and ask for a
+reload. Offset pagination is explicitly not a snapshot, and the tests exercise exactly the race
+that would otherwise drop or double a row.
+
+**THE ROW LINK NOW USES THE FULL MATCH ID, NOT THE SHORT ONE.** Two archived matches can share an
+eight-character short-id prefix — `study-server`'s own collision test proves the lookup resolves
+it deterministically — and a table listing many matches is exactly where that collision becomes
+reachable in practice rather than theoretical. Linking by the full id sidesteps it entirely rather
+than trusting the lookup's tie-break to pick the right one every time.
+
+**Results**: `apps/study` — 28 files, 397 tests green (up from 391), typecheck clean. `go test
+./cmd/study-server/... ./cmd/study-archiver/...` green, including a legacy-schema round trip
+(scores written, columns dropped, archive still readable) and a fetch-one test that asserts the
+recorded score is the match's real score and not a sum of kills.
+
+---
+
+## [2026-09-05] apps/study: drawing layers, the floor fallback chain, and the archive browser — Complete
 
 **Context**: issues #16, #17 and #18 of epic #2, in that order. #16 makes the map readable as a
 fight rather than eight dots; #17 puts a legible floor under every match, not only the two maps

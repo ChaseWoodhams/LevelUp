@@ -5,10 +5,9 @@
  * browser meets most often is a capture holding the database, which passes on its own schedule
  * and is made no better by being hammered; the screen says so and offers a button.
  *
- * ONE FETCH FOR THE WHOLE ARCHIVE. Filtering and sorting are `browserLogic.ts`'s, over the rows
- * in hand — so narrowing the table asks nothing of the server, and the archive is borrowed for
- * milliseconds instead of once per keystroke. That matters here more than in most apps: while
- * this server holds the database file, the hourly capture cannot write to it.
+ * The complete archive is loaded in pages once per visit or reload. Filtering and sorting are
+ * local, so narrowing the table asks nothing of the server. Each page releases the database
+ * handle; a capture taking it between requests yields the existing busy state.
  */
 import { useCallback, useEffect, useState } from 'react'
 

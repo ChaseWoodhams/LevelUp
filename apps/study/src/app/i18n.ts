@@ -32,6 +32,8 @@ interface ShellText {
   noArtifactHint: string
   busy: string
   busyHint: string
+  archiveChanged: string
+  archiveChangedHint: string
   failed: string
   failedHint: string
   retry: string
@@ -58,11 +60,7 @@ interface ShellText {
   colPlayers: string
   colScore: string
   colCoverage: string
-  /**
-   * Pourquoi la colonne « score » n'en est pas un. L'archive n'enregistre aucun score final :
-   * elle a les frags, morts et passes de chaque joueur, et le code d'issue brut de Halo. La
-   * colonne dit donc ce qu'elle compte.
-   */
+  /** Scores finaux, dans l'ordre Eagle / Cobra. */
   scoreHint: string
   coverageHint: string
   coverageUnknown: string
@@ -80,6 +78,8 @@ interface ShellText {
 
 export const SHELL_TEXT: Record<Locale, ShellText> = {
   fr: {
+    archiveChanged: 'L’archive a changé pendant le chargement',
+    archiveChangedHint: 'Recharger l’archive pour afficher la liste complète des matchs.',
     documentTitle: 'LevelUp — Étude',
     appName: 'Outil d’étude',
     localeLabel: 'Langue',
@@ -126,10 +126,10 @@ export const SHELL_TEXT: Record<Locale, ShellText> = {
     colMap: 'Carte',
     colMode: 'Mode',
     colPlayers: 'Joueurs',
-    colScore: 'Frags par équipe',
+    colScore: 'Score',
     colCoverage: 'Couverture',
     scoreHint:
-      'Somme des frags de chaque équipe, et rien d’autre : l’archive n’enregistre aucun score final. Sur un mode à objectifs, le score de la partie n’est pas ce nombre.',
+      'Score final Eagle / Cobra. Un score absent des statistiques ou d’une ancienne archive reste inconnu.',
     coverageHint:
       'Part des vies que le décodeur a pu NOMMER — combien du match l’artefact sait rattacher à un joueur. C’est ce qui sépare un match à étudier d’un match dont la donnée est trop pauvre, et c’est pourquoi il se lit avant d’ouvrir.',
     coverageUnknown: 'inconnue',
@@ -148,6 +148,8 @@ export const SHELL_TEXT: Record<Locale, ShellText> = {
     openByIdTitle: 'Ouvrir par identifiant',
   },
   en: {
+    archiveChanged: 'The archive changed while loading',
+    archiveChangedHint: 'Reload the archive to display the complete match list.',
     documentTitle: 'LevelUp — Study',
     appName: 'Study tool',
     localeLabel: 'Language',
@@ -194,10 +196,10 @@ export const SHELL_TEXT: Record<Locale, ShellText> = {
     colMap: 'Map',
     colMode: 'Mode',
     colPlayers: 'Players',
-    colScore: 'Kills by team',
+    colScore: 'Score',
     colCoverage: 'Coverage',
     scoreHint:
-      'Each team’s kills added up, and nothing more: the archive records no final score. In an objective mode, the score of the match is not this number.',
+      'Final score, Eagle / Cobra. Scores missing from match stats or older archives remain unknown.',
     coverageHint:
       'The share of lives the decoder could NAME — how much of the match the artifact can attribute to a player. It is what separates a match worth studying from one whose data is sparse, which is why it is read before opening one.',
     coverageUnknown: 'unknown',

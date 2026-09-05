@@ -80,12 +80,19 @@ describe('the landing screen', () => {
 })
 
 describe('the archive browser', () => {
+  it('shows final objective scores, preserving zero instead of substituting kills', async () => {
+    stubArchive([{ ...ARCHIVED_MATCH, mode: 'CTF', team0_score: 3, team1_score: 0 }])
+    render(<App />)
+    expect(await screen.findByRole('columnheader', { name: 'Score' })).toBeDefined()
+    expect(within(screen.getByRole('table')).getByText('3 – 0')).toBeDefined()
+  })
+
   it('lists what was archived, and every row leads to its replay', async () => {
     stubArchive([ARCHIVED_MATCH])
     render(<App />)
 
     const link = await screen.findByRole('link', { name: 'Cliffhanger' })
-    expect(link.getAttribute('href')).toBe('#/match/000d5950')
+    expect(link.getAttribute('href')).toBe('#/match/000d5950-8b0e-4a2c-9a1f-1c2d3e4f5a6b')
     // The coverage is read BEFORE the match is opened: that is what the column is for.
     expect(screen.getByText('86 %')).toBeDefined()
     // Scoped to the table: the player's name is also one of the filter's options, which is the

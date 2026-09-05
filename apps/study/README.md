@@ -46,23 +46,29 @@ reviewed by somebody who has captured nothing yet.
 ## The browser
 
 The landing screen lists everything in the archive — date, map, mode, the players as
-team-coloured chips, each side's kills, and the **coverage**: the share of lives the decoder
+team-coloured chips, final team scores, and the **coverage**: the share of lives the decoder
 could name. Coverage is shown before a match is opened because it is what separates a match
 worth studying from one whose data is too thin to study, and finding that out after opening one
 is finding it out too late. An artifact that reported no lives at all has an *unknown* coverage,
 which is not zero and which no minimum-coverage filter admits.
 
-The kills column is **not a score**: the archive records each player's kills, deaths and assists
-and Halo's raw outcome code, and no final score at all. On an objective mode the two differ, so
-the column says what it counts.
+The score column shows Eagle / Cobra final game scores from match stats, including zero.
+The archiver adds nullable score columns on its next open; the server also reads older schemas
+without modifying them. Existing matches without captured scores display unknown values.
+This migration does not backfill settled matches: those retain unknown scores unless their
+match stats are captured again. Offline replay rebuilds preserve any scores already recorded.
 
 Filtering and sorting happen **in the browser**, over the rows already loaded
 (`features/archive/browserLogic.ts`, pure and unit-tested against fixture rows). The server can
 filter too and still does for any other caller; doing it here means the table answers a
-keystroke instantly, and it means each rule — what a bare date means, what an unknown coverage
-does to a floor — exists once instead of in SQL and again in TypeScript. One read brings back up
-to a thousand rows; past that the screen says how many the archive holds and how many it is
-filtering.
+keystroke instantly. The client reads successive pages of up to a thousand rows before showing
+the table, so filters and sorting cover the complete archive. If a capture takes the database
+between pages, the screen offers a retry rather than showing a partial list. A changed total
+or an empty intermediate page also asks the reader to reload. Offset pagination is not a
+database snapshot: updates that preserve the total can still occur between requests.
+
+Players without a recorded gamertag can be selected by XUID. Match links use the full match
+identifier, so matches sharing an eight-character prefix still open their own replay.
 
 ## The viewer
 

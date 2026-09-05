@@ -18,7 +18,7 @@ import {
   facetsOf,
   filterMatches,
   sortMatches,
-  teamTalliesOf,
+  archiveTeamsOf,
   type ArchiveFilter,
 } from './browserLogic'
 import type { MatchSummary, ParticipantRow } from './studyApi'
@@ -171,6 +171,13 @@ describe('sortMatches', () => {
 })
 
 describe('facetsOf', () => {
+  it('lets the reader filter by a player whose gamertag was not recorded', () => {
+    const unnamed = match({ ...CLIFF, participants: [player('42', '', 't0', 3)] })
+    const rows = [unnamed, STREETS]
+    expect(facetsOf(rows).players).toEqual(['42', 'Rival', 'Third'])
+    expect(filterMatches(rows, filter({ player: '42' }))).toEqual([unnamed])
+  })
+
   it('offers exactly what the archive holds, sorted and without repeats', () => {
     const facets = facetsOf(ROWS)
     expect(facets.maps).toEqual(['Aquarius', 'Cliffhanger', 'Streets'])
@@ -183,24 +190,20 @@ describe('facetsOf', () => {
   })
 })
 
-describe('teamTalliesOf', () => {
-  it('groups the players by side and sums their kills', () => {
-    const tallies = teamTalliesOf(CLIFF)
-    expect(tallies.map((t) => t.side)).toEqual(['t0', 't1'])
-    expect(tallies.map((t) => t.kills)).toEqual([15, 9])
+describe('archiveTeamsOf', () => {
+  it('groups the players by side', () => {
+    const teams = archiveTeamsOf(CLIFF)
+    expect(teams.map((t) => t.side)).toEqual(['t0', 't1'])
   })
 
   it('keeps the players the archive named no team for in their own bucket, last', () => {
-    const tallies = teamTalliesOf(AQUARIUS)
-    expect(tallies.map((t) => t.side)).toEqual(['t0', null])
-    // A player with no counters contributes nothing rather than being counted as a zero-kill
-    // member of somebody's team.
-    expect(tallies[1].kills).toBe(0)
-    expect(tallies[1].players.map((p) => p.gamertag)).toEqual(['Inconnu'])
+    const teams = archiveTeamsOf(AQUARIUS)
+    expect(teams.map((t) => t.side)).toEqual(['t0', null])
+    expect(teams[1].players.map((p) => p.gamertag)).toEqual(['Inconnu'])
   })
 
   it('answers nothing for a match whose roster was never recorded', () => {
-    expect(teamTalliesOf(BARE)).toEqual([])
+    expect(archiveTeamsOf(BARE)).toEqual([])
   })
 
   /**
@@ -218,6 +221,6 @@ describe('teamTalliesOf', () => {
       colorIndex: i,
     }))
 
-    expect(teamTalliesOf(AQUARIUS).map((t) => t.side)).toEqual(groupByTeam(players).map((g) => g.side))
+    expect(archiveTeamsOf(AQUARIUS).map((t) => t.side)).toEqual(groupByTeam(players).map((g) => g.side))
   })
 })

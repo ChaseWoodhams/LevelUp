@@ -199,32 +199,22 @@ export function facetsOf(rows: readonly MatchSummary[]): ArchiveFacets {
     if (row.map_name) maps.add(row.map_name)
     if (row.mode) modes.add(row.mode)
     for (const p of row.participants ?? []) {
-      if (p.gamertag) players.add(p.gamertag)
+      players.add(p.gamertag || p.xuid)
     }
   }
   const sorted = (s: Set<string>) => [...s].sort((a, b) => a.localeCompare(b))
   return { maps: sorted(maps), modes: sorted(modes), players: sorted(players) }
 }
 
-/** One side of a match, as the browser shows it: who was on it, and what they scored. */
-export interface TeamTally {
+/** One side of a match, as the browser shows it: who was on it. */
+export interface ArchiveTeam {
   /** The archive's own `team_side` label, or null for players it named no team for. */
   side: string | null
   players: ParticipantRow[]
-  /**
-   * Kills, summed over the side.
-   *
-   * IT IS NOT THE MATCH SCORE, and it is not labelled as one. The archive records no final
-   * score — the archiver stores each player's kills, deaths, assists and Halo's raw outcome
-   * code, and nothing else — so the number here is what it says it is: how many kills that side
-   * got. A "score" column filled with a kill total would read as the scoreboard on every mode
-   * where the two differ, which is every objective mode there is.
-   */
-  kills: number
 }
 
 /**
- * teamTalliesOf groups a row's players by side, IN THE SAME ORDER THE REPLAY VIEW USES.
+ * archiveTeamsOf groups a row's players by side, IN THE SAME ORDER THE REPLAY VIEW USES.
  *
  * That order is what makes the chips' colours mean the same thing on both screens: the replay
  * paints the Nth group with the Nth comparison token (`teamColors.teamTokenAt`), so a browser
@@ -232,18 +222,17 @@ export interface TeamTally {
  * the map. The rule — sides sorted by label, the team-less bucket last — is `rosterLogic`'s
  * `groupByTeam`, and `browserLogic.test.ts` pins the two together against the same input.
  */
-export function teamTalliesOf(row: MatchSummary): TeamTally[] {
-  const bySide = new Map<string, TeamTally>()
+export function archiveTeamsOf(row: MatchSummary): ArchiveTeam[] {
+  const bySide = new Map<string, ArchiveTeam>()
   for (const p of row.participants ?? []) {
     const side = p.team_side ?? null
     const key = side ?? ''
-    let tally = bySide.get(key)
-    if (!tally) {
-      tally = { side, players: [], kills: 0 }
-      bySide.set(key, tally)
+    let team = bySide.get(key)
+    if (!team) {
+      team = { side, players: [] }
+      bySide.set(key, team)
     }
-    tally.players.push(p)
-    tally.kills += p.kills ?? 0
+    team.players.push(p)
   }
   // '￿' sorts after every real label, which puts the team-less bucket last — the same
   // trick, and the same outcome, as `groupByTeam`.

@@ -99,7 +99,9 @@ CREATE TABLE IF NOT EXISTS watchlist (
     xuid         VARCHAR,
     added_at     TIMESTAMPTZ NOT NULL,
     last_checked TIMESTAMPTZ
-);`
+);
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS team0_score INTEGER;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS team1_score INTEGER;`
 
 // archive is an open handle on the archive database.
 type archive struct {
@@ -142,6 +144,8 @@ func (a *archive) Close() error {
 // matchRecord is one row of `matches`. It is the archive's view of an outcome: what was
 // played, what state its film is in, and what the decoder got out of it.
 type matchRecord struct {
+	Team0Score *int
+	Team1Score *int
 	MatchID    string
 	ShortID    string
 	PlayedAt   *time.Time
@@ -198,10 +202,11 @@ func (a *archive) recorded(ctx context.Context, matchID string) (matchRecord, bo
 	)
 	err := a.db.QueryRow(ctx, `
         SELECT short_id, map_name, map_module, film_state, skip_reason, artifact_path,
-               tracks, points, shots, named_lives, total_lives
+               tracks, points, shots, named_lives, total_lives, team0_score, team1_score
         FROM matches WHERE match_id = ?`, matchID).
 		Scan(&rec.ShortID, &mapName, &mapModule, &state, &skip, &artifact,
-			&rec.Tracks, &rec.Points, &rec.Shots, &rec.NamedLives, &rec.TotalLives)
+			&rec.Tracks, &rec.Points, &rec.Shots, &rec.NamedLives, &rec.TotalLives,
+			&rec.Team0Score, &rec.Team1Score)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return matchRecord{}, false, nil

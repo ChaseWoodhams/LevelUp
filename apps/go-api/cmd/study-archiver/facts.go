@@ -26,6 +26,8 @@ import (
 
 // matchFacts is the archive's reading of one match-stats payload.
 type matchFacts struct {
+	Team0Score *int
+	Team1Score *int
 	// MapName is the DISPLAY name; it is also what the quant-bounds catalogue is keyed
 	// by, so map resolution reads it from here rather than digging into the payload
 	// a second time.
@@ -47,6 +49,7 @@ func readMatchFacts(stats map[string]any, sourceGT string) (matchFacts, error) {
 		return matchFacts{}, fmt.Errorf("unreadable match stats: %w", err)
 	}
 	facts := matchFacts{
+		Team0Score: reg.Team0Score, Team1Score: reg.Team1Score,
 		MapName:  derefStr(reg.MapName),
 		Mode:     derefStr(reg.GameVariantName),
 		Playlist: derefStr(reg.PlaylistName),

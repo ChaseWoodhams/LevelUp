@@ -19,7 +19,7 @@
 import { tokenCssVar } from '@/lib/accessibility/semantic-tokens'
 import type { Locale } from '@/lib/i18n/locale'
 
-import { teamTalliesOf, type ArchiveSort, type SortKey } from '../features/archive/browserLogic'
+import { archiveTeamsOf, type ArchiveSort, type SortKey } from '../features/archive/browserLogic'
 import type { MatchSummary } from '../features/archive/studyApi'
 import { teamTokenAt } from '../features/viewer/teamColors'
 
@@ -109,8 +109,8 @@ function SortableHeader({
  */
 function MatchRow({ row, locale }: { row: MatchSummary; locale: Locale }) {
   const t = SHELL_TEXT[locale]
-  const href = matchHref(row.short_id)
-  const tallies = teamTalliesOf(row)
+  const href = matchHref(row.match_id)
+  const teams = archiveTeamsOf(row)
   return (
     <tr
       className="cursor-pointer border-b border-border last:border-0 hover:bg-muted"
@@ -129,8 +129,8 @@ function MatchRow({ row, locale }: { row: MatchSummary; locale: Locale }) {
       <td className="px-3 py-2 text-muted-foreground">{row.mode || t.unknownValue}</td>
       <td className="px-3 py-2">
         <div className="flex flex-wrap gap-1">
-          {tallies.map((tally, index) =>
-            tally.players.map((p) => (
+          {teams.map((team, index) =>
+            team.players.map((p) => (
               <span
                 key={p.xuid}
                 className="rounded-md border border-border px-1.5 py-0.5 text-xs"
@@ -143,12 +143,7 @@ function MatchRow({ row, locale }: { row: MatchSummary; locale: Locale }) {
         </div>
       </td>
       <td className="whitespace-nowrap px-3 py-2 font-mono text-xs" title={t.scoreHint}>
-        {tallies.map((tally, index) => (
-          <span key={tally.side ?? 'none'} style={{ color: tokenCssVar(teamTokenAt(index)) }}>
-            {index > 0 ? ' – ' : ''}
-            {tally.kills}
-          </span>
-        ))}
+        {`${row.team0_score ?? t.unknownValue} – ${row.team1_score ?? t.unknownValue}`}
       </td>
       <td className="whitespace-nowrap px-3 py-2">
         <Coverage value={row.coverage} locale={locale} />
@@ -175,4 +170,3 @@ function Coverage({ value, locale }: { value: number | undefined; locale: Locale
   }
   return <span title={t.coverageHint}>{formatShare(value, locale)}</span>
 }
-

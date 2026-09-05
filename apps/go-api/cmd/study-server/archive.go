@@ -209,13 +209,16 @@ func (s *archiveSource) heldForTest() bool {
 // matchSummary is one row of the archive browser: what was played, and what the decoder got
 // out of it. Everything here is a fact the archiver recorded.
 type matchSummary struct {
-	MatchID   string     `json:"match_id"`
-	ShortID   string     `json:"short_id"`
-	PlayedAt  *time.Time `json:"played_at,omitempty"`
-	MapName   string     `json:"map_name,omitempty"`
-	MapModule string     `json:"map_module,omitempty"`
-	Mode      string     `json:"mode,omitempty"`
-	Playlist  string     `json:"playlist,omitempty"`
+	// Final game scores, not participant kills or personal score. Absent in older archives.
+	Team0Score *int       `json:"team0_score,omitempty"`
+	Team1Score *int       `json:"team1_score,omitempty"`
+	MatchID    string     `json:"match_id"`
+	ShortID    string     `json:"short_id"`
+	PlayedAt   *time.Time `json:"played_at,omitempty"`
+	MapName    string     `json:"map_name,omitempty"`
+	MapModule  string     `json:"map_module,omitempty"`
+	Mode       string     `json:"mode,omitempty"`
+	Playlist   string     `json:"playlist,omitempty"`
 	// DurationMS is milliseconds, the replay document's own clock, so the two can be
 	// compared without a unit change.
 	DurationMS *int64 `json:"duration_ms,omitempty"`
@@ -271,6 +274,10 @@ const summaryColumns = `m.match_id, m.short_id, m.played_at, m.map_name, m.map_m
 
 // listMatches runs a filter and returns one page of archived matches, newest first.
 func (a *archive) listMatches(ctx context.Context, f matchFilter) (matchPage, error) {
+	columns, err := a.matchColumns(ctx)
+	if err != nil {
+		return matchPage{}, err
+	}
 	where, args := f.where()
 
 	page := matchPage{Matches: []matchSummary{}}
@@ -283,7 +290,7 @@ func (a *archive) listMatches(ctx context.Context, f matchFilter) (matchPage, er
 	// rather than heading a list sorted by "most recent". match_id breaks ties, so two
 	// matches played in the same second keep a stable order across pages.
 	rows, err := a.db.QueryContext(ctx, `
-        SELECT `+summaryColumns+`
+        SELECT `+columns+`
         FROM matches m
         WHERE `+where+`
         ORDER BY m.played_at DESC NULLS LAST, m.match_id
@@ -365,8 +372,12 @@ func (a *archive) attachRosters(ctx context.Context, matches []matchSummary) err
 // Built or not, like the roster: `map_module` is a fact about the match, not about whether the
 // decoder managed to produce an artifact from its film.
 func (a *archive) getMatch(ctx context.Context, id string) (matchSummary, error) {
+	columns, err := a.matchColumns(ctx)
+	if err != nil {
+		return matchSummary{}, err
+	}
 	row := a.db.QueryRowContext(ctx, `
-        SELECT `+summaryColumns+`
+        SELECT `+columns+`
         FROM matches m
         WHERE (m.match_id = ? OR m.short_id = ?)
         ORDER BY CASE WHEN m.match_id = ? THEN 0 ELSE 1 END, m.match_id
@@ -401,7 +412,8 @@ func scanMatch(rows rowScanner) (matchSummary, error) {
 	)
 	if err := rows.Scan(&m.MatchID, &m.ShortID, &playedAt, &mapName, &mapModule, &mode,
 		&playlist, &durationMS, &sourceGT, &builtAt,
-		&m.Tracks, &m.Points, &m.Shots, &m.NamedLives, &m.TotalLives, &coverage); err != nil {
+		&m.Tracks, &m.Points, &m.Shots, &m.NamedLives, &m.TotalLives, &coverage,
+		&m.Team0Score, &m.Team1Score); err != nil {
 		return matchSummary{}, fmt.Errorf("scanning an archived match: %w", err)
 	}
 	m.MapName, m.MapModule = mapName.String, mapModule.String

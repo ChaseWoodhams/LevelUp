@@ -349,6 +349,7 @@ func buildArtifact(ctx context.Context, d deps, out outcome, mapInfo matchMap) (
 // recordOutcome writes the archive row for whatever just happened.
 func recordOutcome(ctx context.Context, d deps, out outcome, facts matchFacts) error {
 	rec := matchRecord{
+		Team0Score: facts.Team0Score, Team1Score: facts.Team1Score,
 		MatchID: out.MatchID, ShortID: out.ShortID,
 		PlayedAt: facts.PlayedAt, MapName: out.MapName, MapModule: out.MapModule,
 		Mode: facts.Mode, Playlist: facts.Playlist, DurationMS: facts.DurationMS,

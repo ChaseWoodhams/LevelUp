@@ -57,6 +57,9 @@ export function HomeScreen({ locale }: HomeScreenProps) {
         // Not a fault, and not painted like one: a capture is writing, and it will finish.
         <Notice tone="info" title={t.busy} hint={t.busyHint} action={retry} />
       )}
+      {screen.kind === 'changed' && (
+        <Notice tone="info" title={t.archiveChanged} hint={t.archiveChangedHint} action={retry} />
+      )}
       {screen.kind === 'failed' && (
         <Notice
           tone="destructive"

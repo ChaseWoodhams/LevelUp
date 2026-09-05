@@ -78,7 +78,7 @@ type participantRow struct {
 // stats payload happened to list.
 func (a *archive) readParticipants(ctx context.Context, matchID string) ([]participantRow, error) {
 	rows, err := a.db.QueryContext(ctx, `
-        SELECT xuid, gamertag, team, kills, deaths, assists
+        SELECT `+participantColumns+`
         FROM participants WHERE match_id = ?
         ORDER BY team NULLS LAST, xuid`, matchID)
 	if err != nil {
@@ -100,22 +100,52 @@ func (a *archive) readParticipants(ctx context.Context, matchID string) ([]parti
 	return out, nil
 }
 
-func scanParticipant(rows *sql.Rows) (participantRow, error) {
-	var (
-		p               participantRow
-		gamertag        sql.NullString
-		team, kills     sql.NullInt64
-		deaths, assists sql.NullInt64
-	)
-	if err := rows.Scan(&p.XUID, &gamertag, &team, &kills, &deaths, &assists); err != nil {
-		return participantRow{}, err
-	}
-	p.Gamertag = gamertag.String
-	if team.Valid {
-		side := fmt.Sprintf(teamSideFormat, team.Int64)
+// participantColumns is what a participant is read from, in the order the scanners below expect.
+// One list for both readers — the roster of one match, and the rosters of a page of them.
+const participantColumns = `xuid, gamertag, team, kills, deaths, assists`
+
+// participantFields holds the nullable columns as SQL hands them over, before they become the
+// row's pointers. Shared so that "an unknown value is null, never a zero" is decided ONCE,
+// however the row was queried.
+type participantFields struct {
+	gamertag        sql.NullString
+	team, kills     sql.NullInt64
+	deaths, assists sql.NullInt64
+}
+
+// dest is the scan target list, in `participantColumns` order.
+func (f *participantFields) dest(p *participantRow) []any {
+	return []any{&p.XUID, &f.gamertag, &f.team, &f.kills, &f.deaths, &f.assists}
+}
+
+func (f participantFields) into(p *participantRow) {
+	p.Gamertag = f.gamertag.String
+	if f.team.Valid {
+		side := fmt.Sprintf(teamSideFormat, f.team.Int64)
 		p.TeamSide = &side
 	}
-	p.Kills, p.Deaths, p.Assists = nullInt(kills), nullInt(deaths), nullInt(assists)
+	p.Kills, p.Deaths, p.Assists = nullInt(f.kills), nullInt(f.deaths), nullInt(f.assists)
+}
+
+func scanParticipant(rows *sql.Rows) (participantRow, error) {
+	var p participantRow
+	var f participantFields
+	if err := rows.Scan(f.dest(&p)...); err != nil {
+		return participantRow{}, err
+	}
+	f.into(&p)
+	return p, nil
+}
+
+// scanPageParticipant reads a participant WITH the match it belongs to — the shape the browser's
+// one-query-per-page roster read comes back in (cf. archive.attachRosters).
+func scanPageParticipant(rows *sql.Rows, matchID *string) (participantRow, error) {
+	var p participantRow
+	var f participantFields
+	if err := rows.Scan(append([]any{matchID}, f.dest(&p)...)...); err != nil {
+		return participantRow{}, fmt.Errorf("scanning a participant of a page of matches: %w", err)
+	}
+	f.into(&p)
 	return p, nil
 }
 

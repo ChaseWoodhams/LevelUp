@@ -201,9 +201,12 @@ une passe, puis sortie. `status` et `rebuild` ne font AUCUN appel réseau et ne 
 aucun credential. Liste des joueurs suivis : `watchlist.toml` à la racine (git-ignoré,
 modèle `watchlist.example.toml`).
 
-`study-server` expose l'archive en LECTURE SEULE (`GET /matches`,
+`study-server` expose l'archive en LECTURE SEULE (`GET /matches`, `/matches/{match_id}`,
 `/matches/{match_id}/replay`, `/matches/{match_id}/participants`). Il écoute sur la boucle
 locale par défaut — l'archive contient les films et rosters de parties d'autrui.
+`GET /matches` porte le roster de chaque ligne (une seule requête pour la page) ; la fiche
+`GET /matches/{match_id}` ne le porte pas — l'écran de rejeu lit `/participants`, dont l'échec
+doit faire échouer l'écran, là où une fiche absente ne coûte que l'image calibrée du sol.
 L'artefact est résolu par `PathResolver.ReplayArtifactPath` (jamais par la colonne
 `artifact_path`, qui est un chemin ABSOLU de la machine qui l'a construit) et servi
 tel quel, octet pour octet : la garde de version de schéma est côté client.

@@ -42,6 +42,40 @@ interface ShellText {
    */
   unsupported: (found: number, supported: number) => string
   unsupportedHint: string
+  /** Navigateur d'archive : filtres, colonnes, états vides. */
+  browserTitle: string
+  filterMap: string
+  filterMode: string
+  filterPlayer: string
+  filterFrom: string
+  filterTo: string
+  filterCoverage: string
+  filterAny: string
+  filterClear: string
+  colDate: string
+  colMap: string
+  colMode: string
+  colPlayers: string
+  colScore: string
+  colCoverage: string
+  /**
+   * Pourquoi la colonne « score » n'en est pas un. L'archive n'enregistre aucun score final :
+   * elle a les frags, morts et passes de chaque joueur, et le code d'issue brut de Halo. La
+   * colonne dit donc ce qu'elle compte.
+   */
+  scoreHint: string
+  coverageHint: string
+  coverageUnknown: string
+  coverageUnknownHint: string
+  unknownValue: string
+  /** Combien de lignes sont affichées, et sur combien. */
+  shownOf: (shown: number, total: number) => string
+  truncated: (loaded: number, total: number) => string
+  emptyArchive: string
+  emptyArchiveHint: string
+  emptyFiltered: string
+  emptyFilteredHint: string
+  openByIdTitle: string
 }
 
 export const SHELL_TEXT: Record<Locale, ShellText> = {
@@ -79,6 +113,39 @@ export const SHELL_TEXT: Record<Locale, ShellText> = {
       `Artefact en version de schéma ${found} ; ce lecteur lit la version ${supported}.`,
     unsupportedHint:
       'Rien n’est dessiné, volontairement : lire un document d’une autre version avec ces règles-ci produirait une carte plausible et fausse. Reconstruire l’artefact (`study-archiver rebuild <match>`) le réécrit dans la version courante.',
+    browserTitle: 'Matchs archivés',
+    filterMap: 'Carte',
+    filterMode: 'Mode',
+    filterPlayer: 'Joueur',
+    filterFrom: 'Du',
+    filterTo: 'Au',
+    filterCoverage: 'Couverture minimale',
+    filterAny: 'Toutes',
+    filterClear: 'Effacer les filtres',
+    colDate: 'Date',
+    colMap: 'Carte',
+    colMode: 'Mode',
+    colPlayers: 'Joueurs',
+    colScore: 'Frags par équipe',
+    colCoverage: 'Couverture',
+    scoreHint:
+      'Somme des frags de chaque équipe, et rien d’autre : l’archive n’enregistre aucun score final. Sur un mode à objectifs, le score de la partie n’est pas ce nombre.',
+    coverageHint:
+      'Part des vies que le décodeur a pu NOMMER — combien du match l’artefact sait rattacher à un joueur. C’est ce qui sépare un match à étudier d’un match dont la donnée est trop pauvre, et c’est pourquoi il se lit avant d’ouvrir.',
+    coverageUnknown: 'inconnue',
+    coverageUnknownHint:
+      'L’artefact n’a rapporté aucune vie : il n’y avait rien à rattacher. « Inconnue » n’est pas zéro, et aucun seuil ne l’accepte.',
+    unknownValue: 'inconnu',
+    shownOf: (shown, total) => `${shown} match(s) sur ${total}`,
+    truncated: (loaded, total) =>
+      `L’archive contient ${total} matchs ; ce tableau en a chargé les ${loaded} plus récents, et les filtres portent sur ceux-là.`,
+    emptyArchive: 'Aucun match archivé pour l’instant',
+    emptyArchiveHint:
+      'L’archive est vide : capturer un film avec `study-archiver fetch-one --xuid <xuid> <matchId>`, ou lancer une passe sur la liste de suivi avec `study-archiver watch`.',
+    emptyFiltered: 'Aucun match ne correspond à ces filtres',
+    emptyFilteredHint:
+      'L’archive n’est pas vide — c’est le filtrage qui ne laisse rien passer. Élargir la période, baisser la couverture minimale, ou tout effacer.',
+    openByIdTitle: 'Ouvrir par identifiant',
   },
   en: {
     documentTitle: 'LevelUp — Study',
@@ -114,5 +181,38 @@ export const SHELL_TEXT: Record<Locale, ShellText> = {
       `Artifact in schema version ${found}; this viewer reads version ${supported}.`,
     unsupportedHint:
       'Nothing is drawn, deliberately: reading a document of another version with these rules would produce a plausible map that is wrong. Rebuilding the artifact (`study-archiver rebuild <match>`) writes it out in the current version.',
+    browserTitle: 'Archived matches',
+    filterMap: 'Map',
+    filterMode: 'Mode',
+    filterPlayer: 'Player',
+    filterFrom: 'From',
+    filterTo: 'To',
+    filterCoverage: 'Minimum coverage',
+    filterAny: 'Any',
+    filterClear: 'Clear the filters',
+    colDate: 'Date',
+    colMap: 'Map',
+    colMode: 'Mode',
+    colPlayers: 'Players',
+    colScore: 'Kills by team',
+    colCoverage: 'Coverage',
+    scoreHint:
+      'Each team’s kills added up, and nothing more: the archive records no final score. In an objective mode, the score of the match is not this number.',
+    coverageHint:
+      'The share of lives the decoder could NAME — how much of the match the artifact can attribute to a player. It is what separates a match worth studying from one whose data is sparse, which is why it is read before opening one.',
+    coverageUnknown: 'unknown',
+    coverageUnknownHint:
+      'The artifact reported no lives at all: there was nothing to attach anything to. "Unknown" is not zero, and no floor admits it.',
+    unknownValue: 'unknown',
+    shownOf: (shown, total) => `${shown} of ${total} matches`,
+    truncated: (loaded, total) =>
+      `The archive holds ${total} matches; this table loaded the ${loaded} most recent, and the filters apply to those.`,
+    emptyArchive: 'Nothing archived yet',
+    emptyArchiveHint:
+      'The archive is empty: capture a film with `study-archiver fetch-one --xuid <xuid> <matchId>`, or run a pass over the watchlist with `study-archiver watch`.',
+    emptyFiltered: 'No match answers these filters',
+    emptyFilteredHint:
+      'The archive is not empty — the filtering is what lets nothing through. Widen the dates, lower the minimum coverage, or clear everything.',
+    openByIdTitle: 'Open by identifier',
   },
 }

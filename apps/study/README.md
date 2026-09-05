@@ -28,7 +28,7 @@ Three screens, chosen by the URL hash:
 
 | Hash | Screen |
 |---|---|
-| `#/` | The way in: a field taking a match identifier, short or full form |
+| `#/` | The archive browser: every archived match, filterable, sortable — plus a field taking a match identifier, short or full form |
 | `#/match/<id>` | One archived match, fetched from `study-server` and drawn |
 | `#/sample` | The hand-written artifact, drawn through the very same viewer |
 
@@ -43,7 +43,26 @@ inventories, and the coverage banner. **No real match data is involved** — eve
 file was written to put a layer on screen. It exists so the viewer can be looked at and
 reviewed by somebody who has captured nothing yet.
 
-The archive browser — the table with filters on map, mode, player and date — is separate work.
+## The browser
+
+The landing screen lists everything in the archive — date, map, mode, the players as
+team-coloured chips, each side's kills, and the **coverage**: the share of lives the decoder
+could name. Coverage is shown before a match is opened because it is what separates a match
+worth studying from one whose data is too thin to study, and finding that out after opening one
+is finding it out too late. An artifact that reported no lives at all has an *unknown* coverage,
+which is not zero and which no minimum-coverage filter admits.
+
+The kills column is **not a score**: the archive records each player's kills, deaths and assists
+and Halo's raw outcome code, and no final score at all. On an objective mode the two differ, so
+the column says what it counts.
+
+Filtering and sorting happen **in the browser**, over the rows already loaded
+(`features/archive/browserLogic.ts`, pure and unit-tested against fixture rows). The server can
+filter too and still does for any other caller; doing it here means the table answers a
+keystroke instantly, and it means each rule — what a bare date means, what an unknown coverage
+does to a floor — exists once instead of in SQL and again in TypeScript. One read brings back up
+to a thousand rows; past that the screen says how many the archive holds and how many it is
+filtering.
 
 ## The viewer
 
@@ -63,6 +82,24 @@ The archive browser — the table with filters on map, mode, player and date —
   The digits are drawn as buttons carrying their player's name, because the roster panel is a
   verbatim copy and cannot be given numbers from here — a mapping nobody can see is a shortcut
   nobody uses.
+- **Trails that fade.** Each life leaves a trail over a window the reader picks (3 s, 6 s, or
+  the whole life), graded from bright at the player to faint at the far end — which is what turns
+  a path into a movement with a direction. This app draws its own trail and turns the copied
+  layer's flat one off (`features/viewer/studyDraw.ts`, `trailLogic.ts`).
+- **Shots, throws and arcs.** A shot is a short ray from the shooter along their aim, never a
+  line joining two players: the film does not record who was hit. It only records shots that
+  *deal damage*, so there is no missed shot in this data and nothing here is framed as accuracy.
+  A grenade throw is a dot at its origin; the projectile flight replicated from it is drawn as an
+  arc, in the thrower's colour where the film lets the two be matched and neutral where it does
+  not (`features/viewer/grenadeArcs.ts`). The last point of a flight is not a detonation — the
+  film carries no such event.
+- **The floor, in three fallbacks.** Reconstructed structure geometry when the artifact carries
+  it; otherwise a manually calibrated top-down image for that map; otherwise a plain metric grid.
+  Which one is in use is written under the map, always. Calibration is manual, per map, once:
+  an image under `public/maps/` plus the world coordinates of its corners, in
+  `features/viewer/mapImages.config.ts` — which carries the procedure. Nothing derives a scale
+  from a match: a replay's bounds are the area those players covered, so fitting an image to them
+  would stretch the same map differently in every match.
 - **Schema-version guard.** An artifact whose `schemaVersion` this viewer does not recognise
   renders a message and draws nothing at all — the refusal is structural, not a banner over a
   map (`src/features/archive/schemaVersion.ts`).

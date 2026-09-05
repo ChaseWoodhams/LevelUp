@@ -1,8 +1,9 @@
 package main
 
-// handlers.go — THE THREE ROUTES.
+// handlers.go — THE FOUR ROUTES.
 //
 //	GET /matches                              the archive browser's table
+//	GET /matches/{match_id}                   one row of that table, on its own
 //	GET /matches/{match_id}/replay            the artifact, byte for byte
 //	GET /matches/{match_id}/participants      who played, in the scoreboard's shape
 //
@@ -81,6 +82,8 @@ func (h *studyHandler) mount(r chi.Router) {
 	api := humacore.NewAPI(r)
 	huma.Get(api, "/matches", h.handleListMatches,
 		humacore.Op("listArchivedMatches", "Matchs archivés de l'outil d'étude", "study"))
+	huma.Get(api, "/matches/{match_id}", h.handleGetMatch,
+		humacore.Op("getArchivedMatch", "Fiche d'un match archivé", "study"))
 	huma.Get(api, "/matches/{match_id}/replay", h.handleGetReplay,
 		humacore.Op("getArchivedMatchReplay", "Artefact de rejeu d'un match archivé", "study"))
 	huma.Get(api, "/matches/{match_id}/participants", h.handleGetParticipants,
@@ -123,9 +126,26 @@ func (h *studyHandler) handleListMatches(ctx context.Context, in *listMatchesInp
 	return &listMatchesOutput{Body: page}, nil
 }
 
-// matchInput is the path parameter shared by the two single-match routes.
+// matchInput is the path parameter shared by the three single-match routes.
 type matchInput struct {
 	MatchID string `path:"match_id"`
+}
+
+type matchOutput struct{ Body matchSummary }
+
+// handleGetMatch serves the summary of ONE match, in the same shape a row of the browser has.
+//
+// The viewer asks for it because the replay artifact does not carry a map (cf. getMatch): the
+// floor's calibrated-image fallback is chosen per map module, and this is where that name comes
+// from. Served for any RECORDED match, built or not — the map is a fact about the match.
+func (h *studyHandler) handleGetMatch(ctx context.Context, in *matchInput) (*matchOutput, error) {
+	m, err := withArchive(ctx, h.archive, func(a *archive) (matchSummary, error) {
+		return a.getMatch(ctx, in.MatchID)
+	})
+	if err != nil {
+		return nil, archiveError(ctx, err)
+	}
+	return &matchOutput{Body: m}, nil
 }
 
 // replayOutput carries the artifact's bytes UNTOUCHED. Huma writes a `[]byte` body straight

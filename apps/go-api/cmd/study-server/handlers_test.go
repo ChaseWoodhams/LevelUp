@@ -1,6 +1,6 @@
 package main
 
-// handlers_test.go — the three routes, against a real archive and a real artifact on disk.
+// handlers_test.go — the four routes, against a real archive and a real artifact on disk.
 //
 // The shape follows internal/api/handlers/replay_test.go, the closest existing handler test:
 // a chi router built the way the server builds it, httptest requests through the whole Huma
@@ -104,6 +104,50 @@ func TestListMatchesRoute_Filters(t *testing.T) {
 	}
 }
 
+// TestListMatchesRoute_CarriesItsRosters — the browser's rows say who played.
+//
+// Without them the table cannot colour a player chip or tell two matches on the same map apart,
+// and the alternative — a roster request per row — would be two hundred round trips to a
+// database this server holds for as short a time as it can.
+func TestListMatchesRoute_CarriesItsRosters(t *testing.T) {
+	w := get(t, newTestServer(t), "/matches")
+	expectStatus(t, w, http.StatusOK, "")
+	page := decode[matchPage](t, w)
+
+	byMap := map[string][]participantRow{}
+	for _, m := range page.Matches {
+		byMap[m.MapName] = m.Participants
+	}
+	if got := len(byMap["Cliffhanger"]); got != 2 {
+		t.Fatalf("Cliffhanger roster = %d players, want 2", got)
+	}
+	// Each row got ITS OWN roster: one query for the page must not smear players across matches.
+	if got := byMap["Cliffhanger"][0].Gamertag; got != "JGtm" {
+		t.Errorf("first Cliffhanger player = %q, want JGtm", got)
+	}
+	if got := len(byMap["Aquarius"]); got != 2 {
+		t.Errorf("Aquarius roster = %d players, want 2", got)
+	}
+	// And the row the shape hangs on survives the page read too: a player the stats named no
+	// team for keeps a null team side rather than being folded into one.
+	for _, p := range byMap["Aquarius"] {
+		if p.Gamertag == "Inconnu" && p.TeamSide != nil {
+			t.Errorf("the team-less player came back with team_side %q", *p.TeamSide)
+		}
+	}
+}
+
+// TestGetMatchRoute_HasNoRoster — the single-match route deliberately leaves the roster out:
+// the replay screen reads `/participants`, whose failure must fail that screen, while this
+// summary is allowed to be missing.
+func TestGetMatchRoute_HasNoRoster(t *testing.T) {
+	w := get(t, newTestServer(t), "/matches/000d5950")
+	expectStatus(t, w, http.StatusOK, "")
+	if got := decode[matchSummary](t, w).Participants; got != nil {
+		t.Errorf("summary carries %d participants, want none", len(got))
+	}
+}
+
 // TestListMatchesRoute_BadFilter — a query string that cannot be honoured is the CALLER's
 // mistake and says so, rather than arriving as an empty table that reads like an empty
 // archive.
@@ -114,6 +158,47 @@ func TestListMatchesRoute_BadFilter(t *testing.T) {
 			expectStatus(t, get(t, r, "/matches"+query), http.StatusBadRequest, "invalid_filter")
 		})
 	}
+}
+
+// TestGetMatchRoute — the single-match summary, under either form of the identifier.
+//
+// The field the viewer actually came for is `map_module`: a replay artifact carries no map, so
+// without this route the floor's calibrated-image fallback has nothing to look a map up by.
+func TestGetMatchRoute(t *testing.T) {
+	r := newTestServer(t)
+	for _, id := range []string{cliffhangerID, "000d5950"} {
+		t.Run(id, func(t *testing.T) {
+			w := get(t, r, "/matches/"+id)
+			expectStatus(t, w, http.StatusOK, "")
+			m := decode[matchSummary](t, w)
+			if m.MatchID != cliffhangerID || m.ShortID != "000d5950" {
+				t.Errorf("summary = %+v, want the Cliffhanger row", m)
+			}
+			if m.MapName != "Cliffhanger" || m.MapModule != "olympus" {
+				t.Errorf("map = %q / module %q, want Cliffhanger / olympus", m.MapName, m.MapModule)
+			}
+			if m.Coverage == nil || *m.Coverage < 0.85 || *m.Coverage > 0.86 {
+				t.Errorf("coverage = %v, want 90/105", m.Coverage)
+			}
+		})
+	}
+}
+
+// TestGetMatchRoute_ServesARecordedButUnbuiltMatch — the map is a fact about the MATCH, not
+// about whether its film could be decoded, so it is served like the roster and unlike the
+// artifact.
+func TestGetMatchRoute_ServesARecordedButUnbuiltMatch(t *testing.T) {
+	w := get(t, newTestServer(t), "/matches/"+unbuiltID)
+	expectStatus(t, w, http.StatusOK, "")
+	if m := decode[matchSummary](t, w); m.MapName != "Cliffhanger" {
+		t.Errorf("summary = %+v, want the unbuilt match's recorded row", m)
+	}
+}
+
+// TestGetMatchRoute_UnknownMatch — a clean 404 with the same code the other routes use, so one
+// front end handles one contract.
+func TestGetMatchRoute_UnknownMatch(t *testing.T) {
+	expectStatus(t, get(t, newTestServer(t), "/matches/deadbeef"), http.StatusNotFound, "match_not_found")
 }
 
 func TestReplayRoute(t *testing.T) {

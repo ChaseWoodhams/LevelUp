@@ -52,9 +52,18 @@ interface ReplayViewerProps {
   doc: ReplayDocumentReady
   scoreboard: MatchScoreboardRow[]
   locale: Locale
+  /**
+   * The archive's key for the map, or null when it is not known.
+   *
+   * IT IS NOT IN THE ARTIFACT and cannot be: a replay document carries its match, its title and
+   * its bounds, and no map. It arrives from the archive's own row for the match, and the floor's
+   * calibrated-image fallback is what needs it. Null is an ordinary case — the sample artifact
+   * belongs to no archived match at all — and it simply means the floor falls through.
+   */
+  mapModule?: string | null
 }
 
-export function ReplayViewer({ doc, scoreboard, locale }: ReplayViewerProps) {
+export function ReplayViewer({ doc, scoreboard, locale, mapModule = null }: ReplayViewerProps) {
   const coloring = useMemo(() => buildRosterColoring(doc, scoreboard), [doc, scoreboard])
   const timeline = useMemo(() => timelineOf(doc), [doc])
 
@@ -116,6 +125,7 @@ export function ReplayViewer({ doc, scoreboard, locale }: ReplayViewerProps) {
             speed={state.speed}
             anchor={anchor}
             onFrameChange={onFrameChange}
+            mapModule={mapModule}
           />
           <ReplayTimeline
             doc={doc}

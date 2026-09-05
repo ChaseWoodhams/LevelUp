@@ -43,6 +43,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -231,6 +232,18 @@ type matchSummary struct {
 	Tracks     int      `json:"tracks"`
 	Points     int      `json:"points"`
 	Shots      int      `json:"shots"`
+	// Participants is who played, and it is filled ON THE LIST ROUTE ONLY.
+	//
+	// The browser needs it: a table of matches that does not say who was in them cannot be
+	// browsed by player, and its team-coloured chips are the one thing that makes two rows on
+	// the same map tell each other apart. It is fetched for the whole page in ONE query rather
+	// than a request per row.
+	//
+	// The single-match route leaves it nil, and that is not an oversight: the replay screen has
+	// its own `/participants` route, whose failure has to FAIL that screen (an empty roster
+	// would claim nobody has a team), while a summary that cannot be read only costs the floor
+	// its calibrated image. Two callers, two failure semantics, one shape.
+	Participants []participantRow `json:"participants,omitempty"`
 }
 
 // matchPage is one page of the browser, and how many rows the filter matched in total —
@@ -246,6 +259,16 @@ type matchIdentity struct {
 	ShortID string
 }
 
+// summaryColumns is the SELECT list of a matchSummary, in the order scanMatch reads them.
+//
+// ONE LIST FOR BOTH READERS. The browser's page and the single-match lookup publish the very
+// same shape, and two hand-written column lists feeding one scanner is the shape of bug that
+// only shows up as a column read into the wrong field.
+const summaryColumns = `m.match_id, m.short_id, m.played_at, m.map_name, m.map_module, m.mode,
+               m.playlist, m.duration_ms, m.source_gamertag, m.built_at,
+               m.tracks, m.points, m.shots, m.named_lives, m.total_lives,
+               ` + coverageRatio + ` AS coverage`
+
 // listMatches runs a filter and returns one page of archived matches, newest first.
 func (a *archive) listMatches(ctx context.Context, f matchFilter) (matchPage, error) {
 	where, args := f.where()
@@ -260,10 +283,7 @@ func (a *archive) listMatches(ctx context.Context, f matchFilter) (matchPage, er
 	// rather than heading a list sorted by "most recent". match_id breaks ties, so two
 	// matches played in the same second keep a stable order across pages.
 	rows, err := a.db.QueryContext(ctx, `
-        SELECT m.match_id, m.short_id, m.played_at, m.map_name, m.map_module, m.mode,
-               m.playlist, m.duration_ms, m.source_gamertag, m.built_at,
-               m.tracks, m.points, m.shots, m.named_lives, m.total_lives,
-               `+coverageRatio+` AS coverage
+        SELECT `+summaryColumns+`
         FROM matches m
         WHERE `+where+`
         ORDER BY m.played_at DESC NULLS LAST, m.match_id
@@ -283,13 +303,94 @@ func (a *archive) listMatches(ctx context.Context, f matchFilter) (matchPage, er
 	if err := rows.Err(); err != nil {
 		return matchPage{}, fmt.Errorf("reading the archived matches: %w", err)
 	}
+	if err := a.attachRosters(ctx, page.Matches); err != nil {
+		return matchPage{}, err
+	}
 	return page, nil
+}
+
+// attachRosters fills the page's rosters in ONE query, not one per row.
+//
+// A request per row is what a browser of two hundred matches would cost otherwise — 200 round
+// trips to a database this server is trying to hold for as little time as possible, while the
+// archiver waits behind it for the file. The whole page's players come back in a single read,
+// keyed by match.
+func (a *archive) attachRosters(ctx context.Context, matches []matchSummary) error {
+	if len(matches) == 0 {
+		return nil
+	}
+	ids := make([]any, 0, len(matches))
+	holes := make([]string, 0, len(matches))
+	for _, m := range matches {
+		ids = append(ids, m.MatchID)
+		holes = append(holes, "?")
+	}
+	// The placeholders are built from the COUNT of rows, never from their content: nothing
+	// read from the caller reaches the SQL text (cf. filter.go's promise).
+	rows, err := a.db.QueryContext(ctx, `
+        SELECT match_id, `+participantColumns+`
+        FROM participants WHERE match_id IN (`+strings.Join(holes, ",")+`)
+        ORDER BY match_id, team NULLS LAST, xuid`, ids...)
+	if err != nil {
+		return fmt.Errorf("reading the rosters of a page of matches: %w", err)
+	}
+	defer closeRows(ctx, rows, "page rosters")
+
+	byMatch := map[string][]participantRow{}
+	for rows.Next() {
+		var matchID string
+		p, err := scanPageParticipant(rows, &matchID)
+		if err != nil {
+			return err
+		}
+		byMatch[matchID] = append(byMatch[matchID], p)
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("reading the rosters of a page of matches: %w", err)
+	}
+	for i := range matches {
+		matches[i].Participants = byMatch[matches[i].MatchID]
+	}
+	return nil
+}
+
+// getMatch resolves an identifier to the SUMMARY of one archived match.
+//
+// WHY THE VIEWER NEEDS THIS AND THE ARTIFACT CANNOT ANSWER IT. A replay document carries its
+// match id, its title slug, its bounds and its layers — and NO map. So a viewer holding an
+// artifact cannot say which map it is looking at, which is exactly what the floor fallback
+// needs in order to find a calibrated image for it (issue #17). The archive knows, because the
+// archiver recorded the match stats beside the film.
+//
+// Built or not, like the roster: `map_module` is a fact about the match, not about whether the
+// decoder managed to produce an artifact from its film.
+func (a *archive) getMatch(ctx context.Context, id string) (matchSummary, error) {
+	row := a.db.QueryRowContext(ctx, `
+        SELECT `+summaryColumns+`
+        FROM matches m
+        WHERE (m.match_id = ? OR m.short_id = ?)
+        ORDER BY CASE WHEN m.match_id = ? THEN 0 ELSE 1 END, m.match_id
+        LIMIT 1`, id, id, id)
+	m, err := scanMatch(row)
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return matchSummary{}, fmt.Errorf("%w: %s", errMatchUnknown, id)
+	case err != nil:
+		return matchSummary{}, err
+	}
+	return m, nil
+}
+
+// rowScanner is what `scanMatch` needs of a cursor, and it is all it needs: a page of matches
+// arrives as `*sql.Rows` and a single one as `*sql.Row`, and one scanner reads both.
+type rowScanner interface {
+	Scan(dest ...any) error
 }
 
 // scanMatch reads one row. Every text column is nullable in the archive — a match whose
 // stats named no map really does store NULL — so all of them go through sql.NullString
 // rather than crashing the scan on exactly the degraded row worth looking at.
-func scanMatch(rows *sql.Rows) (matchSummary, error) {
+func scanMatch(rows rowScanner) (matchSummary, error) {
 	var (
 		m                                  matchSummary
 		mapName, mapModule, mode, playlist sql.NullString

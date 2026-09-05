@@ -12,7 +12,7 @@
  * `features/viewer/playbackLogic.test.ts`, and the fetch boundary in
  * `features/archive/studyApi.test.ts`.
  */
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { App } from './App'
@@ -27,24 +27,100 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+/** The archive as the browser's own route answers it. */
+function stubArchive(matches: unknown[], total = matches.length): void {
+  vi.stubGlobal('fetch', async () =>
+    new Response(JSON.stringify({ matches, total }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    }),
+  )
+}
+
+const ARCHIVED_MATCH = {
+  match_id: '000d5950-8b0e-4a2c-9a1f-1c2d3e4f5a6b',
+  short_id: '000d5950',
+  played_at: '2026-05-19T20:15:00Z',
+  map_name: 'Cliffhanger',
+  mode: 'Slayer',
+  coverage: 0.857,
+  named_lives: 90,
+  total_lives: 105,
+  tracks: 8,
+  points: 4200,
+  shots: 519,
+  participants: [
+    { xuid: '1', gamertag: 'JGtm', team_side: 't0', kills: 15, deaths: 9, assists: 4 },
+    { xuid: '2', gamertag: 'Rival', team_side: 't1', kills: 9, deaths: 15, assists: 2 },
+  ],
+}
+
 describe('the landing screen', () => {
   it('offers a way in rather than opening on data about no match', () => {
+    stubArchive([])
     render(<App />)
     expect(screen.getByLabelText('Identifiant du match')).toBeDefined()
     expect(document.querySelector('canvas')).toBeNull()
   })
 
   it('gives the document the language the reader chose', () => {
+    stubArchive([])
     render(<App />)
     expect(document.documentElement.lang).toBe('fr')
     expect(document.title).toBe('LevelUp — Étude')
   })
 
   it('follows the reader into English, page title included', () => {
+    stubArchive([])
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: 'en' }))
     expect(document.documentElement.lang).toBe('en')
     expect(document.title).toBe('LevelUp — Study')
+  })
+})
+
+describe('the archive browser', () => {
+  it('lists what was archived, and every row leads to its replay', async () => {
+    stubArchive([ARCHIVED_MATCH])
+    render(<App />)
+
+    const link = await screen.findByRole('link', { name: 'Cliffhanger' })
+    expect(link.getAttribute('href')).toBe('#/match/000d5950')
+    // The coverage is read BEFORE the match is opened: that is what the column is for.
+    expect(screen.getByText('86 %')).toBeDefined()
+    // Scoped to the table: the player's name is also one of the filter's options, which is the
+    // point of building the filters out of what the archive actually holds.
+    expect(within(screen.getByRole('table')).getByText('JGtm')).toBeDefined()
+  })
+
+  it('narrows the table on a filter, without asking the server again', async () => {
+    stubArchive([
+      ARCHIVED_MATCH,
+      { ...ARCHIVED_MATCH, match_id: 'b', short_id: 'bbbb2222', map_name: 'Streets', mode: 'CTF' },
+    ])
+    render(<App />)
+
+    await screen.findByRole('link', { name: 'Cliffhanger' })
+    fireEvent.change(screen.getByLabelText('Mode'), { target: { value: 'CTF' } })
+    expect(screen.queryByRole('link', { name: 'Cliffhanger' })).toBeNull()
+    expect(screen.getByRole('link', { name: 'Streets' })).toBeDefined()
+  })
+
+  it('says an empty archive is empty rather than showing a table with nothing in it', async () => {
+    stubArchive([])
+    render(<App />)
+    expect(await screen.findByText('Aucun match archivé pour l’instant')).toBeDefined()
+    expect(document.querySelector('table')).toBeNull()
+  })
+
+  it('tells a capture holding the archive apart from a broken server', async () => {
+    vi.stubGlobal('fetch', async () =>
+      new Response(JSON.stringify({ code: 'archive_busy', message: 'busy', retryable: true }), {
+        status: 503,
+      }),
+    )
+    render(<App />)
+    expect(await screen.findByText('L’archive est momentanément tenue par une capture')).toBeDefined()
   })
 })
 

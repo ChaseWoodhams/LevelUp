@@ -57,12 +57,29 @@ function stubFetch(routes: Record<string, () => Response>) {
 
 const replayPath = `/matches/${MATCH}/replay`
 const participantsPath = `/matches/${MATCH}/participants`
+const summaryPath = `/matches/${MATCH}`
+
+/** The archive's own row for the match — where the map comes from, since the artifact has none. */
+const SUMMARY = {
+  match_id: '000d5950-8b0e-4a2c-9a1f-1c2d3e4f5a6b',
+  short_id: MATCH,
+  map_name: 'Cliffhanger',
+  map_module: 'olympus',
+  mode: 'Slayer',
+  coverage: 0.857,
+  named_lives: 90,
+  total_lives: 105,
+  tracks: 8,
+  points: 4200,
+  shots: 519,
+}
 
 describe('loadArchivedMatch', () => {
   it('normalises the artifact once and widens the roster', async () => {
     const { impl } = stubFetch({
       [replayPath]: () => ok(FIXTURE_REPLAY_DOCUMENT),
       [participantsPath]: () => ok({ participants: PARTICIPANTS }),
+      [summaryPath]: () => ok(SUMMARY),
     })
 
     const load = await loadArchivedMatch(MATCH, { fetch: impl })
@@ -76,6 +93,35 @@ describe('loadArchivedMatch', () => {
     expect(load.doc.geometry).toEqual([])
     expect(load.scoreboard.map((r) => r.xuid)).toEqual(PARTICIPANTS.map((p) => p.xuid))
     expect(load.scoreboard[2].team_side).toBeNull()
+    // The map, which the artifact does not carry: it is what the floor's calibrated-image
+    // fallback is looked up by.
+    expect(load.summary?.map_module).toBe('olympus')
+  })
+
+  // THE SUMMARY DEGRADES, THE ROSTER DOES NOT, and the asymmetry is about what each failure
+  // would make the screen SAY: without a roster the viewer would claim nobody has a team;
+  // without a summary the floor falls back to the grid and says grid, which is true.
+  it('still opens the match when the archive has no row to give for it', async () => {
+    const { impl } = stubFetch({
+      [replayPath]: () => ok(FIXTURE_REPLAY_DOCUMENT),
+      [participantsPath]: () => ok({ participants: PARTICIPANTS }),
+      [summaryPath]: () => fail(404, 'match_not_found'),
+    })
+
+    const load = await loadArchivedMatch(MATCH, { fetch: impl })
+    expect(load.kind).toBe('ready')
+    if (load.kind === 'ready') expect(load.summary).toBeNull()
+  })
+
+  it('asks for the archive row only once the artifact is in hand and readable', async () => {
+    const { impl, calls } = stubFetch({
+      [replayPath]: () => ok({ ...FIXTURE_REPLAY_DOCUMENT, schemaVersion: 99 }),
+      [participantsPath]: () => ok({ participants: PARTICIPANTS }),
+      [summaryPath]: () => ok(SUMMARY),
+    })
+
+    await loadArchivedMatch(MATCH, { fetch: impl })
+    expect(calls).toEqual([`/study${replayPath}`])
   })
 
   it('refuses an artifact of an unrecognised schema version, and reports which', async () => {
@@ -114,6 +160,7 @@ describe('loadArchivedMatch', () => {
     const { impl } = stubFetch({
       [replayPath]: () => ok(FIXTURE_REPLAY_DOCUMENT),
       [participantsPath]: () => fail(404, 'replay_not_available'),
+      [summaryPath]: () => ok(SUMMARY),
     })
 
     // The same code that means "empty state" on the artifact must NOT mean it here: every

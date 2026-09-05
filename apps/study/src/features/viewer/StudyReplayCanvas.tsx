@@ -34,7 +34,9 @@ import { REPLAY_TEXT, type ReplayLocale } from '../replay/i18n'
 import { FLOOR_BANDS } from '../replay/replayLogic'
 import type { ReplayDocumentReady } from '../replay/replayNormalize'
 
+import { VIEWER_TEXT } from './i18n'
 import type { PaintLayers } from './paintReplay'
+import { DEFAULT_TRAIL_WINDOW_MS, TRAIL_WINDOW_MS } from './trailLogic'
 import { CANVAS_HEIGHT, useReplayPainter, type FrameAnchor } from './useReplayPainter'
 
 interface StudyReplayCanvasProps {
@@ -49,6 +51,8 @@ interface StudyReplayCanvasProps {
   anchor: FrameAnchor
   /** Called at reduced cadence with the current frame: the panels outside the canvas read it. */
   onFrameChange: (frame: number) => void
+  /** The archive's key for the map, for the floor's calibrated-image fallback. */
+  mapModule: string | null
 }
 
 export function StudyReplayCanvas({
@@ -60,11 +64,16 @@ export function StudyReplayCanvas({
   speed,
   anchor,
   onFrameChange,
+  mapModule,
 }: StudyReplayCanvasProps) {
   const t = REPLAY_TEXT[locale]
+  const v = VIEWER_TEXT[locale]
   const [floor, setFloor] = useState<number | null>(null)
   const [showAim, setShowAim] = useState(true)
   const [showShield, setShowShield] = useState(true)
+  const [showShots, setShowShots] = useState(true)
+  const [showGrenades, setShowGrenades] = useState(true)
+  const [trailWindowMs, setTrailWindowMs] = useState<number | null>(DEFAULT_TRAIL_WINDOW_MS)
 
   const painter = useReplayPainter({
     doc,
@@ -76,8 +85,13 @@ export function StudyReplayCanvas({
     onFrameChange,
     showAim,
     showShield,
+    showShots,
+    showGrenades,
+    trailWindowMs,
+    mapModule,
     floor,
   })
+  const floorText = v.floorSource[painter.floorSource]
 
   return (
     <div ref={painter.containerRef} className="rounded-lg border border-border bg-card">
@@ -93,12 +107,23 @@ export function StudyReplayCanvas({
         </div>
         <div className="flex flex-wrap items-center gap-1">
           <span className="mr-1 text-xs text-muted-foreground">{t.layers}</span>
-          <Toggle on={showAim} onClick={() => setShowAim((v) => !v)} title={t.layerAimHint}>
+          <Toggle on={showAim} onClick={() => setShowAim((on) => !on)} title={t.layerAimHint}>
             {t.layerAim}
           </Toggle>
-          <Toggle on={showShield} onClick={() => setShowShield((v) => !v)} title={t.layerShieldHint}>
+          <Toggle on={showShield} onClick={() => setShowShield((on) => !on)} title={t.layerShieldHint}>
             {t.layerShield}
           </Toggle>
+          <Toggle on={showShots} onClick={() => setShowShots((on) => !on)} title={v.layerShotsHint}>
+            {t.layerShots}
+          </Toggle>
+          <Toggle
+            on={showGrenades}
+            onClick={() => setShowGrenades((on) => !on)}
+            title={v.layerGrenadesHint}
+          >
+            {t.layerGrenades}
+          </Toggle>
+          <TrailWindow chosen={trailWindowMs} onPick={setTrailWindowMs} text={v} />
           {painter.hasFloors && (
             <FloorFilter floor={floor} onPick={setFloor} labels={floorLabels(t)} allLabel={t.floorAll} title={t.floor} />
           )}
@@ -114,8 +139,47 @@ export function StudyReplayCanvas({
           {t.note}
           {doc.geometry.length > 0 ? ` ${doc.geometry.length} ${t.propsSuffix}.` : ''}
         </p>
+        {/* WHICH FLOOR IS UNDER THE MATCH, always said. A grid and a reconstructed geometry do
+            not carry the same claims, and a reader who takes one for the other measures
+            distances on a background that does not support them. */}
+        <p className="mt-1 text-xs text-muted-foreground" title={floorText.hint}>
+          {v.floorLine(floorText.label)}
+        </p>
       </div>
     </div>
+  )
+}
+
+/**
+ * TrailWindow — how far back each player's path is drawn, including all of it.
+ *
+ * THE LABELS ARE DERIVED FROM THE WINDOWS, not written beside them: the list lives in
+ * `trailLogic.ts`, and a hand-written label per value would be a second list to keep in step.
+ */
+function TrailWindow({
+  chosen,
+  onPick,
+  text,
+}: {
+  chosen: number | null
+  onPick: (ms: number | null) => void
+  text: (typeof VIEWER_TEXT)['fr']
+}) {
+  return (
+    <>
+      <span aria-hidden className="mx-2 h-4 w-px bg-border" />
+      <span className="mr-1 text-xs text-muted-foreground">{text.trail}</span>
+      {TRAIL_WINDOW_MS.map((ms) => (
+        <Toggle
+          key={ms ?? 'full'}
+          on={chosen === ms}
+          onClick={() => onPick(ms)}
+          title={text.trailHint}
+        >
+          {ms === null ? text.trailFull : text.trailWindow(Math.round(ms / 1000))}
+        </Toggle>
+      ))}
+    </>
   )
 }
 

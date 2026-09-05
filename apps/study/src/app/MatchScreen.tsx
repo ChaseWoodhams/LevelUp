@@ -53,6 +53,7 @@ export function MatchScreen({ matchId, locale }: MatchScreenProps) {
             doc={screen.doc}
             scoreboard={screen.scoreboard}
             locale={locale}
+            mapModule={screen.summary?.map_module ?? null}
           />
         </>
       )

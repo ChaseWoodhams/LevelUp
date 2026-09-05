@@ -9,6 +9,14 @@
  */
 import type { Locale } from '@/lib/i18n/locale'
 
+import type { FloorSource } from './mapCalibration'
+
+/** What the floor under a match is, and where it came from. One entry per fallback. */
+interface FloorSourceText {
+  label: string
+  hint: string
+}
+
 interface ViewerText {
   /**
    * Le chronomètre, en lecture seule.
@@ -39,6 +47,28 @@ interface ViewerText {
   /** Counters beside the scrubber. */
   deathsLabel: string
   objectivesLabel: string
+  /**
+   * Le calque de traînée : sa fenêtre, et ce qu'elle veut dire.
+   *
+   * `trailWindow` prend les secondes plutôt que de figer trois libellés : la liste des
+   * fenêtres offertes vit dans `trailLogic.ts`, et un libellé par valeur les ferait diverger.
+   */
+  trail: string
+  trailWindow: (seconds: number) => string
+  trailFull: string
+  trailHint: string
+  /** Calques d'événements ponctuels. */
+  layerShotsHint: string
+  layerGrenadesHint: string
+  /**
+   * Le SOL : lequel des trois est sous le match, dit explicitement.
+   *
+   * Un repli n'est pas un détail d'implémentation : une grille et une géométrie reconstruite
+   * ne se lisent pas de la même façon, et un lecteur qui prend l'une pour l'autre mesure des
+   * distances sur un fond qui ne les porte pas.
+   */
+  floorLine: (source: string) => string
+  floorSource: Record<FloorSource, FloorSourceText>
 }
 
 export const VIEWER_TEXT: Record<Locale, ViewerText> = {
@@ -65,6 +95,30 @@ export const VIEWER_TEXT: Record<Locale, ViewerText> = {
       'Espace : lecture/pause · Flèches : image par image (Maj : une seconde) · , et . : entre les morts · 1 à 8 : suivre un joueur (0 relâche)',
     deathsLabel: 'morts',
     objectivesLabel: 'actions d’objectif',
+    trail: 'Traînée',
+    trailWindow: (seconds) => `${seconds} s`,
+    trailFull: 'Vie entière',
+    trailHint:
+      'Longueur du chemin laissé derrière chaque joueur. Le trait pâlit avec l’âge : le bout franc est l’instant présent, le bout pâle le début de la fenêtre. « Vie entière » remonte à l’apparition.',
+    layerShotsHint:
+      'Chaque tir part du tireur dans la direction de sa visée, jamais vers un autre joueur : le film ne dit pas qui a été touché. Il n’enregistre que les tirs qui INFLIGENT un dégât — il n’y a donc pas de tir manqué dans ces données, et rien ici ne se lit comme une précision.',
+    layerGrenadesHint:
+      'Le point marque le lancer, l’arc la trajectoire répliquée du projectile. L’arc prend la couleur du lanceur quand le film permet de les rapprocher, et reste neutre sinon. Le dernier point n’est pas une explosion : la réplication s’arrête avant la mèche.',
+    floorLine: (source) => `Sol : ${source}`,
+    floorSource: {
+      structure: {
+        label: 'géométrie reconstruite',
+        hint: 'Le sol vient de la structure de la carte portée par l’artefact : la même donnée que celle qui porte les trajectoires, à 8 mm d’écart médian des positions.',
+      },
+      image: {
+        label: 'image calibrée',
+        hint: 'Aucune structure dans l’artefact : le fond est une image vue du dessus, posée à la main sur les coordonnées monde de ses coins (mapImages.config.ts). C’est un repère, pas une mesure.',
+      },
+      grid: {
+        label: 'grille',
+        hint: 'Ni structure ni image calibrée pour cette carte : le fond est une simple grille métrique, alignée sur l’origine du monde. Elle ne montre aucun mur — elle donne l’échelle, et sert à relever les quatre coordonnées d’une calibration.',
+      },
+    },
   },
   en: {
     clock: 'Match clock',
@@ -89,5 +143,29 @@ export const VIEWER_TEXT: Record<Locale, ViewerText> = {
       'Space: play/pause · Arrows: frame by frame (Shift: one second) · , and .: between deaths · 1 to 8: follow a player (0 releases)',
     deathsLabel: 'deaths',
     objectivesLabel: 'objective actions',
+    trail: 'Trail',
+    trailWindow: (seconds) => `${seconds} s`,
+    trailFull: 'Full life',
+    trailHint:
+      'How much of the path behind each player is drawn. The line fades with age: the bright end is now, the pale end is the start of the window. "Full life" reaches back to the spawn.',
+    layerShotsHint:
+      'Every shot points from the shooter along their aim, never at another player: the film does not record who was hit. It only records shots that DEAL damage — there is no such thing as a missed shot in this data, and nothing here reads as accuracy.',
+    layerGrenadesHint:
+      'The dot marks the throw, the arc is the projectile flight as replicated. An arc takes its thrower’s colour when the film lets the two be matched, and stays neutral otherwise. The last point is not a detonation: replication stops before the fuse does.',
+    floorLine: (source) => `Floor: ${source}`,
+    floorSource: {
+      structure: {
+        label: 'reconstructed geometry',
+        hint: 'The floor comes from the map structure the artifact carries: the same data that carries the trajectories, a median 8 mm from the positions themselves.',
+      },
+      image: {
+        label: 'calibrated image',
+        hint: 'No structure in the artifact: the background is a top-down image, placed by hand on the world coordinates of its corners (mapImages.config.ts). It is a landmark, not a measurement.',
+      },
+      grid: {
+        label: 'grid',
+        hint: 'Neither structure nor a calibrated image for this map: the background is a plain metric grid, aligned on the world origin. It shows no walls — it gives the scale, and it is what a calibration’s four coordinates are read off.',
+      },
+    },
   },
 }

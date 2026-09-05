@@ -24,6 +24,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { FIXTURE_REPLAY_DOCUMENT } from '../replay/fixtures/replayFixture'
 import { normalizeReplayDocument } from '../replay/replayNormalize'
 
+import { DEFAULT_TRAIL_WINDOW_MS } from './trailLogic'
 import { useReplayPainter, type ReplayPainterOptions } from './useReplayPainter'
 
 /** The fixture carries a reconstructed floor — without one the rasterisation never runs. */
@@ -50,6 +51,10 @@ function options(over: Partial<ReplayPainterOptions> = {}): ReplayPainterOptions
     onFrameChange: NO_REPORT,
     showAim: true,
     showShield: true,
+    showShots: true,
+    showGrenades: true,
+    trailWindowMs: DEFAULT_TRAIL_WINDOW_MS,
+    mapModule: null,
     floor: null,
     ...over,
   }

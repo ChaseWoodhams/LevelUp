@@ -1,3 +1,100 @@
+﻿## [2026-09-05] apps/study: drawing layers, the floor fallback chain, and the archive browser — Complete
+
+**Context**: issues #16, #17 and #18 of epic #2, in that order. #16 makes the map readable as a
+fight rather than eight dots; #17 puts a legible floor under every match, not only the two maps
+with reconstructed structure; #18 is how a match is found in the first place.
+
+**THE COPIED LAYERS COULD NOT BE ASKED FOR EITHER OF THE TWO THINGS #16 IS ABOUT, so this app
+drew them itself and turned the copies off at the call site.** `replayMarkers.drawTracksLayer`
+strokes one flat polyline per life: it says where somebody has been and refuses to say in which
+direction, and no prop of that layer changes it. `drawProjectilesLayer` paints every flight in
+one ink, because the projectile archetype the decoder reads carries no player at all. Both files
+are byte-identical copies of `apps/web` and not editable from here, so the trail and the arc are
+now `features/viewer/studyDraw.ts`'s, and the copied trail is switched off by handing that layer
+a trailing window of zero (`paintReplay.COPIED_TRAIL_OFF` — `trailAt(points, frame, 0)` spans no
+samples). That is a single named constant applied at one place, not a fork of the file, and
+`features/replay/README.md` now records which copied behaviours are bypassed and why.
+
+**THE GRENADE ARC'S THROWER IS THE UPSTREAM DECODER'S OWN WITNESS, NOT A HEURISTIC INVENTED
+HERE.** `internal/analysis/replay/projectiles.go` records the measurement it was built on: 65 of
+70 known throws see a trajectory born within 200 ms, against 11 to 13 for the same throws shifted
+as a block. So `grenadeArcs.ts` pairs a flight to a throw on coincidence of time AND place, and
+refuses in both directions that matter — a flight matching no throw keeps the neutral ink, and so
+does one matching two different slots, because picking the closer would be inventing a tie-break
+the film does not contain.
+
+**THE FLOOR'S REAL FALLBACK ORDER WAS NOT WHAT THE TICKET ASSUMED, AND CHECKING IT WAS THE
+TICKET'S OWN FIRST REQUIREMENT.** `mapFloor.ts` has no chain in it whatsoever: it rasterises BSP
+surfaces into an altitude grid and knows nothing about having none. The chain was spread across
+two other files — `useReplayPainter` built a grid only when `doc.structure.length > 0`, and
+`paintReplay.paintGround` drew the Forge props when there was no pre-painted floor and nothing at
+all otherwise. The real order was therefore: reconstructed floor -> Forge props -> an empty
+background, and a match on a map with neither was watched over a blank rectangle. It is now
+structure -> calibrated image -> metric grid, decided in one place
+(`useFloorImage.ts`) and named in another against the same two facts (`mapCalibration.floorSourceOf`),
+so the line under the map cannot disagree with the picture. The props kept the job they were
+actually good at and lost the one they were not: they are drawn ON TOP of the last two fallbacks,
+and not over a reconstructed floor, where they would be noise on better data.
+
+**CALIBRATION IS MANUAL AND NOTHING DERIVES A SCALE FROM A MATCH.** A replay's bounds are the
+area those particular players covered, so fitting an image to them would stretch the same map
+differently in every match — a floor that misstates every distance read off it, silently, on
+every match. So an entry is an image plus the world coordinates of its corners, hand-measured off
+the grid, and an uncalibrated map falls through to that grid rather than to a guess.
+`mapImages.config.ts` ships EMPTY and carries the procedure: it is a typed module rather than a
+JSON file because JSON cannot hold the instructions an operator needs, and because a mistyped
+`maxY` in JSON is a calibration that is silently ignored — indistinguishable from a map nobody
+has calibrated.
+
+**THE MAP CANNOT COME FROM THE ARTIFACT, WHICH IS WHY THE SERVER GREW A FOURTH ROUTE.** A replay
+document carries its match id, its title slug and its bounds, and no map at all — so a viewer
+holding one cannot say which map to look a calibration up for. `GET /matches/{match_id}` serves
+the archive's own row, and the client treats its failure DIFFERENTLY from the roster's, on
+purpose: a missing roster would make the viewer claim eight players have no team, while a missing
+summary only costs the floor its image and the line then says "grid", which is true. So the
+roster fails the screen and the summary degrades, with the failure reported rather than
+swallowed.
+
+**THE BROWSER FILTERS LOCALLY, AND THAT IS ONE IMPLEMENTATION OF EACH RULE RATHER THAN TWO.**
+The server can filter — it has since #12, with tested rules about half-open date ranges and about
+NULL coverage never satisfying a floor — and the browser deliberately does not ask it to. One
+read brings back up to the server's own ceiling of a thousand rows; filtering and sorting are
+pure functions over those (`browserLogic.ts`), tested against fixture rows with no network
+anywhere near. Two reasons beyond the instant response: writing the same rules a second time in
+TypeScript would be the "two truths" anti-pattern with a filter that quietly disagrees with its
+own SQL, and every keystroke that hit the server would borrow the archive file that the hourly
+capture needs in order to write. Past a thousand rows nothing is silently truncated — `total`
+comes back with the page, and the screen says how many the archive holds and how many are being
+filtered.
+
+**COVERAGE IS THE COLUMN THE BROWSER EXISTS FOR, AND "UNKNOWN" IS NOT ZERO.** It is shown before
+a match is opened because that is the point — it separates a match worth studying from one whose
+data is too thin, and learning it after opening one is learning it too late. An artifact that
+reported no lives at all has no coverage figure: there was nothing to attach anything to. It
+renders as the word, never as 0 %, and no floor admits it — including a floor of zero. The
+server's SQL takes the same position through three-valued logic; the client's is that position
+written out.
+
+**THE "SCORE" COLUMN IS NOT A SCORE AND SAYS SO.** The archive records each player's kills,
+deaths and assists and Halo's raw outcome code, and no final score anywhere. A score column
+filled with a kill total would read as the scoreboard on every mode where the two differ, which
+is every objective mode there is — so the column is labelled "kills by team" / « frags par
+équipe » and carries the reason on hover.
+
+**Results**: `apps/study` typecheck clean, 28 test files / 391 tests green (up from 23 / 306),
+production bundle builds. `go test ./cmd/study-server/` green, including new coverage for the
+fourth route and for the page's rosters coming back per match rather than smeared across them.
+`useReplayPainter.ts` reached 490 of the 500-line ceiling when the chain landed and was split:
+the floor's two hooks moved to `useFloorImage.ts`, which is a cohesive unit rather than an
+arithmetic one — where the ground comes from and how it is painted once, against the clock and
+the frame that stayed behind.
+
+**Next**: epic #3 (heat maps and aggregation), whose first ticket (#19) is the pure occupancy
+raster. No map is calibrated yet: `mapImages.config.ts` is empty by design, and the first
+calibration is a manual measurement somebody has to make against the new grid.
+
+---
+
 ## [2026-09-05] apps/study: live archived matches, team colouring, and a driveable timeline — Complete
 
 **Context**: issues #13, #14 and #15 of epic #2, in that order because each is the ground the

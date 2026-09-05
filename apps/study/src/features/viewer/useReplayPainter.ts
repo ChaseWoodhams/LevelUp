@@ -21,13 +21,21 @@ import { useColorPaletteVersion } from '@/lib/accessibility/useColorPaletteVersi
 
 import { readInk } from '../replay/canvasInk'
 import { buildFloorGrid, type FloorGrid } from '../replay/mapFloor'
-import { drawFloorLayer } from '../replay/replayDraw'
 import { fitWidth, isAliveAt, msToFrames, sceneBounds } from '../replay/replayLogic'
 import type { ReplayDocumentReady } from '../replay/replayNormalize'
 import type { CanvasView, MarkerTiming } from '../replay/replayMarkers'
 
-import { paintReplay, sizeCanvas, type PaintLayers, type PaintStyle } from './paintReplay'
+import { arcThrowers, ARC_ORIGIN_WINDOW_MS } from './grenadeArcs'
+import {
+  calibrationFor,
+  floorSourceOf,
+  type FloorSource,
+  type MapImageCalibration,
+} from './mapCalibration'
+import { MAP_IMAGES } from './mapImages.config'
+import { COPIED_TRAIL_OFF, paintReplay, sizeCanvas, type PaintLayers, type PaintStyle } from './paintReplay'
 import { advanceBy } from './playbackLogic'
+import { useFloorImage, useMapImage } from './useFloorImage'
 
 /** Map floor: a neutral token, with no directional connotation — the subject is the players. */
 const GEOMETRY_TOKEN: SemanticToken = 'divergent-neutral'
@@ -49,9 +57,11 @@ const CANVAS_PAD = 24
  * at build time and can change without playback changing. Values from
  * `apps/web/src/features/match-replay/ReplayCanvas.tsx`, where they were tuned on screen; the
  * measurements behind them are in `replayMarkers.ts`.
+ *
+ * The origin's trailing window (7 s) is NOT here: this app draws its own trail, over a window
+ * the reader picks, and the copied layer's flat one is turned off (cf. `COPIED_TRAIL_OFF`).
  */
 const TIMING_MS = {
-  trail: 7_000,
   aimHold: 5_000,
   shieldHold: 2_000,
   death: 1_500,
@@ -81,6 +91,18 @@ export interface ReplayPainterOptions {
   onFrameChange: (frame: number) => void
   showAim: boolean
   showShield: boolean
+  showShots: boolean
+  showGrenades: boolean
+  /** Trailing window in real time; `null` is the whole life so far. Cf. `trailLogic.ts`. */
+  trailWindowMs: number | null
+  /**
+   * The archive's key for the map this match was played on, or null when it is not known.
+   *
+   * IT CANNOT COME FROM THE ARTIFACT: a replay document carries its match, its title and its
+   * bounds, and no map at all. It is read from the archive (`GET /matches/{id}`), and it is
+   * what the calibrated-image fallback looks a floor up by.
+   */
+  mapModule: string | null
   /** Selected altitude band, or null for all. Ignored on a map with no relief. */
   floor: number | null
 }
@@ -94,6 +116,8 @@ export interface ReplayPainter {
   renderWidth: number
   /** Whether this map has enough relief for a floor filter to mean anything. */
   hasFloors: boolean
+  /** Which floor is actually under the match — what the reader is told, cf. `mapCalibration`. */
+  floorSource: FloorSource
 }
 
 export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
@@ -110,7 +134,22 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
 
   const width = useObservedWidth(containerRef)
   const { style, reducedMotion } = useCanvasInks()
-  const scene = useReplayScene(doc, width)
+  // The calibration is looked up from the MAP, and the image is fetched from the calibration:
+  // both before the scene, which is what avoids a cycle between "what floor do we draw" and
+  // "has its image arrived".
+  const calibration = useMemo(() => calibrationFor(o.mapModule, MAP_IMAGES), [o.mapModule])
+  const mapImage = useMapImage(calibration)
+  const scene = useReplayScene(doc, width, calibration, mapImage)
+
+  /**
+   * The trailing window in frames. `null` — the full life path — becomes `Infinity` rather
+   * than the frame count: a window is compared against a sample's AGE, and a life that started
+   * before the window opened is the case the comparison exists for.
+   */
+  const trailFrames = useMemo(
+    () => (o.trailWindowMs === null ? Number.POSITIVE_INFINITY : msToFrames(o.trailWindowMs, doc)),
+    [o.trailWindowMs, doc],
+  )
 
   const layers = useMemo<PaintLayers>(
     () => ({
@@ -118,10 +157,24 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
       inkOfSlotAt: o.inkOfSlotAt,
       showAim: o.showAim,
       showShield: o.showShield,
+      showShots: o.showShots,
+      showGrenades: o.showGrenades,
+      trailFrames,
       floor: scene.hasFloors ? o.floor : null,
       reducedMotion,
     }),
-    [o.inks, o.inkOfSlotAt, o.showAim, o.showShield, o.floor, scene.hasFloors, reducedMotion],
+    [
+      o.inks,
+      o.inkOfSlotAt,
+      o.showAim,
+      o.showShield,
+      o.showShots,
+      o.showGrenades,
+      trailFrames,
+      o.floor,
+      scene.hasFloors,
+      reducedMotion,
+    ],
   )
 
   const draw = useCallback(() => {
@@ -137,10 +190,12 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
       frame,
       dpr,
       floorImage: floorImage.current,
+      floorSource: scene.floorSource,
       style,
       timing: scene.timing,
       zRange: scene.zRange,
       eventHoldFrames: scene.eventHoldFrames,
+      arcThrowers: scene.arcThrowers,
       layers,
     })
 
@@ -156,11 +211,20 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
 
   // ORDER IS LOAD-BEARING between these two, and it is the reason the floor effect does not
   // call `draw` itself. Every input the floor depends on (`scene.floorGrid`, `scene.view`,
-  // `style.floor`) is part of `scene` or `style`, which `draw` also depends on — so a commit
-  // that repaints the floor is always a commit where `draw` changed too, and effects run in
-  // declaration order. Letting the floor effect take `draw` as a dependency instead was the
-  // bug this ordering replaces: it made every layer toggle re-rasterise the whole grid.
-  useFloorImage(floorImage, scene, style)
+  // `scene.mapImage`, `style.floor`) is part of `scene` or `style`, which `draw` also depends
+  // on — so a commit that repaints the floor is always a commit where `draw` changed too, and
+  // effects run in declaration order. That is also what makes a map image arriving LATE show
+  // up: it changes the scene, so the floor is repainted and the frame redrawn, in that order.
+  // Letting the floor effect take `draw` as a dependency instead was the bug this ordering
+  // replaces: it made every layer toggle re-rasterise the whole grid.
+  useFloorImage(floorImage, {
+    view: scene.view,
+    height: CANVAS_HEIGHT,
+    floorGrid: scene.floorGrid,
+    calibration: scene.calibration,
+    mapImage: scene.mapImage,
+    style,
+  })
 
   // Redraw outside the animation: theme, resize, data, pause, floor filter, focus.
   useEffect(() => {
@@ -183,7 +247,14 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
     onFrameChange(Math.floor(frameRef.current))
   }, [playing, onFrameChange])
 
-  return { containerRef, canvasRef, aliveRef, renderWidth: scene.view.width, hasFloors: scene.hasFloors }
+  return {
+    containerRef,
+    canvasRef,
+    aliveRef,
+    renderWidth: scene.view.width,
+    hasFloors: scene.hasFloors,
+    floorSource: scene.floorSource,
+  }
 }
 
 /** useObservedWidth reports the container's width in CSS pixels, 0 until it is measured. */
@@ -234,7 +305,14 @@ interface ReplayScene {
   hasFloors: boolean
   timing: MarkerTiming
   eventHoldFrames: number
+  /** Slot that threw each projectile, aligned with `doc.projectiles` (null where unknown). */
+  arcThrowers: (number | null)[]
   floorGrid: FloorGrid | null
+  /** The calibrated image for this map, when one is configured AND has loaded. */
+  mapImage: HTMLImageElement | null
+  calibration: MapImageCalibration | null
+  /** Which of the three floors is actually painted. */
+  floorSource: FloorSource
 }
 
 /**
@@ -245,7 +323,12 @@ interface ReplayScene {
  * document, the frame timings are converted once from real time, and the framing is recomputed
  * only on a resize.
  */
-function useReplayScene(doc: ReplayDocumentReady, width: number): ReplayScene {
+function useReplayScene(
+  doc: ReplayDocumentReady,
+  width: number,
+  calibration: MapImageCalibration | null,
+  mapImage: HTMLImageElement | null,
+): ReplayScene {
   const floorGrid = useMemo(
     () => (doc.structure.length > 0 ? buildFloorGrid(doc.structure, doc.bounds) : null),
     [doc.structure, doc.bounds],
@@ -267,7 +350,7 @@ function useReplayScene(doc: ReplayDocumentReady, width: number): ReplayScene {
   )
   const timing = useMemo<MarkerTiming>(
     () => ({
-      trail: msToFrames(TIMING_MS.trail, doc),
+      trail: COPIED_TRAIL_OFF,
       aimHold: msToFrames(TIMING_MS.aimHold, doc),
       shieldHold: msToFrames(TIMING_MS.shieldHold, doc),
       death: msToFrames(TIMING_MS.death, doc),
@@ -276,6 +359,15 @@ function useReplayScene(doc: ReplayDocumentReady, width: number): ReplayScene {
     [doc],
   )
   const eventHoldFrames = useMemo(() => msToFrames(EVENT_HOLD_MS, doc), [doc])
+
+  /**
+   * WHOSE ARC IS WHOSE, computed once per document: the pairing depends on the throws and the
+   * flights and on nothing that changes per frame, and it walks both lists.
+   */
+  const throwers = useMemo(
+    () => arcThrowers(doc.grenades, doc.projectiles, msToFrames(ARC_ORIGIN_WINDOW_MS, doc)),
+    [doc],
+  )
 
   /**
    * THE WRAPPER IS MEMOISED TOO, and that is not tidiness — it is the whole point of the file.
@@ -293,43 +385,14 @@ function useReplayScene(doc: ReplayDocumentReady, width: number): ReplayScene {
       hasFloors: zRange.max - zRange.min > MIN_FLOOR_SPAN,
       timing,
       eventHoldFrames,
+      arcThrowers: throwers,
       floorGrid,
+      mapImage,
+      calibration,
+      floorSource: floorSourceOf(floorGrid !== null, mapImage !== null),
     }),
-    [view, zRange, timing, eventHoldFrames, floorGrid],
+    [view, zRange, timing, eventHoldFrames, throwers, floorGrid, mapImage, calibration],
   )
-}
-
-/**
- * useFloorImage paints the floor ONCE onto an offscreen canvas, and repaints it only when its
- * own geometry, its framing or its inks change — never per frame, and never for a layer drawn
- * OVER it.
- *
- * That is what makes 45 000 cells cost nothing to the animation: the frame loop blits an image
- * instead of rasterising a grid. Its three dependencies are exactly the three things the floor
- * is made of; it deliberately does not depend on the draw callback, which changes for reasons
- * that have nothing to do with the floor (a layer toggled, a player focused, a frame reported).
- * The caller redraws right after — cf. the note at the call site.
- */
-function useFloorImage(
-  image: React.RefObject<HTMLCanvasElement | null>,
-  scene: ReplayScene,
-  style: PaintStyle,
-): void {
-  useEffect(() => {
-    if (!scene.floorGrid || scene.view.width === 0) {
-      image.current = null
-      return
-    }
-    const dpr = window.devicePixelRatio || 1
-    const off = document.createElement('canvas')
-    off.width = Math.round(scene.view.width * dpr)
-    off.height = Math.round(CANVAS_HEIGHT * dpr)
-    const ctx = off.getContext('2d')
-    if (!ctx) return
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-    drawFloorLayer(ctx, scene.floorGrid, scene.view, style.floor)
-    image.current = off
-  }, [image, scene.floorGrid, scene.view, style.floor])
 }
 
 /**

@@ -51,6 +51,26 @@ module with green tests, which is the shape of debt this repository names first 
 of anti-patterns. `lib/accessibility/plotlyColorscale.ts` left with it, for the same reason: the
 chart-series palette had no other reader here.
 
+## What is copied, kept, and no longer called
+
+Two behaviours of `replayMarkers.ts` are deliberately bypassed by this app's own layers
+(`features/viewer/studyDraw.ts`). The files stay byte-identical — a copy is a copy — and the
+bypass happens at the call site:
+
+- **The trail.** `drawTracksLayer` strokes one flat polyline per life at a single opacity: it
+  shows where somebody has been and cannot say in which direction. This app draws a trail that
+  fades with age, over a window the reader picks, and turns the copied one off by handing that
+  layer a trailing window of zero (`paintReplay.COPIED_TRAIL_OFF`). Drawing both would put a flat
+  line under a graded one, at a length nobody chose.
+- **The projectile flights.** `drawProjectilesLayer` paints every flight on the map in ONE ink,
+  because the archetype it reads carries no player. `drawGrenadeArcsLayer` paints each in its
+  thrower's colour where the film lets the throw and the flight be matched, and in the neutral
+  ink where it does not. The copied function is no longer called; it is not dead code of this
+  app's making, it is part of a file that is a copy.
+
+Both remain the right thing to read when the origin moves: a change to either upstream is a
+change this app's replacements should be measured against.
+
 ## Keeping a copy honest
 
 A copy that drifts silently is worse than no copy, so the property is **asserted, not asked

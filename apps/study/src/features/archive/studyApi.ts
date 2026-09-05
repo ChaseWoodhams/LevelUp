@@ -20,7 +20,7 @@
  * library — retry policy — is a requirement in the negative here (never retry on a loop), and
  * "do not retry" costs no dependency.
  *
- * EVERY FAILURE HAS A NAME. The three routes answer with the app's own error contract
+ * EVERY FAILURE HAS A NAME. The server's routes answer with the app's own error contract
  * (`{code, message, retryable}`), and the codes are the distinctions the screen needs to make:
  * an unknown identifier is not a missing artifact, and neither is a capture holding the file.
  * Collapsing them into "something went wrong" would send the reader looking in the wrong place
@@ -59,6 +59,44 @@ interface ParticipantsBody {
   participants: ParticipantRow[]
 }
 
+/**
+ * MatchSummary is one row of `GET /matches`, and the whole body of `GET /matches/{id}`.
+ *
+ * Field for field the server's `matchSummary` (`cmd/study-server/archive.go`). Everything but
+ * the two identifiers is `omitempty` on the Go side, which is why almost every field here is
+ * optional: an archive row whose match stats named no map really does carry no map name, and
+ * the browser has to render that row rather than crash on it.
+ *
+ * `coverage` is the fraction of lives the decoder could NAME, 0..1 (ADR 0006's unit) — and
+ * ABSENT when the artifact reported no lives at all, which is "unknown", not "zero".
+ */
+export interface MatchSummary {
+  match_id: string
+  short_id: string
+  played_at?: string
+  map_name?: string
+  /** The archive's stable key for the map — what a floor calibration is looked up by. */
+  map_module?: string
+  mode?: string
+  playlist?: string
+  duration_ms?: number
+  /** Whose archiving pass DISCOVERED the match. Provenance, never ownership. */
+  source_gamertag?: string
+  built_at?: string
+  coverage?: number
+  named_lives: number
+  total_lives: number
+  tracks: number
+  points: number
+  shots: number
+  /**
+   * Who played. Present on the LIST route, absent on the single-match one — the server says why
+   * (`archive.go`): the replay screen has its own roster route, whose failure must fail that
+   * screen, while this summary is allowed to be missing.
+   */
+  participants?: ParticipantRow[]
+}
+
 /** The app's error contract, as `internal/api/humacore` writes it. */
 interface ApiErrorBody {
   code?: string
@@ -74,7 +112,13 @@ interface ApiErrorBody {
  * counts them.
  */
 export type MatchLoad =
-  | { kind: 'ready'; doc: ReplayPayloadReady['doc']; scoreboard: MatchScoreboardRow[] }
+  | {
+      kind: 'ready'
+      doc: ReplayPayloadReady['doc']
+      scoreboard: MatchScoreboardRow[]
+      /** The archive's row for this match, or null when it could not be read (cf. below). */
+      summary: MatchSummary | null
+    }
   /** The artifact is of a schema version this viewer does not read. Nothing is drawn. */
   | { kind: 'unsupported'; version: number }
   /** The archive knows this match but holds no artifact for it — recorded, never built. */
@@ -91,11 +135,12 @@ type ReplayPayloadReady = Extract<ReplayPayload, { kind: 'ready' }>
 /**
  * loadArchivedMatch fetches one match and answers with the state of its screen.
  *
- * THE TWO REQUESTS ARE SEQUENTIAL, AND THAT IS THE DECISION TREE, NOT A MISSED OPTIMISATION.
+ * THE REQUESTS ARE SEQUENTIAL, AND THAT IS THE DECISION TREE, NOT A MISSED OPTIMISATION.
  * The artifact decides what the screen is: without one there is nothing to draw, and a roster
  * beside an empty map would be a panel about a match the reader cannot watch. Only once the
- * document is in hand — and readable — is there a reason to ask who played. On a loopback
- * server the second round trip costs less than the branch it saves.
+ * document is in hand — and readable — is there a reason to ask who played, and only once
+ * there is a map to put a floor under is there a reason to ask which map it was. On a loopback
+ * server those round trips cost less than the branches they save.
  */
 export async function loadArchivedMatch(
   matchId: string,
@@ -110,15 +155,99 @@ export async function loadArchivedMatch(
   }
   if (payload.kind === 'unsupported') return { kind: 'unsupported', version: payload.version }
 
+  let rows: ParticipantRow[]
   try {
-    const rows = await getParticipants(doFetch, matchId, init.signal)
-    return { kind: 'ready', doc: payload.doc, scoreboard: rows.map(toScoreboardRow) }
+    rows = await getParticipants(doFetch, matchId, init.signal)
   } catch (err) {
     // A ROSTER THAT FAILED IS NOT AN EMPTY ROSTER. Rendering the map with no scoreboard would
     // put every player in the ungrouped bucket — the exact shape this viewer uses to say "the
     // archive has no row for this person". A transport failure must never be able to make
     // that claim, so it fails the screen instead.
     return failureOf(err, 'failed')
+  }
+
+  return {
+    kind: 'ready',
+    doc: payload.doc,
+    scoreboard: rows.map(toScoreboardRow),
+    summary: await getSummaryOrNull(doFetch, matchId, init.signal),
+  }
+}
+
+/**
+ * getSummaryOrNull reads the archive's row for the match, and DEGRADES where the roster fails.
+ *
+ * The asymmetry is deliberate and it is about what a missing answer would make the screen say.
+ * A missing roster makes the viewer claim eight players have no team; a missing summary costs
+ * the floor its calibrated image, and the floor then says "grid" — which is true. So this one
+ * is worth a replay the reader can still watch, and the failure is reported rather than
+ * swallowed.
+ */
+async function getSummaryOrNull(
+  doFetch: typeof fetch,
+  matchId: string,
+  signal?: AbortSignal,
+): Promise<MatchSummary | null> {
+  try {
+    return await getJSON<MatchSummary>(doFetch, `/matches/${encodeURIComponent(matchId)}`, signal)
+  } catch (err) {
+    console.warn(`[study] no archive row for ${matchId}; the floor falls back to the grid`, err)
+    return null
+  }
+}
+
+/**
+ * How many rows the browser asks for.
+ *
+ * THE SERVER'S OWN CEILING, deliberately, and asked for in ONE request. This archive is one
+ * person's captures on one machine, read over the loopback: a thousand rows is a JSON payload
+ * of a few hundred kilobytes and a single round trip, and it is what lets every filter and
+ * every sort in the browser act on the WHOLE archive at once rather than on whatever page
+ * happened to be loaded — the failure mode of a filtered table that filters a page is that it
+ * looks like it worked.
+ *
+ * An archive past this is not a bug and not silently truncated: `total` says how many rows
+ * matched, the browser compares it against what it holds, and the screen says so.
+ */
+export const ARCHIVE_PAGE_LIMIT = 1000
+
+/**
+ * ArchiveLoad — the browser's screen as one value, on the same principle as `MatchLoad`.
+ *
+ * `busy` is its own answer rather than a failure because it is the ordinary state of an archive
+ * during an hourly capture: nothing is broken, and the reader's move is to come back.
+ */
+export type ArchiveLoad =
+  | { kind: 'ready'; matches: MatchSummary[]; total: number }
+  | { kind: 'busy' }
+  | { kind: 'failed'; message: string }
+
+/** The envelope `GET /matches` answers with. */
+interface MatchPageBody {
+  matches: MatchSummary[] | null
+  total: number
+}
+
+/**
+ * listArchivedMatches reads the archive's table.
+ *
+ * NO QUERY PARAMETERS, AND THAT IS THE DESIGN. The server can filter — by map, mode, player,
+ * date and coverage — and this browser deliberately does not ask it to: filtering and sorting
+ * happen over the rows in hand (`browserLogic.ts`), which is instant, which is testable against
+ * fixture rows with no server anywhere near, and which above all is ONE implementation of each
+ * rule instead of one in SQL and a second in TypeScript. The server's filters remain for any
+ * caller with a bigger archive than a browser can hold.
+ */
+export async function listArchivedMatches(
+  init: { fetch?: typeof fetch; signal?: AbortSignal } = {},
+): Promise<ArchiveLoad> {
+  const doFetch = init.fetch ?? fetch
+  try {
+    const body = await getJSON<MatchPageBody>(doFetch, `/matches?limit=${ARCHIVE_PAGE_LIMIT}`, init.signal)
+    return { kind: 'ready', matches: body.matches ?? [], total: body.total }
+  } catch (err) {
+    if (err instanceof StudyApiError && err.code === 'archive_busy') return { kind: 'busy' }
+    return { kind: 'failed', message: err instanceof Error ? err.message : String(err) }
   }
 }
 

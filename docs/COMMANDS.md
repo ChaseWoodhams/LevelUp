@@ -230,9 +230,25 @@ npm run generate-types # openapi.yaml -> src/lib/api/generated.ts
 
 The replay rendering modules under `src/features/replay/` are **copies** of
 `apps/web/src/features/match-replay/`, each carrying its origin path and the commit it was
-copied at; the folder's `README.md` says why, and how to keep the copy honest. Until the
-viewer is wired to `study-server`, the screen draws a hand-written artifact from
-`src/features/replay/fixtures/` — no real match data is involved.
+copied at; the folder's `README.md` says why, and how to keep the copy honest.
+
+The URL hash chooses the screen: `#/` is the way in (a field taking a match identifier, short
+or full form), `#/match/<id>` opens an archived match, and `#/sample` draws a hand-written
+artifact — no real match data, no server, no captured film — so the viewer can be reviewed by
+somebody who has archived nothing yet.
+
+**Opening a real match needs `study-server` running.** The dev server proxies `/study` to
+`127.0.0.1:8100`; a page reaching the server's origin directly would be a cross-origin request,
+and `study-server` deliberately publishes no CORS headers.
+
+```bash
+go run ./apps/go-api/cmd/study-server    # terminal 1
+cd apps/study && npm run dev             # terminal 2, then open #/match/<id>
+```
+
+An artifact whose `schemaVersion` the viewer does not recognise renders a message and draws
+NOTHING — the archive keeps documents built by several versions of the builder, and reading one
+with the wrong rules would produce a plausible map that is wrong.
 
 ---
 

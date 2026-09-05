@@ -129,18 +129,13 @@
 }
 
 /* ─── Tokens sémantiques accessibilité (palette "default") ─────────────────── */
-/* Les seuls que lisent les modules copiés : séries de traces, fond de carte,   */
-/* tir, lancer, verdicts de couverture, camps.                                  */
+/* Les seuls que lit ce lecteur : fond de carte, tir, lancer, verdicts de       */
+/* couverture, camps.                                                           */
+/* LES HUIT `chart-series-*` ONT ÉTÉ RETIRÉS avec la coloration par trace : le  */
+/* rejeu d'étude colore PAR ÉQUIPE (compare-a/b/c), une couleur par joueur et   */
+/* non par vie. Un token que rien ne lit est une valeur qui se périme sans      */
+/* qu'aucun écran ne le montre.                                                 */
 :root {
-  /* Chart series — une teinte par trace joueur (ReplayCanvas). */
-  --ac-chart-series-1: #93C5FD;
-  --ac-chart-series-2: #6366F1;
-  --ac-chart-series-3: #4F46E5;
-  --ac-chart-series-4: #4338CA;
-  --ac-chart-series-5: #3730A3;
-  --ac-chart-series-6: #10B981;
-  --ac-chart-series-7: #F59E0B;
-  --ac-chart-series-8: #EC4899;
   /* Fond de carte : neutre, sans connotation directionnelle. Gris légèrement bleuté —
      PAS le #60A5FA que porte encore le fallback CSS du web (cf. en-tête). */
   --ac-divergent-neutral: #8A9099;
@@ -149,7 +144,8 @@
   --ac-warning:     #F59E0B;
   --ac-info:        #3B82F6;
   --ac-destructive: #EF4444;
-  /* Comparaisons — les camps du rejeu (ReplayTeams.teamColor). `compare-c` n'est
+  /* Comparaisons — les camps du rejeu, sur la carte comme dans les fiches
+     (ReplayTeams.teamColor et features/viewer/teamColors.ts). `compare-c` n'est
      pas dans le fallback CSS du web, qui le reçoit de applyPalette() ; ici il n'y
      a pas de JS pour l'écrire, et le troisième groupe (joueurs sans équipe) est
      un cas ordinaire pour un match d'autrui. */

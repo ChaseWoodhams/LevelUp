@@ -1,3 +1,130 @@
+## [2026-09-05] apps/study: live archived matches, team colouring, and a driveable timeline — Complete
+
+**Context**: issues #13, #14 and #15 of epic #2, in that order because each is the ground the
+next stands on. #13 puts a real artifact on screen (route, fetch boundary, schema-version
+guard); #14 colours it by team on both surfaces; #15 gives the reader a way to drive it.
+
+**THE COPIED CANVAS HAD TO BE FORKED, AND IT WAS DELETED RATHER THAN LEFT BESIDE ITS
+REPLACEMENT.** `ReplayCanvas.tsx` came across from `apps/web` verbatim in #11 and could not
+serve #14 or #15: it derives one colour per TRACK from the chart-series palette (so a player is
+repainted at every respawn — the exact opposite of #14's "stable across all lives"), and it owns
+its own playback position (so #15's stepping, jumps and keyboard have nothing to act on). Neither
+is reachable through its props, and `apps/web/**` is out of bounds from here, so the fork was the
+only door. What followed from that is the part worth recording: the copy became UNUSED, and an
+unused module with green tests is the first anti-pattern in this repository's own list. It was
+deleted, along with `lib/accessibility/plotlyColorscale.ts` (its only reader here) and the eight
+`--ac-chart-series-*` values in `tokens.css`. The replacement carries a DERIVED-FROM header
+naming the origin path and SHA — the same diffing handle, without claiming to be a byte copy —
+and `features/replay/README.md` records what left and why.
+
+**THE SCHEMA GUARD IS READ FROM THE GO SOURCE, NOT FROM THE TICKET.** `replay.SchemaVersion` is 2
+today. The ticket said to re-read it at implementation time; a number copied at that moment is
+right for one day, so `schemaVersion.guard.test.ts` reads `const SchemaVersion` out of
+`internal/analysis/replay/document.go` and fails when the builder moves. The refusal itself is
+STRUCTURAL: `parseReplayPayload` rules on the version BEFORE normalising, so a document of an
+unrecognised version never reaches the nullability frontier and no layer can be drawn from fields
+that may no longer mean what their names say. The web app deliberately has no such guard (its
+contract test says so in as many words) and it is right not to: producer and consumer ship
+together there. An archive holds artifacts built by several versions of the builder, which is
+what makes the two situations different.
+
+**EVERY FAILURE HAS A NAME, because they send the reader to five different places.** An unknown
+identifier (`match_not_found`) is a typo or an uncaptured match; a missing artifact
+(`replay_not_available`) is a `rebuild`; a busy archive (`archive_busy`) is a wait and is painted
+`info`, not as a fault; an unreachable server is a process to start; an unreadable version is a
+format that moved. `loadArchivedMatch` returns one tagged union and the screen is a switch over
+it. The same code read two ways is the one subtlety: `replay_not_available` on the ARTIFACT is an
+empty state, on the ROSTER it fails the screen — an empty scoreboard would put every player in
+the ungrouped bucket, which is precisely how this viewer says "the archive has no row for this
+person". A transport failure must not be able to make that claim.
+
+**NO RETRY LOOP, ON PURPOSE.** Two of those failures would spin forever under a naive policy (a
+match that will never have an artifact; a capture that will finish on its own schedule). The
+screens carry a button instead. That is also why no query library was added: the one behaviour
+that would have justified the dependency is a requirement in the negative here.
+
+**TEAM COLOUR IS JOINED ON XUID AND THE TWO SURFACES CANNOT DRIFT.** The map's group index comes
+from the same `buildPlayers` + `groupByTeam` pair the roster panel uses, so "the same player, the
+same colour" holds by construction. The token list, however, exists twice — the panel's copy is
+private to a file copied verbatim — so `teamColors.guard.test.ts` reads it back out of
+`ReplayTeams.tsx` and compares. Two copies is what the rules allow; the guard is what the rules
+ask for at the second. A life the film never named is drawn in the neutral ink, never in a team's
+colour: painting it would add a player to a team on screen who is not on one in the data.
+
+**THE SHOOTER OF A LINGERING SHOT IS RESOLVED WITH A BOUNDED LOOK BACK.** `drawShotsLayer` asks
+for a slot's colour at the CURRENT frame, and a shot stays up 1.4 s after it was fired. Without
+the look back, every trade kill lost its colour — the shooter had died inside the window, so no
+life held the slot any more and the mark fell to the neutral fallback. `xuidOfSlotAt` therefore
+takes the lingering window and, failing a live owner, returns the most recent one to have ended
+inside it. The window is far shorter than a respawn (~8 s measured), so the life it finds is the
+one that fired.
+
+**THE FRAME LIVES IN TWO PLACES AND THE NONCE IS WHAT KEEPS THEM HONEST.** The canvas advances at
+screen cadence and publishes back every 150 ms — re-rendering eight player cards sixty times a
+second would spend the animation budget on a number that barely changes. So a COMMANDED position
+carries a nonce and the canvas snaps to it; a published one does not. Comparing frames instead
+would be wrong in both directions: a seek to the frame we are already on would be ignored, and a
+report would drag the clock backwards on every render. The visible consequence, documented rather
+than hidden: a step or a jump issued mid-playback starts from a position up to 150 ms old — which
+is why both pause first, after which every step is exact.
+
+**WHAT THE REVIEW CAUGHT, and it was the refactor rather than the feature.** Splitting the
+canvas into a painter, a hook and a component to respect the 80-line rule introduced a defect
+that nothing in the suite could see: `useReplayScene` returned a bare object literal, so it had
+a new identity on every render, so `draw` did, so all three effects keyed on `draw` fired every
+render — the 45 000-cell floor re-rasterised, and the animation frame torn down and re-requested,
+which also DROPS the elapsed time between the two and makes playback run slow by an amount that
+varies with how often React happens to render. The screen looked identical. The fix is a
+`useMemo`; the lesson is that the guarantee was resting on an identity nobody was checking, so
+`useReplayPainter.test.tsx` now asserts the call counts. Writing that test immediately found a
+SECOND instance of the same coupling: `useFloorImage` took `draw` as a dependency, so every
+layer toggle re-rasterised the floor too. It now depends on the three things the floor is made
+of, and the ordering that lets it stop calling `draw` is documented at the call site.
+
+**Three more, all of them the same shape — a rule stated in prose and not asserted:**
+
+- **`?.` on arrays the frontier had already filled.** #13 asks in as many words that no null
+  guard leak into rendering code, and six had, copied in from the origin canvas along with the
+  drawing. They are not redundant: they are a false claim that the array might be null here, and
+  the next reader either believes it and adds a seventh or checks and wastes the trip.
+  `normalized.guard.test.ts` reads the filled-field list out of the normaliser itself.
+- **The keyboard took keys it had no business taking.** `isTypingTarget` reported the scrubber
+  as a text field — it is an `<input>` — so every shortcut died for as long as a reader had
+  touched the slider, `Space` included; and claiming `Space` unconditionally made every button
+  in the transport row unreachable from the keyboard while it held the focus. `focusOwnsKey` now
+  yields only what the focused element actually uses: a text field everything, the scrubber its
+  arrows, a button its `Space` and `Enter`.
+- **`h-7 px-2 text-xs`, eight times.** Centralised into `components/ui/controls.tsx` with a
+  guard-rail, because the rule does not stop at "centralise" and this repository's own worked
+  example is a predicate that went from 8 copies to 36 AFTER being centralised.
+
+**And one claim in a comment was simply false**: `FOCUSABLE_PLAYERS` said a ninth player "is
+reachable by clicking their card". The roster panel is a verbatim copy with no click handler, so
+they are not reachable at all. The comment now says so, and the transport row grew a focus
+picker — the digits 1-8 as buttons carrying their player's name — because the digit mapping was
+otherwise invisible, and a shortcut nobody can see is a shortcut nobody uses.
+
+**`.ai/project_map.md` was deliberately NOT updated.** Its own header declares it frozen and no
+longer authoritative, and CLAUDE.md's rule about updating it is older than that header. Adding a
+live entry to a document that says it is dead would make both less trustworthy; this log is the
+maintained record.
+
+**Results**: 306 tests green (23 files, up from 204/12), `tsc -b` clean, production build clean.
+Four new guards: the schema version against the Go source, the team tokens against the roster
+panel, the nullability frontier against re-checking, and the compact control against a ninth
+hand-written copy.
+The dev server proxies `/study` to `127.0.0.1:8100` rather than the page reaching that origin —
+`study-server` publishes no CORS headers on purpose, and it serves other people's films.
+
+**Verified on pieces, and one thing was NOT**: there is no `data/study/archive.duckdb` on this
+machine, so nothing was opened end to end against a captured film. What was checked: the dev
+server serves, `/study/*` proxies (502 with no server behind it, which is the "server not
+running" screen), and `#/sample` draws the hand-written artifact through the very same viewer —
+which is why that route exists rather than being a test fixture only.
+
+**Next**: #16 (drawing layers) and #17 (floor fallback chain) now have a canvas they can be built
+into; #18 (archive browser) replaces the landing screen's identifier field with the real table.
+
 ## [2026-09-04] apps/study: the scaffold, and the modules that came across with it — Complete
 
 **Context**: issue #11, the foundation of the study viewer (epic #2). A new Vite/React/TS app

@@ -1,37 +1,36 @@
 /**
- * App — the study tool's single screen, for now: one artifact, drawn.
+ * App — the study tool's shell: the language, the way home, and which screen the URL names.
  *
- * WHAT THIS IS THE TRACER BULLET FOR. Every piece below except the fixture is code
- * that already runs in the web app's match replay; putting a real artifact through it
- * on a real canvas, inside a separate app, is what proves the copy landed whole — the
- * boundary (`normalizeReplayDocument`), the floor, the layers, the roster join and
- * the coverage banner, all reading the same document at the same frame.
+ * THREE SCREENS AND NO MORE STATE THAN THAT. The landing screen, one archived match, and the
+ * hand-written sample. Everything about a match — fetching it, ruling on its schema version,
+ * driving its playback — belongs to the screen that shows it; what lives here is the chrome
+ * that is the same on all three.
  *
- * The frame is held HERE and not inside the canvas: the canvas animates at screen
- * cadence and publishes the current frame back at a reduced rate, which is what keeps
- * the player cards from re-rendering sixty times a second.
+ * THE SAMPLE IS A ROUTE AND NOT A DEFAULT. Until this ticket the app opened straight onto the
+ * fixture, which was right while there was nothing else to open. Now that a real artifact can
+ * be fetched, making the hand-written one the first thing on screen would be a tool that
+ * greets its reader with data about no match at all. It keeps its own address, because a
+ * viewer that cannot be looked at without a captured film and a running server is a viewer
+ * nobody can review.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
+import { Toggle } from '@/components/ui/controls'
 import { KNOWN_LOCALES, type Locale } from '@/lib/i18n/locale'
 
+import { HomeScreen } from './app/HomeScreen'
 import { SHELL_TEXT } from './app/i18n'
-import { ReplayCanvas } from './features/replay/ReplayCanvas'
-import { ReplayCoverageBanner } from './features/replay/ReplayCoverage'
-import { ReplayTeams } from './features/replay/ReplayTeams'
+import { MatchScreen } from './app/MatchScreen'
+import { homeHref, type Route } from './app/route'
+import { useRoute } from './app/useRoute'
 import { FIXTURE_REPLAY_DOCUMENT, FIXTURE_SCOREBOARD } from './features/replay/fixtures/replayFixture'
 import { normalizeReplayDocument } from './features/replay/replayNormalize'
+import { ReplayViewer } from './features/viewer/ReplayViewer'
 
 export function App() {
   const [locale, setLocale] = useState<Locale>('fr')
-  const [frame, setFrame] = useState(0)
+  const route = useRoute()
   const t = SHELL_TEXT[locale]
-
-  // The artifact crosses the nullability frontier ONCE, exactly where a fetched one
-  // will (queryFn, issue #13). Everything downstream reads the `*Ready` shape.
-  const doc = useMemo(() => normalizeReplayDocument(FIXTURE_REPLAY_DOCUMENT), [])
-  const onFrameChange = useCallback((f: number) => setFrame(f), [])
 
   // The document itself speaks the chosen language, title and `lang` included. Leaving
   // `lang` frozen at the value in index.html would tell a screen reader to pronounce
@@ -46,38 +45,58 @@ export function App() {
       <header className="flex flex-wrap items-baseline justify-between gap-3">
         <div className="flex items-baseline gap-2">
           <h1 className="text-lg font-semibold">{t.appName}</h1>
-          <span className="rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground">
-            {t.fixtureBadge}
-          </span>
+          {route.kind !== 'home' && (
+            <a href={homeHref()} className="text-xs text-primary underline-offset-4 hover:underline">
+              {t.back}
+            </a>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <span className="mr-1 text-xs text-muted-foreground">{t.localeLabel}</span>
           {KNOWN_LOCALES.map((l) => (
-            <Button
-              key={l}
-              variant={locale === l ? 'default' : 'ghost'}
-              size="sm"
-              className="h-7 px-2 text-xs uppercase"
-              onClick={() => setLocale(l)}
-              aria-pressed={locale === l}
-            >
-              {l}
-            </Button>
+            <Toggle key={l} on={locale === l} onClick={() => setLocale(l)} label={l}>
+              {l.toUpperCase()}
+            </Toggle>
           ))}
         </div>
       </header>
 
-      <p className="text-xs text-muted-foreground">{t.fixtureHint}</p>
-
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
-        <ReplayCanvas doc={doc} locale={locale} onFrameChange={onFrameChange} />
-        <ReplayCoverageBanner doc={doc} locale={locale} />
-      </div>
-
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium">{t.rosterTitle}</h2>
-        <ReplayTeams doc={doc} scoreboard={FIXTURE_SCOREBOARD} frame={frame} locale={locale} />
-      </section>
+      <Screen route={route} locale={locale} />
     </div>
+  )
+}
+
+/** Screen picks the view the URL names. */
+function Screen({ route, locale }: { route: Route; locale: Locale }) {
+  switch (route.kind) {
+    case 'home':
+      return <HomeScreen locale={locale} />
+    case 'match':
+      return <MatchScreen matchId={route.matchId} locale={locale} />
+    case 'sample':
+      return <SampleScreen locale={locale} />
+  }
+}
+
+/**
+ * SampleScreen draws the hand-written artifact through the very same viewer.
+ *
+ * THE SAME VIEWER IS THE POINT. A demonstration rendered by a second code path would prove
+ * nothing about the one that draws real matches; this one crosses the same normalisation
+ * boundary, joins the same roster and drives the same timeline.
+ */
+function SampleScreen({ locale }: { locale: Locale }) {
+  const t = SHELL_TEXT[locale]
+  const doc = useMemo(() => normalizeReplayDocument(FIXTURE_REPLAY_DOCUMENT), [])
+  return (
+    <>
+      <div className="flex flex-wrap items-baseline gap-2">
+        <span className="rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground">
+          {t.sampleBadge}
+        </span>
+        <p className="text-xs text-muted-foreground">{t.sampleHint}</p>
+      </div>
+      <ReplayViewer doc={doc} scoreboard={FIXTURE_SCOREBOARD} locale={locale} />
+    </>
   )
 }

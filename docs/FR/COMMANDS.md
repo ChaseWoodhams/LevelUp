@@ -235,8 +235,24 @@ npm run generate-types # openapi.yaml -> src/lib/api/generated.ts
 Les modules de rendu du rejeu sous `src/features/replay/` sont des **copies** de
 `apps/web/src/features/match-replay/`, chacune portant son chemin d'origine et le commit auquel
 elle a été copiée ; le `README.md` du dossier dit pourquoi, et comment tenir la copie honnête.
-Tant que la visionneuse n'est pas branchée sur `study-server`, l'écran dessine un artefact écrit
-à la main sous `src/features/replay/fixtures/` — aucune donnée réelle n'est en jeu.
+
+Le fragment d'URL choisit l'écran : `#/` est l'entrée (un champ qui prend un identifiant de
+match, forme courte ou complète), `#/match/<id>` ouvre un match archivé, et `#/sample` dessine
+un artefact écrit à la main — aucune donnée réelle, aucun serveur, aucun film capturé — pour que
+la visionneuse reste relisible par qui n'a encore rien archivé.
+
+**Ouvrir un vrai match exige `study-server` démarré.** Le serveur de dev relaie `/study` vers
+`127.0.0.1:8100` ; une page qui viserait l'origine du serveur directement ferait une requête
+inter-origines, et `study-server` ne publie volontairement aucun en-tête CORS.
+
+```bash
+go run ./apps/go-api/cmd/study-server    # terminal 1
+cd apps/study && npm run dev             # terminal 2, puis ouvrir #/match/<id>
+```
+
+Un artefact dont la `schemaVersion` n'est pas reconnue affiche un message et ne dessine RIEN :
+l'archive garde des documents construits par plusieurs versions du constructeur, et en lire un
+avec les mauvaises règles produirait une carte plausible et fausse.
 
 ---
 

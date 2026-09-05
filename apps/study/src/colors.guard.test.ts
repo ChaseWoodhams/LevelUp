@@ -12,10 +12,14 @@
  * Rather than restate the rule in a README and hope, it is asserted here, over the same
  * two shapes the shared linter looks for.
  *
- * TWO EXEMPTIONS, both the same one the web app grants itself:
+ * THREE EXEMPTIONS, and each one is a file where a hex value is the SUBJECT rather than a
+ * design decision:
  *   - `styles/tokens.css` — the palette. Hex values are its entire reason to exist, and
  *     `copies.guard.test.ts` checks each against the palette it was extracted from.
  *   - `lib/api/generated.ts` — generated from the OpenAPI contract, not written here.
+ *   - `features/viewer/fade.test.ts` — the test of the colour-notation parser. It asserts what
+ *     `#818CF8` dimmed comes back as; the literals ARE the cases, and none of them reaches a
+ *     pixel. `fade.ts` itself carries no literal and is not exempt.
  * Copied files are NOT exempt: none of them carries a literal today, and if one arrives
  * from upstream it should be seen here rather than waved through.
  */
@@ -27,7 +31,7 @@ import { describe, expect, it } from 'vitest'
 
 const STUDY_SRC = resolve(dirname(fileURLToPath(import.meta.url)))
 
-const EXEMPT = ['styles/tokens.css', 'lib/api/generated.ts']
+const EXEMPT = ['styles/tokens.css', 'lib/api/generated.ts', 'features/viewer/fade.test.ts']
 
 /** `#abc`, `#aabbcc`, `#aabbccdd` — the shapes a colour literal actually takes. */
 const HEX_RE = /#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3}(?:[0-9a-fA-F]{2})?)?\b/g

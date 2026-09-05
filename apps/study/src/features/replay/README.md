@@ -30,7 +30,26 @@ nullability frontier against the contract, not against a mirror of it.
 ## What did NOT come across
 
 `queries.ts` — it is the web app's fetch layer (its API client, its query keys, its app
-shell store). The study tool fetches from `study-server`, and that layer is its own work.
+shell store). The study tool fetches from `study-server`, and that layer is its own work
+(`features/archive/`).
+
+## What came across and then left
+
+`ReplayCanvas.tsx` was copied here and has since been **deleted**, replaced by
+`features/viewer/StudyReplayCanvas.tsx` — DERIVED from it, not a copy, and carrying no drift
+guard. Two things the origin cannot express through its props forced the fork:
+
+1. it paints one colour per TRACK from the chart-series palette, so a player is repainted at
+   every respawn; this viewer paints by TEAM, which needs the archive's participants rows;
+2. it owns its own playback position, and the study tool drives that position from outside —
+   frame stepping, jumps between deaths, keyboard.
+
+The derived file names its origin and the commit it was derived at, so
+`git diff <sha> HEAD -- apps/web/src/features/match-replay/ReplayCanvas.tsx` still says what the
+origin has learnt about DRAWING. Keeping the unused copy beside it would have been a dead
+module with green tests, which is the shape of debt this repository names first in its own list
+of anti-patterns. `lib/accessibility/plotlyColorscale.ts` left with it, for the same reason: the
+chart-series palette had no other reader here.
 
 ## Keeping a copy honest
 

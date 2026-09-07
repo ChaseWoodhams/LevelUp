@@ -61016,3 +61016,206 @@ A5, A6, A7, A8 (mock HaloClient + engine_test) non implémentés cette session �
 
 ---
 
+
+---
+
+## [2026-09-05] rejeu 2D : cinq defauts d attribution corriges, et l horloge du match publiee — Complete
+
+**Contexte** : session de verification du rejeu contre des DONNEES REELLES (4 films Streets
+archives, 175 484 positions). Chaque defaut ci-dessous a ete constate sur ces films, pas
+deduit d une lecture de code.
+
+**1. APPARIEMENT MORT -> VIE : trois ambiguites, trois refus.** `lives.go` nomme chaque vie par
+la mort qui la termine, sur la seule horloge. Constate sur `36e80b83` : deux joueurs tombes au
+meme tick, appariement DROIT 12+80 = 92 ms, appariement CROISE 46+46 = 92 ms — meme total, et
+c est le croise qui etait juste (verifie sur la geometrie des reapparitions). Aucune distance
+individuelle n etait pourtant a egalite : un test d egalite sur les distances ne voyait rien.
+Trois cas sont desormais refuses plutot que tranches par l ordre de parcours : ecart a egalite
+parfaite, rival a distance egale (une mort entre deux vies jumelles), et echange a somme egale.
+`ownersFromLives` retire en outre ENTIEREMENT un slot en conflit — il gardait la premiere
+lecture, ce que son propre commentaire decrivait deja comme « on ne tranche pas » et que
+`verdictOfBridge` declarait deja non publiable.
+
+**2. UNE TRACK EST UNE VIE, PAS UN SLOT.** `decimateTracks` accumulait par slot sans decouper.
+Un slot reattribue apres reapparition recollait deux vies : le client tracait une ligne droite
+EN TRAVERS de la mort et `isAliveAt` tenait le joueur pour vivant. Constate sur `0e97be38` :
+trous internes de 4,8 / 7,8 / 13,1 s pour un delai de reapparition mesure a ~8 s. Le decoupage
+utilise desormais le MEME seuil que `buildLifeSpans` (`lifeGapUS`).
+
+**3. GRENADES : position choisie sur le temps seul.** `locateThrow` prenait la naissance de
+projectile la plus proche dans 200 ms, les ex aequo departages par le tri (donc par X). Deux
+joueurs qui lancent dans la meme fenetre — banal — et le lancer recevait le projectile de
+l AUTRE. Mesure avant correctif sur `36e80b83` : 171 lancers publies sur 247 sans AUCUN joueur
+a moins de 4 m, distance mediane 7,95 m, pire cas 24,68 m. Le biped de l auteur arbitre
+desormais ; sans pont, une fenetre portant plusieurs naissances n est plus tranchee au hasard.
+Apres : mediane 0,10 m. Le slot du lanceur est aussi publie sur la branche projectile — il
+sortait a zero (201/247), et zero RESSEMBLE a un slot, si bien que le garde d ambiguite du
+client ne se declenchait jamais entre deux zeros.
+
+**4. PROJECTILES : repli du quantum Y.** Nouveau defaut, trouve en regardant l ecran. Un saut
+valant EXACTEMENT l etendue Y de la carte (52,88 m) en un pas de 100 ms, l autre axe fige —
+jamais sur X. 27 a 35 % des trajectoires de chaque film en portaient au moins un, et le client
+tracait une droite en travers de toute la carte. Cause en amont (dequantification, `filmdec`),
+NON corrigee ; ce qui est corrige est la publication d une position fausse : le vol s arrete a
+son dernier point lisible (`projectileMaxStepM`).
+
+**5. HORLOGE DU MATCH publiee (`matchClockZeroMs`).** La frame 0 n est pas le debut de la
+partie : l axe demarre au premier echantillon de position, pendant l avant-match. La duree des
+stats ne permet pas de retrouver l origine (ecart de -25,6 s a +3,6 s sur six matchs). Or
+l appariement des morts resolvait DEJA le decalage entre l horloge du match et celle du film,
+puis le jetait. Mesure sur `36e80b83` : -5 692 ms. Attention, ce zero est l origine FORMELLE
+(creation/chargement), pas le coup d envoi jouable — les barrieres tombent vers 21 s d axe, soit
+~27 s d horloge de match, et rien dans le film ne date cet instant.
+
+**CALIBRATION `sgh_streets` : VERIFIEE, NON MODIFIEE.** Deux ajustements automatiques ont ete
+essayes et REJETES : minimiser les positions sur les pixels pales (29,4 -> 17,1 %) et maximiser
+le recouvrement geometrie/art (IoU 0,79 -> 0,86). Les deux ENCADRENT le rectangle actuel
+(demi-etendues 24,6 et 14,3 contre 16,5) et le cassent sur la verite terrain : le rectangle
+actuel pose les coordonnees Forge des drapeaux a 0,2 et 0,4 m des icones dessinees, contre 5,5
+et 6,6 m pour les deux ajustements. Le pale n est pas un mur : il couvre 41,7 % de la carte,
+les joueurs y sont 25-31 % du temps, et 75,4 % de ces pixels ont une surface BSP jouable
+dessous. 2 points sur 175 484 sortent du rectangle.
+
+**RESULTATS** (film de reference 000d5950) : vies nommees 90 -> 82, tirs 475 -> 444, lancers
+situes 70 -> 67, trajectoires 439 -> 436. Chaque perte est un REFUS sur une donnee qui ne
+tranche pas — le meme arbitrage que le retrait du vote de `owners.go` (496 -> 475).
+Mesure du garde-fou grenade sur ce meme film : 0 lancer a plus de 4 m de son lanceur connu
+contre 3 avant, ecart maximal 0,56 m contre 14,46 m.
+
+**CONCLUSION / PROCHAINE ETAPE** : le fond de carte reste le vrai point faible.
+`map_structure` ne publie que des AABB d instances (`mapstruct-build` le documente : le lien
+instance -> maillage n est pas resolu), d ou un fond « en boites ». Trois pistes, par cout
+croissant : dessiner ces AABB en PLAN (surface la plus haute par pixel, ombrage par altitude,
+contours) — prototype concluant, zero calibration, vaut pour les 14 cartes ; extraire
+`instanced physics instances` (present dans le build serveur dedie, la geometrie de collision
+est exactement « ou l on peut se tenir ») ; resoudre instance -> maillage. Une piste externe
+est apparue en fin de session : l export Blender d une carte (cf. `ekur`, importeur Blender
+avec geometrie de carte multijoueur experimentale) rendrait un rendu ORTHOGRAPHIQUE dont le
+cadrage EST la calibration — a condition de verifier d abord que l export conserve les
+coordonnees monde (Streets doit mesurer ~51,7 x 52,9 m).
+
+---
+
+## [2026-09-06] Streets map floor: ekur render replaces the hand-calibrated art
+
+**Statut** : Complete.
+
+(Entry in English: standing instruction is that new writing is English; existing French
+entries above are left untouched.)
+
+**DECISION TECHNIQUE.** The previous entry's closing hypothesis is CONFIRMED: an ekur Blender
+export keeps world coordinates, so an orthographic render framed on the map's own sbsp AABB
+needs no calibration at all — the framing IS the calibration. Streets measures 51.73 x 52.88 m
+against the ~51.7 x 52.9 m that entry predicted. `apps/study/public/maps/sgh_streets.png` is
+now that render, and `mapImages.config.ts` carries the AABB
+(X[-24.32224, 27.407486], Y[-23.018236, 29.866623]) rather than a fitted rectangle. The
+two-point flag registration is gone, and with it the failure mode that had the art rotated the
+wrong way until a player named their spawn room.
+
+**ROOFS: THE FIX IS PER PIXEL, NOT PER OBJECT.** A plain top-down render hides every street
+under its canopy. Culling roof objects was implemented and MEASURED USELESS (258 objects
+removed, image essentially unchanged): a building arrives as ONE mesh spanning floor to roof,
+so its bbox starts at ground level and no "is this a roof" test fires. A single low cut plane
+fails too — reachable floors here span 0 to 5 m. The asset is composited from 12 plan cuts,
+each pixel taking the lowest cut clearing the local reachable floor (from player positions) by
+2 m. Two tuning traps, both recorded in `tools/map-render/slice_map.js`: the height field must
+be dilated LOCALLY (6 m let one walkway raise the cut over the whole map), and an empty pixel
+must STAY empty (stepping up the stack reinstates every roof).
+
+**SCENE HYGIENE.** The import is 43.5% non-map, measured: 2 393 exact duplicates (same mesh,
+same transform, up to 6 deep — 23.7% of objects), 1 679 objects in ekur's `Master Geometries`
+source-mesh pile parked at the origin (4.17M polys, 49 changed pixels out of 1.58M), plus
+above-play and off-arena geometry. Flat sub-2cm planes look like decals but are NOT culled:
+Halo builds real walls out of thin brushes, and dropping them tore faces off buildings.
+
+**RESULTATS.** 175 484 player positions, 100.00% on drawn geometry, zero calibration.
+`npm run typecheck` clean, 418/418 tests pass, verified in the running app on match 0e97be38 —
+trails follow corridors and turn at building corners.
+
+**CONCLUSION / PROCHAINE ETAPE.** Pipeline is in `tools/map-render/` (README carries the whole
+procedure and the language exception: Blender only embeds Python). Two things left. (1) The
+Forge props layer is still drawing 382 objects of ANOTHER map's decor over every map —
+`LoadGeometry(dir)` serves one directory to all — and now that the floor is good, that wrong
+layer is the worst thing on screen. (2) The other 44 maps can be generated the same way, about
+a minute each once the map is imported to a .blend.
+
+## [2026-09-06] English-only repository audit — Complete
+
+**Context**: the repository was audited for French text, notes, features, data
+paths, and generated artifacts in order to produce the edit inventory for an
+English-only end state.
+
+**Technical decision**: treat this as a repository campaign. The audit records
+runtime, API, database, configuration, documentation, asset, and generated
+artifact surfaces without modifying application code or pre-existing worktree
+changes. Removing French fields and translation columns requires an explicit
+database and client compatibility decision before implementation.
+
+**Results**: created
+.ai/AUDIT_ENGLISH_ONLY_2026-09-06.md with ten retained findings, reproduction
+scans, exclusions, implementation sequence, and validation gates. The scan
+confirmed 21 bilingual web manifests containing 2,964 French entries, 18
+tracked files under docs/FR, French locale negotiation in both apps and the Go
+API, French metadata ingestion and storage paths, and French policy in active
+agent and CI documentation.
+
+**Next step**: review the registry, decide the API/database migration policy,
+then implement the changes as a separate change set and regenerate all derived
+artifacts before running the validation gates.
+
+---
+
+## [2026-09-06] Decoder: weapon witness, per-map props, and what the executable settled
+
+**Statut** : Complete for the decoder changes; the reverse-engineering findings are recorded
+but NOT wired into production.
+
+**TEMOIN D ARME (lives_witness.go).** Life naming matched on ONE quantity: the gap between a
+life ending and a death in the feed. Two players dying in the same instant are therefore
+unresolvable, and both pairs are refused. The film carries a second, independent reading: fire
+events give the weapon per PLAYER, keyframes give carried weapons per SLOT, decoded by
+different code on the same clock. Consulted ONLY inside the two ambiguity branches, and only
+when one candidate has weapon agreements and the other has NONE — so uniform loadouts make it
+silent rather than wrong, which is what allows adding it without reopening the 2026-07-28
+decision. Measured on six films: 9 ties resolved, +8 lives. The control matters more than the
+effect: on pairs the clock resolves unambiguously, the weapon agrees 593 times against 4
+contradictions (99.3%), and those counters now ship in the artifact as a standing check on the
+slot->player bridge. Goldens updated deliberately: 444->446 shots, 82->84 lives.
+
+**PROPS PAR CARTE (registry.go, geometry.go).** `MapGeometryDir` took only the title and
+returned ONE directory, so its CSV was drawn on every match whatever the map: measured, 382
+identical props across six films of three maps, including maps with no structure file at all.
+The file carries no map column - nothing in the data says which map it belongs to. It is moved
+to `map_geometry/UNATTRIBUTED/` with a README rather than deleted, and the resolver now takes
+a module. `LoadGeometry` takes two directories because the props are per-map while the type
+catalogue is per-title; sharing one directory would have forced a copy of the catalogue under
+every map.
+
+**CE QUE L EXECUTABLE A TRANCHE.** Ghidra 12.1.3 + JDK 21 installed under `C:\Users\Wolfie\
+Tools`; the game binary imported with `-noanalysis`, which decompiles a named function in
+about a minute instead of a multi-hour whole-binary pass. Results, all verified against this
+build: the repo's recorded FUN_ addresses still match; the descriptor chain
+(registrar -> `world[ti*8+8]` -> vtable+0x60) is exactly what the game does; and the
+default-state grammars for ti=0/5/6/9 are CORRECT as ported. A second agent (codex,
+gpt-6-astra) resolved all 50 archetypes and verified the four grammars by executing the
+original bytes in Ghidra's p-code emulator (4 680 cases, 0 failures), reproducing the ti=35
+control. Its results agree with the repo's ports in every particular.
+
+**LA VRAIE DECOUVERTE : L EN-TETE DE RECORD KEYFRAME N EST PAS CONSTANT.** The decoder assumed
+64 bits everywhere, a value taken from a biped-specific helper with NO support in the binary.
+ti=9 needs 47 (the only prefix, out of 300, giving eight player entities of stable team split
+4-4 in all six films); at 47 the biped collapses from 19 736 decoded components to zero. The
+header is per entity type. That is why team, respawn timers and objective stats read blank -
+not a wrong grammar, a wrong offset.
+
+**RESULTATS.** Team IS in the film, contrary to `document.go`: 1 873 reads across six films.
+Also confirmed present: `object-dead-state-component` (1 317, on bipeds) and four match-timeline
+signals. Still blank: respawn timers, lives, statborg stats - each needs its own header
+calibration.
+
+**CONCLUSION / PROCHAINE ETAPE.** None of the reverse-engineering is wired in: the benches are
+tests skipped without `REPLAY_FILMS`. The team read needs one missing link before it is usable
+- which PLAYER each ti=9 entity is; the read gives eight teams with no identities attached.
+The nearest real gain remains `object-dead-state-component` on bipeds: it needs no header
+calibration and attacks the measured defect (12,7 % of lives unnamed, 11,5 % of shots orphaned
+as a result).

@@ -1190,6 +1190,7 @@ func traverseComponentLoopFrom(br *BitReader, arch Archetype, t *EntityTrace, fr
 		consumeCorruptionCheck(br)
 		t.Comps = append(t.Comps, CompResult{Index: i, Name: arch.Components[i], Variant: variant,
 			Ported: ported, StartBit: start, Payload: payload})
+		observeComponent(t.TypeIndex, arch.Components[i], payload)
 		if arch.Components[i] == compWeaponStateTypeInfo && variant != noVariant && t.HeldWeapon == noVariant {
 			t.HeldWeapon = variant
 		}

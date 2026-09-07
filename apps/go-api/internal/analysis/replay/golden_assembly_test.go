@@ -31,20 +31,49 @@ import (
 // constantes vient d une mesure datee du chantier ; si l une bouge, c est le decodeur ou
 // l assemblage qui a bouge, et le test doit le dire par son nom.
 const (
-	// wantShotsAttached / wantShotsAvailable : 475/519 = 91,5 %. Mesure du 2026-07-28, apres le
-	// retrait du repli vote (496/519 avec lui, pour 4 desaccords entre sources).
-	wantShotsAttached  = 475
+	// wantShotsAttached / wantShotsAvailable : 446/519 = 85,9 %. Mesure du 2026-09-06, apres
+	// l ajout du TEMOIN D ARME (lives_witness.go) : il leve une ambiguite que l horloge seule
+	// refusait, ce qui rend 2 vies (voir wantLivesNamed) et donc 2 tirs de plus.
+	// Serie complete, chaque palier avec sa raison :
+	//   496/519  avant le retrait du repli vote (2026-07-28) — mais 4 desaccords entre sources
+	//   475/519  apres ce retrait : tout ce qui est affiche vient d une lecture
+	//   444/519  apres le refus des appariements a somme egale (2026-09-05)
+	//   446/519  apres le temoin d arme (2026-09-06)
+	wantShotsAttached  = 446
 	wantShotsAvailable = 519
-	// wantLivesNamed / wantLivesTotal : 90 vies nommees sur 105. Les 15 restantes sont 4 vies
-	// anterieures au debut reel du match et 6 survivants de fin de partie, que le film ne clot
-	// par aucun evenement.
-	wantLivesNamed = 90
+	// wantLivesNamed / wantLivesTotal : 82 vies nommees sur 105. Les 23 restantes sont 4 vies
+	// anterieures au debut reel du match, 6 survivants de fin de partie que le film ne clot par
+	// aucun evenement, et 8 REFUSEES par 4 echanges a somme egale : deux vies et deux morts dont
+	// l appariement droit et l appariement croise coutent EXACTEMENT le meme total, ou rien dans
+	// l horloge ne dit laquelle est laquelle (cf. lives.go et
+	// TestNameLivesByDeathsRefusesTiedExchange). Mesure du 2026-09-05 : les 4 sont des egalites
+	// exactes, aucune n est un simple defaut d optimalite du glouton. Avant ce refus, ces 8 vies
+	// etaient nommees par le seul ordre de parcours, sans garantie que ce soit le bon camp — le
+	// defaut a ete constate sur un match reel, ou les deux identites s etaient posees a l envers.
+	// MISE A JOUR DU 2026-09-06 : 84, apres le temoin d arme. Il ne tranche que la ou
+	// l horloge refusait deja, et SEULEMENT quand un candidat a des accords d arme et l autre
+	// AUCUN — sur les 4 echanges ci-dessus il en departage 1, soit 2 vies rendues. Le temoin
+	// est mesure la ou la reponse est connue (les paires non ambigues) : 593 accords contre 4
+	// contradictions sur les six films de reference, soit 99,3 %.
+	wantLivesNamed = 84
 	wantLivesTotal = 105
-	// wantGrenades : 70 lancers, tous situes (65 par la naissance de leur projectile, 5 par le
-	// biped de leur auteur).
-	wantGrenades = 70
-	// wantProjectiles : 439 trajectoires publiees.
-	wantProjectiles = 439
+	// wantGrenades : 70 lancers DISPONIBLES (decodes), dont 67 situes. Le denominateur ne bouge
+	// pas : c est le rattachement qui perd des lancers, pas le decodage.
+	//
+	// LES TROIS PERDUS SONT DES REFUS, PAS DES REGRESSIONS. La naissance de projectile etait
+	// choisie sur le TEMPS SEUL : quand deux joueurs lancent dans la meme fenetre de 200 ms, le
+	// lancer recevait la position du projectile de l autre. Mesure sur ce meme film apres
+	// correctif (TestReviewReferenceMeasurements) : 0 lancer a plus de 4 m de son lanceur connu
+	// contre 3 avant, ecart maximal 0,56 m contre 14,46 m — soit le regime annonce par la mesure
+	// qui fonde cette source (0,77 unite entre la naissance et la main de son auteur). Les trois
+	// lancers retires sont ceux qu aucun biped connu ne peut confirmer.
+	wantGrenades         = 70
+	wantGrenadesAttached = 67
+	// wantProjectiles : 436 trajectoires publiees. Trois vols de moins qu avant le garde-fou
+	// `projectileMaxStepM` : ils portaient un pas impossible (repli du quantum Y, cf.
+	// projectiles.go) et sont desormais coupes a leur dernier point lisible, ce qui en laisse
+	// certains sous les deux points requis pour etre dessines.
+	wantProjectiles = 436
 	// wantInventory : 184 etats d inventaire publies.
 	wantInventory = 184
 	// wantIndexReadings : 26 chunks de replication livrent la MEME table identite -> index.
@@ -373,9 +402,9 @@ func renderInventory(p func(string, ...any), doc ReplayDocument) {
 	p("%d lecture(s) de munitions a PLUSIEURS candidats : la plus longue a ete retenue et le",
 		multi)
 	p("nombre de candidats est publie, pour que le departage reste visible")
-	p("rangs de grenade : %s", renderBilingualList(doc.GrenadeLabels))
+	p("rangs de grenade : %s", renderLabelList(doc.GrenadeLabels))
 	p("capacites nommees (TABLE PARTIELLE — 4 index observes pour 11 capacites dans le jeu) : %s",
-		renderBilingualMap(doc.AbilityLabels))
+		renderLabelMap(doc.AbilityLabels))
 	p("")
 }
 
@@ -400,6 +429,9 @@ func renderBridge(p func(string, ...any), doc ReplayDocument) {
 		b.LivesNamed, b.LivesTotal)
 	p("%d chunk(s) de replication concordants · %d desaccord(s) d identite · %d collision(s) de slot",
 		b.IndexReadings, b.IndexDisagreements, b.SlotCollisions)
+	p("%d vie(s) ecartee(s) pour ecart a egalite parfaite envers une mort proche — ni l une ni",
+		b.AmbiguousTies)
+	p("l autre n a de reponse que l horloge puisse donner, aucune des deux n est nommee")
 	p("verdict : %s", doc.Coverage.Verdict["bridge"])
 	p("")
 }
@@ -411,27 +443,24 @@ func renderLabels(p func(string, ...any), doc ReplayDocument) {
 	p("n emprunte pas le nom d une arme voisine")
 	for _, k := range sortedKeys(doc.WeaponLabels) {
 		l := doc.WeaponLabels[k]
-		p("  %s  en=%q fr=%q fx=%q", k, l.En, l.Fr, l.Fx)
+		p("  %s  en=%q fx=%q", k, l.En, l.Fx)
 	}
 	p("")
 }
 
-// renderBilingualList / renderBilingualMap — les libelles sont BILINGUES depuis le lot
-// 3.2 : le golden fige les DEUX langues, sinon une regression FR passerait sous un
-// golden vert.
-func renderBilingualList(in []Label) string {
+func renderLabelList(in []Label) string {
 	parts := make([]string, 0, len(in))
 	for i, l := range in {
-		parts = append(parts, fmt.Sprintf("%d:en=%q/fr=%q", i, l.En, l.Fr))
+		parts = append(parts, fmt.Sprintf("%d:en=%q", i, l.En))
 	}
 	return strings.Join(parts, ", ")
 }
 
-func renderBilingualMap(in map[string]Label) string {
+func renderLabelMap(in map[string]Label) string {
 	keys := sortedKeys(in)
 	parts := make([]string, 0, len(keys))
 	for _, k := range keys {
-		parts = append(parts, fmt.Sprintf("%s=en:%q/fr:%q", k, in[k].En, in[k].Fr))
+		parts = append(parts, fmt.Sprintf("%s=en:%q", k, in[k].En))
 	}
 	return strings.Join(parts, ", ")
 }

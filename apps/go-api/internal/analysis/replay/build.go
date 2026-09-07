@@ -224,15 +224,17 @@ func BuildFromPositions(matchID, titleSlug string, pos []filmdec.BipedPosition,
 	// ~120 ms, la grille du rejeu est à 100 ms : décimer d'abord perdrait des tireurs).
 	// LE PONT slot -> joueur vient du seul fil des morts (cf. owners.go). Il conditionne les
 	// tirs ET les lancers : le construire une seule fois, et le partager.
-	own := buildOwners(indexBySlot(sorted), opt.Deaths, opt.PlayerIndices)
+	own := buildOwners(indexBySlot(sorted), opt.Deaths, opt.PlayerIndices, fire, opt.Loadouts)
 	// L'IDENTITÉ se pose sur les traces dès que le pont existe : sans elle, un client ne peut
 	// ni nommer un joueur, ni regrouper ses vies, ni colorer une équipe.
 	nameTracks(doc.Tracks, own.SlotXUID)
 	doc.Roster = buildRoster(opt.PlayerIndices, gamertagsOf(opt.Deaths))
+	doc.MatchClockZeroMS = matchClockZero(own, origin)
 	slog.Info("pont slot->joueur",
 		"slots", len(own.Owner), "viesNommees", own.DeathsNamed, "viesTotal", own.LivesTotal,
 		"lecturesIndex", own.IndexReadings, "desaccordsIndex", own.IndexDisagreements,
-		"collisionsSlot", own.SlotCollisions)
+		"collisionsSlot", own.SlotCollisions, "viesAmbigues", own.AmbiguousTies,
+		"zeroHorlogeMatchMS", derefI64(doc.MatchClockZeroMS))
 
 	// Chaque calque rend sa COUVERTURE en même temps que son contenu. Le filtrage par
 	// trajectoire publiée qui suit est lui aussi compté, sous une catégorie distincte.
@@ -257,7 +259,8 @@ func BuildFromPositions(matchID, titleSlug string, pos []filmdec.BipedPosition,
 	objCov.warnIfLossy("objectifs")
 
 	doc.Coverage = buildCoverage(shotCov, grenCov, objCov, own)
-	doc.Projectiles = buildProjectiles(opt.Projectiles, origin, step)
+	projectiles, projTruncated := buildProjectiles(opt.Projectiles, origin, step)
+	doc.Projectiles = projectiles
 	doc.WeaponLabels = buildWeaponLabels(doc.Loadouts, doc.Shots, opt.Labels)
 	doc.Inventory = keepInventoryOfPublishedTracks(
 		buildInventory(opt.Inventory, origin, step), doc.Tracks)
@@ -275,6 +278,7 @@ func BuildFromPositions(matchID, titleSlug string, pos []filmdec.BipedPosition,
 		"tirsSansSlot", shotCov.NoSlot, "tirsAmbigus", shotCov.Ambiguous,
 		"tirsHorsFenetre", shotCov.OutOfWindow, "tirsNonPublies", shotCov.Unpublished,
 		"grenadesRattachees", grenCov.Attached, "grenadesDisponibles", grenCov.Available,
+		"volsTronques", projTruncated, "volsPublies", len(doc.Projectiles),
 		"verdictTirs", doc.Coverage.Verdict["shots"],
 		"verdictGrenades", doc.Coverage.Verdict["grenades"],
 		"verdictPont", doc.Coverage.Verdict["bridge"])
@@ -289,12 +293,25 @@ func keepShotsOfPublishedTracks(shots []Shot, tracks []Track) []Shot {
 }
 
 // decimateTracks projette les positions sur la grille de frames (un point par slot et par
-// frame, le premier observé gagne) et produit une track par slot, dans l'ordre de première
-// apparition.
+// frame, le premier observé gagne) et produit une track PAR VIE, dans l'ordre de première
+// apparition du slot.
+//
+// UNE TRACK EST UNE VIE, PAS UN SLOT — et ce fichier a longtemps publié l'inverse. Un slot
+// MIGRE aux réapparitions, mais rien ne garantit qu'il ne revienne pas : sur `0e97be38`, des
+// slots reviennent après 4,8 s, 7,8 s et 13,1 s d'absence, soit largement au-delà du délai de
+// réapparition mesuré (~8 s). Recollées en une seule track, ces deux vies faisaient tracer au
+// client une ligne droite EN TRAVERS de la mort — le joueur se déplaçait à l'écran pendant que
+// le fil des morts le disait mort, et `isAliveAt` le tenait pour vivant tout du long.
+//
+// LE SEUIL EST CELUI DE `buildLifeSpans` (`lifeGapUS`), et il n'y en a pas deux : l'analyse de
+// propriété et la publication doivent découper les vies au MÊME endroit, sans quoi le pont
+// slot -> joueur nommerait des vies que l'artefact ne porte pas.
 func decimateTracks(sorted []filmdec.BipedPosition, origin, step uint64, minPoints int) []Track {
 	type acc struct {
 		pts       []Point
 		lastFrame int
+		lastTS    uint64
+		closed    [][]Point // vies déjà terminées pour ce slot, dans l'ordre du temps
 	}
 	accs := map[uint32]*acc{}
 	var order []uint32
@@ -309,6 +326,13 @@ func decimateTracks(sorted []filmdec.BipedPosition, origin, step uint64, minPoin
 			accs[p.Slot] = a
 			order = append(order, p.Slot)
 		}
+		// Un trou plus long que lifeGapUS ferme la vie en cours : ce qui suit est une
+		// RÉAPPARITION sur le même slot, pas la suite du même déplacement.
+		if len(a.pts) > 0 && p.TimestampUS-a.lastTS > lifeGapUS {
+			a.closed = append(a.closed, a.pts)
+			a.pts, a.lastFrame = nil, -1
+		}
+		a.lastTS = p.TimestampUS
 		if frame == a.lastFrame {
 			continue
 		}
@@ -337,19 +361,45 @@ func decimateTracks(sorted []filmdec.BipedPosition, origin, step uint64, minPoin
 	}
 	tracks := make([]Track, 0, len(order))
 	for _, slot := range order {
-		pts := accs[slot].pts
-		if len(pts) < minPoints {
-			continue
+		a := accs[slot]
+		for _, pts := range append(a.closed, a.pts) {
+			if len(pts) < minPoints {
+				continue
+			}
+			tracks = append(tracks, Track{
+				Slot:       slot,
+				Team:       -1,
+				Points:     pts,
+				StartFrame: pts[0].T,
+				EndFrame:   pts[len(pts)-1].T,
+			})
 		}
-		tracks = append(tracks, Track{
-			Slot:       slot,
-			Team:       -1,
-			Points:     pts,
-			StartFrame: pts[0].T,
-			EndFrame:   pts[len(pts)-1].T,
-		})
 	}
 	return tracks
+}
+
+// matchClockZero place le zéro de l'horloge du match sur l'axe du document, en millisecondes,
+// ou nil s'il n'est pas mesuré.
+//
+// LE SIGNE PORTE DU SENS ET N'EST PAS BORNÉ : négatif, le zéro précède la première image du
+// film, ce qui est le cas ordinaire (mesuré -5 692 ms sur `36e80b83`). Le borner à l'axe, comme
+// le faisait la première version de ce calcul, revenait à jeter la mesure exacte dans le seul
+// cas où elle se produit.
+// derefI64 rend la valeur pointée, ou "non mesuré" pour le journal : un pointeur passé tel
+// quel à slog s'imprime en adresse, ce qui ne se relit pas.
+func derefI64(v *int64) any {
+	if v == nil {
+		return "non mesuré"
+	}
+	return *v
+}
+
+func matchClockZero(own OwnerReport, origin uint64) *int64 {
+	if own.DeathsNamed == 0 {
+		return nil
+	}
+	ms := own.DeathClockOffsetMS - int64(origin/1000)
+	return &ms
 }
 
 // frameSpan renvoie le nombre de frames couvrant tout le film (dernier index + 1).

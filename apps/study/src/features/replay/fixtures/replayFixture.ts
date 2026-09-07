@@ -251,27 +251,27 @@ function track(life: Life): ReplayTrack {
 
 /** Weapon families, keyed by the 64-bit weapon id the film writes in hexadecimal. */
 const WEAPON_LABELS: NonNullable<ReplayDocument['weaponLabels']> = {
-  '0000000100000000': { en: 'Assault Rifle', fr: 'Fusil d’assaut', fx: 'ballistic' },
-  '0000000200000000': { en: 'Battle Rifle', fr: 'Fusil de combat', fx: 'ballistic' },
-  '0000000300000000': { en: 'Plasma Pistol', fr: 'Pistolet plasma', fx: 'plasma' },
-  '0000000400000000': { en: 'Needler', fr: 'Needler', fx: 'needles' },
-  '0000000500000000': { en: 'Rocket Launcher', fr: 'Lance-roquettes', fx: 'explosive' },
+  '0000000100000000': { en: 'Assault Rifle', fx: 'ballistic' },
+  '0000000200000000': { en: 'Battle Rifle', fx: 'ballistic' },
+  '0000000300000000': { en: 'Plasma Pistol', fx: 'plasma' },
+  '0000000400000000': { en: 'Needler', fx: 'needles' },
+  '0000000500000000': { en: 'Rocket Launcher', fx: 'explosive' },
   // Deliberately outside the drawn families: an unknown effect must fall back to the
   // neutral mark, never borrow a neighbouring shape.
-  '0000000600000000': { en: 'Prototype', fr: 'Prototype', fx: 'unknown-family' },
+  '0000000600000000': { en: 'Prototype', fx: 'unknown-family' },
 }
 
 /** Grenade types, in the rank order the inventory counters use. */
 const GRENADE_LABELS: NonNullable<ReplayDocument['grenadeLabels']> = [
-  { en: 'Frag', fr: 'Fragmentation' },
-  { en: 'Plasma', fr: 'Plasma' },
-  { en: 'Spike', fr: 'Spike' },
+  { en: 'Frag' },
+  { en: 'Plasma' },
+  { en: 'Spike' },
 ]
 
 /** Armour abilities, keyed by the ability index the inventory reads. */
 const ABILITY_LABELS: NonNullable<ReplayDocument['abilityLabels']> = {
-  '0': { en: 'Grappleshot', fr: 'Grappin' },
-  '1': { en: 'Repulsor', fr: 'Repulseur' },
+  '0': { en: 'Grappleshot' },
+  '1': { en: 'Repulsor' },
 }
 
 /**
@@ -361,6 +361,15 @@ const COVERAGE: NonNullable<ReplayDocument['coverage']> = {
     indexReadings: 8,
     indexDisagreements: 0,
     slotCollisions: 0,
+    ambiguousTies: 0,
+    // Le témoin d'arme (cf. go-api lives_witness.go) : ce qu'il a levé, et de quoi le juger.
+    // Zéro partout dans la fixture — un rejeu de démonstration sans ambiguïté n'a rien à
+    // départager, et publier autre chose ferait croire à une mesure.
+    tiesResolved: 0,
+    witnessDeferred: 0,
+    controlAgree: 0,
+    controlContradict: 0,
+    controlSilent: 0,
   },
   verdict: { shots: 'partial', grenades: 'nominal', objectives: 'nominal' },
 }

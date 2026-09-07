@@ -42,4 +42,42 @@ import type { MapImageConfig } from './mapCalibration'
  *
  *   olympus: { image: '/maps/olympus.png', world: { minX: -60, minY: -40, maxX: 60, maxY: 40 } },
  */
-export const MAP_IMAGES: MapImageConfig = {}
+export const MAP_IMAGES: MapImageConfig = {
+  /**
+   * sgh_streets ("Streets") — NOT CALIBRATED, AND THAT IS THE POINT. The four numbers are not a
+   * measurement anybody made; they are the map's own sbsp bounding box, and the image is
+   * rendered onto exactly that rectangle. Nothing here was fitted, so there is nothing here to
+   * have fitted wrong.
+   *
+   * WHERE THE IMAGE COMES FROM. The map's geometry is extracted from the game's own module
+   * files with `ekur` and rendered top-down in Blender by `tools/map-render/` (whose README
+   * carries the whole pipeline). The camera is orthographic and framed on
+   * X[-24.32224, 27.407486], Y[-23.018236, 29.866623] — the sbsp AABB, which is the same frame
+   * the replay's coordinates live in. So a world point maps to a pixel by linear interpolation
+   * of the rectangle below, which is what this file's contract already asks for.
+   *
+   * THE CHECK THAT MATTERS: 175,484 player positions from four archived matches, every one of
+   * them (100.00%) landing on drawn geometry, with no calibration step in between. The previous
+   * asset was a piece of callout art registered against two Forge-extracted flag positions —
+   * a two-point fit, which cannot distinguish a rotation from its mirror, and did in fact get
+   * the rotation backwards until a player in one of the archived matches said which room they
+   * spawned in. None of that fragility survives here: there is no fit.
+   *
+   * ROOFS ARE CUT AWAY, per region. A plain top-down render hides every street under its
+   * canopy, and no per-object rule removes them — a building arrives as ONE mesh spanning floor
+   * to roof, so its bounding box starts at ground level and every "is this a roof" test says
+   * no. Only the camera's near plane cuts per pixel, and one cut height cannot serve a map that
+   * stacks walkways over streets (reachable floors here span 0 to 5 m). The asset is therefore
+   * composited from a stack of plan cuts, each pixel taking the lowest cut that still clears
+   * the local reachable floor — derived from where players actually stood — by 2 m.
+   *
+   * `preferOverStructure` STAYS SET, for the reason it was set originally: this map's
+   * reconstructed floor is hundreds of raw BSP rectangles with no rooms or corridors drawn in,
+   * and reads as a jumble even where every one is placed correctly.
+   */
+  sgh_streets: {
+    image: '/maps/sgh_streets.png',
+    world: { minX: -24.32224, minY: -23.018236, maxX: 27.407486, maxY: 29.866623 },
+    preferOverStructure: true,
+  },
+}

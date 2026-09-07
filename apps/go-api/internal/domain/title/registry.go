@@ -744,14 +744,28 @@ func (p *PathResolver) MapObjectivesPath(titleSlug string) string {
 	return filepath.Join(p.TitleDataDir(titleSlug), "reference", "map_objectives.json")
 }
 
-// MapGeometryDir retourne le répertoire des PROPS de carte (géométrie Forge : socles,
-// caisses, rampes posées dans la variante), lus par cmd/replay-build pour poser des
-// repères contextuels sur le rejeu 2D — à distinguer de la STRUCTURE, qui est le sol.
-// Donnée de RÉFÉRENCE versionnée (produite par le RE de la variante .mvar), au même
-// titre que map_structure/ et map_quant_bounds.json : ce n'est pas un cache.
-// Ex: data/titles/halo_infinite/reference/map_geometry/
-func (p *PathResolver) MapGeometryDir(titleSlug string) string {
-	return filepath.Join(p.TitleDataDir(titleSlug), "reference", "map_geometry")
+// MapGeometryDir retourne le répertoire des PROPS d'UNE carte (géométrie Forge : socles,
+// caisses, rampes posées dans la variante), lus pour poser des repères contextuels sur le
+// rejeu 2D — à distinguer de la STRUCTURE, qui est le sol. Donnée de RÉFÉRENCE versionnée
+// (produite par le RE de la variante .mvar), au même titre que map_structure/ et
+// map_quant_bounds.json : ce n'est pas un cache.
+//
+// LA CLÉ EST LE MODULE, ET CE PARAMÈTRE EST UN CORRECTIF. Cette fonction ne prenait que le
+// titre et rendait UN répertoire pour toutes les cartes : le CSV qui s'y trouve était donc
+// servi à chaque match, quelle que soit la carte jouée. Mesuré sur six matchs de trois
+// cartes différentes : 382 props IDENTIQUES partout, y compris sur des cartes dont aucun
+// fichier de structure n'existe. Le fichier lui-même ne porte aucune colonne de carte —
+// rien, dans la donnée, ne dit à quelle carte il appartient.
+//
+// Le sol reconstruit était autrefois un amas de rectangles, et ces props étaient les SEULS
+// repères lisibles : les servir partout se défendait. Depuis que le fond de carte est un
+// rendu correct (cf. tools/map-render/), une couche de décor appartenant à une AUTRE carte
+// n'est plus un pis-aller, c'est une donnée fausse posée sur un outil où l'on mesure des
+// positions. Un répertoire par module, absent = pas de props.
+//
+// Ex: data/titles/halo_infinite/reference/map_geometry/sgh_streets/
+func (p *PathResolver) MapGeometryDir(titleSlug, module string) string {
+	return filepath.Join(p.TitleDataDir(titleSlug), "reference", "map_geometry", module)
 }
 
 // MapStructurePath retourne le chemin du fichier de STRUCTURE d'une carte : les emprises

@@ -43,7 +43,7 @@ func main() {
 	titleFlag := flag.String("title", title.DefaultSlug, "slug du titre")
 	interval := flag.Int("interval", replay.DefaultFrameIntervalMS, "pas de temps du rejeu, en ms")
 	geomDir := flag.String("geometry", "",
-		"répertoire des CSV de props Forge (défaut : PathResolver.MapGeometryDir du titre)")
+		"répertoire des CSV de props Forge (défaut : PathResolver.MapGeometryDir du titre ET de la carte)")
 	mapName := flag.String("map", "", "nom de carte du match (obligatoire : porte les bornes de déquantification)")
 	flag.Parse()
 	args := flag.Args()
@@ -78,7 +78,7 @@ func main() {
 	// une donnée de production n'a pas à vivre dans les notes du chantier qui l'a
 	// produite (règle multi-titre : jamais de chemin composé à la main).
 	if *geomDir == "" {
-		*geomDir = title.NewPathResolver(repoRoot).MapGeometryDir(*titleFlag)
+		*geomDir = title.NewPathResolver(repoRoot).MapGeometryDir(*titleFlag, entry.Module)
 	}
 
 	// Le catalogue de libellés vient des mappings du TITRE (armes, grenades, capacités).
@@ -93,7 +93,7 @@ func main() {
 
 	doc, err := replay.BuildFromFilm(matchID, *titleFlag, filmDir, replay.Options{
 		FrameIntervalMS: *interval,
-		Geometry:        loadGeometry(*geomDir),
+		Geometry:        loadGeometry(*geomDir, title.NewPathResolver(repoRoot).MapGeometryDir(*titleFlag, "")),
 		Structure:       loadStructure(repoRoot, *titleFlag, entry.Module),
 		Labels:          labels,
 		WorldRange:      &worldRange,
@@ -159,13 +159,13 @@ func loadStructure(repoRoot, titleSlug, module string) []replay.Surface {
 
 // loadGeometry charge le fond de carte ; l'absence des CSV n'est PAS fatale (le rejeu
 // reste lisible sans repères), mais elle est journalisée.
-func loadGeometry(dir string) []replay.MapObject {
-	objs, skipped, err := replay.LoadGeometry(dir)
+func loadGeometry(mapDir, typesDir string) []replay.MapObject {
+	objs, skipped, err := replay.LoadGeometry(mapDir, typesDir)
 	if err != nil {
-		slog.Warn("géométrie de carte indisponible — artefact sans fond", "err", err, "dir", dir)
+		slog.Warn("géométrie de carte indisponible — artefact sans fond", "err", err, "mapDir", mapDir)
 		return nil
 	}
-	slog.Info("géométrie de carte chargée", "objets", len(objs), "sansEmprise", skipped, "dir", dir)
+	slog.Info("géométrie de carte chargée", "objets", len(objs), "sansEmprise", skipped, "mapDir", mapDir)
 	return objs
 }
 

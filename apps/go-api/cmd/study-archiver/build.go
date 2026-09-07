@@ -74,7 +74,7 @@ func runBuild(build buildFilm, matchID, titleSlug, filmDir string, opt replay.Op
 func (d deps) buildOptions(ctx context.Context, m matchMap) replay.Options {
 	return replay.Options{
 		FrameIntervalMS: d.FrameIntervalMS,
-		Geometry:        loadGeometry(ctx, d.Paths.MapGeometryDir(d.Title)),
+		Geometry:        loadGeometry(ctx, d.Paths.MapGeometryDir(d.Title, m.Module), d.Paths.MapGeometryDir(d.Title, "")),
 		Structure:       loadStructure(ctx, d.Paths.MapStructurePath(d.Title, m.Module), m.Module),
 		Labels:          d.Labels,
 		WorldRange:      &m.Range,
@@ -99,15 +99,18 @@ func loadStructure(ctx context.Context, path, module string) []replay.Surface {
 
 // loadGeometry loads the map's Forge props (contextual landmarks). Absence is NOT fatal
 // either; it is logged.
-func loadGeometry(ctx context.Context, dir string) []replay.MapObject {
-	objs, skipped, err := replay.LoadGeometry(dir)
+func loadGeometry(ctx context.Context, mapDir, typesDir string) []replay.MapObject {
+	objs, skipped, err := replay.LoadGeometry(mapDir, typesDir)
 	if err != nil {
+		// Absence is the NORMAL case for a map nobody has extracted props for, and it is
+		// now the honest one: props used to be read from a single title-wide directory and
+		// drawn on every map, whichever map they belonged to.
 		slog.WarnContext(ctx, "study-archiver: map geometry unavailable - replay without props",
-			"err", err, "dir", dir)
+			"err", err, "mapDir", mapDir)
 		return nil
 	}
 	slog.InfoContext(ctx, "study-archiver: map geometry loaded",
-		"objects", len(objs), "without_footprint", skipped, "dir", dir)
+		"objects", len(objs), "without_footprint", skipped, "mapDir", mapDir)
 	return objs
 }
 

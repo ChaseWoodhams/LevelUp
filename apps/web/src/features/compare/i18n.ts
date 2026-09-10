@@ -63,7 +63,7 @@ const TEXT: Record<Locale, CompareText> = {
   en: EN_TEXT,
 }
 
-export function normalizeCompareLocale(_locale?: string | null): Locale {
+export function normalizeCompareLocale(): Locale {
   return 'en'
 }
 
@@ -99,10 +99,9 @@ export const METRIC_TO_FIELD_KEY: Record<string, string> = {
 }
 
 export function getCompareText(
-  locale?: string | null,
   fieldMappings?: { fields: Record<string, { label: string }> },
 ): CompareText {
-  const base = TEXT[normalizeCompareLocale(locale)]
+  const base = TEXT[normalizeCompareLocale()]
   if (!fieldMappings) return base
   const merged: CompareText = {
     ...base,

@@ -95,7 +95,7 @@ describe('AscensionCoachingTab — composition (couche Coaching)', () => {
 
   it('renders the coaching LayerSection header', () => {
     render(<AscensionCoachingTab />)
-    expect(screen.getByText(/Ascension — Coaching d'amélioration/i)).toBeInTheDocument()
+    expect(screen.getByText(/Ascension — Improvement coaching/i)).toBeInTheDocument()
   })
 
   it('renders the Coach focus + proposals cards', () => {

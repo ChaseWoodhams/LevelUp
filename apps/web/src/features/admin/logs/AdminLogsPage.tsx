@@ -195,7 +195,7 @@ function LogEntriesList({ entries }: { entries: AdminLogEntry[] }) {
             >
               <span
                 className="w-20 flex-none font-mono text-muted-foreground"
-                title={adminAbsoluteTime(entry.time, locale)}
+                title={adminAbsoluteTime(entry.time)}
               >
                 {adminRelativeTime(entry.time, locale)}
               </span>

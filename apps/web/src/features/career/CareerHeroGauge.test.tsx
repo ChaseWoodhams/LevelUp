@@ -62,7 +62,7 @@ describe('CareerHeroGaugeChart', () => {
         intlLocale="en-US"
       />,
     )
-    expect(screen.getByText('Progression vers Hero')).toBeInTheDocument()
+    expect(screen.getByText('Progress to Hero')).toBeInTheDocument()
     expect(screen.getByText('122/272')).toBeInTheDocument()
   })
 

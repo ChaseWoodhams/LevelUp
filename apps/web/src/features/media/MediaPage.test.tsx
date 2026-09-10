@@ -148,7 +148,7 @@ describe('MediaPage', () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
       // La zone d'upload contient une mention "parcourir" ou "glisser"
-      const matches = screen.getAllByText(/parcourir|glisser|déposer/i)
+      const matches = screen.getAllByText(/browse|drag|drop/i)
       expect(matches.length).toBeGreaterThan(0)
     })
   })
@@ -174,7 +174,7 @@ describe('MediaPage', () => {
       expect(screen.getByText('Screenshots')).toBeInTheDocument()
     })
     // Cliquer ne doit pas lever d'exception
-    expect(() => fireEvent.click(screen.getByText('Captures'))).not.toThrow()
+    expect(() => fireEvent.click(screen.getByText('Screenshots'))).not.toThrow()
   })
 
   // ─── Navigation contextuelle vers la page Match ────────────────────────────
@@ -248,7 +248,7 @@ describe('MediaPage', () => {
 
     // Attendre que les vignettes soient rendues — l'icône d'ouverture est
     // affichée pour les items avec match_id (donc 2 boutons attendus, m-A & m-B).
-    const openBtns = await screen.findAllByRole('button', { name: /Ouvrir.*match/ })
+    const openBtns = await screen.findAllByRole('button', { name: /Open.*match/ })
     expect(openBtns.length).toBe(2)
 
     openBtns[0].click()

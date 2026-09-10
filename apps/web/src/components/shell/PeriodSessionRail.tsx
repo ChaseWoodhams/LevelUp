@@ -85,10 +85,10 @@ const TEXTS: Record<Locale, RailText> = {
 }
 
 /** Formate une date ISO (YYYY-MM-DD) en label localisé court. */
-function formatDateMonthDay(iso: string, locale: Locale): string {
+function formatDateMonthDay(iso: string): string {
   try {
     const d = new Date(iso + 'T00:00:00Z')
-    return d.toLocaleDateString(intlLocale(locale), {
+    return d.toLocaleDateString(intlLocale(), {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -117,12 +117,12 @@ function formatSessionLabel(
   try {
     const start = new Date(startedAtUTC)
     if (isNaN(start.getTime())) return sessionLabel
-    const dateFmt = new Intl.DateTimeFormat(intlLocale(locale), {
+    const dateFmt = new Intl.DateTimeFormat(intlLocale(), {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     })
-    const timeFmt = new Intl.DateTimeFormat(intlLocale(locale), {
+    const timeFmt = new Intl.DateTimeFormat(intlLocale(), {
       hour: '2-digit',
       minute: '2-digit',
       hour12: locale !== 'en',
@@ -438,12 +438,12 @@ interface PeriodRailProps {
   centerExtra?: React.ReactNode
 }
 
-function PeriodRail({ period, durationDays, locale, t, filterStore, centerExtra }: PeriodRailProps) {
+function PeriodRail({ period, durationDays, t, filterStore, centerExtra }: PeriodRailProps) {
   const goToPrevPeriod = filterStore((s) => s.goToPrevPeriod)
   const goToNextPeriod = filterStore((s) => s.goToNextPeriod)
 
-  const startLabel = period.start_date ? formatDateMonthDay(period.start_date, locale) : '?'
-  const endLabel = period.end_date ? formatDateMonthDay(period.end_date, locale) : '?'
+  const startLabel = period.start_date ? formatDateMonthDay(period.start_date) : '?'
+  const endLabel = period.end_date ? formatDateMonthDay(period.end_date) : '?'
   const canGoPrev = !!computePrevWindow(period)
   const canGoNext = !!computeNextWindow(period)
 
@@ -496,17 +496,16 @@ interface SeasonRailProps {
 /** Mode "season" : prend le relais du mode period quand la fenêtre courante
  *  matche pile une saison du catalog. Boutons prev/next sautent saison-à-
  *  saison via setPeriod (au lieu du sliding-window classique). */
-function SeasonRail({ season, seasons, locale, t, filterStore, centerExtra }: SeasonRailProps) {
+function SeasonRail({ season, seasons, t, filterStore, centerExtra }: SeasonRailProps) {
   const setPeriod = filterStore((s) => s.setPeriod)
 
   const prev = prevSeason(seasons, season)
   const next = nextSeason(seasons, season)
   const todayUTC = isoDateUTC(new Date())
 
-  const startLabel = formatDateMonthDay(isoDateUTC(season.startDate), locale)
+  const startLabel = formatDateMonthDay(isoDateUTC(season.startDate))
   const endLabel = formatDateMonthDay(
     season.endDate ? isoDateUTC(season.endDate) : todayUTC,
-    locale,
   )
 
   const goToSeason = (s: SeasonEntry) => {

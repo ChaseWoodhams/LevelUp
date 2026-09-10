@@ -10,7 +10,6 @@
  */
 import { Tooltip } from '@/components/ui/tooltip'
 import { tokenCssVar } from '@/lib/accessibility'
-import type { Locale } from '@/lib/i18n/locale'
 
 function SplitBar({
   leftCount,
@@ -49,11 +48,9 @@ function SplitBar({
 export function AllyEnemySplitBar({
   allyCount,
   enemyCount,
-  locale: _locale,
 }: {
   allyCount: number
   enemyCount: number
-  locale: Locale
 }) {
   const ttAlly = `${allyCount} matches as ally`
   const ttEnemy = `${enemyCount} matches as enemy`
@@ -72,11 +69,9 @@ export function AllyEnemySplitBar({
 export function KDSplitBar({
   kills,
   deaths,
-  locale: _locale,
 }: {
   kills: number
   deaths: number
-  locale: Locale
 }) {
   const ttKills = `${kills} kills dealt`
   const ttDeaths = `${deaths} deaths suffered`

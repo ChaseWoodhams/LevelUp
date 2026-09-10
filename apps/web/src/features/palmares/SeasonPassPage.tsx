@@ -8,7 +8,6 @@ import { DataFreshnessIndicator } from '@/components/ui/data-freshness-indicator
 import { EmptyStateCard } from '@/components/ui/empty-state'
 import { Spinner } from '@/components/ui/spinner'
 import type { SeasonPassTrackSummary } from '@/lib/api/types'
-import { useAppShellStore } from '@/stores/appShellStore'
 
 import { seasonPassStatusRole } from './battlePassBadgeStyle'
 import { BattlePassRewardCarousel } from './BattlePassRewardCarousel'
@@ -32,7 +31,6 @@ function OverlayContentRows({
   remaining,
   labels,
   locale,
-  palmaresLocale,
 }: {
   content: SeasonPassContent
   /** Contenu restant (paliers non atteints). Fourni ⇒ affichage « restant/total » (XX/YY). */
@@ -101,7 +99,7 @@ function OverlayContentRows({
           {rarities.map(({ tier, count, r }) => (
             <span key={tier} className="flex items-center gap-1">
               <span className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${rarityStyle(tier)?.segment ?? 'bg-muted-foreground/60'}`} />
-              <span className="text-muted-foreground">{rarityLabel(tier, palmaresLocale)}</span>
+              <span className="text-muted-foreground">{rarityLabel(tier)}</span>
               {' '}
               <span className="font-semibold text-foreground tabular-nums">{val(count, r)}</span>
             </span>
@@ -175,7 +173,7 @@ function aggregatePasses(passes: SeasonPassTrackSummary[]): PassAggregate {
 
 // ── Carte « Cosmétiques débloqués » : barre segmentée par rareté ────────────
 
-function CosmeticsUnlockedCard({ label, agg, intlLocale, palmaresLocale, accent, className = '' }: {
+function CosmeticsUnlockedCard({ label, agg, intlLocale, accent, className = '' }: {
   label: string
   agg: PassAggregate
   intlLocale: string
@@ -210,7 +208,7 @@ function CosmeticsUnlockedCard({ label, agg, intlLocale, palmaresLocale, accent,
                 key={tier}
                 className={rarityStyle(tier)?.segment ?? 'bg-muted-foreground/60'}
                 style={{ flex: acq }}
-                title={`${rarityLabel(tier, palmaresLocale)} : ${acq.toLocaleString(intlLocale)}`}
+                title={`${rarityLabel(tier)} : ${acq.toLocaleString(intlLocale)}`}
               />
             ))}
             {remainder > 0 && <div style={{ flex: remainder }} aria-hidden />}
@@ -220,7 +218,7 @@ function CosmeticsUnlockedCard({ label, agg, intlLocale, palmaresLocale, accent,
           {rarities.map(({ tier, acq }) => (
             <span key={tier} className="flex items-center gap-1">
               <span className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${rarityStyle(tier)?.segment ?? 'bg-muted-foreground/60'}`} />
-              {rarityLabel(tier, palmaresLocale)}
+              {rarityLabel(tier)}
               <span className="font-semibold tabular-nums text-foreground">{acq.toLocaleString(intlLocale)}</span>
             </span>
           ))}
@@ -523,8 +521,8 @@ function PassShowcase({
 
 export function SeasonPassPage() {
   const { playerSlug } = useParams({ strict: false }) as { playerSlug: string }
-  const locale = normalizePalmaresLocale(useAppShellStore((state) => state.locale))
-  const text = getPalmaresText(locale)
+  const locale = normalizePalmaresLocale()
+  const text = getPalmaresText()
   const { data, isLoading, isError, error, refetch } = useSeasonPassPage(playerSlug)
   const [selectedPassPath, setSelectedPassPath] = useState<string | null>(null)
   const showcaseRef = useRef<HTMLDivElement | null>(null)

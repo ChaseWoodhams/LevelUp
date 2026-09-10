@@ -7,14 +7,12 @@
  * Admin · Système. Composant autonome qui câble son propre i18n — même pattern
  * que AdminSyncSettingsSection.
  */
-import { getSettingsText, normalizeSettingsLocale } from '@/features/settings/i18n'
-import { useAppShellStore } from '@/stores/appShellStore'
+import { getSettingsText } from '@/features/settings/i18n'
 import { BackupTab } from '@/features/settings/BackupTab'
 import { SectionHeader } from '../components/SectionHeader'
 
 export function AdminBackupSection() {
-  const locale = normalizeSettingsLocale(useAppShellStore((s) => s.locale))
-  const t = getSettingsText(locale)
+  const t = getSettingsText()
 
   return (
     <section className="space-y-3">

@@ -177,7 +177,7 @@ function SynthesisOverviewSection({ overview, detailedStats, topWeaponKills, fra
   const currentTitleSlug = useAppShellStore((s) => s.currentTitleSlug)
   const hijacksLabel = t(hijacksLabelKey(currentTitleSlug))
   // Format nombre locale-aware (séparateurs "12 345" FR / "12,345" EN) — I2.
-  const numLoc = intlLocale(locale)
+  const numLoc = intlLocale()
   const navigateToMatch = useNavigateToMatch(playerSlug)
   const openMatchLabel = t('synthesis.kpi.open_match')
   // Helper : crée le handler onOpenMatch d'une carte si le ref backend est présent.
@@ -412,13 +412,13 @@ function SynthesisOverviewSection({ overview, detailedStats, topWeaponKills, fra
 
                   <div className="grid grid-cols-2 gap-2">
                     <AccentCard label={t('synthesis.combat_profile.perfect_kills')} value={detailedStats.total_perfect_kills.toLocaleString(numLoc)} accent="perf-tier-3" />
-                    <AccentCard label={fieldMappings?.fields['headshot_kills']?.label ?? 'Tirs à la tête'} value={detailedStats.total_headshot_kills.toLocaleString(numLoc)} accent="perf-tier-2" />
+                    <AccentCard label={fieldMappings?.fields['headshot_kills']?.label ?? 'Headshots'} value={detailedStats.total_headshot_kills.toLocaleString(numLoc)} accent="perf-tier-2" />
                   </div>
 
                   <div>
                     <div className="grid grid-cols-2 gap-2">
-                      <AccentCard label={fieldMappings?.fields['shots_fired']?.label ?? 'Tirs effectués'} value={detailedStats.total_shots_fired.toLocaleString(numLoc)} accent="info" />
-                      <AccentCard label={fieldMappings?.fields['shots_hit']?.label ?? 'Tirs au but'}      value={detailedStats.total_shots_hit.toLocaleString(numLoc)}   accent="info" />
+                      <AccentCard label={fieldMappings?.fields['shots_fired']?.label ?? 'Shots fired'} value={detailedStats.total_shots_fired.toLocaleString(numLoc)} accent="info" />
+                      <AccentCard label={fieldMappings?.fields['shots_hit']?.label ?? 'Shots hit'}      value={detailedStats.total_shots_hit.toLocaleString(numLoc)}   accent="info" />
                       {detailedStats.total_shots_fired > 0 && (
                         <AccentCard
                           label={t('synthesis.kpi.raw_accuracy')}
@@ -438,9 +438,9 @@ function SynthesisOverviewSection({ overview, detailedStats, topWeaponKills, fra
 
                   <div>
                     <div className="grid grid-cols-2 gap-2">
-                      <AccentCard label={fieldMappings?.fields['damage_dealt']?.label ?? 'Dégâts infligés'} value={Math.round(detailedStats.total_damage_dealt).toLocaleString(numLoc)} accent="outcome-win" />
+                      <AccentCard label={fieldMappings?.fields['damage_dealt']?.label ?? 'Damage dealt'} value={Math.round(detailedStats.total_damage_dealt).toLocaleString(numLoc)} accent="outcome-win" />
                       {hasDamageTaken && (
-                        <AccentCard label={fieldMappings?.fields['damage_taken']?.label ?? 'Dégâts reçus'} value={Math.round(detailedStats.total_damage_taken).toLocaleString(numLoc)} accent="outcome-loss" />
+                        <AccentCard label={fieldMappings?.fields['damage_taken']?.label ?? 'Damage taken'} value={Math.round(detailedStats.total_damage_taken).toLocaleString(numLoc)} accent="outcome-loss" />
                       )}
                     </div>
                   </div>
@@ -707,7 +707,7 @@ export function SynthesisPage() {
       <div className="px-6">
         <EmptyStateCard
           title={t('synthesis.empty.synthesis_unavailable')}
-          description="Aucune charge utile n'a été renvoyée pour cette page. Vérifie les agrégats solo/escouade et le contexte de filtres."
+          description="No payload was returned for this page. Check the solo/squad aggregates and the filter context."
         />
       </div>
     )

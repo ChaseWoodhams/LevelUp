@@ -70,6 +70,14 @@ const EXEMPTIONS: ReadonlyArray<{ pattern: RegExp; why: string }> = [
     pattern: /(^|\/)features\/lab\/ChartsShowcasePage\.tsx$/,
     why: 'sandbox /lab/charts (doc visuelle, hors surface user-facing)',
   },
+  {
+    // 2026-09-10 (English-only switch): FEATURE_LABEL is keyed by TitleCapability, not by
+    // FieldKey. Two capability names (team_mmr, damage_taken) happen to also be FieldKeys,
+    // and flattening the old { fr, en } values to plain strings made those two lines look
+    // like FieldKey → label pairs. They name a missing capability, not a stat field.
+    pattern: /(^|\/)lib\/capabilities\/FeatureUnavailable\.tsx$/,
+    why: 'capability labels keyed by TitleCapability; team_mmr/damage_taken only collide with FieldKey names (2026-09-10)',
+  },
 ]
 
 function isExempt(rel: string): boolean {

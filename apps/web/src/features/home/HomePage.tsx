@@ -197,7 +197,7 @@ export function HomePage() {
   const challengesCompletedLabel = challenges?.available
     ? `${challengesCompleted} / ${challengesTotal} completed`
     : null
-  const numberLocale = intlLocale(locale)
+  const numberLocale = intlLocale()
   // Séquence d'outcomes : filtrer recent_matches par le session_label de la
   // dernière session connue (solo ou squad). On prend le premier label qui
   // apparaît dans recent_matches (trié DESC) parmi les deux sessions.
@@ -208,7 +208,7 @@ export function HomePage() {
   const lastSessionMatches = lastSessionLabel
     ? recentMatches.filter((m) => m.session_label === lastSessionLabel)
     : recentMatches.slice(0, Math.min(20, recentMatches.length))
-  const kpiText = getKPIText(locale)
+  const kpiText = getKPIText()
   // Phase D multi-titres : résout les libellés métier via le backend TOML.
   // Fallback gracieux sur les libellés locaux de kpi.i18n.ts si l'endpoint
   // est absent (404, réseau — le flag serveur qui pouvait l'éteindre a été
@@ -419,8 +419,8 @@ export function HomePage() {
             autonome, plus de carte englobante (cf. demande user). */}
         <section className="flex flex-col gap-3">
           <header className="flex items-center gap-1.5">
-            <h3 className="text-base font-semibold text-foreground">{getHighlightText(locale).section.title}</h3>
-            <InfoTooltip content={<p>{getHighlightText(locale).section.tooltipIntro}</p>} />
+            <h3 className="text-base font-semibold text-foreground">{getHighlightText().section.title}</h3>
+            <InfoTooltip content={<p>{getHighlightText().section.tooltipIntro}</p>} />
           </header>
           {highlights.length > 0 ? (
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">

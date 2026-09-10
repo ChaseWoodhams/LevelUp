@@ -14,7 +14,7 @@ import { BattlePassRewardCarousel } from '@/features/palmares/BattlePassRewardCa
 import { buildTierGroups, type RewardCard } from '@/features/palmares/battlePassTierGroups'
 import { PassContentSummary } from '@/features/palmares/PassContentSummary'
 import { SeasonPassBadge } from '@/features/palmares/SeasonPassBadge'
-import { getPalmaresText, normalizePalmaresLocale } from '@/features/palmares/i18n'
+import { getPalmaresText } from '@/features/palmares/i18n'
 
 function pickFeaturedPass(passes: SeasonPassTrackSummary[]) {
   return passes.find((pass) => pass.is_active)
@@ -36,7 +36,7 @@ export function HomeBattlePassPanel({
   const intlLocale = 'en-US'
   const t = useCallback((key: HomeManifestKey) => formatMessage(homeManifest, key, locale), [locale])
   // Labels du contenu de pass (paliers, cR, raretés…) — réutilise l'i18n palmares.
-  const passContentLabels = getPalmaresText(normalizePalmaresLocale(locale)).seasonPass.content
+  const passContentLabels = getPalmaresText().seasonPass.content
   const buildFreshnessLabel = useCallback(
     (date: string) =>
       formatMessage(homeManifest, 'home.freshness.last_sync', locale, { date }),

@@ -61367,3 +61367,42 @@ GamertagCombobox placeholder, login error, HLS errors), and the copy-guard SHA b
 
 **Next step**: fix the two guard regressions and the remaining French literals in the app, then
 the web tests, the lint refactor, and a full run of every gate before pushing.
+
+---
+
+## [2026-09-10] English-only branch: every local gate green
+
+**Status**: Complete (pending CI on PR #28).
+
+**Technical decision**: finish without relaxing a single rule. The last ~90 failing web tests
+get English expectations read from the manifests or the failure's own DOM dump; tests that only
+proved French behaviour are removed or turned into their English equivalent (pickLocalized's
+French fallback, the French tip categories, squad EN≠FR parity, the help glossary's French
+formulas now checked through the English conversion/resistance/impact/survival formulas). About
+70 user-visible French literals left in app source are translated (theme toggle, carousel, star
+button, setup step, Synthesis/Timeseries fallbacks, masked player names, the API connection
+message, the feedback issue body, the charts lab page), operator log and error messages are
+English, and the dead `nameFr` outline-colour field is gone. Deliberately left in French: parsers
+that match legacy stored data (the "sur" mode-label split, the "classé" playlist match), the
+feedback keyword classifier (it reads user input), comments, and one MSW fixture.
+
+The 41 lint errors were unused `_locale` parameters: each is removed together with its call
+sites, driven by tsc (excess arguments, then declarations left unused, looped until clean), and
+two component props that no longer did anything went with them; the demo-mode notice moved into
+the settings i18n table. **Pitfall worth keeping**: TS2554 anchors on the TRAILING excess
+argument, so dropping "the reported argument" is only right when the removed parameter was the
+last one. For `getHelpText(locale, hp)`, `formatLastSeen(…, locale, now)`, `csrTierLabel`,
+`resolveLabel`/`resolveDetail`, `buildSkillTierMarkArea` and `getCompareText` it dropped the
+wrong argument; an AST comparison of every changed signature and call site against HEAD found
+and repaired them. `csrTierLabel` passed two strings, so the typechecker alone would never have
+caught it. The settings PATCH still strips `lang`/`discord_lang` rather than sending them.
+
+**Results**: apps/web typecheck 0 errors, eslint 0 errors, vitest 3,497 passed with one failure
+that only occurs west of UTC (`periodSessionNav` "cap à aujourd'hui", passes with `TZ=UTC` as CI
+runs). apps/study typecheck 0 errors; its six copies re-synced from web (412 tests pass, the five
+copy-guard SHA checks wait for the follow-up bump commit). gofmt 1.26.1 clean on every Go file
+the branch touches; both generated-types freshness checks ok; no Go change since the checkpoint,
+whose integration runs were green.
+
+**Next step**: bump the study copy SHAs, push, let CI rule, take PR #28 out of draft; retarget it
+to `main` once #27 is merged.

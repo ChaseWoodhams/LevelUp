@@ -47,7 +47,7 @@ export function MedalCard({ item, locale }: { item: MedalSummaryItem; locale: Ma
         aria-label={countAria}
         className={`text-[13px] font-semibold leading-none ${earned ? 'text-foreground' : 'text-destructive'}`}
       >
-        {item.count.toLocaleString(intlLocale(locale))}
+        {item.count.toLocaleString(intlLocale())}
       </span>
       {rarity && (
         <span className="rounded-full border border-border bg-muted px-1.5 py-0.5 text-[10px] leading-none text-muted-foreground">

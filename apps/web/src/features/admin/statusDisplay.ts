@@ -5,7 +5,6 @@
 import type { SemanticToken } from '@/lib/accessibility/semantic-tokens'
 import type { AdminManifestKey } from '@/lib/i18n/generated/admin'
 import type { JobStatus, SchedulerOutcome } from '@/lib/api/types'
-import type { AdminLocale } from './format'
 
 /** Statuts affichables par StatusBadge (jobs + outcomes scheduler + génériques). */
 export type AdminStatus =
@@ -133,6 +132,6 @@ const JOB_TYPE_LABELS: Record<string, string> = {
   catalog_refresh: 'Catalog refresh',
 }
 
-export function jobTypeLabel(jobType: string, _locale: AdminLocale): string {
+export function jobTypeLabel(jobType: string): string {
   return JOB_TYPE_LABELS[jobType] ?? jobType
 }

@@ -14,7 +14,7 @@ describe('match-card-presentation', () => {
       textColor: 'var(--ac-narrative-dominant-text)',
     })
     expect(getMatchNarrativeBadgeMeta('remontada')).toEqual({
-      label: 'REMONTADA',
+      label: 'COMEBACK',
       color: 'var(--ac-narrative-remontada)',
       textColor: 'var(--ac-narrative-remontada-text)',
     })

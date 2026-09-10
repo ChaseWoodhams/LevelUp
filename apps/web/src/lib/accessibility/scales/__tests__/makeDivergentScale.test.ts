@@ -23,7 +23,7 @@ describe('makeDivergentScale', () => {
         neutral: 'divergent-neutral',
         negative: 'divergent-neg',
         neutralBand: [10, -10],
-      })).toThrow('inversée')
+      })).toThrow('inverted')
     })
   })
 

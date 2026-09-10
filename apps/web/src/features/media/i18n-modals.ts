@@ -118,6 +118,6 @@ const EN: MediaModalsText = {
 
 const TEXT: Record<Locale, MediaModalsText> = { en: EN }
 
-export function getMediaModalsText(_locale?: string | null): MediaModalsText {
+export function getMediaModalsText(): MediaModalsText {
   return TEXT['en']
 }

@@ -128,7 +128,7 @@ describe('ExplorerTargetIdentityBanner', () => {
   it('affiche la barre de progression carrière dès que career_rank existe (rang normal)', () => {
     render(IDENTITY_FULL) // is_max_rank: false
     expect(screen.getByTestId('explorer-target-rank-progress-fill')).toBeInTheDocument()
-    expect(screen.getByText(/Progression vers/)).toBeInTheDocument()
+    expect(screen.getByText(/Progress towards/)).toBeInTheDocument()
   })
 
   it('au rang max (Héros) : XP de carrière totale à gauche + un SEUL "Rang max"', () => {

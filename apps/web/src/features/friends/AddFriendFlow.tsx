@@ -34,7 +34,7 @@ interface Texts {
   alreadyFriend: string
 }
 
-function getTexts(_locale: string): Texts {
+function getTexts(): Texts {
   return {
     title: (gt) => "Add " + gt + " as a friend?",
     confirmDescription: "The teammate will be added to the friends list and shown in the Squad selector.",
@@ -55,8 +55,8 @@ function getTexts(_locale: string): Texts {
  * sur diff (§4). Invalide les queries Squad pour rafraîchir le dropdown.
  */
 // eslint-disable-next-line react-refresh/only-export-components
-export function useAddFriend(locale: string = 'en') {
-  const t = getTexts(locale)
+export function useAddFriend() {
+  const t = getTexts()
   const { data: settings } = useSettings()
   const update = useUpdateSettings()
   const qc = useQueryClient()
@@ -97,15 +97,13 @@ export interface AddFriendModalProps {
   open: boolean
   /** Appelé après confirmation OK ou annulation. */
   onClose: () => void
-  /** Locale UI (fr | en). */
-  locale: string
   /** Callback optionnel après ajout réussi. */
   onSuccess?: (gamertag: string) => void
 }
 
-export function AddFriendModal({ gamertag, open, onClose, locale, onSuccess }: AddFriendModalProps) {
-  const t = getTexts(locale)
-  const { addFriend, isAdding } = useAddFriend(locale)
+export function AddFriendModal({ gamertag, open, onClose, onSuccess }: AddFriendModalProps) {
+  const t = getTexts()
+  const { addFriend, isAdding } = useAddFriend()
   const [submitted, setSubmitted] = useState(false)
 
   if (!open) return null

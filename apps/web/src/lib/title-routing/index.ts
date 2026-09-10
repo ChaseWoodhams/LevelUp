@@ -12,7 +12,7 @@
  *  - applyActiveTitle : UNIQUE fonction effectful (extraite de switchTitle, D-6).
  *  - initTitleFromLocation : câblage synchrone au boot (D-9).
  */
-export { parseRouteSegments, withLangSegment, type RouteSegments } from './parseRouteSegments'
+export { parseRouteSegments, withLangSegment, replaceLangSegment, type RouteSegments } from './parseRouteSegments'
 export { resolveTitleGate, type TitleGate } from './resolveTitleGate'
 export { buildLegacyRedirect, type LegacyRedirect } from './buildLegacyRedirect'
 export { applyActiveTitle } from './applyActiveTitle'

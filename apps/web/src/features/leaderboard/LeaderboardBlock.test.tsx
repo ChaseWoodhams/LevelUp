@@ -130,10 +130,10 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => {
-      expect(screen.getByText(/1\s?850/)).toBeInTheDocument()
+      expect(screen.getByText(/1,850/)).toBeInTheDocument()
     })
-    expect(screen.getByText(/1\s?720/)).toBeInTheDocument()
-    expect(screen.getByText(/1\s?600/)).toBeInTheDocument()
+    expect(screen.getByText(/1,720/)).toBeInTheDocument()
+    expect(screen.getByText(/1,600/)).toBeInTheDocument()
     // Colonne Rang = image (via alt), plus de libellé texte « Diamond VI ».
     expect(screen.getByAltText('Onyx')).toBeInTheDocument()
     expect(screen.getAllByAltText('Diamond').length).toBeGreaterThan(0)
@@ -161,7 +161,6 @@ describe('LeaderboardBlock', () => {
     expect(screen.getByRole('button', { name: /Assists/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /KDA/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Matches/ })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^KDA/ })).not.toBeInTheDocument()
     // Valeurs Frags + le total de matchs CUMULÉ (pas match_count de la saison).
     expect(screen.getByText('200')).toBeInTheDocument()
     expect(screen.getByText('150')).toBeInTheDocument()
@@ -198,8 +197,8 @@ describe('LeaderboardBlock', () => {
       expect(screen.getByText('LocalAce')).toBeInTheDocument()
     })
     // L'en-tête "Victoires" (col_win_rate) ne doit pas apparaître.
-    expect(screen.queryByText('Wins')).not.toBeInTheDocument()
-    expect(screen.queryByText('Δ rang')).not.toBeInTheDocument()
+    expect(screen.queryByText('Win rate')).not.toBeInTheDocument()
+    expect(screen.queryByText('Rank Δ')).not.toBeInTheDocument()
   })
 
   it('affiche les colonnes enrichies (win rate, KDA, Δ rang) quand le joueur est backfillé', async () => {
@@ -223,15 +222,15 @@ describe('LeaderboardBlock', () => {
       expect(screen.getByText('Ace')).toBeInTheDocument()
     })
     // En-têtes enrichis présents.
-    expect(screen.getByText('Wins')).toBeInTheDocument()
-    expect(screen.getByText('Δ rang')).toBeInTheDocument()
+    expect(screen.getByText('Win rate')).toBeInTheDocument()
+    expect(screen.getByText('Rank Δ')).toBeInTheDocument()
 
     // Valeurs de la ligne Ace : win rate FR, KDA moyen (36/20=1.80), précision
     // moyenne (1050/20=52,5%), delta signé, nb matchs.
     const aceRow = screen.getByText('Ace').closest('tr')!
-    expect(within(aceRow).getByText('65,0%')).toBeInTheDocument()
+    expect(within(aceRow).getByText('65.0%')).toBeInTheDocument()
     expect(within(aceRow).getByText('1.80')).toBeInTheDocument()
-    expect(within(aceRow).getByText('52,5%')).toBeInTheDocument()
+    expect(within(aceRow).getByText('52.5%')).toBeInTheDocument()
     expect(within(aceRow).getByText('+3')).toBeInTheDocument()
     expect(within(aceRow).getByText('20')).toBeInTheDocument()
 
@@ -248,8 +247,8 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => expect(screen.getByText('Enrichi1')).toBeInTheDocument())
-    expect(screen.queryByText('Wins')).not.toBeInTheDocument()
-    expect(screen.queryByText('Δ rang')).not.toBeInTheDocument()
+    expect(screen.queryByText('Win rate')).not.toBeInTheDocument()
+    expect(screen.queryByText('Rank Δ')).not.toBeInTheDocument()
     expect(screen.getByText(/Detailed stats unavailable for this snapshot/i)).toBeInTheDocument()
   })
 
@@ -259,10 +258,10 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => expect(screen.getByText('Enrichi1')).toBeInTheDocument())
-    expect(screen.getByText('Wins')).toBeInTheDocument()
-    expect(screen.getByText(/Stats détaillées partielles/i)).toBeInTheDocument()
+    expect(screen.getByText('Win rate')).toBeInTheDocument()
+    expect(screen.getByText(/Partial detailed stats/i)).toBeInTheDocument()
     // Le bandeau chiffre la couverture (2 sur 4) plutôt que de rester vague.
-    expect(screen.getByText(/2 joueurs enrichis sur 4/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 of 4 listed players enriched/i)).toBeInTheDocument()
   })
 
   it('couverture complète : colonnes affichées et AUCUN bandeau de couverture', async () => {
@@ -270,9 +269,9 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => expect(screen.getByText('Enrichi1')).toBeInTheDocument())
-    expect(screen.getByText('Wins')).toBeInTheDocument()
-    expect(screen.queryByText(/Stats détaillées partielles/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Stats détaillées indisponibles/i)).not.toBeInTheDocument()
+    expect(screen.getByText('Win rate')).toBeInTheDocument()
+    expect(screen.queryByText(/Partial detailed stats/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Detailed stats unavailable/i)).not.toBeInTheDocument()
   })
 
   // ─── Couplage saison ↔ playlist (playlist_ids du catalogue) ─────────────────
@@ -368,7 +367,7 @@ describe('LeaderboardBlock', () => {
     // Retour au relevé couvert : le tri choisi n'a pas été perdu, seulement neutralisé.
     fireEvent.change(screen.getByLabelText('Season'), { target: { value: 'csrseason13-3' } })
     await waitFor(() => expect(gamertagOrder()).toEqual(['Enrichi2', 'Enrichi3', 'Enrichi1']))
-    expect(sortedHeaders()).toEqual([['Frags▼', 'descending']])
+    expect(sortedHeaders()).toEqual([['Kills▼', 'descending']])
   })
 
   it('catalogue sans playlist_ids (backend antérieur) : toutes les playlists restent proposées', async () => {

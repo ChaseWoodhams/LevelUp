@@ -56,6 +56,6 @@ const EN: MediaAudioConfigText = {
 
 const TEXT: Record<Locale, MediaAudioConfigText> = { en: EN }
 
-export function getMediaAudioConfigText(_locale?: string | null): MediaAudioConfigText {
+export function getMediaAudioConfigText(): MediaAudioConfigText {
   return TEXT['en']
 }

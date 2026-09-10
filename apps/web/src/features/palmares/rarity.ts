@@ -107,7 +107,7 @@ export function rarityStyle(tier: RarityTier | null): RarityStyle | null {
 
 // preferEN accepte une locale courte ('en'/'en') OU Intl ('en-US'/'en-US') —
 // certains appelants (PassContentSummary) passent l'Intl locale.
-export function rarityLabel(tier: RarityTier, _locale: string = 'en'): string {
+export function rarityLabel(tier: RarityTier): string {
   return RARITY_LABELS_EN[tier]
 }
 
@@ -173,7 +173,7 @@ export function isArmorItemType(raw?: string | null): boolean {
   return ARMOR_ITEM_TYPES.has(raw.trim())
 }
 
-export function itemTypeLabel(raw?: string | null, _locale: string = 'en'): string | null {
+export function itemTypeLabel(raw?: string | null): string | null {
   if (!raw) return null
   const trimmed = raw.trim()
   if (!trimmed) return null

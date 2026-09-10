@@ -113,11 +113,11 @@ describe('SquadFocusStrip — boucle défis (Lot 2)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Manage' }))
 
     // Label FR affiché, template_id brut absent.
-    expect(screen.getByText('Briseur de couronnes')).toBeInTheDocument()
+    expect(screen.getByText('Crown breaker')).toBeInTheDocument()
     expect(screen.queryByText(/headshots_session/)).not.toBeInTheDocument()
 
     // Le joueur courant (alice) est déjà participant → bouton « Rejoint » désactivé.
-    const joined = screen.getByRole('button', { name: 'Rejoint' })
+    const joined = screen.getByRole('button', { name: 'Joined' })
     expect(joined).toBeDisabled()
   })
 

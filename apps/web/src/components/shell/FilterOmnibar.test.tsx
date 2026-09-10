@@ -110,9 +110,9 @@ describe('FilterOmnibar', () => {
     // Pending uniquement — store pas encore mis à jour
     expect(useGlobalFilterStore.getState().filterContext.sessions!.picked_sessions).toEqual([])
     // Confirm sélection via "Valider" (validation différée du multi-select)
-    fireEvent.click(screen.getByRole('button', { name: /Confirm/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Apply$/i }))
     // Commit via Analyser (commit pending → store global)
-    fireEvent.click(screen.getByRole('button', { name: /analyser/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Analyze/i }))
     const ctx = useGlobalFilterStore.getState().filterContext
     // Le nouveau composant utilise des labels de session, pas des IDs.
     expect(ctx.sessions!.picked_sessions).toEqual(['15/03/2026 18:00'])

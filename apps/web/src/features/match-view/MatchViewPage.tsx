@@ -53,7 +53,7 @@ function DetailSection({ title, children }: { title: string; children: ReactNode
  * Traduit un code stable de partial_reason en impact end-user concret.
  * Décrit ce que l'utilisateur ne peut PAS voir, pas la raison technique.
  */
-function translatePartialReason(code: string, _locale: string): string {
+function translatePartialReason(code: string): string {
     switch (code) {
     case 'scoreboard_empty':
       return 'Scoreboard and individual player stats are unavailable'
@@ -200,7 +200,7 @@ export function MatchViewPage() {
   }
 
   const { header, rank, summary_tab, combat_tab, team_tab, media_tab, citations_tab } = data
-  const matchLabel = buildMatchHeadingStr(header.map_ui, header.mode_ui, locale)
+  const matchLabel = buildMatchHeadingStr(header.map_ui, header.mode_ui)
   // Le breadcrumb ajoute la date pour distinguer plusieurs matchs sur la même map/mode
   const breadcrumbLabel = header.start_time_label
     ? `${matchLabel} · ${header.start_time_label}`
@@ -261,7 +261,7 @@ export function MatchViewPage() {
                 {data.partial_reasons.map((r) => (
                   <li key={r} className="flex gap-2 text-xs text-muted-foreground">
                     <span className="mt-px shrink-0 text-warning" aria-hidden="true">▸</span>
-                    <span>{translatePartialReason(r, locale)}</span>
+                    <span>{translatePartialReason(r)}</span>
                   </li>
                 ))}
               </ul>

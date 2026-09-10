@@ -309,7 +309,7 @@ export function MatchEncountersTable({ rows, locale = 'en', onPlayerClick, hideC
         cell: (ctx) => {
           const r = ctx.row.original
           if (r.ally_count != null && r.enemy_count != null) {
-            return <AllyEnemySplitBar allyCount={r.ally_count} enemyCount={r.enemy_count} locale={locale} />
+            return <AllyEnemySplitBar allyCount={r.ally_count} enemyCount={r.enemy_count} />
           }
           return <span className="font-mono">{r.count_together}</span>
         },
@@ -350,7 +350,7 @@ export function MatchEncountersTable({ rows, locale = 'en', onPlayerClick, hideC
         cell: (ctx) => {
           const r = ctx.row.original
           if (r.kills_dealt != null && r.deaths_suffered != null) {
-            return <KDSplitBar kills={r.kills_dealt} deaths={r.deaths_suffered} locale={locale} />
+            return <KDSplitBar kills={r.kills_dealt} deaths={r.deaths_suffered} />
           }
           return <span className="font-mono">{formatKDCross(r.kills_dealt, r.deaths_suffered)}</span>
         },

@@ -37,7 +37,7 @@ interface StreakCardProps {
   compact?: boolean
 }
 
-export function StreakCard({ streak: s, locale, t, compact = false }: StreakCardProps) {
+export function StreakCard({ streak: s, t, compact = false }: StreakCardProps) {
   const statusLabel = s.status === 'active' ? t.streakActive : s.status === 'paused' ? t.streakPaused : t.streakBroken
   const nextTier = s.status !== 'broken' ? nextPPTier(s.current_length) : null
   const shieldsLeft = s.shields_available - s.shields_used
@@ -85,7 +85,7 @@ export function StreakCard({ streak: s, locale, t, compact = false }: StreakCard
         {s.status === 'broken' ? (
           <Tooltip
             content={interpolate(t.streakBrokenTooltip, {
-              date: s.broken_at ? formatAscensionDate(s.broken_at, locale) : '—',
+              date: s.broken_at ? formatAscensionDate(s.broken_at) : '—',
             })}
           >
             <span
@@ -130,9 +130,9 @@ export function StreakCard({ streak: s, locale, t, compact = false }: StreakCard
         )}
         <div className="text-muted-foreground">{interpolate(t.streakShieldsAvailable, { n: shieldsLeft })}</div>
         {s.status === 'broken' && s.broken_at && (
-          <div className="text-muted-foreground">{interpolate(t.streakBrokenAt, { date: formatAscensionDate(s.broken_at, locale) })}</div>
+          <div className="text-muted-foreground">{interpolate(t.streakBrokenAt, { date: formatAscensionDate(s.broken_at) })}</div>
         )}
-        <div className="text-muted-foreground">{interpolate(t.streakStarted, { date: formatAscensionDate(s.started_at, locale) })}</div>
+        <div className="text-muted-foreground">{interpolate(t.streakStarted, { date: formatAscensionDate(s.started_at) })}</div>
       </dl>
     </article>
   )

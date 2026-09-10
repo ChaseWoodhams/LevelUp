@@ -106,7 +106,7 @@ export function TimeseriesSessionPerformance({
     const colPerf = resolveToken('chart-series-2')
     const colWR = resolveToken('outcome-win')
     const colMMR = resolveToken('chart-series-7')
-    const numLoc = intlLocale(locale)
+    const numLoc = intlLocale()
 
     // Format X selon la granularité : session=DD/MM, week=Sxx, month=Mois yy.
     const formatX = (p: SoloSessionPerfPoint): string => {

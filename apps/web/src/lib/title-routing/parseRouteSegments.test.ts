@@ -5,7 +5,7 @@
  * `/t/`. Aucune validation de la VALEUR du slug (D-2, verbatim).
  */
 import { describe, it, expect } from 'vitest'
-import { parseRouteSegments, withLangSegment } from './parseRouteSegments'
+import { parseRouteSegments, replaceLangSegment, withLangSegment } from './parseRouteSegments'
 
 describe('parseRouteSegments', () => {
   it('capture le titre sous /t/{slug} (sans langue)', () => {
@@ -102,5 +102,23 @@ describe('withLangSegment (émission par défaut du segment, I10)', () => {
     expect(withLangSegment('/t/halo_infinite/players/x/home', 'en')).toBe(
       '/en/t/halo_infinite/players/x/home',
     )
+  })
+})
+
+describe('replaceLangSegment (legacy /fr/t/ links)', () => {
+  it('rewrites an unsupported language segment in front of a title scope', () => {
+    expect(replaceLangSegment('/fr/t/halo_infinite/players/x/home', 'en')).toBe(
+      '/en/t/halo_infinite/players/x/home',
+    )
+  })
+
+  it('leaves a known language, a bare /t/ path and non-title pages unchanged', () => {
+    expect(replaceLangSegment('/en/t/halo_5/players/x', 'en')).toBe('/en/t/halo_5/players/x')
+    expect(replaceLangSegment('/t/halo_5/players/x', 'en')).toBe('/t/halo_5/players/x')
+    expect(replaceLangSegment('/fr/settings', 'en')).toBe('/fr/settings')
+  })
+
+  it('keeps a trailing slash', () => {
+    expect(replaceLangSegment('/fr/t/halo_5/', 'en')).toBe('/en/t/halo_5/')
   })
 })

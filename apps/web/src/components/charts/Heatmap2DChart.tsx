@@ -135,7 +135,7 @@ export function buildHeatmap2DOption(
       formatter: (params: { data: [number, number, number, Record<string, unknown>?] }) => {
         const [xi, yi, v, detail] = params.data
         const count = detail?.count ?? 0
-        return `${escapeHtml(ys[yi])} × ${escapeHtml(xs[xi])}<br/>Win Rate: <b>${(v * 100).toFixed(1)}%</b><br/>Matchs: <b>${count}</b>`
+        return `${escapeHtml(ys[yi])} × ${escapeHtml(xs[xi])}<br/>Win Rate: <b>${(v * 100).toFixed(1)}%</b><br/>Matches: <b>${count}</b>`
       },
     },
     xAxis: { ...axis, type: 'category', data: xs, splitArea: { show: true } },

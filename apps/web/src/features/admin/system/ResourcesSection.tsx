@@ -38,7 +38,7 @@ export function ResourcesSection() {
   )
 }
 
-function RuntimeSummary({ data, tA, locale }: { data: AdminResourcesResponse; tA: TAdmin; locale: AdminLocale }) {
+function RuntimeSummary({ data, tA}: { data: AdminResourcesResponse; tA: TAdmin; locale: AdminLocale }) {
   const disk = data.disk
   const color = diskToken(disk.status)
   return (
@@ -50,14 +50,14 @@ function RuntimeSummary({ data, tA, locale }: { data: AdminResourcesResponse; tA
           style={color ? { color: tokenCssVar(color) } : undefined}
           title={disk.error || disk.path}
         >
-          {disk.status === 'unknown' ? '—' : formatBytes(disk.free_bytes, locale)}
+          {disk.status === 'unknown' ? '—' : formatBytes(disk.free_bytes)}
         </span>
-        {disk.total_bytes > 0 && <span> / {formatBytes(disk.total_bytes, locale)}</span>}
+        {disk.total_bytes > 0 && <span> / {formatBytes(disk.total_bytes)}</span>}
       </span>
       <span className="cursor-help" title={tA('admin.resources.heap_help')}>
         {tA('admin.resources.heap')}{' '}
-        <span className="font-semibold tabular-nums text-foreground">{formatBytes(data.runtime.heap_alloc_bytes, locale)}</span>
-        {' '}({tA('admin.resources.sys')} {formatBytes(data.runtime.sys_bytes, locale)})
+        <span className="font-semibold tabular-nums text-foreground">{formatBytes(data.runtime.heap_alloc_bytes)}</span>
+        {' '}({tA('admin.resources.sys')} {formatBytes(data.runtime.sys_bytes)})
       </span>
       <span>
         {tA('admin.resources.goroutines')}{' '}
@@ -65,7 +65,7 @@ function RuntimeSummary({ data, tA, locale }: { data: AdminResourcesResponse; tA
       </span>
       <span>
         {tA('admin.resources.uptime')}{' '}
-        <span className="font-semibold tabular-nums text-foreground">{formatDurationMs(data.uptime_s * 1000, locale)}</span>
+        <span className="font-semibold tabular-nums text-foreground">{formatDurationMs(data.uptime_s * 1000)}</span>
       </span>
       <span>
         {tA('admin.resources.restarts')}{' '}
@@ -75,7 +75,7 @@ function RuntimeSummary({ data, tA, locale }: { data: AdminResourcesResponse; tA
   )
 }
 
-function DatabasesTable({ data, tA, locale }: { data: AdminResourcesResponse; tA: TAdmin; locale: AdminLocale }) {
+function DatabasesTable({ data, tA}: { data: AdminResourcesResponse; tA: TAdmin; locale: AdminLocale }) {
   // Inventaire non mesurable (racine data introuvable/illisible — RepoRoot mal
   // résolu, volume non monté) : état EXPLICITE distinct d'un « aucune base » ou
   // d'une table de tailles nulles silencieuse. La cause exacte est LOGGÉE côté Go.
@@ -103,9 +103,9 @@ function DatabasesTable({ data, tA, locale }: { data: AdminResourcesResponse; tA
           <AdminTd className="font-mono text-xs text-foreground" title={db.path}>
             {db.name}
           </AdminTd>
-          <AdminTd className="tabular-nums text-muted-foreground">{formatBytes(db.size_bytes, locale)}</AdminTd>
+          <AdminTd className="tabular-nums text-muted-foreground">{formatBytes(db.size_bytes)}</AdminTd>
           <AdminTd className="tabular-nums text-muted-foreground">
-            {db.wal_bytes ? formatBytes(db.wal_bytes, locale) : '—'}
+            {db.wal_bytes ? formatBytes(db.wal_bytes) : '—'}
           </AdminTd>
         </AdminTr>
       ))}
@@ -114,7 +114,7 @@ function DatabasesTable({ data, tA, locale }: { data: AdminResourcesResponse; tA
           {tA('admin.resources.total')}
         </AdminTd>
         <AdminTd className="font-semibold tabular-nums text-foreground" colSpan={2}>
-          {formatBytes(data.db_total_bytes, locale)}
+          {formatBytes(data.db_total_bytes)}
         </AdminTd>
       </tr>
     </AdminTable>

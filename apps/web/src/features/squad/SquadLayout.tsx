@@ -87,7 +87,7 @@ function toContractKpis(k: V2KPIStats): KPIStats {
 }
 
 function formatError(err: unknown): string {
-  if (err == null) return 'Erreur inconnue'
+  if (err == null) return 'Unknown error'
   if (err instanceof Error) return err.message
   if (typeof err === 'string') return err
   if (typeof err === 'object') {
@@ -96,7 +96,7 @@ function formatError(err: unknown): string {
     if (typeof e.statusText === 'string') {
       return typeof e.status === 'number' ? `${e.status} ${e.statusText}` : e.statusText
     }
-    try { return JSON.stringify(err) } catch { return 'Erreur non sérialisable' }
+    try { return JSON.stringify(err) } catch { return 'Unserializable error' }
   }
   return String(err)
 }
@@ -532,7 +532,7 @@ export function SquadLayout() {
   if (confirmedGts.length > 0 && !isLoading && selectedRows.length === 0) {
     log.warn(
       `invalid_selection:${playerSlug}`,
-      `Aucun gamertag confirmé n'a matché un teammate côté backend (player=${playerSlug}).`,
+      `No confirmed gamertag matched a teammate on the backend (player=${playerSlug}).`,
       { confirmedGts },
     )
   }
@@ -570,7 +570,6 @@ export function SquadLayout() {
     playerSlug,
     currentPlayerXuid,
     hasLinkedIdentity,
-    locale,
     selectedRows,
     activeContextLabels,
   })
@@ -661,7 +660,6 @@ export function SquadLayout() {
               sessions={compositionSessions}
               selected={pickedSquadSessionLabels}
               onChange={applySessionLabels}
-              locale={locale}
               triggerClassName="flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-1 text-xs font-medium hover:bg-muted whitespace-nowrap transition-colors"
               getMatchCount={getSessionCount}
             />
@@ -854,7 +852,6 @@ export function SquadLayout() {
           gamertag={addFriendGamertag}
           open={!!addFriendGamertag}
           onClose={() => setAddFriendGamertag(null)}
-          locale={locale}
         />
       )}
     </SquadContext.Provider>

@@ -109,7 +109,7 @@ export function SynthesisOutcomesByGroupChart({ entries, title, height }: Props)
   const lossLabel = useOutcomeLabel('loss')
   const tieLabel  = useOutcomeLabel('tie')
   const dnfLabel  = useOutcomeLabel('dnf')
-  const yAxisLabel = fieldMappings?.fields['match_count']?.label ?? 'Matchs'
+  const yAxisLabel = fieldMappings?.fields['match_count']?.label ?? 'Matches'
 
   const series: ChartSeries<Pt>[] = entries.length > 0
     ? [{ key: 'outcomes', datapoints: entries.map((e) => ({ name: e.name })) }]

@@ -87,7 +87,7 @@ export function RootLayout() {
       authReloadFiredRef.current = true
       log.warn(
         'auth:session_expired',
-        'session expirée (401 auth_required) — rechargement plein vers /login',
+        'session expired (401 auth_required) — full reload to /login',
       )
       window.location.assign('/')
     }
@@ -116,7 +116,7 @@ export function RootLayout() {
     if (!data.current_username && wasAuthenticated) {
       log.warn(
         'bootstrap:anon_downgrade',
-        'bootstrap anonyme transitoire ignoré — session authentifiée préservée',
+        'transient anonymous bootstrap ignored — authenticated session kept',
       )
       return
     }
@@ -155,7 +155,7 @@ export function RootLayout() {
       <div className="flex h-screen items-center justify-center">
         <span className="text-sm text-muted-foreground animate-pulse">
           {failureCount > 0
-            ? `Connexion à l'API… (tentative ${failureCount + 1}/7)`
+            ? `Connecting to the API… (attempt ${failureCount + 1}/7)`
             : t('common.root.loading_app')}
         </span>
       </div>

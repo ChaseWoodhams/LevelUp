@@ -24,14 +24,14 @@ export function makeOrdinalScale(config: OrdinalScaleConfig): (value: number) =>
 
   if (tiers.length !== thresholds.length + 1) {
     throw new Error(
-      `makeOrdinalScale : tiers.length (${tiers.length}) doit être égal à thresholds.length + 1 (${thresholds.length + 1})`,
+      `makeOrdinalScale: tiers.length (${tiers.length}) must equal thresholds.length + 1 (${thresholds.length + 1})`,
     )
   }
 
   for (let i = 0; i < thresholds.length - 1; i++) {
     if (thresholds[i] <= thresholds[i + 1]) {
       throw new Error(
-        `makeOrdinalScale : thresholds doit être strictement décroissant. Violation : thresholds[${i}]=${thresholds[i]} <= thresholds[${i + 1}]=${thresholds[i + 1]}`,
+        `makeOrdinalScale: thresholds must be strictly decreasing. Violation: thresholds[${i}]=${thresholds[i]} <= thresholds[${i + 1}]=${thresholds[i + 1]}`,
       )
     }
   }
@@ -42,7 +42,7 @@ export function makeOrdinalScale(config: OrdinalScaleConfig): (value: number) =>
     // NaN = valeur invalide → tier le plus bas. ±Infinity suit la logique normale
     // (Infinity >= n = true → tier-1 ; -Infinity >= n = false → tier final).
     if (isNaN(value)) {
-      log.warn(`ordinal:invalid:${scaleKey}`, `ordinalScale reçoit NaN — retourne le tier le plus bas`)
+      log.warn(`ordinal:invalid:${scaleKey}`, `ordinalScale received NaN — returning the lowest tier`)
       return tiers[tiers.length - 1]
     }
 

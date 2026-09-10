@@ -128,7 +128,7 @@ interface MilestoneCardProps {
   t: ReturnType<typeof getAscensionText>
 }
 
-function MilestoneCard({ milestone: m, locale, t }: MilestoneCardProps) {
+function MilestoneCard({ milestone: m, t }: MilestoneCardProps) {
   const title = m.title_en
   const metricText = useMetricLabel(m.metric)
   // A9 : description lisible localisée ; jamais la formule technique. Absente
@@ -161,7 +161,7 @@ function MilestoneCard({ milestone: m, locale, t }: MilestoneCardProps) {
       )}
       {m.earned && m.earned_at && (
         <p className="mt-auto text-2xs text-amber-700 dark:text-amber-300"> {/* color-allow: amber distinction milestone earned (CLAUDE.md §20) */}
-          {interpolate(t.milestonesEarnedAt, { date: formatAscensionDate(m.earned_at, locale) })}
+          {interpolate(t.milestonesEarnedAt, { date: formatAscensionDate(m.earned_at) })}
         </p>
       )}
     </article>

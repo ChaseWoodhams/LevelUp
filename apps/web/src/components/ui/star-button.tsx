@@ -30,7 +30,7 @@ export function StarButton({
         e.stopPropagation()
         onToggle()
       }}
-      aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
       className={
         compact
           ? `absolute left-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${isFavorite ? 'bg-warning text-warning-foreground' : 'bg-card/70 text-muted-foreground hover:bg-warning/70 hover:text-warning-foreground'} ${className}`

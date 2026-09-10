@@ -13,9 +13,9 @@ describe('adminRelativeTime', () => {
 
   it('couvre les bornes minute/heure/jour en FR', () => {
     expect(adminRelativeTime('2026-06-11T11:59:50Z', 'en', now)).toBe("just now")
-    expect(adminRelativeTime('2026-06-11T11:45:00Z', 'en', now)).toBe('il y a 15 min')
-    expect(adminRelativeTime('2026-06-11T09:00:00Z', 'en', now)).toBe('il y a 3 h')
-    expect(adminRelativeTime('2026-06-09T12:00:00Z', 'en', now)).toBe('il y a 2 j')
+    expect(adminRelativeTime('2026-06-11T11:45:00Z', 'en', now)).toBe('15 min ago')
+    expect(adminRelativeTime('2026-06-11T09:00:00Z', 'en', now)).toBe('3 h ago')
+    expect(adminRelativeTime('2026-06-09T12:00:00Z', 'en', now)).toBe('2 d ago')
   })
 
   it('couvre les bornes en EN', () => {
@@ -32,28 +32,28 @@ describe('adminRelativeTime', () => {
 
 describe('formatDurationMs', () => {
   it('retourne un tiret pour les valeurs absentes ou négatives', () => {
-    expect(formatDurationMs(undefined, 'en')).toBe('—')
-    expect(formatDurationMs(-5, 'en')).toBe('—')
-    expect(formatDurationMs(Number.NaN, 'en')).toBe('—')
+    expect(formatDurationMs(undefined)).toBe('—')
+    expect(formatDurationMs(-5)).toBe('—')
+    expect(formatDurationMs(Number.NaN)).toBe('—')
   })
 
   it('formate ms, secondes (décimale localisée), minutes et heures', () => {
-    expect(formatDurationMs(850, 'en')).toBe('850 ms')
-    expect(formatDurationMs(2400, 'en')).toBe('2,4 s')
-    expect(formatDurationMs(2400, 'en')).toBe('2.4 s')
-    expect(formatDurationMs(65_000, 'en')).toBe('1 min 05 s')
-    expect(formatDurationMs(120_000, 'en')).toBe('2 min')
-    expect(formatDurationMs(4_320_000, 'en')).toBe('1 h 12 min')
-    expect(formatDurationMs(7_200_000, 'en')).toBe('2 h')
+    expect(formatDurationMs(850)).toBe('850 ms')
+    expect(formatDurationMs(2400)).toBe('2.4 s')
+    expect(formatDurationMs(2400)).toBe('2.4 s')
+    expect(formatDurationMs(65_000)).toBe('1 min 05 s')
+    expect(formatDurationMs(120_000)).toBe('2 min')
+    expect(formatDurationMs(4_320_000)).toBe('1 h 12 min')
+    expect(formatDurationMs(7_200_000)).toBe('2 h')
   })
 })
 
 describe('formatIntervalMinutes', () => {
   it('gère minutes, heures rondes et mixte', () => {
-    expect(formatIntervalMinutes(undefined, 'en')).toBe('—')
-    expect(formatIntervalMinutes(0, 'en')).toBe('—')
-    expect(formatIntervalMinutes(15, 'en')).toBe('15 min')
-    expect(formatIntervalMinutes(360, 'en')).toBe('6 h')
-    expect(formatIntervalMinutes(90, 'en')).toBe('1 h 30 min')
+    expect(formatIntervalMinutes(undefined)).toBe('—')
+    expect(formatIntervalMinutes(0)).toBe('—')
+    expect(formatIntervalMinutes(15)).toBe('15 min')
+    expect(formatIntervalMinutes(360)).toBe('6 h')
+    expect(formatIntervalMinutes(90)).toBe('1 h 30 min')
   })
 })

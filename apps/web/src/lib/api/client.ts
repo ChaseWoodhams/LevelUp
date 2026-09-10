@@ -163,7 +163,7 @@ function guardResolvedTitle(
     // Non gardé en DEV seulement : c'est l'UNIQUE trace d'une bascule de titre
     // pendant une écriture en vol (diagnostic d'un « j'ai cliqué sur le mauvais
     // jeu »), elle doit rester visible en production.
-    console.warn('[title-guard] mutation appliquée à un autre titre que le titre actif', {
+    console.warn('[title-guard] mutation applied to a title other than the active one', {
       path,
       method,
       resolved,
@@ -174,7 +174,7 @@ function guardResolvedTitle(
   }
 
   if (import.meta.env.DEV) {
-    console.warn('[title-guard] réponse rejetée : titre résolu divergent', {
+    console.warn('[title-guard] response rejected: resolved title differs', {
       path,
       resolved,
       active,
@@ -183,7 +183,7 @@ function guardResolvedTitle(
   }
   const err: ApiError = {
     code: TITLE_MISMATCH_CODE,
-    message: `Réponse d'un autre titre rejetée (résolu « ${resolved} », attendu « ${active} »)`,
+    message: `Response for another title rejected (resolved "${resolved}", expected "${active}")`,
     // Retryable (status 503-like) : TanStack Query re-tente → la requête repart avec
     // le header du titre courant et converge sur la bonne donnée.
     retryable: true,
@@ -244,7 +244,7 @@ async function request<T>(
     }
     const err: ApiError = {
       code: errorBody.code ?? 'unknown_error',
-      message: errorBody.message ?? `Erreur HTTP ${response.status}`,
+      message: errorBody.message ?? `HTTP error ${response.status}`,
       retryable: errorBody.retryable ?? response.status >= 500,
       details: errorBody.details,
       field_errors: errorBody.field_errors,
@@ -318,7 +318,7 @@ export const api = {
       } catch { /* body non-JSON */ }
       const err: ApiError = {
         code: errorBody.code ?? 'upload_error',
-        message: errorBody.message ?? `Erreur HTTP ${response.status}`,
+        message: errorBody.message ?? `HTTP error ${response.status}`,
         retryable: errorBody.retryable ?? response.status >= 500,
         details: errorBody.details,
         field_errors: errorBody.field_errors,

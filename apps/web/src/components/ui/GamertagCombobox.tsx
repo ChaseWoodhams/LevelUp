@@ -95,7 +95,7 @@ export function GamertagCombobox({
   frequentOptions = [],
   colors,
   excludeGamertag,
-  placeholder = 'Rechercher un gamertag…',
+  placeholder = 'Search a gamertag…',
   allowFreeInput = true,
   onAddAsFriend,
   compact = false,

@@ -175,7 +175,6 @@ export function useRecentMediaRail(playerSlug: string, limit: number, likedOnly 
 
 export function useToggleMediaLike(playerSlug: string) {
   const queryClient = useQueryClient()
-  const locale = useAppShellStore((s) => s.locale)
 
   return useMutation({
     mutationFn: (request: MediaLikeRequest) =>
@@ -218,7 +217,7 @@ export function useToggleMediaLike(playerSlug: string) {
       // Garde anti-silence (item 1.5) : la mise à jour optimiste rend un échec
       // serveur (401 sans session, 503 base occupée, 404 média inconnu)
       // indiscernable d'un succès — le cœur revenait simplement en arrière.
-      toast.error(getMediaText(locale).likeError, {
+      toast.error(getMediaText().likeError, {
         description: apiErrorMessage(error),
       })
     },
@@ -334,18 +333,17 @@ export function useAssociateMediaToMatch(playerSlug: string) {
  */
 export function useDeleteMedia(playerSlug: string) {
   const queryClient = useQueryClient()
-  const locale = useAppShellStore((s) => s.locale)
   return useMutation({
     mutationFn: (filePath: string) =>
       api.delete<MediaDeleteResponse>(
         `/players/${playerSlug}/media?file_path=${encodeURIComponent(filePath)}`,
       ),
     onSuccess: () => {
-      toast.success(getMediaModalsText(locale).coverFlow.deleteSuccess)
+      toast.success(getMediaModalsText().coverFlow.deleteSuccess)
       queryClient.invalidateQueries({ queryKey: queryKeys.mediaBase(playerSlug) })
     },
     onError: (error) => {
-      toast.error(getMediaModalsText(locale).coverFlow.deleteError, {
+      toast.error(getMediaModalsText().coverFlow.deleteError, {
         description: apiErrorMessage(error),
       })
     },

@@ -37,7 +37,7 @@ function BehaviorAlert({ pattern: p, t }: { pattern: BehavioralPattern; t: Ascen
         <span className={`text-sm font-semibold ${labelCls}`}>{typeLabel}</span>
         {p.confirmed && (
           <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-            {t.behaviorConfirmed ?? 'Confirmé'}
+            {t.behaviorConfirmed ?? 'Confirmed'}
           </span>
         )}
       </div>

@@ -58,7 +58,7 @@ function buildLusrSeries(checkpoints: CareerLusrCheckpoint[], locale: ManifestLo
 function buildLusrEvolutionOption(series: ChartSeries<[string, number]>[], locale: ManifestLocale): EChartsCoreOption {
   const tc = getEChartsThemeColors()
   const axisBase = getAxisBase(tc)
-  const intlLocale = toIntlLocale(locale)
+  const intlLocale = toIntlLocale()
 
   const allRatings = series.flatMap(s => s.datapoints.map(p => p[1]))
   const dataMin = allRatings.length > 0 ? Math.min(...allRatings) : 0
@@ -93,7 +93,7 @@ function buildLusrEvolutionOption(series: ChartSeries<[string, number]>[], local
     data: [],
     silent: true,
     legendHoverLink: false,
-    markArea: buildSkillTierMarkArea(locale, yMin, yMax, grid, tc),
+    markArea: buildSkillTierMarkArea(yMin, yMax, grid, tc),
   }
 
   const echartsSeriesList = [

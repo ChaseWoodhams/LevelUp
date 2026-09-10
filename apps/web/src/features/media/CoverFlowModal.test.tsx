@@ -63,7 +63,7 @@ describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
     })
 
     expect(screen.getByText(/Lecture impossible/)).toBeInTheDocument()
-    expect(screen.getByText(/Format vidéo non supporté/)).toBeInTheDocument()
+    expect(screen.getByText(/Video format not supported/)).toBeInTheDocument()
   })
 
   it('affiche un message spécifique pour erreur de décodage (code 3)', () => {
@@ -80,7 +80,7 @@ describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
     act(() => {
       fireEvent.error(video)
     })
-    expect(screen.getByText(/Erreur de décodage/)).toBeInTheDocument()
+    expect(screen.getByText(/Video decoding error/)).toBeInTheDocument()
   })
 
   it('affiche le basename de la vidéo en erreur pour aider l\'utilisateur', () => {

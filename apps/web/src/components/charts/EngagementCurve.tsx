@@ -95,10 +95,10 @@ export interface EngagementSeriesLabels {
 }
 
 const DEFAULT_SERIES_LABELS: EngagementSeriesLabels = {
-  team: 'Équipe réelle',
-  expected: 'Joueur attendu',
-  player: 'Joueur réel',
-  lobby: 'Partie',
+  team: 'Actual team',
+  expected: 'Expected player',
+  player: 'Actual player',
+  lobby: 'Lobby',
 }
 
 /**
@@ -140,8 +140,8 @@ export function EngagementCurve(props: EngagementCurveProps) {
   // conforme aux autres blocs Timeseries. On ne passe PAS `error` à ChartCard
   // (qui rendrait son habillage d'erreur) — on dégrade en empty.
   const emptyMessage = isError
-    ? (errorMessage ?? 'Engagement momentanément indisponible')
-    : (subtitle ?? "Aucune donnée d'engagement pour ce match")
+    ? (errorMessage ?? 'Engagement temporarily unavailable')
+    : (subtitle ?? 'No engagement data for this match')
 
   return (
     <ChartCard

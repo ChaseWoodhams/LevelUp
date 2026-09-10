@@ -34,7 +34,6 @@ export function HomeSkillPeakCard({
   label,
   peak,
   numberLocale,
-  locale,
   testIdPrefix,
   state,
   detail,
@@ -120,7 +119,7 @@ export function HomeSkillPeakCard({
                   data-testid={peak?.tier_label && !isPlacement ? `${testIdPrefix}-tier` : `${testIdPrefix}-detail`}
                   className="truncate text-xl font-semibold text-foreground"
                 >
-                  {isPlacement ? detail : (localizeTierLabel(peak?.tier_label, locale) ?? detail)}
+                  {isPlacement ? detail : (localizeTierLabel(peak?.tier_label) ?? detail)}
                 </p>
               )}
               {isTierOnlyRating ? null : (
@@ -154,7 +153,7 @@ export function HomeSkillPeakCard({
                   data-testid={`${testIdPrefix}-next-tier`}
                   className="shrink-0 truncate text-2xs font-medium text-muted-foreground"
                 >
-                  {localizeTierLabel(peak!.next_tier_label, locale)}
+                  {localizeTierLabel(peak!.next_tier_label)}
                 </span>
               )}
             </div>

@@ -13,7 +13,7 @@ import type { ManifestLocale } from '@/lib/i18n/format'
 export const DOW_LABELS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
 
 /** Abréviations des 7 jours (lundi-first, aligné sur l'index `dow` backend). */
-export function dowLabels(_locale: ManifestLocale): readonly string[] {
+export function dowLabels(): readonly string[] {
   return DOW_LABELS_EN
 }
 

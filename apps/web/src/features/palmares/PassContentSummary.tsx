@@ -133,7 +133,6 @@ function RarityChips({
   breakdown,
   remaining,
   fmt,
-  locale,
 }: {
   breakdown: Record<string, number>
   remaining: Record<string, number> | null | undefined
@@ -155,7 +154,7 @@ function RarityChips({
             <span className="flex items-center gap-1.5">
               <span className={`inline-block h-2 w-2 shrink-0 rounded-full ${styles?.segment ?? 'bg-muted'}`} />
               <span className="text-xs text-muted-foreground">
-                {rarityLabel(tier, locale)}{' '}
+                {rarityLabel(tier)}{' '}
                 <span className="font-semibold tabular-nums text-foreground">{fmt(count, rem)}</span>
               </span>
             </span>
@@ -180,7 +179,7 @@ function TypeTags({ breakdown, locale, title }: { breakdown: Record<string, numb
             key={type}
             className="inline-flex items-center gap-1.5 rounded border border-border/50 bg-muted/40 px-2 py-0.5 text-3xs"
           >
-            <span className="text-muted-foreground">{itemTypeLabel(type, locale) ?? type}</span>
+            <span className="text-muted-foreground">{itemTypeLabel(type) ?? type}</span>
             <span className="font-medium tabular-nums text-foreground">{count.toLocaleString(locale)}</span>
           </span>
         ))}

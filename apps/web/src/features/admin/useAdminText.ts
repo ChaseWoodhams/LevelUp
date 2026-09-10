@@ -31,8 +31,7 @@ export function useAdminT(): TAdmin {
 
 /** Locale BCP-47 pour toLocaleString/toLocaleDateString. */
 export function useDateLocale(): string {
-  const locale = useAppShellStore((s) => s.locale)
-  return intlLocale(locale)
+  return intlLocale()
 }
 
 /** Locale courte ('en' | 'en') pour les helpers purs (format.ts). */

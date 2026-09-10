@@ -144,11 +144,11 @@ export function SessionPlacementBreakdown({ title, matches, height = 260, yMax, 
   const hasPlacement = matches.some((m) => m.placement != null && m.placement > 0)
   const hasLobby = matches.some((m) => m.lobby_size != null && m.lobby_size > 0)
   if (matches.length > 0 && !hasPlacement) {
-    log.warn(`placement_missing:${sLabel}`, 'Breakdown placements vide : aucun rang (placement) sur la session')
+    log.warn(`placement_missing:${sLabel}`, 'Empty placement breakdown: no rank (placement) in the session')
   } else if (hasPlacement && !hasLobby) {
     log.warn(
       `lobby_size_fallback:${sLabel}`,
-      'Breakdown placements : taille de lobby (present_at_completion) indisponible → axe = max(rang observé)',
+      'Placement breakdown: lobby size (present_at_completion) unavailable → axis = max(observed rank)',
     )
   }
 

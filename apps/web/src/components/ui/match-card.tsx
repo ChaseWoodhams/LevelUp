@@ -38,7 +38,7 @@ function formatMatchDuration(secs: number): string {
   return `${m}m ${s.toString().padStart(2, '0')}s`
 }
 
-function formatMatchDateTime(isoDate: string, timezone: string, _locale: Locale): string {
+function formatMatchDateTime(isoDate: string, timezone: string): string {
   const date = new Date(isoDate)
   if (isNaN(date.getTime())) return ''
   const intlLocale = 'en-US'
@@ -52,7 +52,7 @@ function formatMatchDateTime(isoDate: string, timezone: string, _locale: Locale)
   }).format(date)
 }
 
-function buildMatchHeading(match: RecentMatchItem, _locale: Locale): string {
+function buildMatchHeading(match: RecentMatchItem): string {
   const normalizedMode = normalizeModeLabel(match.mode_ui, match.map_ui)
   const connector = 'on'
 
@@ -64,7 +64,7 @@ function buildMatchHeading(match: RecentMatchItem, _locale: Locale): string {
 }
 
 export function MatchCard({ match: m, locale = 'en', timezone = 'UTC', onClick, onToggleFavorite, favoriteDisabled }: MatchCardProps) {
-  const heading = buildMatchHeading(m, locale)
+  const heading = buildMatchHeading(m)
   const t = (key: CommonManifestKey) => formatMessage(commonManifest, key, locale)
   // KDA NET ((k+a/3)−d) pour les 2 titres (API Infinite / FDA Halo 5), possiblement
   // negatif -> echelle divergente autour de 0 (jamais kdScale).
@@ -549,7 +549,7 @@ export function MatchCard({ match: m, locale = 'en', timezone = 'UTC', onClick, 
           {m.started_at && (
             <p className="text-3xs text-muted-foreground/70 leading-tight">
               <span className="font-semibold text-muted-foreground/90">{t('common.match_card.date_label')}</span>{' '}
-              {formatMatchDateTime(m.started_at, timezone, locale)}
+              {formatMatchDateTime(m.started_at, timezone)}
             </p>
           )}
         </div>

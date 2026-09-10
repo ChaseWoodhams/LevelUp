@@ -25,31 +25,31 @@ const REGISTRY = {
 
 describe('compare — résolution des libellés de métrique', () => {
   it('le registre canonique prime sur toute valeur locale', () => {
-    const text = getCompareText('en', REGISTRY)
+    const text = getCompareText(REGISTRY)
     expect(resolveMetricLabel(text, 'win_rate')).toBe('Win rate')
     expect(resolveMetricLabel(text, 'max_killing_spree')).toBe('Meilleure série')
   })
 
   it('damage_taken_per_game est résolu par le registre (avg_damage_taken)', () => {
     expect(METRIC_TO_FIELD_KEY['damage_taken_per_game']).toBe('avg_damage_taken')
-    const text = getCompareText('en', REGISTRY)
+    const text = getCompareText(REGISTRY)
     expect(resolveMetricLabel(text, 'damage_taken_per_game')).toBe('Dégâts subis / match')
   })
 
   it('les métriques sans FieldKey canonique gardent le dictionnaire de feature', () => {
-    expect(resolveMetricLabel(getCompareText('en', REGISTRY), 'csr')).toBe('CSR (saison actuelle)')
-    expect(resolveMetricLabel(getCompareText('en', REGISTRY), 'csr')).toBe('CSR (current season)')
+    expect(resolveMetricLabel(getCompareText(REGISTRY), 'csr')).toBe('CSR (current season)')
+    expect(resolveMetricLabel(getCompareText(REGISTRY), 'csr')).toBe('CSR (current season)')
   })
 
   it('repli sur la clé humanisée quand le registre ne déclare pas la clé', () => {
-    const text = getCompareText('en', { fields: {} })
+    const text = getCompareText({ fields: {} })
     expect(resolveMetricLabel(text, 'avg_life_secs')).toBe('Avg life secs')
     expect(resolveMetricLabel(text, 'metrique_inconnue')).toBe('Metrique inconnue')
   })
 
   it('aucune clé mappée sur le registre ne subsiste dans le dictionnaire local', () => {
-    const fr = getCompareText('en')
-    const en = getCompareText('en')
+    const fr = getCompareText()
+    const en = getCompareText()
     const duplicated = Object.keys(METRIC_TO_FIELD_KEY).filter(
       (k) => k in fr.metrics || k in en.metrics,
     )
@@ -61,8 +61,8 @@ describe('compare — résolution des libellés de métrique', () => {
   })
 
   it('parité stricte des clés FR / EN du dictionnaire local', () => {
-    const fr = Object.keys(getCompareText('en').metrics).sort()
-    const en = Object.keys(getCompareText('en').metrics).sort()
+    const fr = Object.keys(getCompareText().metrics).sort()
+    const en = Object.keys(getCompareText().metrics).sort()
     expect(fr).toEqual(en)
     expect(fr.length).toBeGreaterThan(0)
   })

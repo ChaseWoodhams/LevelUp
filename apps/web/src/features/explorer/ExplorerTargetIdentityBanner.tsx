@@ -41,10 +41,10 @@ export function ExplorerTargetIdentityBanner({
   identityUnavailableDescription,
 }: ExplorerTargetIdentityBannerProps) {
   const locale = useAppShellStore((s) => s.locale)
-  const numberLocale = intlLocale(locale)
+  const numberLocale = intlLocale()
   // Labels localisés réutilisés du Home (source unique : home.spartan.*) :
   // « Meilleur CSR/LUSR », « Rang max », « Progression vers … ».
-  const { labels } = getSpartanIdentityText(locale)
+  const { labels } = getSpartanIdentityText()
   // Halo 5 : bandeau composé (emblème carré + nameplate recolorisés, apparence
   // choisie-ou-défaut #160) — parité avec HomeSpartanIdentityBanner.
   const currentTitleSlug = useAppShellStore((s) => s.currentTitleSlug)

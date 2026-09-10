@@ -207,7 +207,7 @@ describe('TimeseriesFdaGapTrend — KPI écart moyen par match', () => {
     )
     const kpi = await screen.findByTestId('fda-gap-avg')
     expect(kpi).toHaveTextContent('Average gap per match')
-    expect(kpi).toHaveTextContent('+0,5/match')
+    expect(kpi).toHaveTextContent('+0.5/match')
   })
 
   it('aucun match avec attendu → « — »', async () => {

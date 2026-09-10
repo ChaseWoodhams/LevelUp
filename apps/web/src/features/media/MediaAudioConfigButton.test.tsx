@@ -31,19 +31,19 @@ describe('MediaAudioConfigButton', () => {
   it('ouvre la modale au clic', () => {
     renderWithProviders(<MediaAudioConfigButton playerSlug="p1" />)
     fireEvent.click(screen.getByLabelText('Audio tracks settings'))
-    expect(screen.getByText('Pistes audio des médias')).toBeInTheDocument()
-    expect(screen.getByText('Automatique')).toBeInTheDocument()
-    expect(screen.getByText('Manuel')).toBeInTheDocument()
+    expect(screen.getByText('Media audio tracks')).toBeInTheDocument()
+    expect(screen.getByText('Automatic')).toBeInTheDocument()
+    expect(screen.getByText('Manual')).toBeInTheDocument()
   })
 
   it('affiche l’éditeur de pistes en mode manuel', () => {
     renderWithProviders(<MediaAudioConfigButton playerSlug="p1" />)
     fireEvent.click(screen.getByLabelText('Audio tracks settings'))
-    fireEvent.click(screen.getByText('manual'))
+    fireEvent.click(screen.getByText('Manual'))
     // Seed manuel = 2 pistes (jeu + voix) + bouton d'ajout.
-    expect(screen.getByText('Piste 1')).toBeInTheDocument()
-    expect(screen.getByText('Piste 2')).toBeInTheDocument()
-    expect(screen.getByText('+ Ajouter une piste')).toBeInTheDocument()
+    expect(screen.getByText('Track 1')).toBeInTheDocument()
+    expect(screen.getByText('Track 2')).toBeInTheDocument()
+    expect(screen.getByText('+ Add a track')).toBeInTheDocument()
   })
 
   it('appelle la mutation à l’enregistrement', () => {

@@ -37,7 +37,7 @@ export function AchievementCard({ achievement, locale, fixedWidth = true }: Prop
     description = locked || achievement.description_en
   }
 
-  const unlockedDate = formatUnlockedDate(achievement.unlocked_at, locale)
+  const unlockedDate = formatUnlockedDate(achievement.unlocked_at)
   const progress =
     achievement.target_progress !== undefined &&
     achievement.target_progress > 0 &&

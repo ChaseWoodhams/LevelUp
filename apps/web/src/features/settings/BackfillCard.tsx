@@ -91,7 +91,7 @@ export function BackfillCard({ t }: BackfillCardProps) {
         onSuccess: (job) => {
           setActiveJobId(job.job_id)
           toast.info(t.backfillToastStarted, {
-            description: `${selectedGamertag}${force ? ' — forcé' : ''}`,
+            description: `${selectedGamertag}${force ? ' — forced' : ''}`,
           })
         },
         onError: (err) => {

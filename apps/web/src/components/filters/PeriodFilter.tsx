@@ -35,7 +35,7 @@ export interface PeriodFilterProps {
    * commonManifest, 'common.period.{key}', locale) avant le passage au composant.
    */
   labels: Record<Period, string>
-  /** Aria-label du groupe (déjà localisé). Default "Filtre période". */
+  /** Group aria-label. Default "Period filter". */
   ariaLabel?: string
   /** ClassName additionnel. */
   className?: string
@@ -50,7 +50,7 @@ export function PeriodFilter({
   value,
   onChange,
   labels,
-  ariaLabel = 'Filtre période',
+  ariaLabel = 'Period filter',
   className = '',
   disabled = false,
 }: PeriodFilterProps) {

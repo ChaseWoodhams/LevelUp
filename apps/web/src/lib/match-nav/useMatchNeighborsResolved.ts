@@ -146,7 +146,7 @@ export function useMatchNeighborsResolved(
     // diagnostic, sans bloquer (le fallback API reste correct).
     if (import.meta.env.DEV) {
       console.warn(
-        `[match-nav] matchId "${matchId}" absent du contexte (${localCtx.matchIds.length} matchs, source=${localCtx.source}) → fallback API Q25`,
+        `[match-nav] matchId "${matchId}" missing from the context (${localCtx.matchIds.length} matches, source=${localCtx.source}) → fallback API Q25`,
       )
     }
   }

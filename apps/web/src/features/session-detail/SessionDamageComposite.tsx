@@ -13,7 +13,6 @@ import { CHART_BG, escapeHtml, getAxisBase, getEChartsThemeColors, getTooltipBas
 import { resolveToken } from '@/lib/accessibility'
 import { useFieldMappings } from '@/lib/i18n/fieldMappings'
 import { useProvidesDamageTaken } from '@/lib/damage/effectiveHp'
-import { useAppShellStore } from '@/stores/appShellStore'
 import { intlLocale } from '@/lib/formatters'
 import type { SessionDetailMatchRow } from '@/lib/api/types'
 
@@ -130,7 +129,6 @@ export function SessionDamageComposite({ title, matches, height = 280 }: Props) 
   // false (Halo 5) → dégâts subis non fournis : segment + légende « subis » retirés
   // (cf. buildSessionDamageOption). Source unique de masquage via useCapability.
   const providesDamageTaken = useProvidesDamageTaken()
-  const locale = useAppShellStore((s) => s.locale)
 
   const series = useMemo<ChartSeries<DamagePoint>[]>(() => {
     const sorted = [...matches]
@@ -157,7 +155,7 @@ export function SessionDamageComposite({ title, matches, height = 280 }: Props) 
   if (matches.length > 0 && rows === 0) {
     log.warn(
       `damage_missing:${matches[0]?.session_label ?? ''}`,
-      'Barre dégâts vide : aucun match de la session n\'a de dégâts infligés/subis (vieux matchs ?)',
+      'Empty damage bar: no match in the session has damage dealt/taken (old matches?)',
       { matches: matches.length },
     )
   }
@@ -172,7 +170,7 @@ export function SessionDamageComposite({ title, matches, height = 280 }: Props) 
           dealtLabel: fields?.damage_dealt?.label ?? 'damage_dealt',
           takenLabel: fields?.damage_taken?.label ?? 'damage_taken',
           showTaken: providesDamageTaken,
-          numLoc: intlLocale(locale),
+          numLoc: intlLocale(),
         })
       }
     />

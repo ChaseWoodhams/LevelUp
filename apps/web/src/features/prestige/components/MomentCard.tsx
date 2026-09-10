@@ -48,7 +48,7 @@ export function MomentCard({
 
   const label = challenge.label || challenge.metric
   const date = challenge.completed_at
-    ? new Date(challenge.completed_at).toLocaleDateString(intlLocale(locale), {
+    ? new Date(challenge.completed_at).toLocaleDateString(intlLocale(), {
         day: '2-digit',
         month: 'short',
         year: 'numeric',

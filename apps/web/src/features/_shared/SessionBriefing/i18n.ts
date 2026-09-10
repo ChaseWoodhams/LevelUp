@@ -6,7 +6,6 @@
  * pour rester title-aware (multi-titres).
  */
 
-import type { Locale } from '@/lib/i18n/locale'
 
 export interface BriefingTexts {
   /** Libellé "Résultats" + helper pluralisation outcomes — utilisés dans la
@@ -88,6 +87,6 @@ const EN: BriefingTexts = {
   },
 }
 
-export function getBriefingTexts(_locale: Locale): BriefingTexts {
+export function getBriefingTexts(): BriefingTexts {
   return EN
 }

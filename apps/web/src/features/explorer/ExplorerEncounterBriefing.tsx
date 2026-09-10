@@ -137,7 +137,7 @@ export function ExplorerEncounterBriefing({ stats }: Props) {
             label={t('explorer.encounter.encounters')}
             value={
               ally != null && enemy != null
-                ? <AllyEnemySplitBar allyCount={ally} enemyCount={enemy} locale={manifestLocale} />
+                ? <AllyEnemySplitBar allyCount={ally} enemyCount={enemy} />
                 : stats.count_together
             }
             accent="outcome-draw"
@@ -181,7 +181,7 @@ export function ExplorerEncounterBriefing({ stats }: Props) {
             label={t('explorer.encounter.kd_cross')}
             value={
               stats.kills_dealt != null && stats.deaths_suffered != null
-                ? <KDSplitBar kills={stats.kills_dealt} deaths={stats.deaths_suffered} locale={manifestLocale} />
+                ? <KDSplitBar kills={stats.kills_dealt} deaths={stats.deaths_suffered} />
                 : <span className="font-mono">{formatKDCross(stats.kills_dealt, stats.deaths_suffered)}</span>
             }
             accent={cmpAccent(stats.kills_dealt, stats.deaths_suffered)}

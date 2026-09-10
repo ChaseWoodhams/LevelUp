@@ -49,10 +49,10 @@ describe('citationCategoryLabel', () => {
   })
 
   it('rend des libellés FR sans anglicisme pour les catégories traduisibles', () => {
-    expect(citationCategoryLabel('weapon', 'en')).toBe('Armes')
+    expect(citationCategoryLabel('weapon', 'en')).toBe('Weapons')
     expect(citationCategoryLabel('vehicle', 'en')).toBe('Vehicles')
     expect(citationCategoryLabel('game_mode', 'en')).toBe('Game modes')
-    expect(citationCategoryLabel('other', 'en')).toBe('Autres')
+    expect(citationCategoryLabel('other', 'en')).toBe('Other')
   })
 
   it('retombe sur la clé brute si elle est inconnue du manifeste', () => {

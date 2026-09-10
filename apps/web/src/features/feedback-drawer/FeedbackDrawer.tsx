@@ -126,7 +126,7 @@ export function FeedbackDrawer() {
       { pathname: browser.pathname, recentConsole: ctx.console },
     )
     return buildIssueUrl({
-      title: title.trim() || '_(sans titre)_',
+      title: title.trim() || '_(untitled)_',
       description: deferredDescription,
       context: ctx,
       classification,

@@ -194,7 +194,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
     render(<AscensionObjectivesTab />)
     fireEvent.click(screen.getByRole('button', { name: /Browse presets/i }))
     // Le picker affiche son en-tête + l'état vide (presets mock = []).
-    expect(screen.getByText(/Aucun preset disponible/i)).toBeInTheDocument()
+    expect(screen.getByText(/No preset available/i)).toBeInTheDocument()
   })
 
   it('shows the empty-state message for empty challenges (Prestige layer)', () => {
@@ -209,7 +209,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
 
   it('mode pilote OFF : le toggle propose « Activer » et l\'appuie active le pilote (B3)', () => {
     render(<AscensionObjectivesTab />)
-    const toggle = screen.getByRole('button', { name: 'Activer', pressed: false })
+    const toggle = screen.getByRole('button', { name: 'Enable', pressed: false })
     fireEvent.click(toggle)
     expect(pilotEnableMutate).toHaveBeenCalledTimes(1)
     expect(pilotDisableMutate).not.toHaveBeenCalled()
@@ -239,11 +239,11 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
     // ouvre un AlertDialog (pas de mutation tant qu'on n'a pas confirmé).
     fireEvent.click(screen.getByRole('button', { name: 'Abandon' }))
     const dialog = screen.getByRole('alertdialog')
-    expect(within(dialog).getByText(/Abandonner cet objectif/i)).toBeInTheDocument()
+    expect(within(dialog).getByText(/Abandon this objective/i)).toBeInTheDocument()
     expect(abandonMutate).not.toHaveBeenCalled()
 
     // Confirmation → mutation déclenchée avec l'id de l'objectif.
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Abandonner' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Abandon' }))
     expect(abandonMutate).toHaveBeenCalledWith('l1')
   })
 

@@ -70,7 +70,7 @@ interface SerieTileProps {
   className?: string
 }
 
-function SerieTile({ title, slides, locale, className }: SerieTileProps) {
+function SerieTile({ title, slides, className }: SerieTileProps) {
   const [idx, setIdx] = useState(0)
   const [fading, setFading] = useState(false)
   const { data: fieldMappings } = useFieldMappings()
@@ -86,9 +86,9 @@ function SerieTile({ title, slides, locale, className }: SerieTileProps) {
     return () => window.clearInterval(iv)
   }, [slides.length])
   const s = slides[idx]
-  const slideLabel = s.label_key ? resolveLabel(locale, s.label_key, fieldMappings) : (s.label ?? '')
+  const slideLabel = s.label_key ? resolveLabel(s.label_key, fieldMappings) : (s.label ?? '')
   const slideDetail = s.detail_key
-    ? resolveDetail(locale, s.detail_key, s.detail_params)
+    ? resolveDetail(s.detail_key, s.detail_params)
     : (s.detail ?? '')
   return (
     <KpiCard accent={highlightAccent(s.value_color)} className={className}>
@@ -122,15 +122,15 @@ interface HomeHighlightTileProps {
 }
 
 export function HomeHighlightTile({ h, locale }: HomeHighlightTileProps) {
-  const title = h.title_key ? resolveTitle(locale, h.title_key) : (h.title ?? '')
+  const title = h.title_key ? resolveTitle(h.title_key) : (h.title ?? '')
   const spanClass = highlightFlexClass(h.title_key)
   if (h.slides && h.slides.length > 0) {
     return <SerieTile title={title} slides={h.slides} locale={locale} className={spanClass} />
   }
   const detail = h.detail_key
-    ? resolveDetail(locale, h.detail_key, h.detail_params)
+    ? resolveDetail(h.detail_key, h.detail_params)
     : (h.detail ?? '')
-  const unit = resolveUnit(locale, h.title_key)
+  const unit = resolveUnit(h.title_key)
   return (
     <KpiCard accent={highlightAccent(h.value_color)} className={spanClass}>
       <div className="p-3">

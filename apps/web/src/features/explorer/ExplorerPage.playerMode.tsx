@@ -32,7 +32,7 @@ function isEncounterSemanticToken(s: string): s is SemanticToken {
   return s.startsWith('narrative-') || s.startsWith('outcome-') || s.startsWith('perf-')
 }
 
-function renderEncounterBadges(badges: MatchEncounterBadge[], _locale: string) {
+function renderEncounterBadges(badges: MatchEncounterBadge[]) {
   const manifestLocale: Locale = 'en'
   const sqT = (key: SquadManifestKey, values?: Record<string, string | number>) =>
     formatMessage(squadManifest, key, manifestLocale, values)
@@ -87,7 +87,7 @@ export function ExplorerPlayerMode({
         <GamertagSearchInput onSelect={onSelectTarget} initialValue={targetGamertag} />
         {targetGamertag && !!playerQuery.data?.badges?.length && (
           <div className="flex flex-wrap gap-1.5">
-            {renderEncounterBadges(playerQuery.data!.badges!, locale)}
+            {renderEncounterBadges(playerQuery.data!.badges!)}
           </div>
         )}
         {targetGamertag && playerQuery.data?.encounter_stats && (

@@ -67,22 +67,22 @@ function renderWithClient(
 describe('AddFriendModal — UI', () => {
   it('ne se monte pas quand open=false', () => {
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={false} onClose={vi.fn()} locale="en" />,
+      <AddFriendModal gamertag="Alice" open={false} onClose={vi.fn()} />,
     )
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
   it('affiche le titre avec le gamertag fourni', () => {
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={true} onClose={vi.fn()} locale="en" />,
+      <AddFriendModal gamertag="Alice" open={true} onClose={vi.fn()} />,
     )
-    expect(screen.getByText(/Ajouter Alice comme ami/i)).toBeTruthy()
+    expect(screen.getByText(/Add Alice as a friend/i)).toBeTruthy()
   })
 
   it('appelle onClose au clic sur Annuler', () => {
     const onClose = vi.fn()
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} locale="en" />,
+      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} />,
     )
     fireEvent.click(screen.getByText(/Cancel/i))
     expect(onClose).toHaveBeenCalled()
@@ -91,7 +91,7 @@ describe('AddFriendModal — UI', () => {
   it('appelle onClose au clic sur le backdrop', () => {
     const onClose = vi.fn()
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} locale="en" />,
+      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} />,
     )
     const dialog = screen.getByRole('dialog')
     fireEvent.click(dialog)
@@ -100,7 +100,7 @@ describe('AddFriendModal — UI', () => {
 
   it('locale EN affiche le texte anglais', () => {
     renderWithClient(
-      <AddFriendModal gamertag="Bob" open={true} onClose={vi.fn()} locale="en" />,
+      <AddFriendModal gamertag="Bob" open={true} onClose={vi.fn()} />,
     )
     expect(screen.getByText(/Add Bob as a friend/i)).toBeTruthy()
     expect(screen.getByText(/Cancel/i)).toBeTruthy()
@@ -123,12 +123,11 @@ describe('AddFriendModal — soumission', () => {
         gamertag="Charlie"
         open={true}
         onClose={onClose}
-        locale="en"
         onSuccess={onSuccess}
       />,
       [], // friends initiaux vides
     )
-    fireEvent.click(screen.getByRole('button', { name: /^Ajouter$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Add$/i }))
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledWith('Charlie')
       expect(onClose).toHaveBeenCalled()
@@ -151,12 +150,11 @@ describe('AddFriendModal — soumission', () => {
         gamertag="Alice"
         open={true}
         onClose={onClose}
-        locale="en"
         onSuccess={onSuccess}
       />,
       ['alice'], // déjà dans la liste (case-insensitive)
     )
-    fireEvent.click(screen.getByRole('button', { name: /^Ajouter$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Add$/i }))
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled()
     })

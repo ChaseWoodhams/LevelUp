@@ -3,17 +3,15 @@ import { GifHoverThumbnail } from '@/components/ui/gif-hover-thumbnail'
 import { CoverFlowModal } from './CoverFlowModal'
 import { getMediaText } from './i18n'
 import { getMediaModalsText } from './i18n-modals'
-import { useAppShellStore } from '@/stores/appShellStore'
 import { playerScopedHref, useTitleSlug } from '@/lib/title-routing'
 import { looksLikeAssetId } from '@/lib/halo/assetId'
 import { intlLocale } from '@/lib/formatters'
-import type { ManifestLocale } from '@/lib/i18n/format'
 import type { MediaItemRow } from '@/lib/api/types'
 import { ownerTagColor } from './mediaOwnerColors'
 
 export { CoverFlowModal as MediaLightbox }
 
-function formatMediaDate(value: string | null | undefined, locale: ManifestLocale) {
+function formatMediaDate(value: string | null | undefined) {
   if (!value) {
     return null
   }
@@ -21,7 +19,7 @@ function formatMediaDate(value: string | null | undefined, locale: ManifestLocal
   if (Number.isNaN(d.getTime())) {
     return null
   }
-  const loc = intlLocale(locale)
+  const loc = intlLocale()
   const datePart = d.toLocaleDateString(loc, { day: '2-digit', month: '2-digit', year: '2-digit' })
   const timePart = d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' })
   return `${timePart} ${datePart}`
@@ -174,11 +172,10 @@ export function MediaThumbnailCard({
   onOpenMatch,
 }: MediaThumbnailCardProps) {
   const [isHovering, setIsHovering] = useState(false)
-  const locale = useAppShellStore((s) => s.locale)
   const titleSlug = useTitleSlug()
-  const text = getMediaText(locale)
-  const modals = getMediaModalsText(locale)
-  const dateStr = formatMediaDate(item.capture_end_utc ?? item.match_start_time, locale)
+  const text = getMediaText()
+  const modals = getMediaModalsText()
+  const dateStr = formatMediaDate(item.capture_end_utc ?? item.match_start_time)
   const hasMatch = Boolean(item.match_id)
   // Garde anti-GUID (défense en profondeur) : un asset_id de map non résolu ne
   // doit jamais s'afficher ; le backend renvoie normalement le nom ou null.

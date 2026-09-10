@@ -7,11 +7,9 @@
  * Tiers traduits en FR (locale FR) ; la valeur de rating brute n'est pas affichée
  * (demande user). Liste simple, sans sous-blocs bordés.
  */
-import { useAppShellStore } from '@/stores/appShellStore'
 import { composeTierLabel } from '@/lib/skillTiers'
 import { unrankedBadgeURL } from '@/lib/staticAssets'
 import type { CareerPlaylistCSR, ExplorerLiveSectionStatus } from '@/lib/api/types'
-import type { Locale } from '@/lib/i18n/locale'
 import { ExplorerLiveStatusBadge } from './ExplorerLiveStatusBadge'
 
 interface ExplorerTargetSeasonCSRProps {
@@ -30,14 +28,13 @@ interface ExplorerTargetSeasonCSRProps {
  * Compose via `composeTierLabel` (source unique, cf. skillTiers.ts) — pas de mapping
  * local dupliqué ; ici on n'ajoute que le cas non classé (tier vide → "—").
  */
-function tierLabel(tier: string, subTier: number, locale: Locale): string {
+function tierLabel(tier: string, subTier: number): string {
   const raw = tier.trim()
   if (raw === '') return '—'
-  return composeTierLabel(raw, subTier, locale)
+  return composeTierLabel(raw, subTier)
 }
 
 export function ExplorerTargetSeasonCSR({ csrs, title, emptyMessage, liveStatus }: ExplorerTargetSeasonCSRProps) {
-  const locale = useAppShellStore((s) => s.locale)
   const titleBar = (
     <div className="flex flex-none items-center gap-2 border-b border-border px-4 py-2 text-sm font-medium">
       <span>{title}</span>
@@ -78,7 +75,7 @@ export function ExplorerTargetSeasonCSR({ csrs, title, emptyMessage, liveStatus 
             const unranked = c.current.tier.trim() === ''
             const label = unranked
               ? 'Unranked'
-              : tierLabel(c.current.tier, c.current.sub_tier, locale)
+              : tierLabel(c.current.tier, c.current.sub_tier)
             // Badge tout à DROITE (après le label). Unranked → unranked_0.png ;
             // classé → badge de rang (fallback unranked_0 si l'image manque).
             const badgeURL = unranked ? unrankedBadgeURL() : c.current.badge_image_url || unrankedBadgeURL()

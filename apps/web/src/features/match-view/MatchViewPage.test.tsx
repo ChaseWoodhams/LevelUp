@@ -103,7 +103,7 @@ describe('MatchViewPage — match_not_found (pas encore synchronisé)', () => {
     renderWithProviders(<MatchViewPage />)
 
     expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Previous' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'My matches' })).toBeInTheDocument()
   })
 
@@ -111,7 +111,7 @@ describe('MatchViewPage — match_not_found (pas encore synchronisé)', () => {
     hoisted.matchView.error = { code: 'match_not_participant', message: 'non participant' }
     renderWithProviders(<MatchViewPage />)
 
-    expect(screen.getByText('Match indisponible')).toBeInTheDocument()
+    expect(screen.getByText('Match unavailable')).toBeInTheDocument()
     expect(screen.queryByText('Match not synced yet')).not.toBeInTheDocument()
   })
 })

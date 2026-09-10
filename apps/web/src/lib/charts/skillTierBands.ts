@@ -19,7 +19,6 @@
  * la couleur serait un aplat constant — c'est le label qui porte l'identité du
  * sous-rang).
  */
-import type { ManifestLocale } from '@/lib/i18n/format'
 import type { SkillTierGrid, SkillTier } from '@/lib/skillTiers'
 
 const STEP = 100
@@ -85,7 +84,7 @@ export function frameToData(dataMin: number, dataMax: number, grid: SkillTierGri
 
 /** Libellé d'un sous-palier : « Or III » (LUSR/roman) ou « Diamond 3 » (CSR/arabe).
  *  Palier sans sous-palier (Onyx) → nom du tier seul. */
-function subTierLabel(grid: SkillTierGrid, tier: SkillTier, subIndex: number, _locale: ManifestLocale): string {
+function subTierLabel(grid: SkillTierGrid, tier: SkillTier, subIndex: number): string {
   const name = tier.en
   if (tier.subTiers <= 1) return name
   if (grid.subTierStyle === 'roman') return `${name} ${ROMAN[subIndex] ?? subIndex + 1}`
@@ -104,7 +103,6 @@ interface MarkAreaTheme {
  * visibles pour un damier lisible quel que soit le zoom.
  */
 export function buildSkillTierMarkArea(
-  locale: ManifestLocale,
   yMin: number,
   yMax: number,
   grid: SkillTierGrid,
@@ -122,7 +120,7 @@ export function buildSkillTierMarkArea(
       data.push([
         {
           yAxis: lo,
-          name: subTierLabel(grid, tier, k, locale),
+          name: subTierLabel(grid, tier, k),
           itemStyle: { color: parity % 2 === 0 ? tc.splitAreaA : tc.splitAreaB },
           label: { show: true, position: 'insideTopLeft' as const, fontSize: 9, color: tc.axisLabel, opacity: 0.7 },
         },

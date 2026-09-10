@@ -167,7 +167,7 @@ export function SessionMmrDumbbell({ title, matches, height = 280 }: Props) {
   if (providesTeamMmr && matches.length > 0 && rows === 0) {
     log.warn(
       `mmr_missing:${matches[0]?.session_label ?? ''}`,
-      'Dumbbell MMR vide : aucun match de la session n\'a de MMR équipe/adverse (session social ?)',
+      'Empty MMR dumbbell: no match in the session has team/enemy MMR (social session?)',
       { matches: matches.length },
     )
   }

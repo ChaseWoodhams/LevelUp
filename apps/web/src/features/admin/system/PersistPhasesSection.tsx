@@ -49,7 +49,6 @@ function labelFor(p: PerfCallStats, tA: (key: AdminManifestKey) => string): stri
 function PhaseCell({
   phase,
   label,
-  locale,
 }: {
   phase: NonNullable<AdminPerfStats['persist_phases']>[number]
   label: string
@@ -60,10 +59,10 @@ function PhaseCell({
     <div className="rounded-md border px-3 py-2">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="text-lg font-semibold tabular-nums text-foreground">
-        {formatDurationMs(phase.avg_ms, locale)}
+        {formatDurationMs(phase.avg_ms)}
       </div>
       <div className="font-mono text-[11px] text-muted-foreground">
-        max {formatDurationMs(phase.max_ms, locale)} · ×{phase.count}
+        max {formatDurationMs(phase.max_ms)} · ×{phase.count}
         {hasErrors && (
           <span className="ml-1 font-semibold" style={{ color: tokenCssVar('destructive') }}>
             · {phase.errors} err

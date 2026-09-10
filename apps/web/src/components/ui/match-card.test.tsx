@@ -53,7 +53,7 @@ describe('MatchCard', () => {
 
   it('affiche le titre centré mode sur carte et la playlist', () => {
     render(<MatchCard match={WIN_MATCH} locale="en" />)
-    expect(screen.getByText('Assassin sur Aquarius')).toBeTruthy()
+    expect(screen.getByText('Assassin on Aquarius')).toBeTruthy()
     expect(screen.queryByText('Assassin : Arène sur Aquarius')).toBeNull()
     expect(screen.getByText('Ranked Arena')).toBeTruthy()
   })
@@ -66,8 +66,8 @@ describe('MatchCard', () => {
   it('strip le nom de carte EN collé au mode même si map_ui est FR (régression "Slayer on Forest sur Forêt")', () => {
     const crossLang: RecentMatchItem = { ...WIN_MATCH, mode_ui: 'Slayer on Forest', map_ui: 'Forêt' }
     render(<MatchCard match={crossLang} locale="en" />)
-    expect(screen.getByText('Slayer sur Forêt')).toBeTruthy()
-    expect(screen.queryByText('Slayer on Forest sur Forêt')).toBeNull()
+    expect(screen.getByText('Slayer on Forêt')).toBeTruthy()
+    expect(screen.queryByText('Slayer on Forest on Forêt')).toBeNull()
   })
 
   it('rend sans crasher quand les champs S56 sont absents', () => {
@@ -82,7 +82,7 @@ describe('MatchCard', () => {
     expect(panel).toBeTruthy()
     expect(screen.getByTestId('match-card-score').textContent).toBe('50-42')
     expect(screen.getByText('DOMINATION')).toBeTruthy()
-    expect(screen.getByText('REMONTADA')).toBeTruthy()
+    expect(screen.getByText('COMEBACK')).toBeTruthy()
     expect(screen.getByTestId('match-card-badges-row')).toBeTruthy()
   })
 
@@ -154,7 +154,7 @@ describe('MatchCard', () => {
 
     it('affiche « En placement (8/10) » à la place du score', () => {
       render(<MatchCard match={IN_PLACEMENT} locale="en" />)
-      expect(screen.getByText('En placement (8/10)')).toBeTruthy()
+      expect(screen.getByText('In placement (8/10)')).toBeTruthy()
     })
 
     it('n\'affiche JAMAIS un 0 fabriqué pour une perf absente', () => {

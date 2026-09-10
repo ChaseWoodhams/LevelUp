@@ -14,7 +14,6 @@ import { formatMessage } from '@/lib/i18n/format'
 import { squadManifest, type SquadManifestKey } from '@/lib/i18n/generated/squad'
 import { useFieldMappings } from '@/lib/i18n/fieldMappings'
 import { localizeTierLabel } from '@/lib/skillTiers'
-import { useAppShellStore } from '@/stores/appShellStore'
 import type { CompareMetricRow, CompareResponse, MatchEncounterBadge } from '@/lib/api/types'
 
 import { CompareBar } from './CompareBar'
@@ -42,8 +41,7 @@ function formatMetricValue(
   // NOM de palier à l'affichage. Un titre de rang carrière (déjà localisé côté back)
   // ou tout libellé sans palier connu est renvoyé inchangé par localizeTierLabel.
   if (display) {
-    const loc = text.intlLocale.toLowerCase().startsWith('en') ? 'en' : 'en'
-    return localizeTierLabel(display, loc) ?? display
+    return localizeTierLabel(display) ?? display
   }
   if (typeof value !== 'number') return String(value)
   if (metric === 'win_rate' || metric === 'accuracy') {
@@ -307,9 +305,9 @@ export function ComparePage() {
   const fromExplorer = search.from === 'explorer'
   const isMirror = !!target && !!target2
 
-  const locale = normalizeCompareLocale(useAppShellStore((s) => s.locale))
+  const locale = normalizeCompareLocale()
   const { data: fieldMappings } = useFieldMappings()
-  const text = getCompareText(locale, fieldMappings)
+  const text = getCompareText(fieldMappings)
 
   const leftCompare = useCompare(playerSlug)   // A vs B
   const rightCompare = useCompare(playerSlug)  // A vs C (mirror uniquement)

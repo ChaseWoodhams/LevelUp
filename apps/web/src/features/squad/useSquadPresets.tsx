@@ -135,7 +135,6 @@ export interface UseSquadPresetsOptions {
    *  Vide tant que le header n'est pas résolu (dégradation gracieuse transitoire). */
   currentPlayerXuid: string
   hasLinkedIdentity: boolean
-  locale: string
   /** Coéquipiers actuellement sélectionnés (pour « enregistrer la compo »). */
   selectedRows: TeammateRow[]
   /** Labels (playlists/modes) du filtre courant → trie en tête les escouades
@@ -155,7 +154,6 @@ export function useSquadPresets({
   playerSlug,
   currentPlayerXuid,
   hasLinkedIdentity,
-  locale: _locale,
   selectedRows,
   activeContextLabels,
 }: UseSquadPresetsOptions): UseSquadPresetsResult {

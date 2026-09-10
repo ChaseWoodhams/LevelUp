@@ -159,7 +159,7 @@ interface PBCardProps {
   titleSlug: string
 }
 
-function PBCard({ metric, pbs, locale, t, playerSlug, titleSlug }: PBCardProps) {
+function PBCard({ metric, pbs, t, playerSlug, titleSlug }: PBCardProps) {
   const label = useMetricLabel(metric)
   return (
     <article className="rounded-md border border-border bg-card p-4">
@@ -182,7 +182,7 @@ function PBCard({ metric, pbs, locale, t, playerSlug, titleSlug }: PBCardProps) 
               {pb.achieved_at && (
                 <span className="text-2xs text-muted-foreground">
                   {interpolate(t.recordsAchievedAt, {
-                    date: formatAscensionDate(pb.achieved_at, locale),
+                    date: formatAscensionDate(pb.achieved_at),
                   })}
                 </span>
               )}
@@ -210,13 +210,13 @@ interface HistoryRowProps {
   titleSlug: string
 }
 
-function HistoryRow({ entry, locale, t, playerSlug, titleSlug }: HistoryRowProps) {
+function HistoryRow({ entry, t, playerSlug, titleSlug }: HistoryRowProps) {
   const label = useMetricLabel(entry.metric)
   return (
     <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-card px-3 py-2 text-sm">
       <div className="flex flex-1 items-baseline gap-2">
         <span className="text-xs text-muted-foreground">
-          {formatAscensionDate(entry.achieved_at, locale)}
+          {formatAscensionDate(entry.achieved_at)}
         </span>
         <span className="font-medium">{label}</span>
         <span className="text-xs text-muted-foreground">

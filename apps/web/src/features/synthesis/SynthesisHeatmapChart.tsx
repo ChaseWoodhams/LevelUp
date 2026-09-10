@@ -26,7 +26,7 @@ interface Props {
 
 function buildHeatmapOption(cells: HeatmapCell[], locale: ManifestLocale): EChartsCoreOption {
   const tc = getEChartsThemeColors()
-  const DOW_LABELS = dowLabels(locale)
+  const DOW_LABELS = dowLabels()
   const txt = calendarChartText(locale)
 
   // Indexer les données reçues par (dow, hour)

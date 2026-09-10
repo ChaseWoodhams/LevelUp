@@ -42,7 +42,7 @@ export function ThemeToggle({ className = '', variant = 'sidebar' }: ThemeToggle
   const theme = useSettingsDraftStore((state) => state.localUiPrefs.theme)
   const toggleTheme = useSettingsDraftStore((state) => state.toggleTheme)
   const isDark = theme === 'dark'
-  const label = isDark ? 'Passer au thème clair' : 'Passer au thème sombre'
+  const label = isDark ? 'Switch to light theme' : 'Switch to dark theme'
 
   const trackClass =
     variant === 'menu'

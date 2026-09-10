@@ -155,10 +155,10 @@ function matchesFilter(item: MedalSummaryItem, filter: MedalFilter): boolean {
 }
 
 /** Tri des médailles DANS une catégorie. category_total → ordre backend conservé. */
-function sortItems(items: MedalSummaryItem[], sort: MedalSort, locale: ManifestLocale): MedalSummaryItem[] {
+function sortItems(items: MedalSummaryItem[], sort: MedalSort): MedalSummaryItem[] {
   if (sort === 'medal_count') return [...items].sort((a, b) => b.count - a.count)
   if (sort === 'medal_name') {
-    const collator = new Intl.Collator(intlLocale(locale), { sensitivity: 'base' })
+    const collator = new Intl.Collator(intlLocale(), { sensitivity: 'base' })
     return [...items].sort((a, b) => collator.compare(a.name, b.name))
   }
   return items
@@ -188,9 +188,9 @@ function toCategoryView(fg: FilteredGroup, sort: MedalSort, locale: ManifestLoca
       total: group.total,
     }),
     totalAwardedLabel: formatMessage(medalsManifest, 'medals.category.total_awarded', locale, {
-      count: group.total_count.toLocaleString(intlLocale(locale)),
+      count: group.total_count.toLocaleString(intlLocale()),
     }),
-    items: sortItems(fg.items, sort, locale),
+    items: sortItems(fg.items, sort),
   }
 }
 

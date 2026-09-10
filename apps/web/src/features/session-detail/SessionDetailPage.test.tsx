@@ -159,10 +159,10 @@ describe("SessionDetailPage", () => {
     expect(screen.getByText("Oddball")).toBeInTheDocument();
     // Le tableau réutilise désormais ExplorerMatchesTable → l'issue est rendue via
     // le manifest explorer (bundlé) : outcome 2 → "Victoire" (FR), pas la clé brute.
-    expect(screen.getByText("Victoire")).toBeInTheDocument();
+    expect(screen.getByText("Win")).toBeInTheDocument();
     // Session solo (with_friends: false) → pas de bouton "Voir les synergies" (V72-09).
     expect(
-      screen.queryByRole("button", { name: /View synergies/i }),
+      screen.queryByRole("button", { name: /squad synergies/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -182,7 +182,7 @@ describe("SessionDetailPage", () => {
     renderWithProviders(<SessionDetailPage />);
 
     const synergiesButton = await screen.findByRole("button", {
-      name: /View synergies/i,
+      name: /squad synergies/i,
     });
 
     fireEvent.click(synergiesButton);
@@ -254,7 +254,7 @@ describe("SessionDetailPage", () => {
       ).toBeInTheDocument();
       // En-tête L3 du drawer = label "Comparaison" (heading) + sélecteur de session +
       // pills FR de la session comparée (catégorie "Ranked" → "Classé") + KPI "Score perf.".
-      expect(screen.getByRole("heading", { name: "Comparaison" })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Comparison" })).toBeInTheDocument();
       expect(screen.getAllByText("Ranked").length).toBeGreaterThan(0);
       expect(screen.getAllByText("Perf. score").length).toBeGreaterThan(0);
     });

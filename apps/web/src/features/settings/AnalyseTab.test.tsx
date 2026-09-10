@@ -39,7 +39,7 @@ vi.mock('@/features/settings/queries', () => ({
   useRecalculateSessions: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
-const t = getSettingsText('en')
+const t = getSettingsText()
 
 function renderTab(merged: Partial<SettingsResponse>, onChange = vi.fn()) {
   renderWithProviders(<AnalyseTab merged={merged} handleChange={onChange} t={t} />)
@@ -49,15 +49,15 @@ function renderTab(merged: Partial<SettingsResponse>, onChange = vi.fn()) {
 describe('AnalyseTab — Progression long-terme', () => {
   it('affiche la card avec son titre et son hint', () => {
     renderTab({ show_progression: true })
-    expect(screen.getByText('Progression long-terme')).toBeInTheDocument()
-    expect(screen.getByText('Afficher Objectifs & Prestige')).toBeInTheDocument()
-    expect(screen.getByText(/Prestige points/)).toBeInTheDocument()
+    expect(screen.getByText('Long-term progression')).toBeInTheDocument()
+    expect(screen.getByText('Show Objectives & Prestige')).toBeInTheDocument()
+    expect(screen.getByText(/Prestige Points/)).toBeInTheDocument()
   })
 
   it('active par défaut quand show_progression est absent', () => {
     renderTab({})
     const toggle = screen
-      .getByText('Afficher Objectifs & Prestige')
+      .getByText('Show Objectives & Prestige')
       .closest('div')!
       .querySelector('button')!
     // bg-primary => actif (true)
@@ -67,7 +67,7 @@ describe('AnalyseTab — Progression long-terme', () => {
   it('reflète show_progression=false (toggle inactif)', () => {
     renderTab({ show_progression: false })
     const toggle = screen
-      .getByText('Afficher Objectifs & Prestige')
+      .getByText('Show Objectives & Prestige')
       .closest('div')!
       .querySelector('button')!
     expect(toggle.className).not.toMatch(/bg-primary/)
@@ -76,7 +76,7 @@ describe('AnalyseTab — Progression long-terme', () => {
   it('appelle handleChange("show_progression", false) quand on clique le toggle activé', () => {
     const onChange = renderTab({ show_progression: true })
     const toggle = screen
-      .getByText('Afficher Objectifs & Prestige')
+      .getByText('Show Objectives & Prestige')
       .closest('div')!
       .querySelector('button')!
     fireEvent.click(toggle)
@@ -85,7 +85,7 @@ describe('AnalyseTab — Progression long-terme', () => {
 
   it('expose un lien vers /help?tab=glossary', () => {
     renderTab({ show_progression: true })
-    const link = screen.getByRole('link', { name: /glossaire/i })
+    const link = screen.getByRole('link', { name: /glossary/i })
     expect(link).toHaveAttribute('href', '/help?tab=glossary')
   })
 })

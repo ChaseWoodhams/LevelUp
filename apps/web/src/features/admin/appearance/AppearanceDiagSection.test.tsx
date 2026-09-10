@@ -58,7 +58,7 @@ function mockDiag(resp: AppearanceDiagnosisResponse, opts?: { delayMs?: number }
 async function selectAndDiagnose() {
   const select = screen.getByRole('combobox')
   fireEvent.change(select, { target: { value: 'jgtm' } })
-  fireEvent.click(screen.getByRole('button', { name: /Diagnostiquer/i }))
+  fireEvent.click(screen.getByRole('button', { name: /Diagnose/i }))
 }
 
 describe('AppearanceDiagSection', () => {
@@ -80,9 +80,9 @@ describe('AppearanceDiagSection', () => {
     mockDiag(FOUR_VERDICTS, { delayMs: 80 })
     renderWithProviders(<AppearanceDiagSection />)
     await selectAndDiagnose()
-    expect((await screen.findAllByText(/Diagnostic en cours/i)).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(/Diagnosing/i)).length).toBeGreaterThan(0)
     // Puis le résultat arrive.
-    await screen.findByText('Nameplate')
+    await screen.findByText('Banner')
   })
 
   it('rend 4 verdicts distincts + composants + CTA de réauthentification', async () => {
@@ -91,7 +91,7 @@ describe('AppearanceDiagSection', () => {
     await selectAndDiagnose()
 
     // Libellés des 4 composants.
-    await screen.findByText('Nameplate')
+    await screen.findByText('Banner')
     expect(screen.getByText('Emblem')).toBeInTheDocument()
     expect(screen.getByText('Backdrop')).toBeInTheDocument()
     expect(screen.getByText('Service tag')).toBeInTheDocument()
@@ -99,12 +99,12 @@ describe('AppearanceDiagSection', () => {
     // Badges de verdict.
     expect(screen.getByText('Missing upstream')).toBeInTheDocument()
     expect(screen.getByText('Up to date')).toBeInTheDocument()
-    expect(screen.getByText('Temporaire')).toBeInTheDocument()
+    expect(screen.getByText('Transient')).toBeInTheDocument()
     expect(screen.getByText('Re-authentication required')).toBeInTheDocument()
 
     // « rien à faire, servi par design » (upstream_missing).
     expect(
-      screen.getByText(/servie par design/i),
+      screen.getByText(/served by design/i),
     ).toBeInTheDocument()
 
     // CTA de réauthentification (auth_required) → flux SSO existant.

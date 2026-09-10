@@ -63,7 +63,7 @@ describe('buildUsualSubtitle — indice « surtout … » (V72-10)', () => {
   // re-mutiler : normalizeModeLabel est idempotent sur un libellé FR propre.
   it('mode FR résolu par l API rendu tel quel (pas de sur-normalisation)', () => {
     const subtitle = buildUsualSubtitle(['Partie rapide'], ['Assassin'], T_FR)
-    expect(subtitle).toBe('surtout Partie rapide · Assassin')
+    expect(subtitle).toBe('mostly Partie rapide · Assassin')
   })
 
   it('réponse complète FR (playlists + mode FR) -> sous-titre complet', () => {
@@ -74,7 +74,7 @@ describe('buildUsualSubtitle — indice « surtout … » (V72-10)', () => {
       ['Assassin en équipe', 'Assassin'],
       T_FR,
     )
-    expect(subtitle).toBe('surtout Partie rapide · Baston à grande échelle · Assassin en équipe')
+    expect(subtitle).toBe('mostly Partie rapide · Baston à grande échelle · Assassin en équipe')
   })
 })
 

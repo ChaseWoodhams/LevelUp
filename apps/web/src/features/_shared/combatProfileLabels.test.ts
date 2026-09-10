@@ -5,7 +5,7 @@ describe('combatProfileLabels — locale-aware', () => {
   it('offensiveLabel rend FR et EN', () => {
     expect(offensiveLabel('disperse', 'en')).toBe('Scattered')
     expect(offensiveLabel('disperse', 'en')).toBe('Scattered')
-    expect(offensiveLabel('chirurgical', 'en')).toBe('Chirurgical')
+    expect(offensiveLabel('chirurgical', 'en')).toBe('Surgical')
     expect(offensiveLabel('chirurgical', 'en')).toBe('Surgical')
   })
 
@@ -16,7 +16,7 @@ describe('combatProfileLabels — locale-aware', () => {
   })
 
   it('activityLabel rend FR et EN', () => {
-    expect(activityLabel('agressif', 'en')).toBe('Agressif')
+    expect(activityLabel('agressif', 'en')).toBe('Aggressive')
     expect(activityLabel('agressif', 'en')).toBe('Aggressive')
     expect(activityLabel('passif', 'en')).toBe('Passive')
   })

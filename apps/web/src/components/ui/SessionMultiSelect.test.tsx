@@ -9,7 +9,6 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { SessionMultiSelect } from './SessionMultiSelect'
 import type { SessionLabelEntry } from '@/lib/api/types'
-import type { ManifestLocale } from '@/lib/i18n/format'
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -36,14 +35,12 @@ const SESSIONS: SessionLabelEntry[] = [
 function setup(
   selected: string[] = [],
   onChange = vi.fn(),
-  locale: ManifestLocale = 'en',
 ) {
   const utils = render(
     <SessionMultiSelect
       sessions={SESSIONS}
       selected={selected}
       onChange={onChange}
-      locale={locale}
     />,
   )
   const trigger = () => screen.getByRole('button', { name: /session/i })
@@ -65,7 +62,7 @@ describe('SessionMultiSelect — label du bouton déclencheur', () => {
   })
 
   it('affiche "All sessions" en locale EN', () => {
-    setup([], vi.fn(), 'en')
+    setup([], vi.fn())
     expect(screen.getByRole('button', { name: /All sessions/i })).toBeTruthy()
   })
 
@@ -75,7 +72,6 @@ describe('SessionMultiSelect — label du bouton déclencheur', () => {
         sessions={SESSIONS}
         selected={[]}
         onChange={vi.fn()}
-        locale="en"
         placeholder="Choisir une session…"
       />,
     )

@@ -36,7 +36,7 @@ describe('GamertagCombobox', () => {
     renderWithProviders(
       <GamertagCombobox selected={[]} onChange={() => {}} />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
     expect(screen.getByText('Configured players')).toBeInTheDocument()
     expect(screen.getByText('AlphaPlayer')).toBeInTheDocument()
     expect(screen.getByText('BravoGamer')).toBeInTheDocument()
@@ -52,7 +52,7 @@ describe('GamertagCombobox', () => {
         ]}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
     expect(screen.getByText('Frequent teammates')).toBeInTheDocument()
     expect(screen.getByText('CharlieX')).toBeInTheDocument()
     expect(screen.getByText('12×')).toBeInTheDocument()
@@ -69,7 +69,7 @@ describe('GamertagCombobox', () => {
     renderWithProviders(
       <GamertagCombobox selected={[]} onChange={() => {}} />,
     )
-    const input = screen.getByPlaceholderText(/Rechercher un gamertag/i)
+    const input = screen.getByPlaceholderText(/Search a gamertag/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'xq' } })
 
@@ -92,7 +92,7 @@ describe('GamertagCombobox', () => {
     )
 
     renderWithProviders(<GamertagCombobox selected={[]} onChange={() => {}} />)
-    const input = screen.getByPlaceholderText(/Rechercher un gamertag/i)
+    const input = screen.getByPlaceholderText(/Search a gamertag/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'GhostGT' } })
 
@@ -127,7 +127,7 @@ describe('GamertagCombobox', () => {
         ]}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
     expect(screen.getByText('My squads')).toBeInTheDocument()
     expect(screen.getByText('surtout Classé')).toBeInTheDocument()
     // Clic = charge le roster entier (≠ ajout d'un joueur).
@@ -143,7 +143,7 @@ describe('GamertagCombobox', () => {
         footer={<button type="button">Save lineup</button>}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
     expect(screen.getByText('Save lineup')).toBeInTheDocument()
   })
 
@@ -158,7 +158,7 @@ describe('GamertagCombobox', () => {
         }}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
     fireEvent.mouseDown(document.body) // clic hors du combobox → ferme
     expect(closed).toBe(1)
   })
@@ -181,7 +181,7 @@ describe('GamertagCombobox', () => {
     renderWithProviders(
       <GamertagCombobox selected={[]} onChange={(v) => { result = v }} />,
     )
-    const input = screen.getByPlaceholderText(/Rechercher un gamertag/i)
+    const input = screen.getByPlaceholderText(/Search a gamertag/i)
     fireEvent.focus(input)
     // 'UnknownGuy' n'est dans aucune suggestion (configurés Alpha/Bravo) → saisie libre.
     fireEvent.change(input, { target: { value: 'UnknownGuy' } })

@@ -6,7 +6,7 @@ import type { RelationInsight } from '@/lib/api/types'
 import { getPalmaresText } from './i18n'
 import { RelationsTable } from './RelationsTable'
 
-const labels = getPalmaresText('en').relations
+const labels = getPalmaresText().relations
 
 // mk — fabrique une relation minimale (tous les champs requis du DTO) ; on ne
 // surcharge que ce qui compte pour le tri sous test.

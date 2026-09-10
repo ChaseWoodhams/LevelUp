@@ -36,14 +36,14 @@ export function adminRelativeTime(iso: string | undefined, locale: AdminLocale, 
   if (hours < 24) return t.hoursAgo(hours)
   const days = Math.round(hours / 24)
   if (days < 7) return t.daysAgo(days)
-  return date.toLocaleDateString(intlLocale(locale))
+  return date.toLocaleDateString(intlLocale())
 }
 
 /**
  * Formate une durée en millisecondes en libellé compact : "850 ms",
  * "2,4 s" / "2.4 s", "1 min 05 s", "1 h 12 min". Négatif/NaN → '—'.
  */
-export function formatDurationMs(ms: number | undefined, _locale: AdminLocale): string {
+export function formatDurationMs(ms: number | undefined): string {
   if (ms === undefined || Number.isNaN(ms) || ms < 0) return '—'
   if (ms < 1000) return `${Math.round(ms)} ms`
   const seconds = ms / 1000
@@ -66,15 +66,15 @@ export function formatDurationMs(ms: number | undefined, _locale: AdminLocale): 
  * Formate un horodatage ISO en datetime locale complète (pour les `title=`
  * au survol des temps relatifs). ISO vide → ''.
  */
-export function adminAbsoluteTime(iso: string | undefined, locale: AdminLocale): string {
+export function adminAbsoluteTime(iso: string | undefined): string {
   if (!iso) return ''
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return ''
-  return date.toLocaleString(intlLocale(locale))
+  return date.toLocaleString(intlLocale())
 }
 
 /** Formate un intervalle scheduler en minutes vers un libellé lisible. */
-export function formatIntervalMinutes(minutes: number | undefined, _locale: AdminLocale): string {
+export function formatIntervalMinutes(minutes: number | undefined): string {
   if (!minutes || minutes <= 0) return '—'
   if (minutes < 60) return `${minutes} min`
   const hours = Math.floor(minutes / 60)
@@ -84,11 +84,11 @@ export function formatIntervalMinutes(minutes: number | undefined, _locale: Admi
 }
 
 /** Formate un volume d'octets en unité lisible (Ko/Mo/Go — décimal, FR). */
-export function formatBytes(bytes: number | undefined, locale: AdminLocale): string {
+export function formatBytes(bytes: number | undefined): string {
   if (bytes == null || Number.isNaN(bytes)) return '—'
   const abs = Math.abs(bytes)
   const fmt = (v: number, unit: string) =>
-    `${v.toLocaleString(intlLocale(locale), { maximumFractionDigits: 1 })} ${unit}`
+    `${v.toLocaleString(intlLocale(), { maximumFractionDigits: 1 })} ${unit}`
   if (abs < 1_000) return fmt(bytes, 'B')
   if (abs < 1_000_000) return fmt(bytes / 1_000, 'KB')
   if (abs < 1_000_000_000) return fmt(bytes / 1_000_000, 'MB')

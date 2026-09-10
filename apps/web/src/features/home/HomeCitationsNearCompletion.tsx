@@ -149,7 +149,6 @@ function NearCompletionSection({
 
 function NearCompletionTile({
   entry,
-  locale,
   t,
   onClick,
 }: {
@@ -159,7 +158,7 @@ function NearCompletionTile({
   onClick: () => void
 }) {
   const { item, remaining, isFinalTier } = entry
-  const numberLocale = intlLocale(locale)
+  const numberLocale = intlLocale()
   return (
     <button
       type="button"

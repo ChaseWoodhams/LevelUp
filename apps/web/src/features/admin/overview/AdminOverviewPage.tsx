@@ -92,7 +92,7 @@ function OverviewKpiGrid({
         label={tA('admin.overview.kpi_last_cycle')}
         value={sched.available ? adminRelativeTime(sched.last_cycle_at, locale) : '—'}
         sub={sched.available ? undefined : tA('admin.sync.scheduler_unavailable')}
-        title={adminAbsoluteTime(sched.last_cycle_at, locale)}
+        title={adminAbsoluteTime(sched.last_cycle_at)}
         accent={
           !sched.available || !sched.last_cycle_at
             ? undefined
@@ -170,7 +170,7 @@ function OverviewKpiGrid({
       />
       <AdminKpi
         label={tA('admin.overview.kpi_disk')}
-        value={disk && disk.status !== 'unknown' ? formatBytes(disk.free_bytes, locale) : '—'}
+        value={disk && disk.status !== 'unknown' ? formatBytes(disk.free_bytes) : '—'}
         accent={disk ? diskToken(disk.status) : undefined}
         to="/admin/system"
       />
@@ -182,9 +182,9 @@ function OverviewKpiGrid({
       />
       <AdminKpi
         label={tA('admin.overview.kpi_uptime')}
-        value={formatDurationMs(data.server.uptime_s * 1000, locale)}
+        value={formatDurationMs(data.server.uptime_s * 1000)}
         sub={data.server.version}
-        title={adminAbsoluteTime(data.server.started_at, locale)}
+        title={adminAbsoluteTime(data.server.started_at)}
         accent="info"
       />
     </div>

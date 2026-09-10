@@ -42,8 +42,8 @@ describe('buildContextLabel', () => {
 
   it('range complet de dates', () => {
     const spec: MatchFilterSpec = {
-      date_from: '2026-04-01T00:00:00Z',
-      date_to: '2026-05-01T00:00:00Z',
+      date_from: '2026-04-01T12:00:00Z',
+      date_to: '2026-05-01T12:00:00Z',
     }
     const got = buildContextLabel(spec, 'en')
     expect(got).toContain('→')
@@ -52,14 +52,12 @@ describe('buildContextLabel', () => {
   })
 
   it('seulement date_from : "Depuis JJ/MM/YYYY"', () => {
-    const spec: MatchFilterSpec = { date_from: '2026-04-01T00:00:00Z' }
-    expect(buildContextLabel(spec, 'en')).toMatch(/^Depuis /)
+    const spec: MatchFilterSpec = { date_from: '2026-04-01T12:00:00Z' }
     expect(buildContextLabel(spec, 'en')).toMatch(/^From /)
   })
 
   it('seulement date_to : "Jusqu\'au JJ/MM/YYYY"', () => {
-    const spec: MatchFilterSpec = { date_to: '2026-05-01T00:00:00Z' }
-    expect(buildContextLabel(spec, 'en')).toMatch(/^Jusqu'au /)
+    const spec: MatchFilterSpec = { date_to: '2026-05-01T12:00:00Z' }
     expect(buildContextLabel(spec, 'en')).toMatch(/^To /)
   })
 
@@ -68,13 +66,13 @@ describe('buildContextLabel', () => {
       playlist_names: ['Classée'],
       mode_categories: ['BTB'],
       outcome: 'loss',
-      date_from: '2026-04-01T00:00:00Z',
+      date_from: '2026-04-01T12:00:00Z',
     }
     const got = buildContextLabel(spec, 'en')
     expect(got).toContain('Classée')
     expect(got).toContain('BTB')
     expect(got).toContain('Losses')
-    expect(got).toContain('Depuis')
+    expect(got).toContain('From')
     expect(got.split(' · ')).toHaveLength(4)
   })
 

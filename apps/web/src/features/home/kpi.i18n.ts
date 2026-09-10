@@ -41,7 +41,7 @@ interface KPITextDict {
   kills: (count: number) => string
 }
 
-export function normalizeKPILocale(_locale?: string | null): Locale {
+export function normalizeKPILocale(): Locale {
   return 'en'
 }
 
@@ -49,8 +49,8 @@ function t(loc: Locale, key: HomeManifestKey): string {
   return formatMessage(homeManifest, key, loc)
 }
 
-export function getKPIText(locale?: string | null): KPITextDict {
-  const loc = normalizeKPILocale(locale)
+export function getKPIText(): KPITextDict {
+  const loc = normalizeKPILocale()
   return {
     labels: {
       totalTime: t(loc, 'home.kpi.total_time'),

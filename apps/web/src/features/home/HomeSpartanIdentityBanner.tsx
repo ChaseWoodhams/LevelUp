@@ -47,8 +47,8 @@ export function HomeSpartanIdentityBanner({
   spartanCustomizeLabel,
 }: HomeSpartanIdentityBannerProps) {
   const locale = useAppShellStore((s) => s.locale)
-  const numberLocale = intlLocale(locale)
-  const spartanText = getSpartanIdentityText(locale)
+  const numberLocale = intlLocale()
+  const spartanText = getSpartanIdentityText()
 
   // Bannière SYNTHÉTISÉE (emblème + nameplate recolorisés) pour les titres déclarant la
   // capability `spartan_customizer` : leur banner_image_url n'est pas une vraie bannière
@@ -169,7 +169,7 @@ export function HomeSpartanIdentityBanner({
                 <RecoloredMask
                   src={`/titles/${currentTitleSlug}/spartan/emblems/${spartanEmblemId}.png`}
                   colors={spartanApp.emblemColors}
-                  alt={`Emblème ${playerName}`}
+                  alt={`${playerName} emblem`}
                   className="h-20 w-20 shrink-0 object-contain drop-shadow-[0_2px_6px_rgba(8,15,28,0.5)] sm:h-24 sm:w-24"
                 />
               ) : (
@@ -178,7 +178,7 @@ export function HomeSpartanIdentityBanner({
                     <img
                       data-testid="home-spartan-emblem-image"
                       src={spartanIdentity.emblem_image_url}
-                      alt={`Emblème ${playerName}`}
+                      alt={`${playerName} emblem`}
                       className="h-full w-full object-cover"
                       loading="lazy"
                       decoding="async"

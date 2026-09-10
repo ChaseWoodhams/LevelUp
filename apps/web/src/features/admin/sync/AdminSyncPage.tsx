@@ -146,9 +146,9 @@ function SchedulerSummary({
         size="sm"
         label={tA('admin.sync.last_cycle')}
         value={adminRelativeTime(snap.last_cycle_at, locale)}
-        title={adminAbsoluteTime(snap.last_cycle_at, locale)}
+        title={adminAbsoluteTime(snap.last_cycle_at)}
       />
-      <AdminKpi size="sm" label={tA('admin.sync.interval')} value={formatIntervalMinutes(snap.interval_minutes, locale)} />
+      <AdminKpi size="sm" label={tA('admin.sync.interval')} value={formatIntervalMinutes(snap.interval_minutes)} />
       <AdminKpi size="sm" label={tA('admin.sync.pool')} value={String(snap.pool_size)} />
       <AdminKpi size="sm" label={tA('admin.sync.summary_synced')} value={String(res?.synced ?? 0)} accent={(res?.synced ?? 0) > 0 ? 'success' : undefined} />
       <AdminKpi size="sm" label={tA('admin.sync.summary_skipped')} value={String(res?.skipped ?? 0)} />
@@ -157,7 +157,7 @@ function SchedulerSummary({
         label={tA('admin.sync.summary_failed')}
         value={String(res?.failed ?? 0)}
         accent={(res?.failed ?? 0) > 0 ? 'destructive' : undefined}
-        sub={res ? formatDurationMs(res.duration_ns / 1_000_000, locale) : undefined}
+        sub={res ? formatDurationMs(res.duration_ns / 1_000_000) : undefined}
       />
     </div>
   )

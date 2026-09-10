@@ -62,8 +62,8 @@ describe('heatmapCellsToSeries', () => {
       dowLabels: DOW_LABELS_EN,
     })
     const dps = series[0].datapoints
-    expect(dps[0].y).toBe('Lun')
-    expect(dps[1].y).toBe('Dim')
+    expect(dps[0].y).toBe('Mon')
+    expect(dps[1].y).toBe('Sun')
   })
 
   it('résout day_of_week via dowLabels EN', () => {

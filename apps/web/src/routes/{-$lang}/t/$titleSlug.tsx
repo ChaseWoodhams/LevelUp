@@ -21,6 +21,7 @@ import {
   applyActiveTitle,
   resolveTitleGate,
   isKnownLocale,
+  replaceLangSegment,
   withLangSegment,
   type TitleGate,
 } from '@/lib/title-routing'
@@ -100,12 +101,12 @@ function TitleLayout() {
       })
   }, [diverges, titleSlug, isTitleSwitching, applyFailed, navigate])
 
-  // Old language-prefixed links are normalized to the only supported URL variant.
+  // Old language-prefixed links (`/fr/t/…`) are normalised to the only supported URL
+  // variant, through lib/title-routing, the single owner of /t/ parsing.
   useEffect(() => {
     if (!lang || isKnownLocale(lang)) return
-    const prefix = `/${lang}/t/`
-    if (!location.pathname.startsWith(prefix)) return
-    const englishPath = `/en/t/${location.pathname.slice(prefix.length)}`
+    const englishPath = replaceLangSegment(location.pathname, 'en')
+    if (englishPath === location.pathname) return
     const hash = location.hash ? `#${location.hash}` : ''
     router.history.replace(englishPath + location.searchStr + hash)
   }, [lang, location.hash, location.pathname, location.searchStr, router])

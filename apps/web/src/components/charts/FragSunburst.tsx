@@ -51,7 +51,7 @@ type FragSunburstBaseLabels = Omit<FragSunburstLabels, 'formatShare'>
 
 function useSunburstLabels(): FragSunburstBaseLabels {
   const appLocale = useAppShellStore((s) => s.locale)
-  const numLoc = intlLocale(appLocale)
+  const numLoc = intlLocale()
   return {
     classLabel: (c: string) => formatMessage(fragsManifest, `frags.class.${c}` as never, appLocale),
     roleLabel: (r: string) => formatMessage(fragsManifest, `frags.role.${r}` as never, appLocale),
@@ -126,7 +126,7 @@ export function FragSunburst({
 }: FragSunburstProps) {
   const appLocale = useAppShellStore((s) => s.locale)
   const paletteVersion = useColorPaletteVersion()
-  const numLoc = intlLocale(appLocale)
+  const numLoc = intlLocale()
   const labelsBase = useSunburstLabels()
   const total = distribution?.total_kills ?? 0
   const classes = distribution?.classes ?? []
@@ -327,7 +327,7 @@ export function FragClassLegend({
   const appLocale = useAppShellStore((s) => s.locale)
   const paletteVersion = useColorPaletteVersion()
   const labelsBase = useSunburstLabels()
-  const numLoc = intlLocale(appLocale)
+  const numLoc = intlLocale()
   const classes = distribution?.classes ?? []
   const total = distribution?.total_kills ?? 0
   const arcTotal = Math.max(total, classes.reduce((s, c) => s + c.kills, 0)) || 1

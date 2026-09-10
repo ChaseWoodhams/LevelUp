@@ -34,14 +34,14 @@ export function isXuidLike(s: string): boolean {
  */
 export function maskedPlayerLabel(xuid: string): string {
   const tail = xuid.slice(-4) || xuid
-  return `Joueur ${tail}`
+  return `Player ${tail}`
 }
 
 /**
  * Nom d'affichage d'un joueur, GARANTI sans format xuid brut :
  *  - `gamertag` non vide et non xuid-like → `gamertag`
  *  - sinon `xuid` fourni → `maskedPlayerLabel(xuid)`
- *  - sinon → "Joueur inconnu"
+ *  - sinon → "Unknown player"
  */
 export function displayPlayerName(
   gamertag?: string | null,
@@ -51,5 +51,5 @@ export function displayPlayerName(
   if (gt && !isXuidLike(gt)) return gt
   const xu = xuid?.trim()
   if (xu) return maskedPlayerLabel(xu)
-  return 'Joueur inconnu'
+  return 'Unknown player'
 }

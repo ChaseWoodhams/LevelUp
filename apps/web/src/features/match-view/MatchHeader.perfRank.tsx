@@ -25,7 +25,7 @@ export function PerfRankRow({ header, rank, perfColor, locale }: PerfRankRowProp
   const t = MATCH_VIEW_TEXT[locale]
   // « Placement » (sentinelle back) → libellé localisé « En placement », aligné
   // sur les cards d'accueil.
-  const tierLabel = displayTierLabel(localizeTierLabel(rank.tier_label, locale), t.rankPlacement)
+  const tierLabel = displayTierLabel(localizeTierLabel(rank.tier_label), t.rankPlacement)
 
   const deltaColor =
     rank.delta_value != null
@@ -162,7 +162,7 @@ export function PerfRankRow({ header, rank, perfColor, locale }: PerfRankRowProp
               </div>
               <div className="absolute inset-x-0 top-full mt-1 flex justify-between text-2xs text-muted-foreground tabular-nums">
                 <span>{tierLabel ?? ''}</span>
-                <span>{localizeTierLabel(nextTierLabel(rank.tier_label), locale)}</span>
+                <span>{localizeTierLabel(nextTierLabel(rank.tier_label))}</span>
               </div>
             </div>
           )}

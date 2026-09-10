@@ -46,7 +46,7 @@ describe('PeriodFilter', () => {
 
   it("expose role=radiogroup avec aria-label par défaut", () => {
     render(<PeriodFilter value="all" labels={labels} onChange={() => {}} />)
-    const group = screen.getByRole('radiogroup', { name: 'Filtre période' })
+    const group = screen.getByRole('radiogroup', { name: 'Period filter' })
     expect(group).toBeInTheDocument()
   })
 

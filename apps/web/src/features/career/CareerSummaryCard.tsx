@@ -22,7 +22,7 @@ interface Props {
 
 export function CareerSummaryCard({ summary, heroProgress, projections }: Props) {
   const locale = useAppShellStore((s) => s.locale) as ManifestLocale
-  const intlLocale = toIntlLocale(locale)
+  const intlLocale = toIntlLocale()
 
   if (!summary) {
     return (

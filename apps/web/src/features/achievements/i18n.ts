@@ -79,11 +79,7 @@ export const ACHIEVEMENTS_TEXT: Record<AchievementsLocale, AchievementsText> = {
  * @param en - chaîne française (peut être vide ou undefined)
  * @param locale - locale courante de l'app
  */
-export function pickLocalized(
-  en: string | undefined,
-  _legacyLocalized: string | undefined,
-  _locale: AchievementsLocale,
-): string {
+export function pickLocalized(en: string | undefined): string {
   const enStr = en ?? ''
   return enStr
 }
@@ -94,12 +90,11 @@ export function pickLocalized(
  */
 export function formatUnlockedDate(
   iso: string | undefined,
-  locale: AchievementsLocale,
 ): string | null {
   if (!iso) return null
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return null
-  return date.toLocaleDateString(intlLocale(locale), {
+  return date.toLocaleDateString(intlLocale(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

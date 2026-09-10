@@ -326,7 +326,7 @@ export function ExplorerMatchesTable({ rows, playerSlug, teamBanner, contextDesc
     formatMessage(explorerManifest, key, locale, values)
   const tMV = (key: MatchViewManifestKey, values?: Record<string, string | number>) =>
     formatMessage(matchViewManifest, key, locale, values)
-  const intlLocale = toIntlLocale(locale)
+  const intlLocale = toIntlLocale()
 
   const { data: mappings } = useFieldMappings()
   const mapAssets = mappings?.assets?.['map']
@@ -801,7 +801,7 @@ export function ExplorerMatchesTable({ rows, playerSlug, teamBanner, contextDesc
             // "rating" par défaut) lit déjà row.placement_done/placement_total.
             return <PlacementPendingCell row={r} locale={locale} />
           }
-          const label = localizeTierLabel(r.skill_tier_label, locale)
+          const label = localizeTierLabel(r.skill_tier_label)
           // Badge servi par le BACKEND (adaptateur d'assets du titre) — jamais une
           // URL construite ici. Absent (titre sans badge, palier inconnu) → on
           // retombe sur le texte localisé : aucune image cassée à l'écran.

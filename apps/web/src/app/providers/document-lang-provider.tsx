@@ -10,7 +10,7 @@ export function DocumentLangProvider({ children }: { children: ReactNode }) {
   const locale = useAppShellStore((s) => s.locale)
 
   useLayoutEffect(() => {
-    document.documentElement.lang = intlLocale(locale)
+    document.documentElement.lang = intlLocale()
   }, [locale])
 
   return <>{children}</>

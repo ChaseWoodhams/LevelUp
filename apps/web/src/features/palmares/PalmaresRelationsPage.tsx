@@ -22,7 +22,6 @@ import type { SemanticToken } from '@/lib/accessibility/semantic-tokens'
 import { composeTierLabel } from '@/lib/skillTiers'
 import { formatPercent } from '@/lib/formatters'
 import type { FilterContextInput, RelationCSR, RelationInsight } from '@/lib/api/types'
-import { useAppShellStore } from '@/stores/appShellStore'
 import { useRelationsPrefsStore } from '@/stores/relationsPrefsStore'
 
 import { getPalmaresText, normalizePalmaresLocale, type PalmaresText } from './i18n'
@@ -124,10 +123,10 @@ function streakChip(streak: number | undefined, labels: RelationsText): ReactNod
  * (palier ouvert), suffixe la valeur CSR si disponible (« Onyx 1523 »). Renvoie null
  * si le palier est absent → rien n'est affiché (dégradation gracieuse, pas de « N/A »).
  */
-function nemesisRankLabel(csr: RelationCSR, locale: Locale): string | null {
+function nemesisRankLabel(csr: RelationCSR): string | null {
   const tier = csr.tier?.trim()
   if (!tier) return null
-  const base = composeTierLabel(tier, csr.sub_tier ?? 0, locale)
+  const base = composeTierLabel(tier, csr.sub_tier ?? 0)
   if (tier.toLowerCase() === 'onyx' && csr.rating_value != null && Number.isFinite(csr.rating_value)) {
     return `${base} ${Math.round(csr.rating_value)}`
   }
@@ -199,7 +198,7 @@ function HeroRelationCard({
   const winQual = isAlly ? labels.hero.winQualAlly : labels.hero.winQualEnemy
   // Contexte CSR de la bête noire (lot relations-G, best-effort). null pour le
   // binôme ou une bête noire sans ligne CSR → rien n'est rendu (dégradation).
-  const rankLabel = !isAlly && csr ? nemesisRankLabel(csr, locale) : null
+  const rankLabel = !isAlly && csr ? nemesisRankLabel(csr) : null
   // Série en cours (bête noire uniquement).
   const streakNode = isAlly ? null : streakChip(streak, labels)
 
@@ -511,8 +510,8 @@ function SegmentedFilter({
 
 export function PalmaresRelationsPage() {
   const { playerSlug } = useParams({ strict: false }) as { playerSlug: string }
-  const locale = normalizePalmaresLocale(useAppShellStore((state) => state.locale))
-  const text = getPalmaresText(locale)
+  const locale = normalizePalmaresLocale()
+  const text = getPalmaresText()
   const rel = text.relations
   const navigate = useNavigate()
   const titleSlug = useTitleSlug()

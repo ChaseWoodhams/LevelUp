@@ -30,8 +30,8 @@ export function SettingsPage() {
   const { data: settings, isLoading } = useSettings()
   const mutation = useUpdateSettings()
   const demoMode = useAppShellStore((s) => s.demoMode)
-  const locale = normalizeSettingsLocale(useAppShellStore((s) => s.locale))
-  const t = getSettingsText(locale)
+  const locale = normalizeSettingsLocale()
+  const t = getSettingsText()
   const tc = (key: CommonManifestKey) => formatMessage(commonManifest, key, locale)
 
   const [localSettings, setLocalSettings] = useState<Partial<SettingsResponse>>({})
@@ -90,7 +90,7 @@ export function SettingsPage() {
           className="mx-6 mt-4 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground"
           role="note"
         >
-          Demo mode: settings are frozen. Accessibility preferences remain available for this session.
+          {t.demoSettingsFrozen}
         </div>
       )}
       {saveStatus && (

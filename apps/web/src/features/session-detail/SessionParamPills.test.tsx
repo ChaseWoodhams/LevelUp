@@ -35,7 +35,7 @@ function entry(overrides: Partial<SessionCompareEntry> = {}): SessionCompareEntr
 describe('SessionParamPills', () => {
   it('affiche nb de matchs, catégorie FR et durée', () => {
     renderWithProviders(<SessionParamPills entry={entry()} />)
-    expect(screen.getByText('8 matchs')).toBeInTheDocument()
+    expect(screen.getByText('8 matches')).toBeInTheDocument()
     expect(screen.getByText('Ranked')).toBeInTheDocument() // Ranked → FR
     expect(screen.getByText('35 min')).toBeInTheDocument() // 19h30 → 20h05
   })

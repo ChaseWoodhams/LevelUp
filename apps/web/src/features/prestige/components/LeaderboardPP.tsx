@@ -133,7 +133,7 @@ function PeriodToggle({
   )
 }
 
-function Row({ entry, rank, locale }: { entry: LeaderboardEntry; rank: number; locale: ManifestLocale }) {
+function Row({ entry, rank}: { entry: LeaderboardEntry; rank: number; locale: ManifestLocale }) {
   const tierColor = entry.last_tier ? TIER_COLORS[entry.last_tier] : undefined
   // Phase 4 plan finition multi-titres : libellé du tier via TOML, fallback dict.
   const tierLabelFromTOML = useAssetLabel('challenge_tier', entry.last_tier ?? '')
@@ -166,7 +166,7 @@ function Row({ entry, rank, locale }: { entry: LeaderboardEntry; rank: number; l
       <td className="px-3 py-2 text-xs">
         <span className="font-medium">{entry.level_name}</span>
         <span className="ml-1 text-muted-foreground">
-          ({entry.total_pp.toLocaleString(intlLocale(locale))} PP)
+          ({entry.total_pp.toLocaleString(intlLocale())} PP)
         </span>
       </td>
     </tr>

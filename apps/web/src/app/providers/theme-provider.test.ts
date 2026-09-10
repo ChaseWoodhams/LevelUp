@@ -51,8 +51,8 @@ describe('pickPalette', () => {
     pickPalette('autre' as ColorPalette)
 
     expect(warnSpy).toHaveBeenCalledTimes(2) // unknown logué 1×, autre 1×
-    expect(warnSpy.mock.calls[0]![0]).toContain('palette inconnue "unknown"')
-    expect(warnSpy.mock.calls[1]![0]).toContain('palette inconnue "autre"')
+    expect(warnSpy.mock.calls[0]![0]).toContain('unknown palette "unknown"')
+    expect(warnSpy.mock.calls[1]![0]).toContain('unknown palette "autre"')
 
     warnSpy.mockRestore()
   })

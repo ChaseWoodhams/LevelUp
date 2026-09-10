@@ -107,7 +107,7 @@ describe('ExplorerTargetProfileCard', () => {
     // Career : présent (label Matches du manifest fr)
     expect(screen.getByText(/Career overview/i)).toBeInTheDocument()
     // Sample : section présente avec le count
-    expect(screen.getByText(/12 matchs joués ensemble/i)).toBeInTheDocument()
+    expect(screen.getByText(/12 shared matches/i)).toBeInTheDocument()
     // Privacy : level=none → pas de bannière (return null dans PrivacyBanner)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     // No-auth hint : absent
@@ -152,14 +152,14 @@ describe('ExplorerTargetProfileCard', () => {
 
     // Time played : KPI rendu (90000s = 1j 1h)
     expect(screen.getByTestId('explorer-target-time-played')).toBeInTheDocument()
-    expect(screen.getByText('1j 1h')).toBeInTheDocument()
+    expect(screen.getByText('1d 1h')).toBeInTheDocument()
     // Top médailles : section + médaille
     expect(screen.getByTestId('explorer-target-medals')).toBeInTheDocument()
     expect(screen.getByText('Double frag')).toBeInTheDocument()
     // CSR saison : section + playlist + tier (traduit FR, locale défaut = fr)
     expect(screen.getByTestId('explorer-target-season-csr')).toBeInTheDocument()
     expect(screen.getByText('Ranked Arena')).toBeInTheDocument()
-    expect(screen.getByText('Diamant III')).toBeInTheDocument()
+    expect(screen.getByText('Diamond III')).toBeInTheDocument()
     // Matchs par saison : colonne droite TOUJOURS rendue même sans matches_per_season
     // (placeholder titré) — jamais d'espace blanc silencieux à droite du bloc CSR.
     expect(screen.getByTestId('explorer-target-season-matches')).toBeInTheDocument()
@@ -206,7 +206,7 @@ describe('ExplorerTargetProfileCard', () => {
     // unique pour distinguer du texte de hint qui mentionne aussi "carrière".
     expect(screen.queryByText(/via Halo API/i)).not.toBeInTheDocument()
     // Sample reste affiché (calcul local indépendant des tokens)
-    expect(screen.getByText(/12 matchs joués ensemble/i)).toBeInTheDocument()
+    expect(screen.getByText(/12 shared matches/i)).toBeInTheDocument()
   })
 
   it('masque la section sample quand sample_size=0 mais affiche une note explicite (V72-21)', () => {
@@ -222,7 +222,7 @@ describe('ExplorerTargetProfileCard', () => {
     }
     renderWithProviders(<ExplorerTargetProfileCard profile={profile} gamertag="TargetPlayer" />)
 
-    expect(screen.queryByText(/matchs joués ensemble/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/shared matches/i)).not.toBeInTheDocument()
     // Plus de disparition silencieuse : note discrète « aucun match en commun ».
     expect(screen.getByTestId('explorer-target-no-shared-matches')).toBeInTheDocument()
     expect(screen.getByText(/No matches in common with this player yet — direct comparisons will appear after you play shared games\./i)).toBeInTheDocument()

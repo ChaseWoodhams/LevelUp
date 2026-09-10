@@ -58,9 +58,9 @@ describe('buildLusrSeries', () => {
     )
     const labels = series.map((s) => (s.meta as { label: string }).label).sort()
     expect(labels).toEqual([
-      'Arène (LUSR)',
-      'Classé (LUSR)',
-      'Grand combat (LUSR)',
+      'Arena (LUSR)',
+      'Big Team Battle (LUSR)',
+      'Ranked (LUSR)',
       'Social (LUSR)',
     ])
   })
@@ -114,6 +114,6 @@ describe('buildLusrSeries', () => {
     )
     expect(series).toHaveLength(2)
     const labels = series.map((s) => (s.meta as { label: string }).label).sort()
-    expect(labels).toEqual(['Classé (CSR)', 'Classé (LUSR)'])
+    expect(labels).toEqual(['Ranked (CSR)', 'Ranked (LUSR)'])
   })
 })

@@ -36,7 +36,7 @@ export function readInk(name: InkVar): string {
   if (typeof document === 'undefined') return ''
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   if (!value) {
-    log.error(`replay-ink:${name}`, `Variable de mise en page "${name}" absente du thème.`)
+    log.error(`replay-ink:${name}`, `Layout variable "${name}" missing from the theme.`)
     return ''
   }
   return value

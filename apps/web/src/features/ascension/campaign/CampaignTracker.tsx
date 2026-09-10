@@ -29,7 +29,7 @@ interface CampaignTrackerProps {
 }
 
 export function CampaignTracker({ playerSlug, campaign }: CampaignTrackerProps) {
-  const { t, locale } = useProfileI18n()
+  const { t} = useProfileI18n()
   const muts = useCampaignMutations(playerSlug)
   const [confirmClose, setConfirmClose] = useState(false)
   const [confirmAbandon, setConfirmAbandon] = useState(false)
@@ -38,7 +38,7 @@ export function CampaignTracker({ playerSlug, campaign }: CampaignTrackerProps) 
   const lusrKey = `profile.lusr.${campaign.axis}` as ProfileManifestKey
   const axisLabel = t(campaign.axis_kind === 'radar' ? axisKey : lusrKey)
   const startedAt = new Date(campaign.started_at).toLocaleDateString(
-    intlLocale(locale),
+    intlLocale(),
     { day: '2-digit', month: 'long' },
   )
   const enoughData = campaign.matches_since_start >= MIN_MATCHES_FOR_TREND

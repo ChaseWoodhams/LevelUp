@@ -62,8 +62,8 @@ describe('CombatYieldBar', () => {
     fireEvent.mouseEnter(wrapper)
     expect(screen.getByText(/Yield/i)).toBeTruthy()
     expect(screen.getByText(/Resistance/i)).toBeTruthy()
-    expect(screen.getByText(/dégâts\/frag/i)).toBeTruthy()
-    expect(screen.getByText(/dégâts\/mort/i)).toBeTruthy()
+    expect(screen.getByText(/dmg\/kill/i)).toBeTruthy()
+    expect(screen.getByText(/dmg\/death/i)).toBeTruthy()
   })
 
   // GH3-3 : sous UI EN, la légende de la barre suit la locale (dmg/kill · dmg/death,

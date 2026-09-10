@@ -84,7 +84,7 @@ export function SynthesisHighlightsSection({ highlights, playerSlug }: Synthesis
         <CardContent>
           <EmptyStateNotice
             title={t('synthesis.highlights.no_remarkable_match')}
-            description="Pas de données de performance pour le scope et la période sélectionnés."
+            description="No performance data for the selected scope and period."
           />
         </CardContent>
       </Card>

@@ -81,8 +81,8 @@ describe('SquadFdaGapCumulativeCard', () => {
     expect(screen.getByText('Me')).toBeInTheDocument()
     expect(screen.getByText('F1')).toBeInTheDocument()
     // Pastille signée + suffixe i18n (« /match »), séparateur décimal FR ou EN.
-    expect(screen.getByText(/\+0[.,]5\/match/)).toBeInTheDocument()
-    expect(screen.getByText(/-0[.,]5\/match/)).toBeInTheDocument()
+    expect(screen.getByText(/\+0[.,]5\/game/)).toBeInTheDocument()
+    expect(screen.getByText(/[-−]0[.,]5\/game/)).toBeInTheDocument()
   })
 
   it('capability expected_stats absente → non rendu (null)', () => {

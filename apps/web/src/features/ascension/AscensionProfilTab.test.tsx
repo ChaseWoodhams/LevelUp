@@ -68,7 +68,7 @@ describe('AscensionProfilTab — composition (couche Profil)', () => {
 
   it('renders the Profil LayerSection header', () => {
     render(<AscensionProfilTab />)
-    expect(screen.getByText(/Profil de jeu/i)).toBeInTheDocument()
+    expect(screen.getByText(/Play profile/i)).toBeInTheDocument()
   })
 
   it('renders PlayerProfileV3', () => {
@@ -119,7 +119,7 @@ describe('AscensionProfilTab — composition (couche Profil)', () => {
     mockShellState.currentPlayer = null
     render(<AscensionProfilTab />)
     expect(
-      screen.getByText(/Sélectionne un joueur pour voir les objectifs/i),
+      screen.getByText(/Select a player to view objectives/i),
     ).toBeInTheDocument()
   })
 })

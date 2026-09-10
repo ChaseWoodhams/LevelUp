@@ -31,7 +31,7 @@ describe('ExplorerTargetSeasonCSR', () => {
     renderWithProviders(<ExplorerTargetSeasonCSR csrs={csrs} title="CSR" emptyMessage="Aucun classement" />)
     expect(screen.getByText('Ranked Arena')).toBeInTheDocument()
     // Tier traduit en FR (locale par défaut = fr) + sous-palier en romain.
-    expect(screen.getByText('Diamant III')).toBeInTheDocument()
+    expect(screen.getByText('Diamond III')).toBeInTheDocument()
     // Onyx sans sub-tier (inchangé en FR)
     expect(screen.getByText('Onyx')).toBeInTheDocument()
     // La valeur de rating brute n'est plus affichée.

@@ -124,7 +124,7 @@ const EN_TEXT: HelpText = {
             formula:
               "Offensive (avg_oc) — thresholds 0.78 / 0.81 / 0.85 / 0.90.\nDefensive (avg_dr) — thresholds 1.20 / 1.35 / 1.50 / 1.65.\nActivity — mean(player_pace / lobby_pace), thresholds 0.80 / 0.92 / 1.08 / 1.25 (1.0 = lobby pace).",
             example:
-              "OC 0.87 → Précis (precise) · DR 1.29 → Exposé (exposed) · ratio 0.99 → Mesuré (measured): a precise finisher who dies a bit fast and engages at the lobby average.",
+              "OC 0.87 → Precise · DR 1.29 → Exposed · ratio 0.99 → Measured: a precise finisher who dies a bit fast and engages at the lobby average.",
           },
           {
             term: 'KDA',
@@ -433,7 +433,7 @@ const EN_TEXT: HelpText = {
 
 const TEXT: Record<Locale, HelpText> = { en: EN_TEXT }
 
-export function normalizeHelpLocale(_locale?: string | null): Locale {
+export function normalizeHelpLocale(): Locale {
   return 'en'
 }
 
@@ -471,8 +471,7 @@ function withDamageBaseline(text: HelpText, effectiveHpToKill: number): HelpText
  * le barème Halo Infinite.
  */
 export function getHelpText(
-  locale?: string | null,
   effectiveHpToKill: number = DEFAULT_EFFECTIVE_HP_TO_KILL,
 ): HelpText {
-  return withDamageBaseline(TEXT[normalizeHelpLocale(locale)], effectiveHpToKill)
+  return withDamageBaseline(TEXT[normalizeHelpLocale()], effectiveHpToKill)
 }

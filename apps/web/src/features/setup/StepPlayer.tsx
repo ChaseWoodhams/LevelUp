@@ -72,7 +72,7 @@ export function StepPlayer() {
       // Invalidation UNIQUE après tous les profils → le wizard bascule proprement.
       await queryClient.invalidateQueries({ queryKey: queryKeys.bootstrap })
     } catch (e) {
-      setCreateError(getApiErrorMessage(e, 'Erreur lors de la création du profil.'))
+      setCreateError(getApiErrorMessage(e, 'Failed to create the profile.'))
     } finally {
       setCreating(false)
     }
@@ -95,7 +95,7 @@ export function StepPlayer() {
           <Input
             value={gamertagInput}
             onChange={(e) => setGamertagInput(e.target.value)}
-            placeholder="MonGamertag"
+            placeholder="MyGamertag"
             onKeyDown={(e) => { if (e.key === 'Enter') void handleCreate() }}
           />
         </>
@@ -149,10 +149,10 @@ export function StepPlayer() {
         disabled={!gamertag.trim() || selected.length === 0 || creating}
       >
         {creating
-          ? 'Création…'
+          ? 'Creating…'
           : linkedHaloIdentity
-          ? 'Confirmer et créer mon profil'
-          : 'Ajouter'}
+          ? 'Confirm and create my profile'
+          : 'Add'}
       </Button>
     </div>
   )

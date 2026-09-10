@@ -83,7 +83,7 @@ describe('GamertagSearchInput', () => {
     // 'Zz' ne correspond à aucun joueur configuré (Alpha/Bravo) → saisie libre.
     fireEvent.change(input, { target: { value: 'Zz' } })
 
-    const button = screen.getByText(/Rechercher "Zz"/)
+    const button = screen.getByText(/Search "Zz"/)
     expect(button).toBeInTheDocument()
     fireEvent.click(button)
     expect(onSelect).toHaveBeenCalledWith('Zz')

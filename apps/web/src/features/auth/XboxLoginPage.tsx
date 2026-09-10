@@ -279,7 +279,7 @@ function XboxFlowPanel({ onAuthorized }: XboxFlowPanelProps) {
     return (
       <div className="space-y-3 text-center">
         <p className="text-destructive font-medium">
-          {expired ? 'Le code a expiré.' : status?.error_detail ?? 'Échec de l\'authentification.'}
+          {expired ? 'The code has expired.' : status?.error_detail ?? 'Authentication failed.'}
         </p>
         <Button onClick={handleRetry}>{t('common.xbox_login.retry')}</Button>
       </div>
@@ -382,12 +382,12 @@ function AdminPasswordPanel({ onBack }: AdminPasswordPanelProps) {
         onError: (err) => {
           const apiErr = err as unknown as ApiError
           if (apiErr.code === 'invalid_credentials') {
-            setError('Identifiants incorrects.')
+            setError('Invalid credentials.')
           } else if (apiErr.code === 'password_login_admin_only') {
             // D3 : utilisateur valide mais pas admin en mode xbox.
-            setError('En mode SSO Xbox, le login par mot de passe est réservé aux administrateurs. Utilisez la connexion Xbox.')
+            setError('In Xbox SSO mode, password sign-in is reserved for administrators. Use Xbox sign-in.')
           } else {
-            setError(apiErr.message ?? 'Erreur de connexion.')
+            setError(apiErr.message ?? 'Sign-in error.')
           }
         },
       },

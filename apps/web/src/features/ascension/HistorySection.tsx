@@ -76,7 +76,7 @@ interface PastObjectiveRowProps {
 
 // Une ligne = un composant : le libellé de métrique se résout par hook
 // (useMetricLabel), qui ne peut pas être appelé dans un .map().
-function PastObjectiveRow({ challenge: c, locale, t }: PastObjectiveRowProps) {
+function PastObjectiveRow({ challenge: c, t }: PastObjectiveRowProps) {
   // Hook inconditionnel, même quand `c.label` prendra le dessus à l'affichage.
   const metricText = useMetricLabel(c.metric)
   return (
@@ -87,7 +87,7 @@ function PastObjectiveRow({ challenge: c, locale, t }: PastObjectiveRowProps) {
       <span className="flex shrink-0 items-center gap-2">
         <ResultBadge status={c.status} t={t} />
         <time className="text-xs text-muted-foreground">
-          {formatDate(terminalDate(c), locale)}
+          {formatDate(terminalDate(c))}
         </time>
       </span>
     </li>
@@ -118,7 +118,7 @@ interface CompletedArcsBlockProps {
   t: AscensionText
 }
 
-function CompletedArcsBlock({ arcs, locale, t }: CompletedArcsBlockProps) {
+function CompletedArcsBlock({ arcs, t }: CompletedArcsBlockProps) {
   return (
     <HistoryBlock title={t.historyArcsTitle}>
       {arcs.length === 0 ? (
@@ -129,7 +129,7 @@ function CompletedArcsBlock({ arcs, locale, t }: CompletedArcsBlockProps) {
             <li key={a.id} className="flex items-center justify-between gap-3 py-2">
               <span className="min-w-0 truncate text-sm font-medium">{a.title}</span>
               <time className="shrink-0 text-xs text-muted-foreground">
-                {t.historyArcCompletedOn.replace('{date}', formatDate(a.completed_at, locale))}
+                {t.historyArcCompletedOn.replace('{date}', formatDate(a.completed_at))}
               </time>
             </li>
           ))}
@@ -147,7 +147,7 @@ interface ClosedCampaignsBlockProps {
   t: AscensionText
 }
 
-function ClosedCampaignsBlock({ campaigns, locale, t }: ClosedCampaignsBlockProps) {
+function ClosedCampaignsBlock({ campaigns, t }: ClosedCampaignsBlockProps) {
   const { t: pt } = useProfileI18n()
   const axisLabel = (c: CampaignHistoryItem) => {
     const key = (c.axis_kind === 'radar'
@@ -180,7 +180,7 @@ function ClosedCampaignsBlock({ campaigns, locale, t }: ClosedCampaignsBlockProp
                   </span>
                 )}
                 <time className="text-xs text-muted-foreground">
-                  {formatDate(c.ended_at ?? c.started_at, locale)}
+                  {formatDate(c.ended_at ?? c.started_at)}
                 </time>
               </div>
             </li>
@@ -269,9 +269,9 @@ function challengeResultLabel(status: ChallengeStatus, t: AscensionText): string
   }
 }
 
-function formatDate(iso: string | undefined, locale: Locale): string {
+function formatDate(iso: string | undefined): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString(intlLocale(locale), {
+  return new Date(iso).toLocaleDateString(intlLocale(), {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

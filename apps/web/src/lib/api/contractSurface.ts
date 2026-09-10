@@ -177,7 +177,7 @@ export function extractContractSurface(src: string): ContractSurface {
   const operationsBlock = findBlock(code, /^export interface operations \{/)
   if (!pathsBlock || !componentsBlock || !operationsBlock) {
     throw new Error(
-      'contractSurface: blocs paths/components/operations introuvables dans generated.ts — parser à revoir.',
+      'contractSurface: paths/components/operations blocks not found in generated.ts — the parser needs updating.',
     )
   }
   const shift = (b: Block | null): Block | null =>
@@ -187,7 +187,7 @@ export function extractContractSurface(src: string): ContractSurface {
   const responsesBlock = shift(findBlock(inComponents, /^ {4}responses: \{/))
   const parametersBlock = shift(findBlock(inComponents, /^ {4}parameters: \{/))
   if (!schemasBlock) {
-    throw new Error('contractSurface: bloc components.schemas introuvable — parser à revoir.')
+    throw new Error('contractSurface: components.schemas block not found — the parser needs updating.')
   }
 
   const enums = new Map<string, Set<string>>()

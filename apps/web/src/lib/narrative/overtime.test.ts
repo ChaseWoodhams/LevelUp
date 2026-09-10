@@ -15,19 +15,19 @@ import {
 
 describe('lib/narrative/overtime', () => {
   it('libellé localisé FR / EN', () => {
-    expect(overtimeLabel('en')).toBe('Prolongation')
+    expect(overtimeLabel('en')).toBe('Overtime')
     expect(overtimeLabel('en')).toBe('Overtime')
   })
 
   it('tooltip : dépassement formaté en M:SS', () => {
-    expect(overtimeTooltip('en', 43)).toBe('Prolongation : +0:43')
-    expect(overtimeTooltip('en', 270)).toBe('Prolongation : +4:30')
+    expect(overtimeTooltip('en', 43)).toBe('Overtime: +0:43')
+    expect(overtimeTooltip('en', 270)).toBe('Overtime: +4:30')
     expect(overtimeTooltip('en', 54)).toBe('Overtime: +0:54')
   })
 
   it('tooltip : sans dépassement exploitable → libellé seul', () => {
-    expect(overtimeTooltip('en', 0)).toBe('Prolongation')
-    expect(overtimeTooltip('en', null)).toBe('Prolongation')
+    expect(overtimeTooltip('en', 0)).toBe('Overtime')
+    expect(overtimeTooltip('en', null)).toBe('Overtime')
     expect(overtimeTooltip('en', undefined)).toBe('Overtime')
   })
 

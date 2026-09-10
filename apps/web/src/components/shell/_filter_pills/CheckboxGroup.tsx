@@ -141,7 +141,7 @@ interface OptionRowProps {
 function OptionRow({ opt, checked, onToggle, disabled }: OptionRowProps) {
   return (
     <label
-      title={disabled ? '0 match si cette option est cochée' : undefined}
+      title={disabled ? '0 matches if this option is checked' : undefined}
       aria-disabled={disabled}
       className={[
         'flex items-center gap-2 px-2 py-1 text-xs transition-colors',

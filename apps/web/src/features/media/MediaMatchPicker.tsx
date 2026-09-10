@@ -25,7 +25,6 @@ import { tokenCssVar } from '@/lib/accessibility'
 import { getMediaModalsText, type MatchPickerText } from './i18n-modals'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { intlLocale } from '@/lib/formatters'
-import type { ManifestLocale } from '@/lib/i18n/format'
 import { formatMessage } from '@/lib/i18n/format'
 import { commonManifest, type CommonManifestKey } from '@/lib/i18n/generated/common'
 
@@ -40,11 +39,11 @@ interface Props {
   hasCurrentMatch?: boolean
 }
 
-function formatLocalTime(iso: string | null | undefined, locale: ManifestLocale): string {
+function formatLocalTime(iso: string | null | undefined): string {
   if (!iso) return '—'
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return '—'
-  return d.toLocaleString(intlLocale(locale), {
+  return d.toLocaleString(intlLocale(), {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -165,7 +164,7 @@ export function MediaMatchPicker({ playerSlug, filePath, onClose, hasCurrentMatc
   const locale = useAppShellStore((s) => s.locale)
   const t = (key: CommonManifestKey) => formatMessage(commonManifest, key, locale)
   // GH2-B7 : dictionnaire bilingue de la popup (i18n-modals.ts, enfin câblé).
-  const mp = getMediaModalsText(locale).matchPicker
+  const mp = getMediaModalsText().matchPicker
   // Libellés d'issue servis par outcomes.toml (source unique — plus de repli FR
   // local). Le dictionnaire brut est lu ici, au niveau du composant : la
   // résolution se fait ensuite dans une boucle, où un hook serait illégal.
@@ -214,7 +213,7 @@ export function MediaMatchPicker({ playerSlug, filePath, onClose, hasCurrentMatc
             <h2 className="text-base font-semibold">{hasCurrentMatch ? mp.title : mp.titleAssociate}</h2>
             {data?.capture_utc && (
               <p className="text-xs text-muted-foreground">
-                {mp.capturePrefix} {formatLocalTime(data.capture_utc, locale)}
+                {mp.capturePrefix} {formatLocalTime(data.capture_utc)}
               </p>
             )}
           </div>
@@ -305,7 +304,7 @@ export function MediaMatchPicker({ playerSlug, filePath, onClose, hasCurrentMatc
                         </div>
                       </div>
                       <div className="flex items-center gap-3 text-3xs text-muted-foreground">
-                        <span>{formatLocalTime(c.start_time, locale)}</span>
+                        <span>{formatLocalTime(c.start_time)}</span>
                         <span className="opacity-60">{formatDelta(c.delta_seconds, mp)}</span>
                         {c.playlist_name && <span className="ml-auto truncate">{c.playlist_name}</span>}
                       </div>
@@ -323,7 +322,7 @@ export function MediaMatchPicker({ playerSlug, filePath, onClose, hasCurrentMatc
             <div>
               <p className="font-medium">{hasCurrentMatch ? mp.confirmTitle : mp.confirmTitleAssociate}</p>
               <p className="text-xs text-muted-foreground">
-                <CandidateHeading candidate={pending} /> · {formatLocalTime(pending.start_time, locale)}
+                <CandidateHeading candidate={pending} /> · {formatLocalTime(pending.start_time)}
               </p>
             </div>
             <div className="flex gap-2">

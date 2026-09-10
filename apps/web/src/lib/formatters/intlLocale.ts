@@ -8,9 +8,8 @@
  * n°1). Router tout formatage nombre/date locale-sensitive via ce pont
  * (ou `formatNumber`/`formatDate` qui prennent déjà une `Locale`).
  */
-import type { ManifestLocale } from '@/lib/i18n/format'
 import type { Locale } from './date'
 
-export function intlLocale(_locale: ManifestLocale): Locale {
+export function intlLocale(): Locale {
   return 'en-US'
 }

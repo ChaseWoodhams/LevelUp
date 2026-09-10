@@ -129,10 +129,10 @@ describe('CoverFlowModal — suppression définitive', () => {
 
     expect(onDelete).not.toHaveBeenCalled()
     expect(screen.getByRole('alertdialog')).toBeInTheDocument()
-    expect(screen.getByText(/Supprimer ce média \?/)).toBeInTheDocument()
+    expect(screen.getByText(/Delete this media\?/)).toBeInTheDocument()
     // Le corps doit annoncer l'irréversibilité — c'est ce qui rend le
     // consentement éclairé.
-    expect(screen.getByText(/ne pourra pas être récupéré/)).toBeInTheDocument()
+    expect(screen.getByText(/cannot be recovered/)).toBeInTheDocument()
   })
 
   it('confirme : appelle onDelete avec le média affiché', () => {
@@ -149,7 +149,7 @@ describe('CoverFlowModal — suppression définitive', () => {
       />,
     )
     fireEvent.click(screen.getByRole('button', { name: /Permanently delete this media/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Supprimer définitivement' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete permanently' }))
 
     expect(onDelete).toHaveBeenCalledTimes(1)
     expect(onDelete).toHaveBeenCalledWith(expect.objectContaining({ file_path: '/media/clip.mp4' }))

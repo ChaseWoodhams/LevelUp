@@ -50,7 +50,7 @@ export function AscensionLayout() {
   const t = getAscensionText(locale)
   const matchRoute = useMatchRoute()
 
-  const tips = useMemo(() => buildAscensionTips('en'), [locale])
+  const tips = useMemo(() => buildAscensionTips(), [locale])
 
   const profileRoute = '/{-$lang}/t/$titleSlug/players/$playerSlug/ascension' as const
   const objectivesRoute = '/{-$lang}/t/$titleSlug/players/$playerSlug/ascension/objectifs' as const

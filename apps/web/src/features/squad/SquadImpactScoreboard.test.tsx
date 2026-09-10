@@ -100,7 +100,7 @@ describe('SquadImpactScoreboard', () => {
 
     // Rangs : Champion (rank 1), Maillon faible (rank N, score < 0).
     expect(screen.getByText(/Champion/)).toBeInTheDocument()
-    expect(screen.getByText(/Maillon faible/)).toBeInTheDocument()
+    expect(screen.getByText(/Weak link/)).toBeInTheDocument()
   })
 
   it('cellule joueur×match contient les pictos des badges (empilés 2/ligne)', () => {
@@ -137,6 +137,6 @@ describe('SquadImpactScoreboard', () => {
     // `players` est `T[] | null` au contrat mais toujours peuplé par la fixture.
     m.players![2].score = 1
     renderWithProviders(<SquadImpactScoreboard matrix={m} />)
-    expect(screen.getByText(/Passager/)).toBeInTheDocument()
+    expect(screen.getByText(/Stowaway/)).toBeInTheDocument()
   })
 })

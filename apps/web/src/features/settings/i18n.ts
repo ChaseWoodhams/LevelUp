@@ -145,6 +145,7 @@ export interface SettingsText {
   watcherLastSeenAbsolute: string
   /** "Jamais vu en jeu" — pas de last_seen connu */
   watcherNeverSeen: string
+  demoSettingsFrozen: string
 
   // Backfill
   backfillTitle: string
@@ -406,6 +407,7 @@ const EN_TEXT: SettingsText = {
   watcherLastSeenRelative: 'Seen {duration} ago on {title}',
   watcherLastSeenAbsolute: 'Last seen on {date} playing {title}',
   watcherNeverSeen: 'Never seen in game',
+  demoSettingsFrozen: 'Demo mode: settings are frozen. Accessibility preferences remain available for this session.',
 
   backfillTitle: 'Backfill',
   backfillMedals: 'Medals',
@@ -581,10 +583,10 @@ const TEXT: Record<Locale, SettingsText> = {
   en: EN_TEXT,
 }
 
-export function normalizeSettingsLocale(_locale?: string | null): Locale {
+export function normalizeSettingsLocale(): Locale {
   return 'en'
 }
 
-export function getSettingsText(locale?: string | null): SettingsText {
-  return TEXT[normalizeSettingsLocale(locale)]
+export function getSettingsText(): SettingsText {
+  return TEXT[normalizeSettingsLocale()]
 }

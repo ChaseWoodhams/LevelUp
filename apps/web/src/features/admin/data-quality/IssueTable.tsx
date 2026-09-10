@@ -214,7 +214,7 @@ export function IssueTable({
                 </td>
                 <td
                   className="px-3 py-2 text-xs text-muted-foreground"
-                  title={adminAbsoluteTime(issue.last_seen, locale)}
+                  title={adminAbsoluteTime(issue.last_seen)}
                 >
                   {adminRelativeTime(issue.last_seen, locale)}
                 </td>

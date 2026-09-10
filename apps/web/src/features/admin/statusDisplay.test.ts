@@ -85,12 +85,12 @@ describe('watcherLivenessStatus', () => {
 
 describe('jobTypeLabel', () => {
   it('traduit les types connus en FR et EN', () => {
-    expect(jobTypeLabel('forced_sync_cycle', 'en')).toBe('Forced sync cycle')
-    expect(jobTypeLabel('forced_sync_cycle', 'en')).toBe('Forced sync cycle')
-    expect(jobTypeLabel('scan_media', 'en')).toBe('Media scan')
+    expect(jobTypeLabel('forced_sync_cycle')).toBe('Forced sync cycle')
+    expect(jobTypeLabel('forced_sync_cycle')).toBe('Forced sync cycle')
+    expect(jobTypeLabel('scan_media')).toBe('Media scan')
   })
 
   it('retourne le type brut pour un type inconnu (repérable sans crash)', () => {
-    expect(jobTypeLabel('nouveau_type_inconnu', 'en')).toBe('nouveau_type_inconnu')
+    expect(jobTypeLabel('nouveau_type_inconnu')).toBe('nouveau_type_inconnu')
   })
 })

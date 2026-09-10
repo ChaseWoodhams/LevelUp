@@ -9,7 +9,7 @@ import { SortableTh } from '@/components/ui/sortable-th'
 import { tokenCssVar } from '@/lib/accessibility/semantic-tokens'
 import type { AdminPerfStats, PerfCallStats, PerfPlayerCallStats } from '@/lib/api/types'
 import { formatDurationMs } from '../format'
-import { useAdminT, useAdminLocale } from '../useAdminText'
+import { useAdminT } from '../useAdminText'
 import { SectionHeader } from '../components/SectionHeader'
 
 type CallSortKey = 'name' | 'count' | 'avg_ms' | 'max_ms' | 'sum_ms' | 'errors'
@@ -45,7 +45,6 @@ function useCallSort() {
 
 export function ApiHaloSection({ perf }: { perf: AdminPerfStats | undefined }) {
   const tA = useAdminT()
-  const locale = useAdminLocale()
   const { sortKey, sortDir, toggleSort } = useCallSort()
   const sortedCalls = useMemo(() => {
     const calls = perf?.api_calls ?? []
@@ -83,9 +82,9 @@ export function ApiHaloSection({ perf }: { perf: AdminPerfStats | undefined }) {
                   <tr key={c.name} className="border-b last:border-b-0 hover:bg-muted/30">
                     <td className="px-3 py-2 font-mono text-xs text-foreground">{c.name}</td>
                     <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{c.count}</td>
-                    <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-foreground">{formatDurationMs(c.avg_ms, locale)}</td>
-                    <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{formatDurationMs(c.max_ms, locale)}</td>
-                    <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{formatDurationMs(c.sum_ms, locale)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-foreground">{formatDurationMs(c.avg_ms)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{formatDurationMs(c.max_ms)}</td>
+                    <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{formatDurationMs(c.sum_ms)}</td>
                     <td
                       className="px-3 py-2 text-right font-mono text-xs tabular-nums"
                       style={(c.errors ?? 0) > 0 ? { color: tokenCssVar('destructive') } : undefined}
@@ -120,7 +119,6 @@ function comparePlayerCallStats(a: PerfPlayerCallStats, b: PerfPlayerCallStats, 
 /** Sous-tableau des appels API attribuables par joueur (erreurs desc). */
 function ApiByPlayerTable({ perf }: { perf: AdminPerfStats }) {
   const tA = useAdminT()
-  const locale = useAdminLocale()
   const [sortKey, setSortKey] = useState<PlayerCallSortKey | null>(null)
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   function toggleSort(key: PlayerCallSortKey) {
@@ -160,8 +158,8 @@ function ApiByPlayerTable({ perf }: { perf: AdminPerfStats }) {
                 <td className="px-3 py-2 font-mono text-xs text-foreground">{s.player}</td>
                 <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{s.call}</td>
                 <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{s.count}</td>
-                <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-foreground">{formatDurationMs(s.avg_ms, locale)}</td>
-                <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{formatDurationMs(s.max_ms, locale)}</td>
+                <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-foreground">{formatDurationMs(s.avg_ms)}</td>
+                <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">{formatDurationMs(s.max_ms)}</td>
                 <td
                   className="px-3 py-2 text-right font-mono text-xs tabular-nums"
                   style={s.errors > 0 ? { color: tokenCssVar('destructive') } : undefined}

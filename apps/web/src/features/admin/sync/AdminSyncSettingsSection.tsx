@@ -11,8 +11,7 @@
 import { useState } from 'react'
 
 import { useSettings, useUpdateSettings } from '@/features/settings/queries'
-import { getSettingsText, normalizeSettingsLocale } from '@/features/settings/i18n'
-import { useAppShellStore } from '@/stores/appShellStore'
+import { getSettingsText } from '@/features/settings/i18n'
 import { SyncTab } from '@/features/settings/SyncTab'
 import type { SettingsResponse } from '@/lib/api/types'
 import { SectionHeader } from '../components/SectionHeader'
@@ -20,8 +19,7 @@ import { SectionHeader } from '../components/SectionHeader'
 export function AdminSyncSettingsSection() {
   const { data: settings, isLoading } = useSettings()
   const mutation = useUpdateSettings()
-  const locale = normalizeSettingsLocale(useAppShellStore((s) => s.locale))
-  const t = getSettingsText(locale)
+  const t = getSettingsText()
 
   // Copie éditable des réglages serveur : resync quand la requête livre un nouvel
   // objet (ajustement pendant le rendu, pattern React « valeur précédente », au

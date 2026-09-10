@@ -62,7 +62,7 @@ export function SessionSummaryCard({ entry, compact = false }: Props) {
   if (!hasOffDef) {
     log.warn(
       `offdef_missing:${entry.session_label ?? ''}`,
-      'KPI Rendement/Résistance vide : avg_oc/avg_dr absents (aucun match avec dégâts ?)',
+      'Empty conversion/resistance KPI: avg_oc/avg_dr missing (no match with damage?)',
     )
   }
 

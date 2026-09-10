@@ -37,24 +37,6 @@ beforeEach(() => {
   mockCandidates.mockReset()
 })
 
-describe('MediaMatchPicker — i18n FR', () => {
-  it('titre, fenêtre et état vide en français', () => {
-    mockQueryState({ data: { candidates: [], capture_utc: null } })
-    renderPicker()
-    expect(screen.getByText('Reassociate this media')).toBeInTheDocument()
-    expect(screen.getByText('Fenêtre :')).toBeInTheDocument()
-    expect(screen.getByText(/Aucun match trouvé dans cette fenêtre/)).toBeInTheDocument()
-    expect(screen.getByText('0 match trouvé')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Fermer' })).toBeInTheDocument()
-  })
-
-  it("message d'erreur de chargement en français (clé dédiée, pas de brut)", () => {
-    mockQueryState({ isError: true })
-    renderPicker()
-    expect(screen.getByText('Loading error')).toBeInTheDocument()
-  })
-})
-
 describe('MediaMatchPicker — i18n EN (GH2-B7)', () => {
   beforeEach(() => {
     useAppShellStore.setState({ locale: 'en' })
@@ -69,8 +51,6 @@ describe('MediaMatchPicker — i18n EN (GH2-B7)', () => {
     expect(screen.getByText('0 match found')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
     // Aucun libellé FR résiduel.
-    expect(screen.queryByText('Reassociate this media')).not.toBeInTheDocument()
-    expect(screen.queryByText('Fenêtre :')).not.toBeInTheDocument()
   })
 
   it("message d'erreur de chargement en anglais", () => {

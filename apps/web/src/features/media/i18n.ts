@@ -80,7 +80,7 @@ export interface MediaText {
   }
 }
 
-export function normalizeMediaLocale(_locale?: string | null): Locale {
+export function normalizeMediaLocale(): Locale {
   return 'en'
 }
 
@@ -88,8 +88,8 @@ function t(locale: Locale, key: MediaManifestKey, values?: Record<string, string
   return formatMessage(mediaManifest, key, locale, values)
 }
 
-export function getMediaText(locale?: string | null): MediaText {
-  const loc = normalizeMediaLocale(locale)
+export function getMediaText(): MediaText {
+  const loc = normalizeMediaLocale()
   return {
     title: t(loc, 'media.page.title'),
     emptyState: t(loc, 'media.page.empty_state'),

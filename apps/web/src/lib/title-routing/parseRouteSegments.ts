@@ -50,3 +50,19 @@ export function withLangSegment(pathname: string, lang: Locale): string {
   if (!seg.titleSlug || seg.lang) return pathname
   return `/${lang}${pathname}`
 }
+
+/**
+ * replaceLangSegment — rewrites an UNSUPPORTED leading language segment in front of a
+ * title scope (`/fr/t/{slug}/…` → `/{lang}/t/{slug}/…`). Pure function.
+ *
+ * Old links and bookmarks still carry `/fr/t/…` from before the English-only switch;
+ * the optional `{-$lang}` route segment matches them, and this is what normalises them.
+ * A pathname whose first segment is already a known locale, or that has no
+ * `/{segment}/t/{slug}` shape, is returned unchanged. `?search` and `#hash` are left to
+ * the caller.
+ */
+export function replaceLangSegment(pathname: string, lang: Locale): string {
+  const segs = pathname.split('/').filter(Boolean)
+  if (segs.length < 3 || segs[1] !== 't' || isKnownLocale(segs[0])) return pathname
+  return `/${[lang, ...segs.slice(1)].join('/')}${pathname.endsWith('/') ? '/' : ''}`
+}

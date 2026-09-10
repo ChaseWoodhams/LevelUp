@@ -36,13 +36,15 @@ export function useUpdateSettings() {
   const demoMode = useAppShellStore((s) => s.demoMode)
   return useMutation({
     mutationFn: async (req: UpdateSettingsRequest) => {
-      const { lang: _lang, discord_lang: _discordLang, ...settings } = req
       // Demo settings are read-only; language fields are always English.
       if (demoMode) {
         const current =
           qc.getQueryData<SettingsResponse>(queryKeys.settings) ?? ({} as SettingsResponse)
         return { ...current, lang: 'en', discord_lang: 'en' }
       }
+      const settings: UpdateSettingsRequest = { ...req }
+      delete settings.lang
+      delete settings.discord_lang
       return api.patch<SettingsResponse>('/settings', settings)
     },
     onSuccess: (data) => {

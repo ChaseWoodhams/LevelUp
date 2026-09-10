@@ -3,7 +3,6 @@ import { useAppShellStore } from '@/stores/appShellStore'
 import {
   DEFAULT_EFFECTIVE_HP_TO_KILL,
   getHelpText,
-  normalizeHelpLocale,
   type HelpTab,
 } from './i18n'
 import { GlossaryTab } from './GlossaryTab'
@@ -14,7 +13,6 @@ const TABS: HelpTab[] = ['glossary', 'release-notes']
 export function HelpPage() {
   const navigate = useNavigate()
   const routerState = useRouterState()
-  const locale = normalizeHelpLocale(useAppShellStore((s) => s.locale))
   // Barème PV-pour-tuer du titre courant : rend le copy combat (rendement /
   // résistance) title-aware (225 Infinite, 115 Halo 5). Repli sur le défaut Infinite.
   const effectiveHpToKill = useAppShellStore(
@@ -22,7 +20,7 @@ export function HelpPage() {
       s.availableTitles.find((t) => t.slug === s.currentTitleSlug)
         ?.effective_hp_to_kill ?? DEFAULT_EFFECTIVE_HP_TO_KILL,
   )
-  const text = getHelpText(locale, effectiveHpToKill)
+  const text = getHelpText(effectiveHpToKill)
 
   const rawTab = new URLSearchParams(routerState.location.search).get('tab')
   const activeTab: HelpTab =

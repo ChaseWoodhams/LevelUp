@@ -74,7 +74,7 @@ export function ExplorerTargetMedals({ medals }: ExplorerTargetMedalsProps) {
                   {m.label || `#${m.medal_id}`}
                 </span>
                 <span className="flex-shrink-0 text-xs font-semibold tabular-nums text-muted-foreground">
-                  ×{m.total_count.toLocaleString(intlLocale(locale))}
+                  ×{m.total_count.toLocaleString(intlLocale())}
                 </span>
               </li>
             )

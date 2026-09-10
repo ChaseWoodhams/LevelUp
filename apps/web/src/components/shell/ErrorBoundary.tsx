@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // Logging minimal — peut être branché sur Sentry ou autre service.
-    console.error('[ErrorBoundary] Erreur non gérée :', error, info.componentStack)
+    console.error('[ErrorBoundary] Unhandled error:', error, info.componentStack)
   }
 
   render(): ReactNode {

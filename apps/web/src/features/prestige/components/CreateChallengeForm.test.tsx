@@ -67,23 +67,23 @@ describe('CreateChallengeForm — cooldown UI', () => {
     }
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
-    expect(screen.getByText(/Dispo dans/i)).toBeInTheDocument()
+    expect(screen.getByText(/Available in/i)).toBeInTheDocument()
     const item = screen.getByText('KDA challenge').closest('li')
     expect(item).toHaveAttribute('aria-disabled', 'true')
 
     // Clic sur un modèle en cooldown → pas de cible ajustée affichée (non sélectionné).
     fireEvent.click(item as HTMLElement)
-    expect(screen.queryByText(/Cible ajustée/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Adjusted target/i)).not.toBeInTheDocument()
   })
 
   it('rend sélectionnable un modèle sans cooldown', () => {
     mockSuggested.data = { templates: [makeTemplate({ id: 'ok' })] }
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
-    expect(screen.queryByText(/Dispo dans/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Available in/i)).not.toBeInTheDocument()
     const item = screen.getByText('KDA challenge').closest('li')
     fireEvent.click(item as HTMLElement)
-    expect(screen.getByText(/Cible ajustée/i)).toBeInTheDocument()
+    expect(screen.getByText(/Adjusted target/i)).toBeInTheDocument()
   })
 
   it('affiche un message lisible sur refus cooldown (429)', () => {

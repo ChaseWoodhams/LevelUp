@@ -2,7 +2,6 @@
  * Strings i18n du module coach (ADR 0020 Phase 10).
  * Convention identique aux autres features : FR + EN inline.
  */
-import type { Locale } from '@/lib/i18n/locale'
 
 export interface CoachStrings {
   proposalsTitle: string
@@ -62,6 +61,6 @@ export const coachStringsEN: CoachStrings = {
   dismissError: 'Error while dismissing.',
 }
 
-export function getCoachStrings(_locale: Locale): CoachStrings {
+export function getCoachStrings(): CoachStrings {
   return coachStringsEN
 }

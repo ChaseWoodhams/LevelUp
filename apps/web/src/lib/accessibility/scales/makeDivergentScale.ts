@@ -31,7 +31,7 @@ export function makeDivergentScale(config: DivergentScaleConfig): (value: number
 
   if (bandMin > bandMax) {
     throw new Error(
-      `makeDivergentScale : neutralBand inversée [${bandMin}, ${bandMax}] — bandMin doit être <= bandMax`,
+      `makeDivergentScale: inverted neutralBand [${bandMin}, ${bandMax}] — bandMin must be <= bandMax`,
     )
   }
 
@@ -41,7 +41,7 @@ export function makeDivergentScale(config: DivergentScaleConfig): (value: number
     // NaN = valeur invalide → neutral. ±Infinity suit la logique normale
     // (Infinity > bandMax = true → positive ; -Infinity < bandMin = true → negative).
     if (isNaN(value)) {
-      log.warn(`divergent:invalid:${scaleKey}`, `divergentScale reçoit NaN — retourne neutral`)
+      log.warn(`divergent:invalid:${scaleKey}`, `divergentScale received NaN — returning neutral`)
       return neutral
     }
 

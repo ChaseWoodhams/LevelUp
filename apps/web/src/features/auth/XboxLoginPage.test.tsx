@@ -86,7 +86,7 @@ describe('XboxLoginPage', () => {
       expect(screen.getByText(/Admin login only\. Normal users sign in through Xbox\./i)).toBeInTheDocument()
     })
     // Champs de form présents.
-    expect(screen.getByLabelText(/Identifiant/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Username/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument()
   })
 

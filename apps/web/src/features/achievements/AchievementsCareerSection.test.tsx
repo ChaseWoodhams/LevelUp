@@ -110,8 +110,8 @@ describe('AchievementsCareerSection', () => {
     expect(screen.getByText('800 / 2000 G')).toBeInTheDocument()
     expect(screen.getByText('42.0 %')).toBeInTheDocument()
     // Cards : noms FR (locale mock = 'en')
-    expect(screen.getByText('First blood')).toBeInTheDocument()
-    expect(screen.getByText('Sniper')).toBeInTheDocument()
+    expect(screen.getByText('First Blood')).toBeInTheDocument()
+    expect(screen.getByText('Sharpshooter')).toBeInTheDocument()
   })
 
   it('rend toutes les cartes (pas de cap : refacto 2026-05 → scroll vertical)', () => {
@@ -187,19 +187,19 @@ describe('AchievementsCareerSection', () => {
     render(<AchievementsCareerSection playerSlug="jgtm" layout="sidebar" />, { wrapper })
 
     // Multijoueur par défaut : seule la carte MP est visible
-    const categorySelect = screen.getByDisplayValue('Multijoueur')
-    expect(screen.getByText('Pointage')).toBeInTheDocument()
+    const categorySelect = screen.getByDisplayValue('Multiplayer')
+    expect(screen.getByText('Clocking In')).toBeInTheDocument()
     expect(screen.queryByText('Zêta')).not.toBeInTheDocument()
     expect(screen.queryByText('Sortez le pop-corn')).not.toBeInTheDocument()
 
     fireEvent.change(categorySelect, { target: { value: 'all' } })
-    expect(screen.getByText('Pointage')).toBeInTheDocument()
-    expect(screen.getByText('Zêta')).toBeInTheDocument()
-    expect(screen.getByText('Sortez le pop-corn')).toBeInTheDocument()
+    expect(screen.getByText('Clocking In')).toBeInTheDocument()
+    expect(screen.getByText('Zeta')).toBeInTheDocument()
+    expect(screen.getByText('Get the Popcorn')).toBeInTheDocument()
 
     fireEvent.change(categorySelect, { target: { value: 'campaign' } })
-    expect(screen.queryByText('Pointage')).not.toBeInTheDocument()
-    expect(screen.getByText('Zêta')).toBeInTheDocument()
+    expect(screen.queryByText('Clocking In')).not.toBeInTheDocument()
+    expect(screen.getByText('Zeta')).toBeInTheDocument()
   })
 
   it('masque le select catégorie quand aucune entrée n\'a de catégorie (titre sans mapping)', () => {
@@ -225,11 +225,11 @@ describe('AchievementsCareerSection', () => {
       },
     })
     render(<AchievementsCareerSection playerSlug="jgtm" layout="sidebar" />, { wrapper })
-    expect(screen.queryByDisplayValue('Multijoueur')).not.toBeInTheDocument()
+    expect(screen.queryByDisplayValue('Multiplayer')).not.toBeInTheDocument()
     // Le défaut "multiplayer" ne doit pas filtrer un titre sans mapping : la carte reste visible
-    expect(screen.getByText('Sans catégorie')).toBeInTheDocument()
+    expect(screen.getByText('No Category')).toBeInTheDocument()
     // Les filtres statut + tri date restent présents
-    expect(screen.getByDisplayValue('Tous')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('All')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Default')).toBeInTheDocument()
   })
 })

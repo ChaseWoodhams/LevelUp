@@ -184,7 +184,7 @@ describe('api client — course de bascule PENDANT le vol (titre actif ≠ titre
     // provoquerait un toast trompeur et une re-soumission (double écriture).
     await expect(api.post('/squads', { name: 'x' })).resolves.toEqual({ echo: 'halo_infinite' })
     expect(warnSpy).toHaveBeenCalledWith(
-      '[title-guard] mutation appliquée à un autre titre que le titre actif',
+      '[title-guard] mutation applied to a title other than the active one',
       expect.objectContaining({ method: 'POST', resolved: 'halo_infinite', active: 'halo_5' }),
     )
   })

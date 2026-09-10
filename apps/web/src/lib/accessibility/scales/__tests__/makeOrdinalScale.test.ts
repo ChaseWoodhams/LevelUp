@@ -15,7 +15,7 @@ describe('makeOrdinalScale', () => {
 
     it('lève une erreur si thresholds non strictement décroissants', () => {
       expect(() => makeOrdinalScale({ tiers: ['perf-tier-1', 'perf-tier-2', 'perf-tier-3'], thresholds: [50, 80] }))
-        .toThrow('décroissant')
+        .toThrow('decreasing')
     })
   })
 

@@ -55,7 +55,7 @@ function BattlePassRewardCard({ card, onOpen, freeLabel }: { card: RewardCard; o
     <button
       type="button"
       onClick={() => onOpen(card)}
-      aria-label={`Voir le détail de ${card.title}`}
+      aria-label={`View details for ${card.title}`}
       data-rarity={rarityTier ?? 'none'}
       className="group block w-14 sm:w-16 xl:w-[4.5rem] space-y-1 text-left transition-transform duration-150 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:rounded-lg"
     >
@@ -125,9 +125,9 @@ export function BattlePassRewardCarousel({
   tiers,
   activeTierRank,
   onOpenCard,
-  freeLabel = 'gratuit',
-  prevAriaLabel = 'Paliers précédents',
-  nextAriaLabel = 'Paliers suivants',
+  freeLabel = 'free',
+  prevAriaLabel = 'Previous tiers',
+  nextAriaLabel = 'Next tiers',
 }: {
   tiers: SeasonPassTierSummary[]
   activeTierRank?: number | null

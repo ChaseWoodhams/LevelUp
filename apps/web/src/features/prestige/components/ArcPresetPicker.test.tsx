@@ -54,15 +54,15 @@ describe('ArcPresetPicker', () => {
     mockPresets.current = [preset({})]
     render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
 
-    expect(screen.getByText('Ascension du Spartan')).toBeInTheDocument()
-    expect(screen.getByText(/2 objectifs/i)).toBeInTheDocument()
+    expect(screen.getByText('Spartan Ascension')).toBeInTheDocument()
+    expect(screen.getByText(/2 objectives/i)).toBeInTheDocument()
   })
 
   it('adopte un preset au clic sur « Adopter »', () => {
     mockPresets.current = [preset({ id: 'p-kda' })]
     render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Adopter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Adopt' }))
     expect(adoptMutate).toHaveBeenCalledWith('p-kda', expect.objectContaining({ onSuccess: expect.any(Function) }))
   })
 

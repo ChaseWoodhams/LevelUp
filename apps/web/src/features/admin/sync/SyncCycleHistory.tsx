@@ -34,7 +34,7 @@ export function SyncCycleHistory({ history }: { history: SchedulerCycleRecord[] 
               <span aria-hidden className="h-2.5 w-2.5 flex-none" style={{ backgroundColor: marker }} />
               <span
                 className="w-24 flex-none font-medium text-foreground"
-                title={adminAbsoluteTime(c.at, locale)}
+                title={adminAbsoluteTime(c.at)}
               >
                 {adminRelativeTime(c.at, locale)}
               </span>
@@ -57,21 +57,21 @@ export function SyncCycleHistory({ history }: { history: SchedulerCycleRecord[] 
                 {tA('admin.sync.summary_failed')} {c.failed}
               </span>
               <span className="ml-auto font-mono tabular-nums text-muted-foreground">
-                {formatDurationMs(c.duration_ms, locale)}
+                {formatDurationMs(c.duration_ms)}
               </span>
             </div>
             {/* Corrélation charge : indispo lectures (B-swap) / temps API / écritures / 503. */}
             {(c.blocked_ms > 0 || c.api_ms > 0 || c.persist_write_ms > 0 || c.reads_rejected > 0) && (
               <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 pl-6 font-mono text-[11px] text-muted-foreground">
                 <span style={blockedPct >= 20 && c.blocked_ms >= 5000 ? { color: tokenCssVar('warning') } : undefined}>
-                  {tA('admin.sync.col_blocked')} {formatDurationMs(c.blocked_ms, locale)} ({blockedPct}%)
+                  {tA('admin.sync.col_blocked')} {formatDurationMs(c.blocked_ms)} ({blockedPct}%)
                   {c.swap_count > 0 ? ` · ${c.swap_count} swaps` : ''}
                 </span>
                 <span>
-                  {tA('admin.sync.col_api_time')} {formatDurationMs(c.api_ms, locale)}
+                  {tA('admin.sync.col_api_time')} {formatDurationMs(c.api_ms)}
                 </span>
                 <span>
-                  {tA('admin.sync.col_writes')} {formatDurationMs(c.persist_write_ms, locale)}
+                  {tA('admin.sync.col_writes')} {formatDurationMs(c.persist_write_ms)}
                 </span>
                 {c.reads_rejected > 0 && (
                   <span style={{ color: tokenCssVar('destructive') }}>
@@ -96,7 +96,6 @@ export function SyncCycleHistory({ history }: { history: SchedulerCycleRecord[] 
 function CycleTrends({
   history,
   tA,
-  locale,
 }: {
   history: SchedulerCycleRecord[]
   tA: TAdmin
@@ -117,13 +116,13 @@ function CycleTrends({
       label: tA('admin.sync.col_blocked'),
       values: blocked,
       token: 'warning',
-      current: formatDurationMs(blocked[blocked.length - 1], locale),
+      current: formatDurationMs(blocked[blocked.length - 1]),
     },
     {
       label: tA('admin.sync.col_api_time'),
       values: api,
       token: 'info',
-      current: formatDurationMs(api[api.length - 1], locale),
+      current: formatDurationMs(api[api.length - 1]),
     },
   ]
 

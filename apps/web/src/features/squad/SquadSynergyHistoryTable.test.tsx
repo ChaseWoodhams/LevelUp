@@ -115,7 +115,7 @@ describe('SquadSynergyHistoryTable — tri CLIENT par en-têtes (I16)', () => {
 
   it('clic sur « Carte » trie alphabétiquement ASC, un 2e clic bascule en DESC', () => {
     renderWithProviders(<SquadSynergyHistoryTable rows={rowsForSort()} playerSlug="me" />)
-    const btn = screen.getByRole('button', { name: 'Trier par Carte' })
+    const btn = screen.getByRole('button', { name: 'Sort by Map' })
     fireEvent.click(btn)
     expect(bodyMapOrder(names)).toEqual(['Alpha', 'Bravo', 'Charlie'])
     expect(btn.closest('th')).toHaveAttribute('aria-sort', 'ascending')

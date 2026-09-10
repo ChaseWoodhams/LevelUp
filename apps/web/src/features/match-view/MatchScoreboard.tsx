@@ -370,7 +370,7 @@ function TeamScoreboard({
         // « Placement » (sentinelle back) → « En placement », cohérent avec le
         // header (localizeTierLabel + displayTierLabel).
         const label = displayTierLabel(
-          localizeTierLabel(ctx.row.original.skill_rank?.tier_label, locale),
+          localizeTierLabel(ctx.row.original.skill_rank?.tier_label),
           t.rankPlacement,
         )
         // Pas d'icône mais un palier connu (CSR Halo 5 sans badge résolu) → afficher le

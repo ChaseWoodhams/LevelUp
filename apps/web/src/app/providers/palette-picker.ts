@@ -34,7 +34,7 @@ export function pickPalette(key: ColorPalette): Palette {
       // rollback d'une palette). Fallback silencieux côté UX, traçable côté dev.
       log.warn(
         `pickPalette:unknown:${String(key)}`,
-        `palette inconnue "${String(key)}" — fallback sur defaultPalette`,
+        `unknown palette "${String(key)}" — falling back to defaultPalette`,
       )
       return defaultPalette
   }

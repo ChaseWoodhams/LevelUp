@@ -90,9 +90,9 @@ interface LeaderboardBlockProps {
 type SortDir = 'asc' | 'desc'
 
 /** Formate la valeur d'une catégorie de stat. */
-function formatStatValue(entry: LeaderboardEntry, locale: ManifestLocale): string {
+function formatStatValue(entry: LeaderboardEntry): string {
   const v = entry.value ?? 0
-  const intl = intlLocale(locale)
+  const intl = intlLocale()
   const decimals = entry.unit === '%' || /kd|per_game/.test(entry.category ?? '') ? 2 : 0
   return `${v.toLocaleString(intl, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${entry.unit ?? ''}`
 }
@@ -100,8 +100,8 @@ function formatStatValue(entry: LeaderboardEntry, locale: ManifestLocale): strin
 // MetricWithTrend vient du composant PARTAGÉ components/ui/metric-trend (extrait
 // par le chantier leaderboard, garde-rail metric-trend.guard.test.ts) — l'ex-copie
   // English-only API responses are canonical; title changes scope the cache key.
-const fmtPct = (v: number, locale: ManifestLocale): string =>
-  `${(v * 100).toLocaleString(intlLocale(locale), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+const fmtPct = (v: number): string =>
+  `${(v * 100).toLocaleString(intlLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 
 export function LeaderboardBlock({ playerSlug, onHoverEntry }: LeaderboardBlockProps) {
   const locale = useAppShellStore((s) => s.locale)
@@ -393,7 +393,6 @@ function LeaderboardRow({
   localLabel,
   trendTooltip,
   rankDeltaTooltip,
-  locale,
   onHover,
   onGamertagClick,
 }: {
@@ -408,7 +407,7 @@ function LeaderboardRow({
   onHover?: (gamertag: string) => void
   onGamertagClick: (gamertag: string, xuid: string) => void
 }) {
-  const intl = intlLocale(locale)
+  const intl = intlLocale()
   // Accent podium : top-3 en gras (tokens foreground/muted, pas de hex).
   const isPodium = entry.rank <= 3
   const rankClass = isPodium ? 'font-bold text-primary' : 'text-muted-foreground'
@@ -491,7 +490,7 @@ function LeaderboardRow({
                 style={columnHighlightStyle('winRate', entry.win_rate ?? null, extremes)}
               >
                 {entry.win_rate != null ? (
-                  <MetricWithTrend text={fmtPct(entry.win_rate, locale)} trend={entry.win_rate_trend} tooltip={trendTooltip} />
+                  <MetricWithTrend text={fmtPct(entry.win_rate)} trend={entry.win_rate_trend} tooltip={trendTooltip} />
                 ) : (
                   '—'
                 )}
@@ -533,7 +532,7 @@ function LeaderboardRow({
       ) : (
         <>
           <td className="px-3 py-2 text-center font-mono text-muted-foreground">{entry.matches_played ?? 0}</td>
-          <td className="px-3 py-2 text-right font-mono text-foreground">{formatStatValue(entry, locale)}</td>
+          <td className="px-3 py-2 text-right font-mono text-foreground">{formatStatValue(entry)}</td>
         </>
       )}
     </tr>

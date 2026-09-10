@@ -214,7 +214,7 @@ describe('PalmaresRelationsPage', () => {
 
     // Permanent (plus de toggle) : la donnée du mock arrive d'office → titre Rivaux + rival.
     await waitFor(() => {
-      expect(screen.getByText('Rivaux')).toBeInTheDocument()
+      expect(screen.getAllByText('Rivals').length).toBeGreaterThan(0)
     })
     expect(screen.getAllByText('NemesisBravo').length).toBeGreaterThan(0)
   })

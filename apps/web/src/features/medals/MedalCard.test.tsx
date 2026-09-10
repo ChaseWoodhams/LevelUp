@@ -34,7 +34,7 @@ describe('MedalCard', () => {
     const counter = screen.getByText('0')
     expect(counter.className).toContain('text-destructive')
     expect(counter.className).not.toContain('text-foreground')
-    expect(container.querySelector('[aria-label="Jamais obtenue"]')).toBeTruthy()
+    expect(container.querySelector('[aria-label="Never earned"]')).toBeTruthy()
     expect(container.querySelector('.opacity-60')).toBeTruthy()
     // Rareté Halo Infinite (heroic) → pastille affichée.
     expect(screen.getByText('Heroic')).toBeTruthy()
@@ -47,7 +47,7 @@ describe('MedalCard', () => {
     const counter = screen.getByText('5')
     expect(counter.className).toContain('text-foreground')
     expect(counter.className).not.toContain('text-destructive')
-    expect(container.querySelector('[aria-label="Obtenue 5 fois"]')).toBeTruthy()
+    expect(container.querySelector('[aria-label="Earned 5 times"]')).toBeTruthy()
     expect(screen.getByText('Legendary')).toBeTruthy()
   })
 

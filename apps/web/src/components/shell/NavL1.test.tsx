@@ -121,7 +121,7 @@ describe('NavL1', () => {
   it('expose l\'onglet Entraînement dans la dropdown Ascension', () => {
     renderWithProviders(<NavL1 />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Onglets Ascension' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ascension tabs' }))
 
     const coaching = screen.getByRole('menuitem', { name: 'Coaching' })
     expect(coaching).toBeInTheDocument()
@@ -131,10 +131,10 @@ describe('NavL1', () => {
   it('ordonne Profil / Objectifs / Entraînement / Réalisations dans la dropdown Ascension', () => {
     renderWithProviders(<NavL1 />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Onglets Ascension' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ascension tabs' }))
 
-    const profile = screen.getByRole('menuitem', { name: 'Profil' })
-    const objectives = screen.getByRole('menuitem', { name: 'Objectifs' })
+    const profile = screen.getByRole('menuitem', { name: 'Profile' })
+    const objectives = screen.getByRole('menuitem', { name: 'Objectives' })
     const coaching = screen.getByRole('menuitem', { name: 'Coaching' })
     const realisations = screen.getByRole('menuitem', { name: 'Achievements' })
 

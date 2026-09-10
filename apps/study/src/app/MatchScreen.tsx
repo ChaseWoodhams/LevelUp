@@ -51,6 +51,7 @@ export function MatchScreen({ matchId, locale }: MatchScreenProps) {
           <ReplayViewer
             key={matchId}
             doc={screen.doc}
+            matchClockZeroMs={screen.matchClockZeroMs}
             scoreboard={screen.scoreboard}
             locale={locale}
             mapModule={screen.summary?.map_module ?? null}

@@ -61,9 +61,27 @@ interface ReplayViewerProps {
    * belongs to no archived match at all — and it simply means the floor falls through.
    */
   mapModule?: string | null
+  /**
+   * Zéro de l'horloge du MATCH sur l'axe du document, en ms ; null = non mesuré.
+   *
+   * IL ARRIVE À CÔTÉ DU DOCUMENT, ET NON DEDANS. `replayNormalize.ts` est un fichier COPIÉ,
+   * byte-identique à `apps/web` : ce viewer ne peut pas y ajouter un champ dont l'app n'a pas
+   * besoin sans passer d'abord en amont. `parseReplayPayload` le lit donc sur le document brut
+   * et le porte à part (cf. features/archive/schemaVersion.ts).
+   *
+   * Null est le cas ordinaire d'un artefact dont le fil des morts n'a rien apparié : l'écran
+   * n'affiche alors pas d'heure de partie, plutôt qu'une heure fausse.
+   */
+  matchClockZeroMs?: number | null
 }
 
-export function ReplayViewer({ doc, scoreboard, locale, mapModule = null }: ReplayViewerProps) {
+export function ReplayViewer({
+  doc,
+  scoreboard,
+  locale,
+  mapModule = null,
+  matchClockZeroMs = null,
+}: ReplayViewerProps) {
   const coloring = useMemo(() => buildRosterColoring(doc, scoreboard), [doc, scoreboard])
   const timeline = useMemo(() => timelineOf(doc), [doc])
 
@@ -129,6 +147,7 @@ export function ReplayViewer({ doc, scoreboard, locale, mapModule = null }: Repl
           />
           <ReplayTimeline
             doc={doc}
+            matchClockZeroMs={matchClockZeroMs}
             timeline={timeline}
             state={state}
             dispatch={dispatch}

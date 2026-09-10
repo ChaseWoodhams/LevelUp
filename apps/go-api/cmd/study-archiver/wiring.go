@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"os"
@@ -28,6 +29,7 @@ import (
 	"levelup/go-api/internal/domain/title"
 	"levelup/go-api/internal/games/halo_infinite/replaylabels"
 	authpkg "levelup/go-api/internal/platform/auth"
+	ddb "levelup/go-api/internal/platform/duckdb"
 	"levelup/go-api/internal/sync/haloclient"
 )
 
@@ -83,6 +85,23 @@ func newDepsWith(ctx context.Context, req depsRequest, withClient bool) (deps, e
 		return deps{}, fmt.Errorf("title label catalogue (%s): %w", req.Title, err)
 	}
 
+	// The metadata catalogue is the one dependency that is NOT mandatory, unlike catalog
+	// and labels above: an install with no metadata.duckdb yet (never ran `levelup
+	// populate-assets`, never unpacked the repo's prebuilt snapshot) still archives and
+	// still refuses a build the honest way — it just cannot recover a match whose stats
+	// carried no display name at all. `OpenReadForQuery` is the repo's own rule for
+	// reading a DB another process may hold read-write (CLAUDE.md ART rule 4): the main
+	// app's server can be writing `asset_translations` at the same moment this runs.
+	var metadataDB *sql.DB
+	releaseMetadata := func() {}
+	if db, release, mErr := ddb.OpenReadForQuery(paths.MetadataDBPath(req.Title)); mErr == nil {
+		metadataDB, releaseMetadata = db, release
+	} else {
+		slog.WarnContext(ctx, "study-archiver: no metadata catalogue - a match with no "+
+			"display name in its stats will stay unsupported_map rather than being recovered",
+			"err", mErr)
+	}
+
 	var client filmAPI
 	if withClient {
 		tokens, tErr := resolveTokens(ctx, paths, req)
@@ -104,12 +123,14 @@ func newDepsWith(ctx context.Context, req depsRequest, withClient bool) (deps, e
 		"archive", paths.StudyArchiveDBPath(), "network", withClient)
 
 	return deps{
-		Client:  client,
-		Paths:   paths,
-		Title:   req.Title,
-		Catalog: catalog,
-		Labels:  labels,
-		Archive: store,
+		Client:            client,
+		Paths:             paths,
+		Title:             req.Title,
+		Catalog:           catalog,
+		Labels:            labels,
+		Archive:           store,
+		MetadataDB:        metadataDB,
+		ReleaseMetadataDB: releaseMetadata,
 		// Handed over unwrapped: the build lock lives at the call site (runBuild), so a
 		// wiring cannot forget it.
 		Build:           replay.BuildFromFilm,

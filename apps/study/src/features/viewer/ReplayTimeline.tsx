@@ -20,6 +20,7 @@ import { formatClock, frameToMs } from '../replay/replayLogic'
 import type { ReplayDocumentReady } from '../replay/replayNormalize'
 
 import { VIEWER_TEXT } from './i18n'
+import { formatMatchClock, matchTimeMs } from './matchClock'
 import {
   FOCUSABLE_PLAYERS,
   lastFrameOf,
@@ -33,6 +34,8 @@ import {
 
 interface ReplayTimelineProps {
   doc: ReplayDocumentReady
+  /** Zéro de l'horloge du match sur l'axe du document, en ms ; null = non mesuré. */
+  matchClockZeroMs: number | null
   timeline: Timeline
   state: PlaybackState
   dispatch: (action: PlaybackAction) => void
@@ -43,6 +46,7 @@ interface ReplayTimelineProps {
 
 export function ReplayTimeline({
   doc,
+  matchClockZeroMs,
   timeline,
   state,
   dispatch,
@@ -52,7 +56,13 @@ export function ReplayTimeline({
   const v = VIEWER_TEXT[locale]
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
-      <TransportRow doc={doc} state={state} dispatch={dispatch} locale={locale} />
+      <TransportRow
+        doc={doc}
+        matchClockZeroMs={matchClockZeroMs}
+        state={state}
+        dispatch={dispatch}
+        locale={locale}
+      />
       <NavigationRow
         timeline={timeline}
         state={state}
@@ -68,11 +78,13 @@ export function ReplayTimeline({
 /** TransportRow — play, restart, the match clock, and the scrubber. */
 function TransportRow({
   doc,
+  matchClockZeroMs,
   state,
   dispatch,
   locale,
 }: {
   doc: ReplayDocumentReady
+  matchClockZeroMs: number | null
   state: PlaybackState
   dispatch: (action: PlaybackAction) => void
   locale: Locale
@@ -80,6 +92,14 @@ function TransportRow({
   const t = REPLAY_TEXT[locale]
   const v = VIEWER_TEXT[locale]
   const total = formatClock(doc.durationMs ?? frameToMs(doc.frameCount, doc))
+  // L'HEURE DU MATCH EST AFFICHÉE À CÔTÉ, JAMAIS À LA PLACE. L'axe du document reste la
+  // référence de tout ce que l'écran manipule (la molette, les sauts, les bornes des traces) ;
+  // remplacer son horloge ferait mentir la position du curseur. Absente quand l'artefact ne
+  // sait pas où tombe le zéro du match — cf. matchClock.ts.
+  const matchNow =
+    matchClockZeroMs === null
+      ? null
+      : formatMatchClock(matchTimeMs(frameToMs(state.frame, doc), matchClockZeroMs))
   return (
     <div className="flex flex-wrap items-center gap-3">
       <Button variant="default" size="sm" onClick={() => dispatch({ type: 'toggle' })} className="h-8 w-24">
@@ -94,6 +114,15 @@ function TransportRow({
       <span className="min-w-[6rem] font-mono text-xs tabular-nums text-muted-foreground" aria-label={v.clock}>
         {formatClock(frameToMs(state.frame, doc))} / {total}
       </span>
+      {matchNow !== null && (
+        <span
+          className="font-mono text-xs tabular-nums text-muted-foreground"
+          aria-label={v.matchClock}
+          title={v.matchClockHint}
+        >
+          {v.matchClockLabel} {matchNow}
+        </span>
+      )}
       <input
         type="range"
         min={0}

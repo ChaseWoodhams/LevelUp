@@ -183,6 +183,7 @@ func runWatch(ctx context.Context, args []string) int {
 		if cErr := d.Archive.Close(); cErr != nil {
 			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
 		}
+		d.ReleaseMetadataDB()
 	}()
 
 	if sum := watchPass(ctx, d, newWatchDeps(d.Paths, common.request()), wl); sum.Failed > 0 {
@@ -244,6 +245,7 @@ func runRebuild(ctx context.Context, args []string) int {
 		if cErr := d.Archive.Close(); cErr != nil {
 			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
 		}
+		d.ReleaseMetadataDB()
 	}()
 
 	out, err := rebuildOne(ctx, d, matchID)
@@ -282,6 +284,7 @@ func runFetchOne(ctx context.Context, args []string) int {
 		if cErr := d.Archive.Close(); cErr != nil {
 			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
 		}
+		d.ReleaseMetadataDB()
 	}()
 
 	out, err := fetchOne(ctx, d, matchID)

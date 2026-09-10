@@ -13,6 +13,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -54,6 +55,16 @@ type deps struct {
 	// Archive is the archive database, and it is required: a match archived without a
 	// row is a match the tool has forgotten it has.
 	Archive *archive
+	// MetadataDB is the title's `metadata.duckdb`, read-only, for resolving a map's
+	// display name when the stats payload carried only its asset id (cf. mapresolve.go).
+	// Best-effort and may be nil — an install with no metadata catalogue yet degrades
+	// to the historical behaviour (refuse the build) rather than failing to run at all.
+	MetadataDB *sql.DB
+	// ReleaseMetadataDB gives back the borrow `ddb.OpenReadForQuery` took out (a real
+	// Close, or a no-op if the handle was shared from the process-wide cache — the
+	// caller must never call MetadataDB.Close() directly, cf. wiring.go). A no-op when
+	// MetadataDB is nil, so the caller's defer needs no nil check of its own.
+	ReleaseMetadataDB func()
 	// SourceGamertag is whose archiving pass produced this match. Empty for a bare
 	// fetch-one; `watch` (#8) fills it with the watchlist entry that surfaced the match.
 	SourceGamertag string
@@ -127,8 +138,12 @@ func fetchOneWithStats(ctx context.Context, d deps, matchID string, stats map[st
 	if err != nil {
 		return out, err
 	}
-	out.MapName = facts.MapName
-	mapInfo, mapErr := resolveMatchMap(facts.MapName, d.Catalog)
+	mapInfo, mapErr := resolveMatchMap(ctx, facts.MapName, d.Catalog, d.MetadataDB)
+	// mapInfo.Name is the RESOLVED name when the metadata fallback found one, and the raw
+	// value otherwise (cf. mapresolve.go) — so the archive row, and the "film archived"
+	// log line downloadFilm writes from this same field, never carry a bare asset GUID
+	// when a real name was available.
+	out.MapName = mapInfo.Name
 	out.MapModule = mapInfo.Module
 
 	if err := downloadFilm(ctx, d, prior, &out); err != nil {

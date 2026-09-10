@@ -70,6 +70,30 @@ type ReplayDocument struct {
 	FrameIntervalMS int `json:"frameIntervalMs,omitempty"`
 	// DurationMS est la durée réelle couverte par le rejeu, en millisecondes.
 	DurationMS int `json:"durationMs,omitempty"`
+	// MatchClockZeroMS place le ZÉRO DE L'HORLOGE DU MATCH sur l'axe de ce document, en
+	// millisecondes. NÉGATIF quand ce zéro précède la première image, ce qui est le cas
+	// ordinaire. L'heure de match d'une frame vaut donc `frame*FrameIntervalMS -
+	// MatchClockZeroMS`.
+	//
+	// CE QU'IL EST : l'origine du fil des morts, que `Death.TimeMS` horodate. L'appariement des
+	// vies résout déjà ce décalage pour nommer les traces ; il était calculé puis jeté. Mesuré
+	// sur `36e80b83` : -5 692 ms, c'est-à-dire que le premier échantillon de position du film
+	// tombe 5,7 s APRÈS le zéro de cette horloge.
+	//
+	// CE QU'IL N'EST PAS : le moment où la manche s'ouvre. Sur ce même film, les joueurs sont
+	// répliqués et se déplacent bien avant que les barrières ne tombent — l'utilisateur situe
+	// l'ouverture vers 21 s d'axe, soit ~27 s d'horloge de match. Le zéro publié ici est donc
+	// l'origine FORMELLE (création/chargement de la partie), pas le coup d'envoi jouable, et
+	// aucun champ de ce document ne porte ce dernier : rien dans le film ne le date.
+	//
+	// LA DURÉE DES STATS NE LE REMPLACE PAS : l'écart entre elle et la durée du film va de
+	// -25,6 s à +3,6 s sur les six matchs archivés, parce que la réplication des bipeds
+	// s'arrête avant la fin officielle.
+	//
+	// ABSENT quand le fil des morts n'a rien apparié : sans mort appariée, `bestDeathOffset`
+	// rend le bord de sa plage de recherche et non une mesure, et publier ce bord ferait passer
+	// « on ne sait pas » pour une horloge.
+	MatchClockZeroMS *int64 `json:"matchClockZeroMs,omitempty"`
 	// Geometry est le fond de carte : props Forge orientés (repères contextuels, pas les
 	// sols). Absent si la géométrie n'a pas été fournie au build.
 	Geometry []MapObject `json:"geometry,omitempty"`

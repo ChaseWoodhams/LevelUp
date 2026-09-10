@@ -55,7 +55,7 @@ func rebuildOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 			matchID, d.Paths.FilmChunksDir(matchID))
 	}
 
-	mapInfo, mapErr := resolveMatchMap(rec.MapName, d.Catalog)
+	mapInfo, mapErr := resolveMatchMap(ctx, rec.MapName, d.Catalog, d.MetadataDB)
 	if mapErr != nil {
 		// Still not a failure of the decoder: the map's bounds have not arrived yet, and
 		// building with another map's would be wrong by an arbitrary scale factor.

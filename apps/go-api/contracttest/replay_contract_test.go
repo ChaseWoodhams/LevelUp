@@ -88,14 +88,19 @@ var replaySchemas = []struct {
 }
 
 // wantReplayDocumentFields : le nombre de champs que l artefact publie. Ecrit ici pour que le
-// chiffre du chantier — « 22 champs publies », 23 depuis le 2026-08-05 — soit verifiable et
-// pas seulement affirme.
+// chiffre du chantier — « 22 champs publies », 23 depuis le 2026-08-05, 24 depuis le
+// 2026-09-05 — soit verifiable et pas seulement affirme.
 //
 // Le 23e est `objectives`, le calque d actions d objectif entre a l integration de
 // `feat/re-mode-score`. Ce test l a ATTRAPE : la branche publiait le champ sans que le
 // contrat le decrive, exactement le defaut qu il existe pour empecher. Contrat regenere
 // (`make openapi-gen`), jamais ecrit a la main.
-const wantReplayDocumentFields = 23
+//
+// Le 24e est `matchClockZeroMs`, qui place le zero de l horloge du MATCH sur l axe du
+// document. La frame 0 n est pas le debut de la partie — le film commence au premier
+// echantillon de position, pendant l avant-match — et ce decalage etait deja calcule par
+// l appariement des morts, puis jete.
+const wantReplayDocumentFields = 24
 
 // TestReplayContractDescribesEveryPublishedField : AUCUN CHAMP PUBLIE SANS DESCRIPTION, ET
 // AUCUNE DESCRIPTION SANS CHAMP.
@@ -132,8 +137,8 @@ func TestReplayContractDescribesEveryPublishedField(t *testing.T) {
 	}
 }
 
-// TestReplayDocumentPublishesTwentyTwoFields : le chiffre du chantier, verifie des deux cotes.
-func TestReplayDocumentPublishesTwentyTwoFields(t *testing.T) {
+// TestReplayDocumentPublishesTwentyFourFields : le chiffre du chantier, verifie des deux cotes.
+func TestReplayDocumentPublishesTwentyFourFields(t *testing.T) {
 	got := jsonFieldsOf(reflect.TypeOf(replay.ReplayDocument{}))
 	if len(got) != wantReplayDocumentFields {
 		t.Errorf("%d champ(s) publie(s) par l artefact, attendu %d : %v",

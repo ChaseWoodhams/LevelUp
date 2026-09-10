@@ -67,7 +67,7 @@ describe('isUsable', () => {
 })
 
 describe('floorSourceOf', () => {
-  it('prefers real geometry over a picture somebody lined up by hand', () => {
+  it('prefers real geometry over a picture somebody lined up by hand, by default', () => {
     expect(floorSourceOf(true, true)).toBe('structure')
     expect(floorSourceOf(true, false)).toBe('structure')
   })
@@ -78,5 +78,21 @@ describe('floorSourceOf', () => {
 
   it('falls to the grid when there is neither', () => {
     expect(floorSourceOf(false, false)).toBe('grid')
+  })
+
+  describe('preferImage — the one opt-in exception', () => {
+    it('draws the image over structure when the map has asked for it', () => {
+      expect(floorSourceOf(true, true, true)).toBe('image')
+    })
+
+    it('still refuses to draw an image that has not actually loaded', () => {
+      // The preference is not permission to lie: no image, no floor to show for one.
+      expect(floorSourceOf(true, false, true)).toBe('structure')
+    })
+
+    it('changes nothing for a map that has not opted in', () => {
+      expect(floorSourceOf(true, true, false)).toBe('structure')
+      expect(floorSourceOf(true, true, undefined)).toBe('structure')
+    })
   })
 })

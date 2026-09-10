@@ -112,8 +112,11 @@ export function useFloorImage(
     if (!ctx) return
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     // THE FALLBACK CHAIN, in one place and in one order: measured geometry, then a calibrated
-    // image, then a grid that claims nothing.
-    if (floorGrid) {
+    // image, then a grid that claims nothing — UNLESS this map's own calibration says to
+    // prefer the image, the one escape hatch `mapCalibration.floorSourceOf` also honours. Kept
+    // in the same shape as that function so the label and the pixels can never disagree.
+    const preferImage = Boolean(calibration?.preferOverStructure) && mapImage !== null
+    if (floorGrid && !preferImage) {
       drawFloorLayer(ctx, floorGrid, view, style.floor)
     } else if (calibration && mapImage) {
       drawMapImage(ctx, mapImage, calibration.world, view)

@@ -43,7 +43,7 @@ export const SUPPORTED_SCHEMA_VERSION = 2
  * put it in the same bucket as a dead server and lose that distinction.
  */
 export type ReplayPayload =
-  | { kind: 'ready'; doc: ReplayDocumentReady }
+  | { kind: 'ready'; doc: ReplayDocumentReady; matchClockZeroMs: number | null }
   | { kind: 'unsupported'; version: number }
 
 /**
@@ -59,5 +59,15 @@ export type ReplayPayload =
 export function parseReplayPayload(raw: ReplayDocument): ReplayPayload {
   const version = raw.schemaVersion
   if (version !== SUPPORTED_SCHEMA_VERSION) return { kind: 'unsupported', version }
-  return { kind: 'ready', doc: normalizeReplayDocument(raw) }
+  return {
+    kind: 'ready',
+    doc: normalizeReplayDocument(raw),
+    // READ FROM THE RAW DOCUMENT, BESIDE the normalised one rather than inside it.
+    // `normalizeReplayDocument` is a COPIED file (byte-identical to `apps/web`), so a field
+    // this viewer needs and the app does not cannot be added to its result from here — it
+    // would have to go upstream first. Carrying it alongside keeps the frontier intact and
+    // costs one field. Null, not zero: an artifact whose death feed named nothing does not
+    // know where the match clock starts, and zero would read as "it starts at frame 0".
+    matchClockZeroMs: raw.matchClockZeroMs ?? null,
+  }
 }

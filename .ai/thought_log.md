@@ -61219,3 +61219,41 @@ tests skipped without `REPLAY_FILMS`. The team read needs one missing link befor
 The nearest real gain remains `object-dead-state-component` on bipeds: it needs no header
 calibration and attacks the measured defect (12,7 % of lives unnamed, 11,5 % of shots orphaned
 as a result).
+
+
+---
+
+## [2026-09-10] Study branch: the replay and viewer work left out on 2026-09-06, committed; branch tip repaired
+
+**Status**: Complete.
+
+**Context**: `38ccdcb1b`, the tip of `feat/study-path-resolution`, did not compile
+`internal/analysis/replay`. `build.go` assigned `doc.MatchClockZeroMS` and read two return values
+from `buildProjectiles`, but the `document.go` and `projectiles.go` they need were never committed.
+The 2026-09-06 session left them out because the same files also held the uncommitted English-only
+conversion (679 modified files in the working copy). `mapImages.config.ts` likewise set
+`preferOverStructure` with nothing reading it.
+
+**Technical decision**: separate the two change sets by hunk instead of committing them together.
+This commit carries only the study/replay work: the match clock beside the replay clock, a canvas
+height taken from the scene's own shape, floor structure scoped to the play area, the per-map
+image preference, grenade throws matched to their author's biped, projectile flights cut at the
+first impossible step, lives split on a slot gap, the map name recovered from `metadata.duckdb`
+when the stats payload carries only an asset id (`sync.LookupAssetCanonicalEN` exported for it),
+and `IsFileLockError` recognising the Windows "being used by another process" wording. Five files
+mixed both sets (`document.go`, `enrich_registry.go`, `StudyReplayCanvas.tsx`, `App.test.tsx`,
+`viewer/i18n.ts`). Their committed version is the branch tip plus the study hunks only, with French
+still a live locale, so the viewer's FR table gains the match-clock strings and the commit stands
+on its own. The English match-clock label is "Match clock", not "Match time", which the scrubber
+already carries.
+
+**Results**: verified on this commit's tree checked out alone (sparse worktree, not the working
+copy). `go build ./...` ok. `go vet` ok on the touched packages. `go test` ok for
+`internal/analysis/replay/...`, `contracttest`, `cmd/study-archiver`, `cmd/study-server` and
+`internal/sync`. `go test -tags=integration -p 1` ok on `internal/sync/...` (9 packages),
+`internal/platform/duckdb` and `internal/persist`. `apps/study` typecheck ok, 418/418 tests. Without the
+lock-classification change, `cmd/study-server`'s two busy-archive tests answer 500 instead of 503 on
+Windows.
+
+**Next step**: the English-only conversion goes to its own branch and a draft PR; it does not pass
+its gates yet.

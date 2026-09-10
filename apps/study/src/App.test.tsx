@@ -153,7 +153,7 @@ describe('the sample artifact', () => {
     render(<App />)
     // The fixture runs 600 frames at 100 ms; the first death closes a life at frame 260.
     fireEvent.keyDown(window, { key: '.' })
-    expect(screen.getByLabelText('Chronomètre du match').textContent).toContain('0:26')
+    expect(screen.getByLabelText('Chronomètre du rejeu').textContent).toContain('0:26')
   })
 
   it('leaves the scrubber its own arrow keys', () => {
@@ -162,7 +162,7 @@ describe('the sample artifact', () => {
     // A range input steps itself on an arrow. Acting on it here too would be two seeks for
     // one press.
     fireEvent.keyDown(screen.getByLabelText('Temps de match'), { key: 'ArrowRight' })
-    expect(screen.getByLabelText('Chronomètre du match').textContent).toContain('0:00')
+    expect(screen.getByLabelText('Chronomètre du rejeu').textContent).toContain('0:00')
   })
 
   it('still jumps on a key the scrubber has no use for', () => {
@@ -171,7 +171,7 @@ describe('the sample artifact', () => {
     // Treating the scrubber as a text field — which its tag alone suggests — would kill every
     // shortcut for as long as the reader had touched it.
     fireEvent.keyDown(screen.getByLabelText('Temps de match'), { key: '.' })
-    expect(screen.getByLabelText('Chronomètre du match').textContent).toContain('0:26')
+    expect(screen.getByLabelText('Chronomètre du rejeu').textContent).toContain('0:26')
   })
 })
 

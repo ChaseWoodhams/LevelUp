@@ -37,7 +37,7 @@ import type { ReplayDocumentReady } from '../replay/replayNormalize'
 import { VIEWER_TEXT } from './i18n'
 import type { PaintLayers } from './paintReplay'
 import { DEFAULT_TRAIL_WINDOW_MS, TRAIL_WINDOW_MS } from './trailLogic'
-import { CANVAS_HEIGHT, useReplayPainter, type FrameAnchor } from './useReplayPainter'
+import { useReplayPainter, type FrameAnchor } from './useReplayPainter'
 
 interface StudyReplayCanvasProps {
   doc: ReplayDocumentReady
@@ -133,7 +133,7 @@ export function StudyReplayCanvas({
         <canvas
           ref={painter.canvasRef}
           className="mx-auto block"
-          style={{ width: painter.renderWidth || '100%', height: CANVAS_HEIGHT }}
+          style={{ width: painter.renderWidth || '100%', height: painter.renderHeight }}
         />
         <p className="mt-2 text-xs text-muted-foreground">
           {t.note}

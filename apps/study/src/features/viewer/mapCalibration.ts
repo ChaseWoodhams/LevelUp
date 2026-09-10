@@ -43,6 +43,22 @@ export interface MapImageCalibration {
   image: string
   /** World coordinates of the image's edges. `minY` is its BOTTOM: the world's +Y is up. */
   world: WorldRect
+  /**
+   * OVERRIDE THE DEFAULT PRECEDENCE for this one map: draw the image even on a match that
+   * carries reconstructed structure. Absent (or false) everywhere else, on purpose — the
+   * default stays "measured data wins", and this is the one escape hatch from it.
+   *
+   * WHY AN ESCAPE HATCH EXISTS AT ALL. The default is right on the evidence it was built on
+   * (structure measured against real trajectories, 8 mm median error) — but that evidence is
+   * about ACCURACY, not LEGIBILITY, and the two came apart on the first complex real map this
+   * app rendered: a dense BSP decomposes into hundreds of raw rectangles with no room outlines,
+   * doors or corridors drawn in, and the result reads as a jumble even when every rectangle is
+   * placed correctly. An operator who has gone to the trouble of calibrating an image for a
+   * SPECIFIC map has made a deliberate legibility judgement this app cannot make for them —
+   * unlike the ordinary case (no calibration at all), which stays exactly as accurate-by-default
+   * as it always was.
+   */
+  preferOverStructure?: boolean
 }
 
 /** The calibration file's shape: one entry per map MODULE, which is the archive's stable key. */
@@ -99,12 +115,23 @@ export function isUsable(entry: MapImageCalibration | null | undefined): boolean
 /**
  * floorSourceOf picks the floor, in the one order the whole app agrees on.
  *
- * REAL GEOMETRY WINS, ALWAYS. A reconstructed floor is the same data that carries the
+ * MEASURED DATA WINS BY DEFAULT. A reconstructed floor is the same data that carries the
  * trajectories — measured against them, median error 8 mm — while a calibrated image is a
- * picture somebody lined up by hand. Where both exist, the one that was measured is the one
- * drawn.
+ * picture somebody lined up by hand. Where both exist and NOBODY has said otherwise, the one
+ * that was measured is the one drawn.
+ *
+ * `preferImage` IS THE ONE EXCEPTION, AND IT IS OPT-IN PER MAP (cf. `MapImageCalibration`'s own
+ * field). It exists for legibility, not accuracy: a dense real BSP can decompose into hundreds
+ * of raw rectangles with no rooms or corridors drawn in, and an operator who calibrated an image
+ * for THAT map has made a deliberate call this function is not in a position to second-guess.
+ * Every OTHER map is unaffected — the flag defaults to false/absent, so nothing changes for a map
+ * nobody has made that call for.
  */
-export function floorSourceOf(hasStructure: boolean, imageReady: boolean): FloorSource {
-  if (hasStructure) return 'structure'
+export function floorSourceOf(
+  hasStructure: boolean,
+  imageReady: boolean,
+  preferImage = false,
+): FloorSource {
+  if (hasStructure && !(preferImage && imageReady)) return 'structure'
   return imageReady ? 'image' : 'grid'
 }

@@ -66,7 +66,8 @@ func IsFileLockError(err error) bool {
 		// locale OS (le message Win FR "utilisé par un autre processus" varie, pas lui).
 		// Sans ça, le boot Air laissant un tmp/server.exe résiduel produit un WARN
 		// par-joueur dans spartan_cron au lieu de l'ERROR agrégée. Cf. 2026-06-27.
-		strings.Contains(s, "File is already open in")
+		strings.Contains(s, "File is already open in") ||
+		strings.Contains(strings.ToLower(s), "process cannot access the file because it is being used by another process")
 }
 
 // Reopen ferme la connexion actuelle et en ouvre une nouvelle avec les

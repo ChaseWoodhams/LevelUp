@@ -81,7 +81,7 @@ func TestFetchOne_RealFilmEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("fixture stats unreadable: %v", err)
 	}
-	if _, err := resolveMatchMap(facts.MapName, d.Catalog); err != nil {
+	if _, err := resolveMatchMap(context.Background(), facts.MapName, d.Catalog, d.MetadataDB); err != nil {
 		t.Skipf("fixture map not in the versioned catalogue: %v", err)
 	}
 

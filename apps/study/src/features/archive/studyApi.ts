@@ -118,6 +118,8 @@ export type MatchLoad =
   | {
       kind: 'ready'
       doc: ReplayPayloadReady['doc']
+      /** Where the MATCH clock's zero sits on the document's axis, in ms; null = not measured. */
+      matchClockZeroMs: ReplayPayloadReady['matchClockZeroMs']
       scoreboard: MatchScoreboardRow[]
       /** The archive's row for this match, or null when it could not be read (cf. below). */
       summary: MatchSummary | null
@@ -172,6 +174,7 @@ export async function loadArchivedMatch(
   return {
     kind: 'ready',
     doc: payload.doc,
+    matchClockZeroMs: payload.matchClockZeroMs,
     scoreboard: rows.map(toScoreboardRow),
     summary: await getSummaryOrNull(doFetch, matchId, init.signal),
   }

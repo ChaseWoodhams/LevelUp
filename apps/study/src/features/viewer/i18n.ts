@@ -26,6 +26,10 @@ interface ViewerText {
    * se lit, l'autre se manipule.
    */
   clock: string
+  /** L'heure de l'horloge du MATCH, distincte de la position sur l'axe du document. */
+  matchClock: string
+  matchClockLabel: string
+  matchClockHint: string
   /** Transport. */
   stepBack: string
   stepForward: string
@@ -73,7 +77,12 @@ interface ViewerText {
 
 export const VIEWER_TEXT: Record<Locale, ViewerText> = {
   fr: {
-    clock: 'Chronomètre du match',
+    clock: 'Chronomètre du rejeu',
+    matchClock: 'Heure de match',
+    matchClockLabel: 'match',
+    matchClockHint:
+      'Heure sur l’horloge du match. L’image 0 du rejeu n’est pas le début de la partie : le film ' +
+      'commence à la première position répliquée, pendant l’avant-match.',
     stepBack: 'Image précédente',
     stepForward: 'Image suivante',
     stepHint: 'Avance d’une image. Avec Maj : une seconde de match.',
@@ -121,7 +130,12 @@ export const VIEWER_TEXT: Record<Locale, ViewerText> = {
     },
   },
   en: {
-    clock: 'Match clock',
+    clock: 'Replay clock',
+    matchClock: 'Match clock',
+    matchClockLabel: 'match',
+    matchClockHint:
+      'Time on the match clock. Frame 0 of the replay is not the start of the match: the film ' +
+      'begins at the first replicated position, during the pre-match.',
     stepBack: 'Previous frame',
     stepForward: 'Next frame',
     stepHint: 'Steps one frame. With Shift: one second of match time.',

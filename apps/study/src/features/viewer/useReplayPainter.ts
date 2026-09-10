@@ -25,6 +25,8 @@ import { fitWidth, isAliveAt, msToFrames, sceneBounds } from '../replay/replayLo
 import type { ReplayDocumentReady } from '../replay/replayNormalize'
 import type { CanvasView, MarkerTiming } from '../replay/replayMarkers'
 
+import { sceneCanvasHeight } from './canvasFraming'
+import { floorSurfacesOf } from './floorScope'
 import { arcThrowers, ARC_ORIGIN_WINDOW_MS } from './grenadeArcs'
 import {
   calibrationFor,
@@ -49,7 +51,6 @@ const GRENADE_TOKEN: SemanticToken = 'info'
 /** How long a point event lingers, in real time. 1.4 s is the convention the origin settled on. */
 const EVENT_HOLD_MS = 1_400
 
-export const CANVAS_HEIGHT = 480
 const CANVAS_PAD = 24
 
 /**
@@ -114,6 +115,8 @@ export interface ReplayPainter {
   aliveRef: React.RefObject<HTMLSpanElement | null>
   /** Drawing width, 0 until the container has been measured. */
   renderWidth: number
+  /** Drawing height — the scene's own, cf. `canvasFraming.ts`. Never 0. */
+  renderHeight: number
   /** Whether this map has enough relief for a floor filter to mean anything. */
   hasFloors: boolean
   /** Which floor is actually under the match — what the reader is told, cf. `mapCalibration`. */
@@ -183,7 +186,7 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     const dpr = window.devicePixelRatio || 1
-    sizeCanvas(canvas, ctx, scene.view.width, CANVAS_HEIGHT, dpr)
+    sizeCanvas(canvas, ctx, scene.view.width, scene.view.height, dpr)
     const frame = frameRef.current
     paintReplay(ctx, doc, {
       view: scene.view,
@@ -219,7 +222,7 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
   // replaces: it made every layer toggle re-rasterise the whole grid.
   useFloorImage(floorImage, {
     view: scene.view,
-    height: CANVAS_HEIGHT,
+    height: scene.view.height,
     floorGrid: scene.floorGrid,
     calibration: scene.calibration,
     mapImage: scene.mapImage,
@@ -252,6 +255,7 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
     canvasRef,
     aliveRef,
     renderWidth: scene.view.width,
+    renderHeight: scene.view.height,
     hasFloors: scene.hasFloors,
     floorSource: scene.floorSource,
   }
@@ -329,21 +333,32 @@ function useReplayScene(
   calibration: MapImageCalibration | null,
   mapImage: HTMLImageElement | null,
 ): ReplayScene {
-  const floorGrid = useMemo(
-    () => (doc.structure.length > 0 ? buildFloorGrid(doc.structure, doc.bounds) : null),
-    [doc.structure, doc.bounds],
-  )
+  const floorGrid = useMemo(() => {
+    // A real match's structure is not automatically confined to where players actually
+    // went — cf. floorScope.ts, whose header measures how much of it was not, on the
+    // first real capture this app rendered. buildFloorGrid clamps an out-of-range
+    // coordinate onto the nearest edge cell rather than dropping it, so an unfiltered
+    // list does not fail loudly: it piles distant geometry onto the grid's border.
+    const onFloor = floorSurfacesOf(doc.structure, doc.bounds)
+    return onFloor.length > 0 ? buildFloorGrid(onFloor, doc.bounds) : null
+  }, [doc.structure, doc.bounds])
   const bounds = useMemo(() => sceneBounds(doc), [doc])
-  /** Drawing width = the scene's ratio at a fixed height, which avoids vast side margins. */
-  const view = useMemo<CanvasView>(
-    () => ({
+  /**
+   * Height first, from the scene's OWN shape — not a fixed constant — then width fit to
+   * that height. A scene at least as wide as it is tall gets exactly what every scene
+   * rendered at before this; only a portrait one grows past it. Cf. canvasFraming.ts for
+   * why that has to be a branch on the scene's own aspect ratio and not a formula that
+   * merely clamps toward it.
+   */
+  const view = useMemo<CanvasView>(() => {
+    const height = sceneCanvasHeight(bounds, width, CANVAS_PAD)
+    return {
       bounds,
-      width: width === 0 ? 0 : Math.floor(fitWidth(bounds, width, CANVAS_HEIGHT, CANVAS_PAD)),
-      height: CANVAS_HEIGHT,
+      width: width === 0 ? 0 : Math.floor(fitWidth(bounds, width, height, CANVAS_PAD)),
+      height,
       pad: CANVAS_PAD,
-    }),
-    [bounds, width],
-  )
+    }
+  }, [bounds, width])
   const zRange = useMemo(
     () => ({ min: doc.bounds.minZ ?? 0, max: doc.bounds.maxZ ?? 0 }),
     [doc.bounds.minZ, doc.bounds.maxZ],
@@ -389,7 +404,7 @@ function useReplayScene(
       floorGrid,
       mapImage,
       calibration,
-      floorSource: floorSourceOf(floorGrid !== null, mapImage !== null),
+      floorSource: floorSourceOf(floorGrid !== null, mapImage !== null, calibration?.preferOverStructure),
     }),
     [view, zRange, timing, eventHoldFrames, throwers, floorGrid, mapImage, calibration],
   )

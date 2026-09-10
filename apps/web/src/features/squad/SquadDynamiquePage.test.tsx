@@ -68,7 +68,7 @@ describe('SquadDynamiquePage', () => {
   it('monte le bloc « Premier frag / première mort » (état vide sans données)', () => {
     mockSquadContext({})
     renderWithProviders(<SquadDynamiquePage />)
-    expect(screen.getByText('Premier frag / première mort')).toBeInTheDocument()
+    expect(screen.getByText('First kill / first death')).toBeInTheDocument()
   })
 
   it('alimente les bandes depuis first_blood du payload (une bande par joueur)', () => {
@@ -90,9 +90,9 @@ describe('SquadDynamiquePage', () => {
     })
     renderWithProviders(<SquadDynamiquePage />)
     // Le chart est rendu (pas l'état vide) dès qu'une bande porte un événement.
-    expect(screen.getByText('Premier frag / première mort')).toBeInTheDocument()
+    expect(screen.getByText('First kill / first death')).toBeInTheDocument()
     expect(
-      screen.queryByText('Aucun premier frag ni première mort sur ce périmètre'),
+      screen.queryByText('No first kill or first death in this scope'),
     ).not.toBeInTheDocument()
   })
 

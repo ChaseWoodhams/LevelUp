@@ -32,10 +32,10 @@ describe('HomeRecentPlaylistsCard', () => {
 
     expect(screen.getByText('Ranked Slayer')).toBeInTheDocument()
     expect(screen.getByText('Quick Play')).toBeInTheDocument()
-    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('En placement (4/10)')
+    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('In placement (4/10)')
     const unrankedImg = screen.getByTestId('home-rank-unranked-image') as HTMLImageElement
     expect(unrankedImg.getAttribute('src')).toBe('/static/ranks/halo_infinite/unranked_4.png')
-    expect(screen.getByText('Sans classement')).toBeInTheDocument()
+    expect(screen.getByText('Unranked')).toBeInTheDocument()
     expect(screen.getAllByTestId('home-rank-neutral-placeholder')).toHaveLength(1)
   })
 
@@ -55,7 +55,7 @@ describe('HomeRecentPlaylistsCard', () => {
       />,
     )
 
-    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('En placement')
+    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('In placement')
     expect(screen.getByTestId('home-rank-unranked-label').textContent).not.toMatch(/\d+\/10/)
   })
 
@@ -65,7 +65,7 @@ describe('HomeRecentPlaylistsCard', () => {
       <HomeRecentPlaylistsCard
         recentPlaylistRanks={[
           {
-            playlist_name: 'Assassin classé',
+            playlist_name: 'Ranked Slayer',
             is_ranked: true,
             rating_type: 'CSR',
             rating_value: null,
@@ -78,7 +78,7 @@ describe('HomeRecentPlaylistsCard', () => {
       />,
     )
 
-    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('En placement (3/5)')
+    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('In placement (3/5)')
     const img = screen.getByTestId('home-rank-unranked-image') as HTMLImageElement
     expect(img.getAttribute('src')).toBe('/static/ranks/halo_infinite/unranked_6.png')
   })
@@ -101,7 +101,7 @@ describe('HomeRecentPlaylistsCard', () => {
       />,
     )
 
-    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('En placement (4/10)')
+    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('In placement (4/10)')
   })
 
   it('fallback à placement_total=10 quand le backend ne fournit pas le champ (back-compat legacy)', () => {
@@ -122,7 +122,7 @@ describe('HomeRecentPlaylistsCard', () => {
       />,
     )
 
-    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('En placement (3/10)')
+    expect(screen.getByTestId('home-rank-unranked-label')).toHaveTextContent('In placement (3/10)')
   })
 
   // GH2-A3 : une playlist non résolue côté backend (asset_translations sans entrée
@@ -150,6 +150,6 @@ describe('HomeRecentPlaylistsCard', () => {
     // Le UUID ne doit JAMAIS apparaître à l'écran.
     expect(screen.queryByText(uuid)).not.toBeInTheDocument()
     // Libellé neutre localisé (FR par défaut dans les tests).
-    expect(screen.getByTestId('home-recent-playlist-name')).toHaveTextContent('Sélection inconnue')
+    expect(screen.getByTestId('home-recent-playlist-name')).toHaveTextContent('Unknown playlist')
   })
 })

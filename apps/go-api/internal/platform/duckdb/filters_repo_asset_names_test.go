@@ -84,12 +84,14 @@ func TestFiltersRepo_ApplyAssetNamesFromMetadata_H5Path(t *testing.T) {
 		t.Fatalf("attendu 1 row, obtenu %d", len(rows))
 	}
 	m := rows[0]
+	// English-only: the fr-FR rows seeded above never surface; the legacy *FR fields
+	// carry the English name.
 	assertFilterName(t, "MapName", m.MapName, "Truth")
-	assertFilterName(t, "MapNameFR", m.MapNameFR, "Vérité")
+	assertFilterName(t, "MapNameFR", m.MapNameFR, "Truth")
 	assertFilterName(t, "PlaylistNameEN", m.PlaylistNameEN, "Team Arena")
-	assertFilterName(t, "PlaylistName", m.PlaylistName, "Arène en équipe")
+	assertFilterName(t, "PlaylistName", m.PlaylistName, "Team Arena")
 	assertFilterName(t, "GameVariantName", m.GameVariantName, "Slayer")
-	assertFilterName(t, "GameVariantNameFR", m.GameVariantNameFR, "Assassin")
+	assertFilterName(t, "GameVariantNameFR", m.GameVariantNameFR, "Slayer")
 }
 
 // TestFiltersRepo_ApplyAssetNamesFromMetadata_ENOnlyFallsBackToEN : un id sans

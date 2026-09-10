@@ -14,7 +14,7 @@ describe('resolveTitle — arrondi des params numériques (enrichParams)', () =>
       },
       'en',
     )
-    expect(title).toBe('À 12.85 pts de Or III')
+    expect(title).toBe('12.85 pts from Gold III')
   })
 
   it('arrondit gap à 2 décimales dans notif.lusr_tier_approach.title (en)', () => {
@@ -33,7 +33,7 @@ describe('resolveTitle — arrondi des params numériques (enrichParams)', () =>
       { title_key: 'notif.lusr_tier_approach.title', params: { gap: 5, next_tier_name: 'Platine I' } },
       'en',
     )
-    expect(title).toBe('À 5 pts de Platine I')
+    expect(title).toBe('5 pts from Platinum I')
   })
 
   it('arrondit toujours value/target/previous_value (non-régression)', () => {
@@ -92,9 +92,9 @@ describe('enrichParams — arrondi défensif des μ LUSR (V72 lot découvertes)'
 // tier/previous_tier du composant CSR de la signature « rating_type|tier|sub_tier ».
 // Sans enrichissement, une UI française annonçait « Gold I ».
 describe('enrichParams — noms de palier localisés', () => {
-  it('traduit next_tier_name en FR en preservant le sous-palier', () => {
-    expect(enrichParams({ next_tier_name: 'Gold I' }, 'en')?.next_tier_name).toBe('Or I')
-    expect(enrichParams({ next_tier_name: 'Gold' }, 'en')?.next_tier_name).toBe('Or')
+  it('maps a legacy French next_tier_name to English, keeping the sub-tier', () => {
+    expect(enrichParams({ next_tier_name: 'Or I' }, 'en')?.next_tier_name).toBe('Gold I')
+    expect(enrichParams({ next_tier_name: 'Or' }, 'en')?.next_tier_name).toBe('Gold')
   })
 
   it('laisse next_tier_name en anglais sous locale EN', () => {
@@ -103,8 +103,8 @@ describe('enrichParams — noms de palier localisés', () => {
 
   it('traduit tier et previous_tier de notif.skill_tier', () => {
     const out = enrichParams({ tier: 'Platinum', previous_tier: 'Gold' }, 'en')
-    expect(out?.tier).toBe('Platine')
-    expect(out?.previous_tier).toBe('Or')
+    expect(out?.tier).toBe('Platinum')
+    expect(out?.previous_tier).toBe('Gold')
   })
 
   it('laisse inchange un nom de palier inconnu et les valeurs non-string', () => {
@@ -121,7 +121,7 @@ describe('enrichParams — noms de palier localisés', () => {
       },
       'en',
     )
-    expect(title).toContain('Or III')
-    expect(title).not.toContain('Gold')
+    expect(title).toContain('Gold III')
+    expect(title).not.toContain('Or III')
   })
 })

@@ -172,9 +172,9 @@ func TestAchievementsIntegration_FullFlow(t *testing.T) {
 				t.Errorf("def05 TargetProgress: attendu %d", target)
 			}
 		}
-		// Vérifier que les noms bilingues sont préservés
-		if a.AchievementID == "def01" && (a.NameEN != "Boot Camp" || a.NameFR != "Camp d'entraînement") {
-			t.Errorf("def01 noms bilingues incorrects: EN=%q FR=%q", a.NameEN, a.NameFR)
+		// English-only: the English name is served, and the legacy NameFR mirrors it.
+		if a.AchievementID == "def01" && (a.NameEN != "Boot Camp" || a.NameFR != "Boot Camp") {
+			t.Errorf("def01 names: EN=%q FR=%q, want both 'Boot Camp'", a.NameEN, a.NameFR)
 		}
 	}
 }

@@ -74,13 +74,13 @@ function makeSquadScore(): SquadScoreCard {
 
 beforeEach(() => {
   useAppShellStore.setState({ locale: 'en' })
-  // Mock useFieldMappings : on retourne les libellés outcomes FR.
+  // Mock useFieldMappings: returns the outcome labels.
   vi.spyOn(fieldMappingsModule, 'useOutcomeLabel').mockImplementation((key: string) => {
     const map: Record<string, string> = {
-      win: 'Victoire',
-      loss: 'Défaite',
-      tie: 'Égalité',
-      dnf: 'Abandon',
+      win: 'Win',
+      loss: 'Loss',
+      tie: 'Tie',
+      dnf: 'DNF',
     }
     return map[key] ?? key
   })
@@ -100,16 +100,16 @@ describe('SessionBriefing — mode solo', () => {
     // Verdict band : la Results bar + mini-cards Matchs/Durée sont toujours
     // rendues (refacto 2026-05 : SquadVerdict toujours monté, sections team
     // card / player cards conditionnelles).
-    expect(screen.getByText('Matchs joués')).toBeInTheDocument()
-    expect(screen.getByText('Durée totale')).toBeInTheDocument()
+    expect(screen.getByText('Matches played')).toBeInTheDocument()
+    expect(screen.getByText('Total duration')).toBeInTheDocument()
     // La durée moyenne/match est désormais inline-sub de la card Matchs (10:54)
     expect(screen.getByText(/10min54\/match/)).toBeInTheDocument()
     // Pas de team card en solo (squadScore absent)
-    expect(screen.queryByText(/Score d'équipe/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Team score/)).not.toBeInTheDocument()
     // Pas de trend hint en solo (kpisByXuid absent → pas de comparaison équipe)
-    expect(screen.queryByText(/vs moyenne d'équipe/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/vs team average/)).not.toBeInTheDocument()
     // KPI évaluatifs affichés (KpiGrid)
-    expect(screen.getByText('Frags par match')).toBeInTheDocument()
+    expect(screen.getByText('Frags per match')).toBeInTheDocument()
     expect(screen.getByText('8.70')).toBeInTheDocument()
   })
 })
@@ -135,12 +135,12 @@ describe('SessionBriefing — mode squad', () => {
     }
     renderWithProviders(<SessionBriefing kpis={kpis} squad={squad} />)
 
-    expect(screen.getByText(/Score d'équipe/)).toBeInTheDocument()
+    expect(screen.getByText(/Team score/)).toBeInTheDocument()
     expect(screen.getByText('Spartan-117')).toBeInTheDocument()
     expect(screen.getByText('Chocoboflor')).toBeInTheDocument()
     expect(screen.getByText('Ghost')).toBeInTheDocument()
     // Trend hint visible quand teamAvg fourni
-    expect(screen.getByText(/vs moyenne d'équipe/)).toBeInTheDocument()
+    expect(screen.getByText(/vs team average/)).toBeInTheDocument()
   })
 
   it('drill-down : click sur Chocoboflor → KpiGrid affiche ses stats + reset bar visible', () => {
@@ -172,8 +172,8 @@ describe('SessionBriefing — mode squad', () => {
     // Désormais 6.50 (kpis de Chocoboflor)
     expect(screen.getByText('6.50')).toBeInTheDocument()
     // Reset bar visible
-    expect(screen.getByText(/Vue active : Chocoboflor/)).toBeInTheDocument()
-    expect(screen.getByText(/revenir à mes stats/)).toBeInTheDocument()
+    expect(screen.getByText(/Viewing: Chocoboflor/)).toBeInTheDocument()
+    expect(screen.getByText(/back to my stats/)).toBeInTheDocument()
   })
 
   it('reset drill-down : click sur ✕ → retour à activeXuid', () => {
@@ -199,9 +199,9 @@ describe('SessionBriefing — mode squad', () => {
     expect(screen.getByText('6.50')).toBeInTheDocument()
 
     // Reset
-    fireEvent.click(screen.getByText(/revenir à mes stats/))
+    fireEvent.click(screen.getByText(/back to my stats/))
     expect(screen.getByText('8.70')).toBeInTheDocument()
-    expect(screen.queryByText(/Vue active : Chocoboflor/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Viewing: Chocoboflor/)).not.toBeInTheDocument()
   })
 })
 
@@ -242,7 +242,7 @@ describe('SessionBriefing — trends', () => {
 })
 
 describe('SessionBriefing — outcomes pluralisation', () => {
-  it('rend "1 Victoire" (singulier) et "7 Défaites" (pluriel) — squad mode', () => {
+  it('renders "1 Win" (singular) and "7 Losses" (plural) — squad mode', () => {
     // La Results bar avec libellés outcomes est désormais dans SquadVerdict
     // (squad mode uniquement) ; en solo, pas de Results bar.
     const kpis = makeKPIs({ outcomes: { wins: 1, losses: 7, ties: 0, dnf: 0 } })
@@ -254,8 +254,8 @@ describe('SessionBriefing — outcomes pluralisation', () => {
       activeXuid: 'xuid-me',
     }
     renderWithProviders(<SessionBriefing kpis={kpis} squad={squad} />)
-    expect(screen.getByText(/Victoire\b/)).toBeInTheDocument()
-    expect(screen.getByText(/Défaites\b/)).toBeInTheDocument()
+    expect(screen.getByText(/Win\b/)).toBeInTheDocument()
+    expect(screen.getByText(/Losses\b/)).toBeInTheDocument()
   })
 })
 
@@ -263,8 +263,8 @@ describe('SessionBriefing — placement Matchs/Durée selon mode', () => {
   it('mode solo : Matchs joués + Durée totale visibles dans le KpiGrid', () => {
     const kpis = makeKPIs({ matches_count: 12, total_play_seconds: 6540, avg_match_seconds: 654 })
     renderWithProviders(<SessionBriefing kpis={kpis} />)
-    expect(screen.getByText('Matchs joués')).toBeInTheDocument()
-    expect(screen.getByText('Durée totale')).toBeInTheDocument()
+    expect(screen.getByText('Matches played')).toBeInTheDocument()
+    expect(screen.getByText('Total duration')).toBeInTheDocument()
     expect(screen.getByText('12')).toBeInTheDocument()
     expect(screen.getByText(/10min54\/match/)).toBeInTheDocument()
   })
@@ -280,8 +280,8 @@ describe('SessionBriefing — placement Matchs/Durée selon mode', () => {
     }
     renderWithProviders(<SessionBriefing kpis={kpis} squad={squad} />)
     // Les labels existent (dans la verdict bar) mais pas en double.
-    expect(screen.getAllByText('Matchs joués')).toHaveLength(1)
-    expect(screen.getAllByText('Durée totale')).toHaveLength(1)
+    expect(screen.getAllByText('Matches played')).toHaveLength(1)
+    expect(screen.getAllByText('Total duration')).toHaveLength(1)
     // Valeurs visibles (rendues dans la verdict bar).
     expect(screen.getByText('12')).toBeInTheDocument()
     expect(screen.getByText(/10min54\/match/)).toBeInTheDocument()
@@ -292,14 +292,14 @@ describe('SessionBriefing — Delta rang (card conditionnelle)', () => {
   it('rend "Delta CSR" + "+27" quand rank_delta.kind=csr et value=27 (entier)', () => {
     const kpis = makeKPIs({ rank_delta: { kind: 'csr', value: 27, count: 3 } })
     renderWithProviders(<SessionBriefing kpis={kpis} />)
-    expect(screen.getByText('Delta CSR')).toBeInTheDocument()
+    expect(screen.getByText('CSR change')).toBeInTheDocument()
     expect(screen.getByText('+27')).toBeInTheDocument()
   })
 
   it('rend "Delta LUSR" + "−0.02" quand rank_delta.kind=lusr et value<0 (2 décimales)', () => {
     const kpis = makeKPIs({ rank_delta: { kind: 'lusr', value: -0.02, count: 2 } })
     renderWithProviders(<SessionBriefing kpis={kpis} />)
-    expect(screen.getByText('Delta LUSR')).toBeInTheDocument()
+    expect(screen.getByText('LUSR change')).toBeInTheDocument()
     expect(screen.getByText('−0.02')).toBeInTheDocument()
   })
 
@@ -312,8 +312,8 @@ describe('SessionBriefing — Delta rang (card conditionnelle)', () => {
   it("n'ajoute PAS la card si rank_delta absent", () => {
     const kpis = makeKPIs() // pas de rank_delta
     renderWithProviders(<SessionBriefing kpis={kpis} />)
-    expect(screen.queryByText(/Delta CSR/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/Delta LUSR/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/CSR change/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/LUSR change/)).not.toBeInTheDocument()
   })
 })
 

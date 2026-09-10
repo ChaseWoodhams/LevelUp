@@ -42,7 +42,7 @@ describe('buildLusrSeries', () => {
     )
     expect(series).toHaveLength(1)
     const meta = series[0].meta as { label: string; groupKey: string }
-    expect(meta.label).toBe('Arène (LUSR)')
+    expect(meta.label).toBe('Arena (LUSR)')
     expect(meta.groupKey).toBe('arena')
   })
 

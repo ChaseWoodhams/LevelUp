@@ -37,7 +37,7 @@ describe('MedalCard', () => {
     expect(container.querySelector('[aria-label="Jamais obtenue"]')).toBeTruthy()
     expect(container.querySelector('.opacity-60')).toBeTruthy()
     // Rareté Halo Infinite (heroic) → pastille affichée.
-    expect(screen.getByText('Héroïque')).toBeTruthy()
+    expect(screen.getByText('Heroic')).toBeTruthy()
   })
 
   it('count>0 : compteur en token foreground (pas destructive) + aria « obtenue N fois »', () => {
@@ -48,14 +48,14 @@ describe('MedalCard', () => {
     expect(counter.className).toContain('text-foreground')
     expect(counter.className).not.toContain('text-destructive')
     expect(container.querySelector('[aria-label="Obtenue 5 fois"]')).toBeTruthy()
-    expect(screen.getByText('Légendaire')).toBeTruthy()
+    expect(screen.getByText('Legendary')).toBeTruthy()
   })
 
   it('Halo 5 (difficulty_key numérique) : AUCUNE pastille de rareté factice', () => {
     render(<MedalCard item={medal({ count: 3, difficulty_key: '2', name: 'Assassinat' })} locale="en" />)
     expect(screen.getByText('3')).toBeTruthy()
-    expect(screen.queryByText('Héroïque')).toBeNull()
-    expect(screen.queryByText('Légendaire')).toBeNull()
+    expect(screen.queryByText('Heroic')).toBeNull()
+    expect(screen.queryByText('Legendary')).toBeNull()
     expect(screen.queryByText('Mythique')).toBeNull()
     expect(screen.queryByText('Normale')).toBeNull()
   })

@@ -12,7 +12,7 @@ describe('adminRelativeTime', () => {
   })
 
   it('couvre les bornes minute/heure/jour en FR', () => {
-    expect(adminRelativeTime('2026-06-11T11:59:50Z', 'en', now)).toBe("à l'instant")
+    expect(adminRelativeTime('2026-06-11T11:59:50Z', 'en', now)).toBe("just now")
     expect(adminRelativeTime('2026-06-11T11:45:00Z', 'en', now)).toBe('il y a 15 min')
     expect(adminRelativeTime('2026-06-11T09:00:00Z', 'en', now)).toBe('il y a 3 h')
     expect(adminRelativeTime('2026-06-09T12:00:00Z', 'en', now)).toBe('il y a 2 j')

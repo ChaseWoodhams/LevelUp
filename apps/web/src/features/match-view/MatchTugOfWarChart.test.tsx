@@ -111,7 +111,7 @@ describe('MatchTugOfWarChart — tooltips (W2)', () => {
     // combatMomentumDelta FR = 'Écart' ; bin 0 : delta +3 en faveur de « Mon équipe ».
     expect(tip).toContain('Écart')
     expect(tip).toContain('+3')
-    expect(tip).toContain('Mon équipe')
+    expect(tip).toContain('My team')
     // Ce n'est PAS un tip per-kill.
     expect(tip).not.toContain('0:01')
   })

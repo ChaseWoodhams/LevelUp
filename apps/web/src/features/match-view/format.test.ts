@@ -6,8 +6,8 @@ import { buildMatchHeadingStr } from './format'
 
 describe('buildMatchHeadingStr', () => {
   it('fr : assemble "Mode sur Carte" quand les deux sont présents', () => {
-    expect(buildMatchHeadingStr('Forbidden', 'Capture du drapeau', 'en')).toBe(
-      'Capture du drapeau sur Forbidden',
+    expect(buildMatchHeadingStr('Forbidden', 'Capture the Flag', 'en')).toBe(
+      'Capture the Flag on Forbidden',
     )
   })
 

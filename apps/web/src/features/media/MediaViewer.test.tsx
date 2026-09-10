@@ -118,7 +118,7 @@ describe('MediaThumbnailCard — affichage map / fallback match', () => {
       />,
     )
     expect(screen.getByText('Aquarius')).toBeInTheDocument()
-    expect(screen.queryByText(/Pas de match associé/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/No associated match/)).not.toBeInTheDocument()
   })
 
   it('affiche "Pas de match associé" (FR) quand match_id est null', () => {
@@ -129,7 +129,7 @@ describe('MediaThumbnailCard — affichage map / fallback match', () => {
         onOpen={vi.fn()}
       />,
     )
-    expect(screen.getByText('Pas de match associé')).toBeInTheDocument()
+    expect(screen.getByText('No associated match')).toBeInTheDocument()
   })
 
   it('affiche "No associated match" (EN) quand match_id est null et locale=en', () => {
@@ -155,7 +155,7 @@ describe('MediaThumbnailCard — affichage map / fallback match', () => {
         onOpen={vi.fn()}
       />,
     )
-    expect(screen.queryByText(/Pas de match associé/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/No associated match/)).not.toBeInTheDocument()
     expect(screen.queryByText(/No associated match/)).not.toBeInTheDocument()
   })
 
@@ -171,7 +171,7 @@ describe('MediaThumbnailCard — affichage map / fallback match', () => {
         currentMatchId="match-42"
       />,
     )
-    expect(screen.queryByText(/Carte inconnue/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Unknown map/)).not.toBeInTheDocument()
   })
 
   it('affiche "Carte inconnue" dans la galerie (média d\'un autre match, map null)', () => {
@@ -185,7 +185,7 @@ describe('MediaThumbnailCard — affichage map / fallback match', () => {
         currentMatchId="other-match"
       />,
     )
-    expect(screen.getByText(/Carte inconnue/)).toBeInTheDocument()
+    expect(screen.getByText(/Unknown map/)).toBeInTheDocument()
   })
 })
 
@@ -205,7 +205,7 @@ describe('MediaThumbnailCard — icône "ouvrir le match"', () => {
         playerSlug="myGT"
       />,
     )
-    const link = screen.getByRole('link', { name: /Ouvrir.*match/ })
+    const link = screen.getByRole('link', { name: /Open.*match/ })
     expect(link).toBeInTheDocument()
     // Lien PLEINE PAGE title-scoped (lot 2-C) : titleSlug = défaut store 'halo_infinite'.
     expect(link).toHaveAttribute('href', '/t/halo_infinite/players/myGT/matches/match-42')
@@ -221,7 +221,7 @@ describe('MediaThumbnailCard — icône "ouvrir le match"', () => {
         currentMatchId="match-42"
       />,
     )
-    expect(screen.queryByRole('link', { name: /Ouvrir.*match/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Open.*match/ })).not.toBeInTheDocument()
   })
 
   it('masque l\'icône quand playerSlug est absent', () => {
@@ -232,7 +232,7 @@ describe('MediaThumbnailCard — icône "ouvrir le match"', () => {
         onOpen={vi.fn()}
       />,
     )
-    expect(screen.queryByRole('link', { name: /Ouvrir.*match/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Open.*match/ })).not.toBeInTheDocument()
   })
 
   it('le clic sur l\'icône ne déclenche pas onOpen (stopPropagation)', () => {
@@ -245,7 +245,7 @@ describe('MediaThumbnailCard — icône "ouvrir le match"', () => {
         playerSlug="myGT"
       />,
     )
-    const link = screen.getByRole('link', { name: /Ouvrir.*match/ })
+    const link = screen.getByRole('link', { name: /Open.*match/ })
     // preventDefault() pour éviter la navigation jsdom, stopPropagation() est appelé par le composant
     link.addEventListener('click', (e) => e.preventDefault())
     link.click()
@@ -279,8 +279,8 @@ describe('MediaThumbnailCard — icône "ouvrir le match"', () => {
       />,
     )
     // Quand onOpenMatch est fourni, on ne doit plus rendre un <a> mais un <button>.
-    expect(screen.queryByRole('link', { name: /Ouvrir.*match/ })).not.toBeInTheDocument()
-    const btn = screen.getByRole('button', { name: /Ouvrir.*match/ })
+    expect(screen.queryByRole('link', { name: /Open.*match/ })).not.toBeInTheDocument()
+    const btn = screen.getByRole('button', { name: /Open.*match/ })
     btn.click()
     expect(onOpenMatch).toHaveBeenCalledWith('match-42')
   })
@@ -297,7 +297,7 @@ describe('MediaThumbnailCard — icône "ouvrir le match"', () => {
         onOpenMatch={onOpenMatch}
       />,
     )
-    screen.getByRole('button', { name: /Ouvrir.*match/ }).click()
+    screen.getByRole('button', { name: /Open.*match/ }).click()
     expect(onOpen).not.toHaveBeenCalled()
     expect(onOpenMatch).toHaveBeenCalledTimes(1)
   })
@@ -357,9 +357,9 @@ describe('MediaThumbnailCard — lien "+ Associer"', () => {
       />,
     )
     // L'article wrapper a role="button" — on cherche par texte exact pour cibler le bouton "+ Associer"
-    expect(screen.getByText('+ Associer')).toBeInTheDocument()
+    expect(screen.getByText('+ Associate')).toBeInTheDocument()
     // Le fallback italic doit être remplacé par le bouton actionnable
-    expect(screen.queryByText(/Pas de match associé/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/No associated match/)).not.toBeInTheDocument()
   })
 
   it('garde le fallback italic "Pas de match associé" si onAssociate non fourni', () => {
@@ -370,8 +370,8 @@ describe('MediaThumbnailCard — lien "+ Associer"', () => {
         onOpen={vi.fn()}
       />,
     )
-    expect(screen.getByText('Pas de match associé')).toBeInTheDocument()
-    expect(screen.queryByText('+ Associer')).not.toBeInTheDocument()
+    expect(screen.getByText('No associated match')).toBeInTheDocument()
+    expect(screen.queryByText('+ Associate')).not.toBeInTheDocument()
   })
 
   it('cliquer sur "+ Associer" appelle onAssociate avec l\'item, pas onOpen', () => {
@@ -386,7 +386,7 @@ describe('MediaThumbnailCard — lien "+ Associer"', () => {
         onAssociate={onAssociate}
       />,
     )
-    const button = screen.getByText('+ Associer')
+    const button = screen.getByText('+ Associate')
     button.click()
     expect(onAssociate).toHaveBeenCalledTimes(1)
     expect(onAssociate).toHaveBeenCalledWith(expect.objectContaining({ file_path: '/orphan.mp4' }))
@@ -402,6 +402,6 @@ describe('MediaThumbnailCard — lien "+ Associer"', () => {
         onAssociate={vi.fn()}
       />,
     )
-    expect(screen.queryByText('+ Associer')).not.toBeInTheDocument()
+    expect(screen.queryByText('+ Associate')).not.toBeInTheDocument()
   })
 })

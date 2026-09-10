@@ -19,24 +19,24 @@ const T_FR = SQUAD_PRESETS_STRINGS.en
 describe('buildUsualSubtitle — indice « surtout … » (V72-10)', () => {
   it('retire la carte collée au mode brut ("Slayer on Bazaar" -> "Slayer")', () => {
     const subtitle = buildUsualSubtitle(['Ranked Arena'], ['Slayer on Bazaar'], T_FR)
-    expect(subtitle).toBe('surtout Ranked Arena · Slayer')
+    expect(subtitle).toBe('mostly Ranked Arena · Slayer')
     expect(subtitle).not.toContain('Bazaar')
   })
 
   it('retire la carte cross-langue (mode EN + carte FR collée, "Slayer sur Forêt")', () => {
     const subtitle = buildUsualSubtitle(undefined, ['Slayer sur Forêt'], T_FR)
-    expect(subtitle).toBe('surtout Slayer')
+    expect(subtitle).toBe('mostly Slayer')
     expect(subtitle).not.toContain('Forêt')
   })
 
   it('extrait le sous-mode du préfixe technique ("Arena:Slayer on Bazaar" -> "Slayer")', () => {
     const subtitle = buildUsualSubtitle([], ['Arena:Slayer on Bazaar'], T_FR)
-    expect(subtitle).toBe('surtout Slayer')
+    expect(subtitle).toBe('mostly Slayer')
   })
 
   it('playlists conservées telles quelles (pas de suffixe carte à retirer)', () => {
     const subtitle = buildUsualSubtitle(['Ranked Arena', 'Quick Play'], [], T_FR)
-    expect(subtitle).toBe('surtout Ranked Arena · Quick Play')
+    expect(subtitle).toBe('mostly Ranked Arena · Quick Play')
   })
 
   it('aucune donnée -> undefined (pas de sous-titre affiché)', () => {
@@ -46,7 +46,7 @@ describe('buildUsualSubtitle — indice « surtout … » (V72-10)', () => {
 
   it('seulement 1 mode gardé (slice top-1) même si plusieurs modes fournis', () => {
     const subtitle = buildUsualSubtitle([], ['Slayer on Bazaar', 'Oddball on Forge'], T_FR)
-    expect(subtitle).toBe('surtout Slayer')
+    expect(subtitle).toBe('mostly Slayer')
   })
 
   // Garde anti-disparition : le sous-titre s'était effacé quand le backend
@@ -55,7 +55,7 @@ describe('buildUsualSubtitle — indice « surtout … » (V72-10)', () => {
   // sous-titre DOIT s'afficher — jamais un blanc total.
   it('modes vides mais playlists présentes -> affiche les playlists (jamais rien)', () => {
     const subtitle = buildUsualSubtitle(['Quick Play', 'Big Team Battle'], [], T_FR)
-    expect(subtitle).toBe('surtout Quick Play · Big Team Battle')
+    expect(subtitle).toBe('mostly Quick Play · Big Team Battle')
   })
 
   // Depuis V72-10.1, l'API sert le mode déjà résolu en FR canonique
@@ -122,7 +122,7 @@ describe('scoreSquadContext — matching contexte actif ↔ contextes habituels'
   })
 
   it('contexte sans rapport -> score 0 (pas de faux positif)', () => {
-    const keys = buildActiveContextKeys(['Capture du drapeau'])
+    const keys = buildActiveContextKeys(['Capture the Flag'])
     expect(scoreSquadContext({ usual_modes: ['Assassin en équipe'] }, keys)).toBe(0)
   })
 

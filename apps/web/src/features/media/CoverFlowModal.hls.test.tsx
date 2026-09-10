@@ -145,8 +145,8 @@ describe('CoverFlowModal — interrupteurs Jeu/Voix (layout game/voices/full)', 
 
   it('affiche deux interrupteurs Jeu/Voix actifs par défaut → rendition full', () => {
     const hls = setupToggleClip()
-    expect(screen.getByRole('button', { name: 'Jeu', pressed: true })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Voix', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Game', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Voice', pressed: true })).toBeInTheDocument()
     expect(screen.queryByText('game')).toBeNull() // pas de noms bruts
     expect(hls.audioTrack).toBe(2) // index de 'full'
   })
@@ -154,17 +154,17 @@ describe('CoverFlowModal — interrupteurs Jeu/Voix (layout game/voices/full)', 
   it('désactiver Voix bascule sur la rendition jeu seul', () => {
     const hls = setupToggleClip()
     act(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Voix' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Voice' }))
     })
-    expect(screen.getByRole('button', { name: 'Voix', pressed: false })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Jeu', pressed: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Voice', pressed: false })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Game', pressed: true })).toBeInTheDocument()
     expect(hls.audioTrack).toBe(0) // index de 'game'
   })
 
   it('désactiver Jeu seul bascule sur la rendition voix', () => {
     const hls = setupToggleClip()
     act(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Jeu' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Game' }))
     })
     expect(hls.audioTrack).toBe(1) // index de 'voices'
   })
@@ -172,10 +172,10 @@ describe('CoverFlowModal — interrupteurs Jeu/Voix (layout game/voices/full)', 
   it('désactiver les deux interrupteurs coupe le son (vidéo muette)', () => {
     setupToggleClip()
     act(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Voix' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Voice' }))
     })
     act(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Jeu' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Game' }))
     })
     const video = document.querySelector('video') as HTMLVideoElement
     expect(video.muted).toBe(true)
@@ -211,10 +211,10 @@ describe('CoverFlowModal — persistance du mute "deux OFF" au recentrage', () =
       })
       // Couper Jeu ET Voix → A muet + marqueur data-audio-off posé.
       act(() => {
-        fireEvent.click(screen.getByRole('button', { name: 'Voix' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Voice' }))
       })
       act(() => {
-        fireEvent.click(screen.getByRole('button', { name: 'Jeu' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Game' }))
       })
       const videoA = container.querySelector('video[controls]') as HTMLVideoElement
       expect(videoA.muted).toBe(true)
@@ -238,8 +238,8 @@ describe('CoverFlowModal — persistance du mute "deux OFF" au recentrage', () =
 
       const videoABack = container.querySelector('video[controls]') as HTMLVideoElement
       expect(videoABack.muted).toBe(true)
-      expect(screen.getByRole('button', { name: 'Jeu', pressed: false })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Voix', pressed: false })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Game', pressed: false })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Voice', pressed: false })).toBeInTheDocument()
     } finally {
       vi.useRealTimers()
     }

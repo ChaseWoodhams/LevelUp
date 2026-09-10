@@ -86,6 +86,6 @@ describe('CareerHeroGaugeChart', () => {
         intlLocale="en-US"
       />,
     )
-    expect(screen.queryByText('Progression vers le rang max')).not.toBeInTheDocument()
+    expect(screen.queryByText('Progress to max rank')).not.toBeInTheDocument()
   })
 })

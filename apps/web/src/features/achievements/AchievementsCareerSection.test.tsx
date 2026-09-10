@@ -46,14 +46,14 @@ describe('AchievementsCareerSection', () => {
     reset({ isLoading: true })
     render(<AchievementsCareerSection playerSlug="jgtm" />, { wrapper })
     // Le titre est toujours affiché
-    expect(screen.getByText('Succès Xbox')).toBeInTheDocument()
+    expect(screen.getByText('Xbox Achievements')).toBeInTheDocument()
   })
 
   it('affiche un message d\'erreur avec bouton réessayer', () => {
     reset({ isError: true })
     render(<AchievementsCareerSection playerSlug="jgtm" />, { wrapper })
-    expect(screen.getByText(/Erreur lors du chargement/)).toBeInTheDocument()
-    expect(screen.getByText('Réessayer')).toBeInTheDocument()
+    expect(screen.getByText(/Failed to load achievements\./)).toBeInTheDocument()
+    expect(screen.getByText('Retry')).toBeInTheDocument()
   })
 
   it('affiche empty state quand total_count=0', () => {
@@ -70,7 +70,7 @@ describe('AchievementsCareerSection', () => {
       },
     })
     render(<AchievementsCareerSection playerSlug="jgtm" />, { wrapper })
-    expect(screen.getByText(/Aucun succès en base/)).toBeInTheDocument()
+    expect(screen.getByText(/No achievements in the database\./)).toBeInTheDocument()
     expect(screen.getByText(/levelup sync-achievements/)).toBeInTheDocument()
   })
 
@@ -110,8 +110,8 @@ describe('AchievementsCareerSection', () => {
     expect(screen.getByText('800 / 2000 G')).toBeInTheDocument()
     expect(screen.getByText('42.0 %')).toBeInTheDocument()
     // Cards : noms FR (locale mock = 'en')
-    expect(screen.getByText('Premier sang')).toBeInTheDocument()
-    expect(screen.getByText('Tireur d\'élite')).toBeInTheDocument()
+    expect(screen.getByText('First blood')).toBeInTheDocument()
+    expect(screen.getByText('Sniper')).toBeInTheDocument()
   })
 
   it('rend toutes les cartes (pas de cap : refacto 2026-05 → scroll vertical)', () => {
@@ -230,6 +230,6 @@ describe('AchievementsCareerSection', () => {
     expect(screen.getByText('Sans catégorie')).toBeInTheDocument()
     // Les filtres statut + tri date restent présents
     expect(screen.getByDisplayValue('Tous')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Défaut')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Default')).toBeInTheDocument()
   })
 })

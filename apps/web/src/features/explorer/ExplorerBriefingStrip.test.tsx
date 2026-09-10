@@ -196,7 +196,7 @@ describe('ExplorerBriefingStrip — Classement (RankedBlock, DEC-LAYOUT/DEC-RANK
     const text = container.textContent ?? ''
     expect(text).toContain('Or I → Or IV') // chaîne arena_slayer
     expect(text).toContain('Argent II → Or I') // chaîne btb
-    expect(text).toContain('Grande Équipe') // label de chaîne btb (≥ 2 chaînes du type)
+    expect(text).toContain('Big Team Battle') // label de chaîne btb (≥ 2 chaînes du type)
     expect(text).not.toContain('Or IV → Argent II') // jamais de flèche inter-chaînes
   })
 
@@ -283,7 +283,7 @@ function makeFullBriefing(): ExplorerBriefing {
     dimensions: [
       { dimension: 'map', entries: [{ label: 'MapA', matches: 12, win_rate: 0.7, delta_win_rate: 0.2 }] },
       { dimension: 'mode', entries: [{ label: 'Slayer', matches: 20, win_rate: 0.55, delta_win_rate: 0.05 }] },
-      { dimension: 'playlist', entries: [{ label: 'Arène', matches: 30, win_rate: 0.5, delta_win_rate: 0 }] },
+      { dimension: 'playlist', entries: [{ label: 'Arena', matches: 30, win_rate: 0.5, delta_win_rate: 0 }] },
     ],
     context_split: contextSplit,
     ranked: rankedSingle,

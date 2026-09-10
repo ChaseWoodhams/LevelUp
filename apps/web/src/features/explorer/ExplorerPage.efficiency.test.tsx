@@ -97,7 +97,7 @@ describe('ExplorerPage — efficacité (E2)', () => {
   it('frappe rapide dans match-ID : une seule valeur atteint la query après 250 ms', async () => {
     hoisted.search = { mode: 'matches' }
     renderWithProviders(<ExplorerPage />)
-    const input = screen.getByPlaceholderText('ID match…')
+    const input = screen.getByPlaceholderText('Match ID…')
 
     fireEvent.change(input, { target: { value: 'a' } })
     fireEvent.change(input, { target: { value: 'ab' } })

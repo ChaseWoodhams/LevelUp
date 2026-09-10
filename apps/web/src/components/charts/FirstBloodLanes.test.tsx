@@ -242,7 +242,7 @@ describe('FirstBloodLanes — libellés et tooltips', () => {
 describe('FirstBloodLanes — états', () => {
   it('rend le titre par défaut du manifest', async () => {
     await renderChart()
-    expect(screen.getByText('Premier frag / première mort')).toBeTruthy()
+    expect(screen.getByText('First kill / first death')).toBeTruthy()
   })
 
   it('affiche l’état vide quand aucun événement n’est exploitable', () => {
@@ -254,7 +254,7 @@ describe('FirstBloodLanes — états', () => {
       />,
     )
     expect(screen.getByTestId('chart-card-empty')).toBeTruthy()
-    expect(screen.getByText(/Aucun premier frag/)).toBeTruthy()
+    expect(screen.getByText(/No first kill or first death in this scope/)).toBeTruthy()
   })
 
   it('dimensionne la carte sur le nombre de lanes (54 px par bande)', async () => {

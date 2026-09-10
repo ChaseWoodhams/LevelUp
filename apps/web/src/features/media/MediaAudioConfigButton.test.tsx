@@ -25,12 +25,12 @@ describe('MediaAudioConfigButton', () => {
 
   it('rend le bouton engrenage', () => {
     renderWithProviders(<MediaAudioConfigButton playerSlug="p1" />)
-    expect(screen.getByLabelText('Réglage des pistes audio')).toBeInTheDocument()
+    expect(screen.getByLabelText('Audio tracks settings')).toBeInTheDocument()
   })
 
   it('ouvre la modale au clic', () => {
     renderWithProviders(<MediaAudioConfigButton playerSlug="p1" />)
-    fireEvent.click(screen.getByLabelText('Réglage des pistes audio'))
+    fireEvent.click(screen.getByLabelText('Audio tracks settings'))
     expect(screen.getByText('Pistes audio des médias')).toBeInTheDocument()
     expect(screen.getByText('Automatique')).toBeInTheDocument()
     expect(screen.getByText('Manuel')).toBeInTheDocument()
@@ -38,8 +38,8 @@ describe('MediaAudioConfigButton', () => {
 
   it('affiche l’éditeur de pistes en mode manuel', () => {
     renderWithProviders(<MediaAudioConfigButton playerSlug="p1" />)
-    fireEvent.click(screen.getByLabelText('Réglage des pistes audio'))
-    fireEvent.click(screen.getByText('Manuel'))
+    fireEvent.click(screen.getByLabelText('Audio tracks settings'))
+    fireEvent.click(screen.getByText('manual'))
     // Seed manuel = 2 pistes (jeu + voix) + bouton d'ajout.
     expect(screen.getByText('Piste 1')).toBeInTheDocument()
     expect(screen.getByText('Piste 2')).toBeInTheDocument()
@@ -48,8 +48,8 @@ describe('MediaAudioConfigButton', () => {
 
   it('appelle la mutation à l’enregistrement', () => {
     renderWithProviders(<MediaAudioConfigButton playerSlug="p1" />)
-    fireEvent.click(screen.getByLabelText('Réglage des pistes audio'))
-    fireEvent.click(screen.getByText('Enregistrer'))
+    fireEvent.click(screen.getByLabelText('Audio tracks settings'))
+    fireEvent.click(screen.getByText('Save'))
     expect(mutate).toHaveBeenCalledTimes(1)
     expect(mutate.mock.calls[0][0]).toMatchObject({ mode: 'auto' })
   })

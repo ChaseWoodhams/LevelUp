@@ -137,7 +137,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
 
   it('renders the Prestige LayerSection header', () => {
     render(<AscensionObjectivesTab />)
-    expect(screen.getByText(/Prestige — Objectifs et arcs/i)).toBeInTheDocument()
+    expect(screen.getByText(/Prestige — Objectives and arcs/i)).toBeInTheDocument()
   })
 
   it('does NOT render the coaching layer (moved to AscensionCoachingTab)', () => {
@@ -149,12 +149,12 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
 
   it('shows "Mes objectifs actifs" section title (Prestige layer)', () => {
     render(<AscensionObjectivesTab />)
-    expect(screen.getByText(/Mes objectifs actifs/i)).toBeInTheDocument()
+    expect(screen.getByText(/My active objectives/i)).toBeInTheDocument()
   })
 
   it('shows "Mes arcs en cours" section title (Prestige layer)', () => {
     render(<AscensionObjectivesTab />)
-    expect(screen.getByText(/Mes arcs en cours/i)).toBeInTheDocument()
+    expect(screen.getByText(/My active arcs/i)).toBeInTheDocument()
   })
 
   it('switches to English copy when locale is en', () => {
@@ -168,7 +168,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
     mockShellState.currentPlayer = null
     render(<AscensionObjectivesTab />)
     expect(
-      screen.getByText(/Sélectionne un joueur pour voir les objectifs/i),
+      screen.getByText(/Select a player to view objectives/i),
     ).toBeInTheDocument()
     expect(screen.queryByText(/Prestige — Objectifs/i)).not.toBeInTheDocument()
   })
@@ -176,35 +176,35 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
   it('shows the empty-state message for empty arcs (Prestige layer)', () => {
     render(<AscensionObjectivesTab />)
     expect(
-      screen.getByText(/Aucun arc en cours. Adopte un arc preset/i),
+      screen.getByText(/No arc in progress. Adopt a preset arc/i),
     ).toBeInTheDocument()
   })
 
   it('shows the "+ Nouvel arc" create button in the empty arcs state', () => {
     render(<AscensionObjectivesTab />)
-    expect(screen.getByText(/\+ Nouvel arc/i)).toBeInTheDocument()
+    expect(screen.getByText(/\+ New arc/i)).toBeInTheDocument()
   })
 
   it('shows the "Parcourir les presets" button in the empty arcs state', () => {
     render(<AscensionObjectivesTab />)
-    expect(screen.getByRole('button', { name: /Parcourir les presets/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Browse presets/i })).toBeInTheDocument()
   })
 
   it('opens the preset picker when clicking "Parcourir les presets"', () => {
     render(<AscensionObjectivesTab />)
-    fireEvent.click(screen.getByRole('button', { name: /Parcourir les presets/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Browse presets/i }))
     // Le picker affiche son en-tête + l'état vide (presets mock = []).
     expect(screen.getByText(/Aucun preset disponible/i)).toBeInTheDocument()
   })
 
   it('shows the empty-state message for empty challenges (Prestige layer)', () => {
     render(<AscensionObjectivesTab />)
-    expect(screen.getByText(/Aucun objectif libre actif/i)).toBeInTheDocument()
+    expect(screen.getByText(/No free objective active/i)).toBeInTheDocument()
   })
 
   it('renders the "+ Nouvel objectif" button in the objectives section', () => {
     render(<AscensionObjectivesTab />)
-    expect(screen.getByRole('button', { name: /\+ Nouvel objectif/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /\+ New objective/i })).toBeInTheDocument()
   })
 
   it('mode pilote OFF : le toggle propose « Activer » et l\'appuie active le pilote (B3)', () => {
@@ -218,7 +218,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
   it('mode pilote ON (défi pilote actif) : le toggle propose « Désactiver » et désactive (B3)', () => {
     mockChallenges.current = [{ id: 'p1', mode: 'pilote', status: 'active' }]
     render(<AscensionObjectivesTab />)
-    const toggle = screen.getByRole('button', { name: 'Désactiver', pressed: true })
+    const toggle = screen.getByRole('button', { name: 'Disable', pressed: true })
     fireEvent.click(toggle)
     expect(pilotDisableMutate).toHaveBeenCalledTimes(1)
     expect(pilotEnableMutate).not.toHaveBeenCalled()
@@ -227,7 +227,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
   it('empty state objectifs libres : CTA d\'activation du mode pilote présent quand OFF (B3)', () => {
     render(<AscensionObjectivesTab />)
     expect(
-      screen.getByRole('button', { name: /Activer le mode pilote/i }),
+      screen.getByRole('button', { name: /Enable pilot mode/i }),
     ).toBeInTheDocument()
   })
 
@@ -237,7 +237,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
 
     // Le bouton « Abandonner » de la carte n'appelle plus confirm() natif : il
     // ouvre un AlertDialog (pas de mutation tant qu'on n'a pas confirmé).
-    fireEvent.click(screen.getByRole('button', { name: 'Abandonner' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Abandon' }))
     const dialog = screen.getByRole('alertdialog')
     expect(within(dialog).getByText(/Abandonner cet objectif/i)).toBeInTheDocument()
     expect(abandonMutate).not.toHaveBeenCalled()
@@ -252,11 +252,11 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
     render(<AscensionObjectivesTab />)
 
     // Ouvre la confirmation (bouton « Supprimer » de l'élément d'arc).
-    fireEvent.click(screen.getByRole('button', { name: 'Supprimer' }))
-    expect(screen.getByText(/Supprimer l'arc « Mon Arc » \?/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(screen.getByText(/Delete the arc “Mon Arc”\?/i)).toBeInTheDocument()
 
     // 0 objectif → un seul bouton « Supprimer » de confirmation + Annuler.
-    fireEvent.click(screen.getByRole('button', { name: 'Supprimer' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
     expect(deleteArcMutate).toHaveBeenCalledWith({ id: 'arc1', cascade: true })
   })
 
@@ -264,8 +264,8 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
     mockArcs.current = [{ id: 'arc1', title: 'Mon Arc' }]
     render(<AscensionObjectivesTab />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Supprimer' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Annuler' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(deleteArcMutate).not.toHaveBeenCalled()
   })
 })

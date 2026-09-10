@@ -100,7 +100,7 @@ describe('RelationsTable — tri client', () => {
     const { container } = render(
       <RelationsTable rows={mixed} labels={labels} locale="en" onPlayerClick={vi.fn()} emptyMessage="vide" />,
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Joueur' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Player' }))
     // Alpha, beta, zeta — insensible à la casse (asc au premier clic pour l'alpha).
     expect(rowGamertags(container)).toEqual(['Alpha', 'beta', 'zeta'])
   })
@@ -114,16 +114,16 @@ describe('RelationsTable — tri client', () => {
       <RelationsTable rows={many} labels={labels} locale="en" onPlayerClick={vi.fn()} emptyMessage="vide" />,
     )
     // Aller en page 2.
-    fireEvent.click(screen.getByRole('button', { name: 'Suivant' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
     expect(screen.getByText('2 / 2')).toBeInTheDocument()
     // Un clic de tri ramène en page 1 (reset piloté par onSortingChange).
-    fireEvent.click(screen.getByRole('button', { name: 'Rencontres' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Encounters' }))
     expect(screen.getByText('1 / 2')).toBeInTheDocument()
   })
 
   it("la colonne « Lien » n'est pas triable (A1)", () => {
     renderTable()
-    const linkCol = screen.getByRole('columnheader', { name: 'Lien' })
+    const linkCol = screen.getByRole('columnheader', { name: 'Link' })
     expect(linkCol).not.toHaveAttribute('aria-sort')
     expect(within(linkCol).queryByRole('button')).toBeNull()
   })

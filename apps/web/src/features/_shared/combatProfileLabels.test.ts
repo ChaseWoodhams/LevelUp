@@ -3,14 +3,14 @@ import { offensiveLabel, defensiveLabel, activityLabel } from './combatProfileLa
 
 describe('combatProfileLabels — locale-aware', () => {
   it('offensiveLabel rend FR et EN', () => {
-    expect(offensiveLabel('disperse', 'en')).toBe('Dispersé')
+    expect(offensiveLabel('disperse', 'en')).toBe('Scattered')
     expect(offensiveLabel('disperse', 'en')).toBe('Scattered')
     expect(offensiveLabel('chirurgical', 'en')).toBe('Chirurgical')
     expect(offensiveLabel('chirurgical', 'en')).toBe('Surgical')
   })
 
   it('defensiveLabel rend FR et EN', () => {
-    expect(defensiveLabel('inebranlable', 'en')).toBe('Inébranlable')
+    expect(defensiveLabel('inebranlable', 'en')).toBe('Unshakable')
     expect(defensiveLabel('inebranlable', 'en')).toBe('Unshakable')
     expect(defensiveLabel('fragile', 'en')).toBe('Fragile')
   })

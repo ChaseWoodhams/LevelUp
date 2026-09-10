@@ -100,24 +100,24 @@ func TestResolveWeaponMeta_WeaponKeyNameSourceH5(t *testing.T) {
 		t.Errorf("BR75 label = %q, want \"BR75\" (parité, source keyée weapon_key)", br.label)
 	}
 
-	// (b) H5, aucune ligne weapon_labels : h5_light_rifle (id 2511447508) → nom résolu
-	// via weapon_ids → weapon_key h5_light_rifle → weapon_name_labels (« Fusil léger »).
+	// (b) H5, no weapon_labels row: h5_light_rifle (id 2511447508) → name resolved via
+	// weapon_ids → weapon_key h5_light_rifle → weapon_name_labels English name.
 	const lightRifleID = int64(2511447508)
-	if lr := resolveWeaponMeta(ctx, meta, "halo_5", []int64{lightRifleID})[lightRifleID]; lr.label != "Fusil léger" {
-		t.Errorf("h5 light rifle label = %q, want \"Fusil léger\" (source weapon_key)", lr.label)
+	if lr := resolveWeaponMeta(ctx, meta, "halo_5", []int64{lightRifleID})[lightRifleID]; lr.label != "Light Rifle" {
+		t.Errorf("h5 light rifle label = %q, want \"Light Rifle\" (source weapon_key)", lr.label)
 	}
 
-	// (c) H5, label EN-only POURRI : on seede une ligne weapon_labels avec name_en NON
-	// VIDE et name_fr VIDE (« FRAG GRENADE », comme en prod H5) pour l'id frag grenade
-	// (stock_id 4106030681 → h5_frag_grenade). La source weapon_name_labels
-	// (« Grenade à fragmentation ») doit primer l'EN brut de weapon_labels.
+	// (c) H5, ROTTEN EN-only label: seed a weapon_labels row with a NON-EMPTY name_en in
+	// API casing ("FRAG GRENADE", as in H5 prod) for the frag grenade id (stock_id
+	// 4106030681 → h5_frag_grenade). The weapon_name_labels source ("Frag Grenade") must
+	// win over the raw weapon_labels EN.
 	const fragGrenadeID = int64(4106030681)
 	if _, err := meta.Exec(ctx,
 		"INSERT INTO weapon_labels VALUES ("+strconv.FormatInt(fragGrenadeID, 10)+", 'FRAG GRENADE', '')"); err != nil {
 		t.Fatalf("seed h5 frag grenade EN-only label: %v", err)
 	}
-	if fg := resolveWeaponMeta(ctx, meta, "halo_5", []int64{fragGrenadeID})[fragGrenadeID]; fg.label != "Grenade à fragmentation" {
-		t.Errorf("h5 frag grenade label = %q, want \"Grenade à fragmentation\" (weapon_name_labels prime l'EN brut)", fg.label)
+	if fg := resolveWeaponMeta(ctx, meta, "halo_5", []int64{fragGrenadeID})[fragGrenadeID]; fg.label != "Frag Grenade" {
+		t.Errorf("h5 frag grenade label = %q, want \"Frag Grenade\" (weapon_name_labels wins over the raw EN)", fg.label)
 	}
 }
 

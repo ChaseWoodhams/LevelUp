@@ -36,7 +36,7 @@ describe('buildContextLabel', () => {
 
   it('outcome FR vs EN', () => {
     const spec: MatchFilterSpec = { outcome: 'win' }
-    expect(buildContextLabel(spec, 'en')).toBe('Victoires')
+    expect(buildContextLabel(spec, 'en')).toBe('Wins')
     expect(buildContextLabel(spec, 'en')).toBe('Wins')
   })
 
@@ -73,7 +73,7 @@ describe('buildContextLabel', () => {
     const got = buildContextLabel(spec, 'en')
     expect(got).toContain('Classée')
     expect(got).toContain('BTB')
-    expect(got).toContain('Défaites')
+    expect(got).toContain('Losses')
     expect(got).toContain('Depuis')
     expect(got.split(' · ')).toHaveLength(4)
   })

@@ -33,23 +33,23 @@ describe('ExplorerPage', () => {
 
   it('affiche les onglets Matchs et Joueur', () => {
     renderWithProviders(<ExplorerPage />)
-    expect(screen.getByText('Matchs')).toBeInTheDocument()
-    expect(screen.getByText('Joueur')).toBeInTheDocument()
+    expect(screen.getByText('Matches')).toBeInTheDocument()
+    expect(screen.getByText('Player')).toBeInTheDocument()
   })
 
   it('affiche un message explicite quand aucun match n’est trouvé', async () => {
     renderWithProviders(<ExplorerPage />)
     await waitFor(() => {
-      expect(screen.getByText(/Aucun match trouvé/i)).toBeInTheDocument()
+      expect(screen.getByText(/No match found\./i)).toBeInTheDocument()
     })
   })
 
   it('affiche un message explicite tant qu’aucun joueur n’est sélectionné', async () => {
     renderWithProviders(<ExplorerPage />)
-    fireEvent.click(screen.getByText('Joueur'))
+    fireEvent.click(screen.getByText('Player'))
 
     await waitFor(() => {
-      expect(screen.getByText(/Aucun joueur sélectionné/i)).toBeInTheDocument()
+      expect(screen.getByText(/No player selected/i)).toBeInTheDocument()
     })
   })
 })

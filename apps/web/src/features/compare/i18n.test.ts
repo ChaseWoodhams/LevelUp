@@ -17,7 +17,7 @@ import { getCompareText, resolveMetricLabel, METRIC_TO_FIELD_KEY } from './i18n'
 
 const REGISTRY = {
   fields: {
-    win_rate: { label: 'Taux de victoire' },
+    win_rate: { label: 'Win rate' },
     avg_damage_taken: { label: 'Dégâts subis / match' },
     max_killing_spree: { label: 'Meilleure série' },
   },
@@ -26,7 +26,7 @@ const REGISTRY = {
 describe('compare — résolution des libellés de métrique', () => {
   it('le registre canonique prime sur toute valeur locale', () => {
     const text = getCompareText('en', REGISTRY)
-    expect(resolveMetricLabel(text, 'win_rate')).toBe('Taux de victoire')
+    expect(resolveMetricLabel(text, 'win_rate')).toBe('Win rate')
     expect(resolveMetricLabel(text, 'max_killing_spree')).toBe('Meilleure série')
   })
 

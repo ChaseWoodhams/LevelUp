@@ -43,7 +43,7 @@ type CatalogSeason = { id: string; display_name: string; enriched: boolean; play
 
 function mockCatalog(
   seasons: CatalogSeason[],
-  playlists: Array<{ id: string; display_name: string }> = [{ id: ARENA, display_name: 'Arène classée' }],
+  playlists: Array<{ id: string; display_name: string }> = [{ id: ARENA, display_name: 'Ranked Arena' }],
 ) {
   server.use(
     http.get(p('/players/:playerSlug/pages/leaderboard/catalog'), () =>
@@ -76,7 +76,7 @@ describe('LeaderboardBlock', () => {
   it('affiche le titre du classement CSR mondial', () => {
     mockLeaderboard(ENTRIES)
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
-    expect(screen.getByText('Classement CSR mondial')).toBeInTheDocument()
+    expect(screen.getByText('World CSR ranking')).toBeInTheDocument()
   })
 
   it('marque les joueurs locaux avec le badge Local', async () => {
@@ -102,14 +102,14 @@ describe('LeaderboardBlock', () => {
 
     // L'option archivée porte le suffixe « (archivée) » dans le menu déroulant.
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: /archivée/i })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: /archived/i })).toBeInTheDocument()
     })
     // Saison active par défaut (13.2, enrichie) → pas de bandeau.
     expect(screen.queryByText(/Saison archivée/i)).not.toBeInTheDocument()
 
     // Sélection de la saison archivée → bandeau « classement seul » affiché.
-    fireEvent.change(screen.getByLabelText('Saison'), { target: { value: 'csrseason4-1' } })
-    expect(screen.getByText(/Saison archivée/i)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Season'), { target: { value: 'csrseason4-1' } })
+    expect(screen.getByText(/Archived season: CSR ranking only \(detailed stats unavailable for this season\)\./i)).toBeInTheDocument()
   })
 
   it('affiche les lignes dans l’ordre du rang', async () => {
@@ -156,11 +156,11 @@ describe('LeaderboardBlock', () => {
 
     await waitFor(() => expect(screen.getByText('Topfrag')).toBeInTheDocument())
     // En-têtes (boutons triables) des nouvelles colonnes en FR + FDA (pas KDA) + Matchs.
-    expect(screen.getByRole('button', { name: /Frags/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Morts/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Assistances/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /FDA/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Matchs/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Kills/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Deaths/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Assists/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /KDA/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Matches/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^KDA/ })).not.toBeInTheDocument()
     // Valeurs Frags + le total de matchs CUMULÉ (pas match_count de la saison).
     expect(screen.getByText('200')).toBeInTheDocument()
@@ -173,7 +173,7 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Classement vide')).toBeInTheDocument()
+      expect(screen.getByText('Empty leaderboard')).toBeInTheDocument()
     })
   })
 
@@ -186,7 +186,7 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => {
-      expect(screen.getByText('Erreur de chargement')).toBeInTheDocument()
+      expect(screen.getByText('Loading error')).toBeInTheDocument()
     })
   })
 
@@ -198,7 +198,7 @@ describe('LeaderboardBlock', () => {
       expect(screen.getByText('LocalAce')).toBeInTheDocument()
     })
     // L'en-tête "Victoires" (col_win_rate) ne doit pas apparaître.
-    expect(screen.queryByText('Victoires')).not.toBeInTheDocument()
+    expect(screen.queryByText('Wins')).not.toBeInTheDocument()
     expect(screen.queryByText('Δ rang')).not.toBeInTheDocument()
   })
 
@@ -223,7 +223,7 @@ describe('LeaderboardBlock', () => {
       expect(screen.getByText('Ace')).toBeInTheDocument()
     })
     // En-têtes enrichis présents.
-    expect(screen.getByText('Victoires')).toBeInTheDocument()
+    expect(screen.getByText('Wins')).toBeInTheDocument()
     expect(screen.getByText('Δ rang')).toBeInTheDocument()
 
     // Valeurs de la ligne Ace : win rate FR, KDA moyen (36/20=1.80), précision
@@ -248,9 +248,9 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => expect(screen.getByText('Enrichi1')).toBeInTheDocument())
-    expect(screen.queryByText('Victoires')).not.toBeInTheDocument()
+    expect(screen.queryByText('Wins')).not.toBeInTheDocument()
     expect(screen.queryByText('Δ rang')).not.toBeInTheDocument()
-    expect(screen.getByText(/Stats détaillées indisponibles pour ce relevé/i)).toBeInTheDocument()
+    expect(screen.getByText(/Detailed stats unavailable for this snapshot/i)).toBeInTheDocument()
   })
 
   it('entre 25 % et 80 % : colonnes détaillées affichées + bandeau « partielles »', async () => {
@@ -259,7 +259,7 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => expect(screen.getByText('Enrichi1')).toBeInTheDocument())
-    expect(screen.getByText('Victoires')).toBeInTheDocument()
+    expect(screen.getByText('Wins')).toBeInTheDocument()
     expect(screen.getByText(/Stats détaillées partielles/i)).toBeInTheDocument()
     // Le bandeau chiffre la couverture (2 sur 4) plutôt que de rester vague.
     expect(screen.getByText(/2 joueurs enrichis sur 4/i)).toBeInTheDocument()
@@ -270,7 +270,7 @@ describe('LeaderboardBlock', () => {
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
     await waitFor(() => expect(screen.getByText('Enrichi1')).toBeInTheDocument())
-    expect(screen.getByText('Victoires')).toBeInTheDocument()
+    expect(screen.getByText('Wins')).toBeInTheDocument()
     expect(screen.queryByText(/Stats détaillées partielles/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/Stats détaillées indisponibles/i)).not.toBeInTheDocument()
   })
@@ -285,14 +285,14 @@ describe('LeaderboardBlock', () => {
         { id: 'csrseason4-1', display_name: 'Saison 4.1', enriched: true, playlist_ids: [DOUBLES] },
       ],
       [
-        { id: ARENA, display_name: 'Arène classée' },
-        { id: SNIPERS, display_name: 'Snipers classés' },
-        { id: DOUBLES, display_name: 'Duo classé' },
+        { id: ARENA, display_name: 'Ranked Arena' },
+        { id: SNIPERS, display_name: 'Ranked Snipers' },
+        { id: DOUBLES, display_name: 'Ranked Doubles' },
       ],
     )
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
-    const playlistSelect = () => screen.getByLabelText('Sélection') as HTMLSelectElement
+    const playlistSelect = () => screen.getByLabelText('Playlist') as HTMLSelectElement
     const optionValues = () =>
       within(playlistSelect())
         .getAllByRole('option')
@@ -304,7 +304,7 @@ describe('LeaderboardBlock', () => {
     expect(playlistSelect().value).toBe(SNIPERS)
 
     // Bascule sur une saison où Snipers n'a jamais été relevé → repli sur SA playlist.
-    fireEvent.change(screen.getByLabelText('Saison'), { target: { value: 'csrseason4-1' } })
+    fireEvent.change(screen.getByLabelText('Season'), { target: { value: 'csrseason4-1' } })
     await waitFor(() => expect(optionValues()).toEqual([DOUBLES]))
     expect(playlistSelect().value).toBe(DOUBLES)
   })
@@ -354,19 +354,19 @@ describe('LeaderboardBlock', () => {
         .map((th) => [th.textContent, th.getAttribute('aria-sort')])
 
     // Tri par Frags décroissant : l'ordre s'écarte du rang.
-    await waitFor(() => expect(screen.getByRole('button', { name: /Frags/ })).toBeInTheDocument())
-    fireEvent.click(screen.getByRole('button', { name: /Frags/ }))
+    await waitFor(() => expect(screen.getByRole('button', { name: /Kills/ })).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: /Kills/ }))
     await waitFor(() => expect(gamertagOrder()).toEqual(['Enrichi2', 'Enrichi3', 'Enrichi1']))
 
     // Relevé sous le seuil : la colonne Frags disparaît → retour à l'ordre du rang,
     // et le SEUL en-tête marqué trié est « # » (aucun indicateur fantôme).
-    fireEvent.change(screen.getByLabelText('Saison'), { target: { value: 'csrseason4-1' } })
+    fireEvent.change(screen.getByLabelText('Season'), { target: { value: 'csrseason4-1' } })
     await waitFor(() => expect(gamertagOrder()).toEqual(['Brut1', 'Brut2', 'Brut3', 'Brut4']))
     expect(screen.queryByRole('button', { name: /Frags/ })).not.toBeInTheDocument()
     expect(sortedHeaders()).toEqual([['#▲', 'ascending']])
 
     // Retour au relevé couvert : le tri choisi n'a pas été perdu, seulement neutralisé.
-    fireEvent.change(screen.getByLabelText('Saison'), { target: { value: 'csrseason13-3' } })
+    fireEvent.change(screen.getByLabelText('Season'), { target: { value: 'csrseason13-3' } })
     await waitFor(() => expect(gamertagOrder()).toEqual(['Enrichi2', 'Enrichi3', 'Enrichi1']))
     expect(sortedHeaders()).toEqual([['Frags▼', 'descending']])
   })
@@ -376,13 +376,13 @@ describe('LeaderboardBlock', () => {
     mockCatalog(
       [{ id: 'csrseason13-3', display_name: 'Infinite (13.3)', enriched: true }],
       [
-        { id: ARENA, display_name: 'Arène classée' },
-        { id: SNIPERS, display_name: 'Snipers classés' },
+        { id: ARENA, display_name: 'Ranked Arena' },
+        { id: SNIPERS, display_name: 'Ranked Snipers' },
       ],
     )
     renderWithProviders(<LeaderboardBlock playerSlug="test-player" />)
 
-    const playlistSelect = () => screen.getByLabelText('Sélection') as HTMLSelectElement
+    const playlistSelect = () => screen.getByLabelText('Playlist') as HTMLSelectElement
     await waitFor(() =>
       expect(
         within(playlistSelect())

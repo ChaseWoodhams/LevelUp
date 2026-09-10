@@ -40,7 +40,7 @@ describe('ReviewBadge', () => {
     setEntry({ status: 'verify', note: { en: 'note en' } })
     render(<ReviewBadge reviewKey={KNOWN_KEY} />)
     const badge = screen.getByTestId('chart-review-badge')
-    expect(badge.textContent).toBe('À vérifier')
+    expect(badge.textContent).toBe('To verify')
     expect(badge.getAttribute('data-review-status')).toBe('verify')
     expect(badge.getAttribute('title')).toContain('note en')
   })
@@ -57,6 +57,6 @@ describe('ReviewBadge', () => {
   it('rend le statut « suppression » avec son libellé dédié', () => {
     setEntry({ status: 'removal', note: { en: 'note en' } })
     render(<ReviewBadge reviewKey={KNOWN_KEY} />)
-    expect(screen.getByTestId('chart-review-badge').textContent).toBe('Suppression ?')
+    expect(screen.getByTestId('chart-review-badge').textContent).toBe('Remove?')
   })
 })

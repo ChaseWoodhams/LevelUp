@@ -75,8 +75,9 @@ func TestResolveRefs_PopulatesTranslationsAndEnriches(t *testing.T) {
 	if err := meta.QueryRow(`SELECT COUNT(*) FROM asset_translations WHERE asset_id = ?`, newPlaylist).Scan(&n); err != nil {
 		t.Fatalf("count: %v", err)
 	}
-	if n != 2 {
-		t.Fatalf("asset_translations rows = %d, want 2 (fr-FR + en-US)", n)
+	// English-only: a single en-US row, even though the fake fetcher could answer fr-FR.
+	if n != 1 {
+		t.Fatalf("asset_translations rows = %d, want 1 (en-US only)", n)
 	}
 
 	if err := EnrichRegistryFromMetadata(ctx, meta, reg); err != nil {
@@ -141,8 +142,8 @@ func TestCollectUnresolvedRefs_AndResolve(t *testing.T) {
 	if err := meta.QueryRow(`SELECT COUNT(*) FROM asset_translations WHERE asset_id = 'pl-orphan'`).Scan(&n); err != nil {
 		t.Fatalf("count: %v", err)
 	}
-	if n != 2 {
-		t.Fatalf("asset_translations[pl-orphan] = %d rows, want 2", n)
+	if n != 1 {
+		t.Fatalf("asset_translations[pl-orphan] = %d rows, want 1 (en-US only)", n)
 	}
 }
 

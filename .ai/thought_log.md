@@ -61334,3 +61334,36 @@ requires (it had also been written against the English contract). The contract n
 `main` by 27 lines: the six BridgeHealth weapon-witness counters and `matchClockZeroMs`.
 
 **Next step**: push and let CI rule on PR #27.
+
+---
+
+## [2026-09-10] English-only branch: making the gates pass (checkpoint)
+
+**Status**: In progress.
+
+**Technical decision**: fix what the conversion broke instead of relaxing the gates. Three real
+defects found by the failing tests are fixed in the app: `pickAssetNameByPreferredLang` fell back
+to the alphabetically first language when no English row existed, so a fr-FR-only asset served
+French (career CSR playlist names, Home map names); `HomeRepo.loadCitationMappingMeta` still served
+the French citation name and description unless the request locale was exactly "en"; and
+`skillTiers.ts` dropped the legacy French tier names, so stored labels like "Or IV" showed raw
+French and sorted as unknown (restored as a read-only French→English map). The remaining failures
+were stale tests: expectations still in French, including damage from the conversion's own letter
+swap and from an earlier pass of mine that mapped the locale literal 'en' to ' at '. Web test
+literals are rewritten from a French→English dictionary built from origin/main's bilingual sources
+(preferring today's wording under the same key), and a replacement is only accepted when the
+English text is on screen in the failure's own DOM dump.
+
+**Results**: Go integration (`-tags=integration -p 1`) is green on every package that failed:
+`platform/duckdb` (27 tests fixed, including the H5 fallback tests that relied on the removed
+fallback), `platform/duckdb/prestige`, `platform/duckdb/halo5`, `sync` (6) and `service` (1).
+apps/web vitest: 494 failing tests down to about 150 in 68 files; no test that passed before is
+failing now. Not done yet: the remaining web tests, web lint (41 errors), four guard tests
+(`no-anglicisms` is obsolete for an English-only UI; `contract-surface` needs its snapshot
+regenerated for the removed `fr` enum members; `no-field-label-dictionary` and
+`no-title-literals` caught real regressions in `FeatureUnavailable.tsx` and the
+`{-$lang}/t/$titleSlug` route), user-visible French literals still in app source (ChartCard,
+GamertagCombobox placeholder, login error, HLS errors), and the copy-guard SHA bump.
+
+**Next step**: fix the two guard regressions and the remaining French literals in the app, then
+the web tests, the lint refactor, and a full run of every gate before pushing.

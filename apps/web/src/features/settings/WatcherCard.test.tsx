@@ -36,7 +36,7 @@ vi.mock('./watcher-queries', () => ({
 // Fixture i18n (subset des clés utilisées par WatcherCard)
 // ---------------------------------------------------------------------------
 const t = {
-  pageTitle: 'Paramètres',
+  pageTitle: 'Settings',
   pageSubtitle: "Configuration de l'application",
   savedStatus: '✓ Enregistré',
   errorStatus: '✗ Erreur',
@@ -44,7 +44,7 @@ const t = {
   tabSync: 'Sync',
   manualSyncTitle: 'Sync manuelle',
   manualSyncButton: 'Synchroniser',
-  manualSyncRunning: 'En cours…',
+  manualSyncRunning: 'In progress…',
   manualSyncDescription: '',
   instanceTitle: 'Lab',
   instanceDescription: '',
@@ -63,7 +63,7 @@ const t = {
   discordNotifySync: 'Notifier sync',
   discordNotifyBackfill: 'Notifier backfill',
   discordNoWebhook: 'Webhook absent',
-  mediaTitle: 'Médias',
+  mediaTitle: 'Media',
   mediaWatcherEnabled: 'Surveillance médias',
   mediaToleranceLabel: 'Tolérance',
   mediaNoBaseDir: 'Aucun dossier',
@@ -90,7 +90,7 @@ const t = {
   watcherPlayersLabel: 'Joueurs surveillés',
   watcherPlayersAll: 'Tous les joueurs',
   watcherSubscriptionsUpdated: 'Mis à jour',
-  watcherRtaConnected: 'RTA connecté',
+  watcherRtaConnected: 'RTA connected',
   watcherRtaDisconnected: 'RTA déconnecté',
   watcherSubscribeError: 'Échec surveillance',
   watcherStateIdle: 'Absent',
@@ -107,7 +107,7 @@ const t = {
   watcherLastSeenAbsolute: 'Vu le {date} sur {title}',
   watcherNeverSeen: 'Jamais vu en jeu',
   backfillTitle: 'Backfill',
-  backfillMedals: 'Médailles',
+  backfillMedals: 'Medals',
   backfillSkill: 'CSR/MMR',
   backfillAliases: 'Alias',
   backfillPersonalScores: 'Scores',
@@ -304,7 +304,7 @@ describe('WatcherCard', () => {
       mockStatusData = { ...baseStatusData, daemon_running: false }
       renderWithProviders(<WatcherCard enabled={true} onToggle={vi.fn()} t={t} />)
       await waitFor(() => screen.getByText(/Aucun jeton Xbox/i))
-      expect(screen.queryByText('RTA connecté')).not.toBeInTheDocument()
+      expect(screen.queryByText('RTA connected')).not.toBeInTheDocument()
       expect(screen.queryByText('RTA déconnecté')).not.toBeInTheDocument()
     })
 
@@ -316,7 +316,7 @@ describe('WatcherCard', () => {
       }
       renderWithProviders(<WatcherCard enabled={true} onToggle={vi.fn()} t={t} />)
       await waitFor(() => {
-        expect(screen.getByText('RTA connecté')).toBeInTheDocument()
+        expect(screen.getByText('RTA connected')).toBeInTheDocument()
       })
     })
 

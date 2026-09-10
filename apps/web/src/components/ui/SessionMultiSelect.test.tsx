@@ -56,7 +56,7 @@ function setup(
 describe('SessionMultiSelect — label du bouton déclencheur', () => {
   it('affiche "Toutes les sessions" quand aucune sélection (fr)', () => {
     setup()
-    expect(screen.getByRole('button', { name: /Toutes les sessions/i })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /All sessions/i })).toBeTruthy()
   })
 
   it('affiche le compte quand des sessions sont sélectionnées (fr)', () => {
@@ -86,9 +86,9 @@ describe('SessionMultiSelect — label du bouton déclencheur', () => {
 describe('SessionMultiSelect — ouverture et fermeture du panel', () => {
   it('ouvre le dropdown au clic sur le bouton', () => {
     const { openPanel } = setup()
-    expect(screen.queryByPlaceholderText(/Rechercher/i)).toBeNull()
+    expect(screen.queryByPlaceholderText(/Search/i)).toBeNull()
     openPanel()
-    expect(screen.getByPlaceholderText(/Rechercher/i)).toBeTruthy()
+    expect(screen.getByPlaceholderText(/Search…/i)).toBeTruthy()
   })
 
   it("affiche toutes les sessions à l'ouverture", () => {
@@ -103,7 +103,7 @@ describe('SessionMultiSelect — ouverture et fermeture du panel', () => {
     const { onChange, openPanel } = setup()
     openPanel()
     fireEvent.mouseDown(document.body)
-    expect(screen.queryByPlaceholderText(/Rechercher/i)).toBeNull()
+    expect(screen.queryByPlaceholderText(/Search/i)).toBeNull()
     expect(onChange).not.toHaveBeenCalled()
   })
 })
@@ -112,7 +112,7 @@ describe('SessionMultiSelect — filtre fuzzy', () => {
   it('filtre la liste par la valeur de recherche textuelle', () => {
     const { openPanel } = setup()
     openPanel()
-    const searchInput = screen.getByPlaceholderText(/Rechercher/i)
+    const searchInput = screen.getByPlaceholderText(/Search…/i)
     fireEvent.change(searchInput, { target: { value: 'Ranked' } })
     expect(screen.getByText('Session Ranked A')).toBeTruthy()
     expect(screen.getByText('Session Ranked C')).toBeTruthy()
@@ -122,10 +122,10 @@ describe('SessionMultiSelect — filtre fuzzy', () => {
   it('affiche "Aucune session" quand le filtre ne correspond à rien', () => {
     const { openPanel } = setup()
     openPanel()
-    fireEvent.change(screen.getByPlaceholderText(/Rechercher/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Search…/i), {
       target: { value: 'xyzinexistant' },
     })
-    expect(screen.getByText(/Aucune session/i)).toBeTruthy()
+    expect(screen.getByText(/No sessions/i)).toBeTruthy()
   })
 })
 
@@ -179,7 +179,7 @@ describe('SessionMultiSelect — validation différée', () => {
     const { openPanel } = setup()
     openPanel()
     fireEvent.click(screen.getByText(/Valider|Apply/i))
-    expect(screen.queryByPlaceholderText(/Rechercher/i)).toBeNull()
+    expect(screen.queryByPlaceholderText(/Search/i)).toBeNull()
   })
 
   it('réinitialise le pending sur la sélection active si on rouvre sans valider', () => {
@@ -206,7 +206,7 @@ describe('SessionMultiSelect — toggle tout sélectionner / désélectionner', 
   it('sélectionne toutes les sessions filtrées au clic sur "Tout sélectionner"', () => {
     const { openPanel } = setup()
     openPanel()
-    fireEvent.click(screen.getByText(/Tout sélectionner/i))
+    fireEvent.click(screen.getByText(/Select all/i))
     const checkboxes = screen.getAllByRole('checkbox')
     checkboxes.forEach((cb) => {
       expect((cb as HTMLInputElement).checked).toBe(true)
@@ -216,7 +216,7 @@ describe('SessionMultiSelect — toggle tout sélectionner / désélectionner', 
   it('affiche "Tout désélectionner" quand tout est coché', () => {
     const { openPanel } = setup(['Session Ranked A', 'Session Casual B', 'Session Ranked C'])
     openPanel()
-    expect(screen.getByText(/Tout désélectionner/i)).toBeTruthy()
+    expect(screen.getByText(/Deselect all/i)).toBeTruthy()
   })
 
   it('désélectionne toutes les sessions filtrées', () => {
@@ -226,7 +226,7 @@ describe('SessionMultiSelect — toggle tout sélectionner / désélectionner', 
       'Session Ranked C',
     ])
     openPanel()
-    fireEvent.click(screen.getByText(/Tout désélectionner/i))
+    fireEvent.click(screen.getByText(/Deselect all/i))
     fireEvent.click(screen.getByText(/Valider|Apply/i))
     const payload = onChange.mock.calls[0][0] as string[]
     expect(payload).toHaveLength(0)
@@ -235,10 +235,10 @@ describe('SessionMultiSelect — toggle tout sélectionner / désélectionner', 
   it('"Tout sélectionner" ne sélectionne que les sessions filtrées par la recherche', () => {
     const { onChange, openPanel } = setup()
     openPanel()
-    fireEvent.change(screen.getByPlaceholderText(/Rechercher/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Search…/i), {
       target: { value: 'Ranked' },
     })
-    fireEvent.click(screen.getByText(/Tout sélectionner/i))
+    fireEvent.click(screen.getByText(/Select all/i))
     fireEvent.click(screen.getByText(/Valider|Apply/i))
     const payload = onChange.mock.calls[0][0] as string[]
     // Uniquement Session Ranked A et Session Ranked C
@@ -252,21 +252,21 @@ describe('SessionMultiSelect — lien Réinitialiser', () => {
   it('masque le lien Réinitialiser quand aucune session sélectionnée', () => {
     const { openPanel } = setup()
     openPanel()
-    expect(screen.queryByText(/Réinitialiser/i)).toBeNull()
+    expect(screen.queryByText(/Reset/i)).toBeNull()
   })
 
   it('affiche le lien Réinitialiser dès qu\'une session est cochée', () => {
     const { openPanel } = setup(['Session Ranked A'])
     openPanel()
-    expect(screen.getByText(/Réinitialiser/i)).toBeTruthy()
+    expect(screen.getByText(/Reset/i)).toBeTruthy()
   })
 
   it('vide une sélection partielle au clic sur Réinitialiser', () => {
     const { onChange, openPanel } = setup(['Session Ranked A'])
     openPanel()
     // Sélection partielle (1/3) → le toggle reste "Tout sélectionner".
-    expect(screen.getByText(/Tout sélectionner/i)).toBeTruthy()
-    fireEvent.click(screen.getByText(/Réinitialiser/i))
+    expect(screen.getByText(/Select all/i)).toBeTruthy()
+    fireEvent.click(screen.getByText(/Reset/i))
     fireEvent.click(screen.getByText(/Valider|Apply/i))
     const payload = onChange.mock.calls[0][0] as string[]
     expect(payload).toHaveLength(0)
@@ -277,10 +277,10 @@ describe('SessionMultiSelect — lien Réinitialiser', () => {
     openPanel()
     // Filtrer pour ne montrer que les "Ranked" : Casual B est masquée mais
     // reste sélectionnée → Réinitialiser doit aussi la retirer.
-    fireEvent.change(screen.getByPlaceholderText(/Rechercher/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Search…/i), {
       target: { value: 'Ranked' },
     })
-    fireEvent.click(screen.getByText(/Réinitialiser/i))
+    fireEvent.click(screen.getByText(/Reset/i))
     fireEvent.click(screen.getByText(/Valider|Apply/i))
     const payload = onChange.mock.calls[0][0] as string[]
     expect(payload).toHaveLength(0)

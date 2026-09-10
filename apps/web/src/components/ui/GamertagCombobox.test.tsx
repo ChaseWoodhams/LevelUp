@@ -37,7 +37,7 @@ describe('GamertagCombobox', () => {
       <GamertagCombobox selected={[]} onChange={() => {}} />,
     )
     fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Joueurs configurés')).toBeInTheDocument()
+    expect(screen.getByText('Configured players')).toBeInTheDocument()
     expect(screen.getByText('AlphaPlayer')).toBeInTheDocument()
     expect(screen.getByText('BravoGamer')).toBeInTheDocument()
   })
@@ -53,7 +53,7 @@ describe('GamertagCombobox', () => {
       />,
     )
     fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Coéquipiers fréquents')).toBeInTheDocument()
+    expect(screen.getByText('Frequent teammates')).toBeInTheDocument()
     expect(screen.getByText('CharlieX')).toBeInTheDocument()
     expect(screen.getByText('12×')).toBeInTheDocument()
   })
@@ -75,7 +75,7 @@ describe('GamertagCombobox', () => {
 
     await waitFor(
       () => {
-        expect(screen.getByText(/Aucun joueur trouvé pour "xq"/)).toBeInTheDocument()
+        expect(screen.getByText(/No player found for "xq"/)).toBeInTheDocument()
       },
       { timeout: 2000 },
     )
@@ -96,15 +96,15 @@ describe('GamertagCombobox', () => {
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'GhostGT' } })
 
-    const cta = await screen.findByText('Rechercher sur Xbox', {}, { timeout: 2000 })
+    const cta = await screen.findByText('Search on Xbox', {}, { timeout: 2000 })
     fireEvent.click(cta)
 
     await waitFor(
-      () => expect(screen.getByText('Aucun résultat Xbox')).toBeInTheDocument(),
+      () => expect(screen.getByText('No Xbox result')).toBeInTheDocument(),
       { timeout: 2000 },
     )
     // Un seul message « rien trouvé » (pas d'empilement avec le message local).
-    expect(screen.queryByText(/Aucun joueur trouvé pour/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/No player found for/)).not.toBeInTheDocument()
   })
 
   it('affiche les presets (escouades/groupes) et charge le roster au clic', () => {
@@ -119,7 +119,7 @@ describe('GamertagCombobox', () => {
         presetGroups={[
           {
             key: 'squads',
-            label: 'Mes escouades',
+            label: 'My squads',
             options: [
               { id: 'sq1', name: 'Ranked', subtitle: 'surtout Classé', gamertags: ['Choco', 'JGtm'] },
             ],
@@ -128,7 +128,7 @@ describe('GamertagCombobox', () => {
       />,
     )
     fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Mes escouades')).toBeInTheDocument()
+    expect(screen.getByText('My squads')).toBeInTheDocument()
     expect(screen.getByText('surtout Classé')).toBeInTheDocument()
     // Clic = charge le roster entier (≠ ajout d'un joueur).
     fireEvent.click(screen.getByText('Ranked'))
@@ -140,11 +140,11 @@ describe('GamertagCombobox', () => {
       <GamertagCombobox
         selected={[]}
         onChange={() => {}}
-        footer={<button type="button">Enregistrer la compo</button>}
+        footer={<button type="button">Save lineup</button>}
       />,
     )
     fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Enregistrer la compo')).toBeInTheDocument()
+    expect(screen.getByText('Save lineup')).toBeInTheDocument()
   })
 
   it('appelle onClose à la fermeture du popover (clic extérieur)', () => {

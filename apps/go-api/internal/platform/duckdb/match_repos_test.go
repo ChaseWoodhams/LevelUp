@@ -153,18 +153,17 @@ func TestCitationsRepo_LoadCitationMappings_WithData(t *testing.T) {
 	}
 }
 
-// Le nom de citation est résolu selon la locale du contexte : EN →
-// citation_name_display_en, FR (défaut) → citation_name_display. Câble la
-// traduction des citations Infinite (copies de commendations H5).
+// The citation name is always citation_name_display_en, whatever the request locale;
+// the legacy French citation_name_display is never served.
 func TestCitationsRepo_LoadCitationMappings_LocaleAware(t *testing.T) {
 	repo := NewCitationsRepo(newTestPlayerDB(t))
 
-	fr, err := repo.LoadCitationMappings(context.Background())
-	if err != nil || len(fr) != 1 {
-		t.Fatalf("FR: err=%v n=%d", err, len(fr))
+	def, err := repo.LoadCitationMappings(context.Background())
+	if err != nil || len(def) != 1 {
+		t.Fatalf("default: err=%v n=%d", err, len(def))
 	}
-	if fr[0].NameDisplay != "Killing Spree" {
-		t.Errorf("FR NameDisplay = %q, want 'Killing Spree'", fr[0].NameDisplay)
+	if def[0].NameDisplay != "Killing Spree (EN)" {
+		t.Errorf("default NameDisplay = %q, want 'Killing Spree (EN)'", def[0].NameDisplay)
 	}
 
 	en, err := repo.LoadCitationMappings(ctxkeys.WithLocale(context.Background(), "en"))
@@ -184,15 +183,13 @@ func TestCitationsRepo_LoadCitationMappings_LocaleAware(t *testing.T) {
 func TestCitationsRepo_LoadMatchCitationsRich_LocaleAware(t *testing.T) {
 	repo := NewCitationsRepo(newTestPlayerDB(t))
 
+	// English-only: a legacy "fr" request still gets the English name and description.
 	fr, err := repo.LoadMatchCitationsRich(ctxkeys.WithLocale(context.Background(), "fr"), "m1")
 	if err != nil || len(fr) != 1 {
-		t.Fatalf("FR: err=%v n=%d", err, len(fr))
+		t.Fatalf("legacy locale: err=%v n=%d", err, len(fr))
 	}
-	if fr[0].Display != "Killing Spree" {
-		t.Errorf("FR Display = %q, want 'Killing Spree'", fr[0].Display)
-	}
-	if fr[0].Description != "Série de kills" {
-		t.Errorf("FR Description = %q, want 'Série de kills'", fr[0].Description)
+	if fr[0].Display != "Killing Spree (EN)" || fr[0].Description != "Killing spree streak" {
+		t.Errorf("legacy locale: Display=%q Description=%q, want the English pair", fr[0].Display, fr[0].Description)
 	}
 
 	en, err := repo.LoadMatchCitationsRich(ctxkeys.WithLocale(context.Background(), "en"), "m1")
@@ -208,22 +205,24 @@ func TestCitationsRepo_LoadMatchCitationsRich_LocaleAware(t *testing.T) {
 	}
 }
 
-// TestHomeRepo_LoadMatchCitations_LocaleAware prouve GH2-B6 : le nom de citation
-// des tuiles de match Home suit la locale de requête (même chaîne Q26j que la
-// Match View — citation_name_display_en sous EN, display FR sinon).
+// TestHomeRepo_LoadMatchCitations_LocaleAware: the Home match tiles serve the English
+// citation name and description (same Q26j chain as the Match view) whatever the
+// request locale — a legacy "fr" or an absent locale never gets the French columns.
 func TestHomeRepo_LoadMatchCitations_LocaleAware(t *testing.T) {
 	repo := NewHomeRepo(newTestPlayerDB(t))
 
-	fr, err := repo.LoadMatchCitations(ctxkeys.WithLocale(context.Background(), "fr"), []string{"m1"})
-	if err != nil || len(fr["m1"]) != 1 {
-		t.Fatalf("FR: err=%v n=%d", err, len(fr["m1"]))
-	}
-	if fr["m1"][0].Display != "Killing Spree" {
-		t.Errorf("FR Display = %q, want 'Killing Spree'", fr["m1"][0].Display)
-	}
-
-	if fr["m1"][0].Description != "Série de kills" {
-		t.Errorf("FR Description = %q, want 'Série de kills'", fr["m1"][0].Description)
+	for name, ctx := range map[string]context.Context{
+		"no locale":     context.Background(),
+		"legacy locale": ctxkeys.WithLocale(context.Background(), "fr"),
+	} {
+		got, err := repo.LoadMatchCitations(ctx, []string{"m1"})
+		if err != nil || len(got["m1"]) != 1 {
+			t.Fatalf("%s: err=%v n=%d", name, err, len(got["m1"]))
+		}
+		if got["m1"][0].Display != "Killing Spree (EN)" || got["m1"][0].Description != "Killing spree streak" {
+			t.Errorf("%s: Display=%q Description=%q, want the English pair",
+				name, got["m1"][0].Display, got["m1"][0].Description)
+		}
 	}
 
 	en, err := repo.LoadMatchCitations(ctxkeys.WithLocale(context.Background(), "en"), []string{"m1"})
@@ -265,16 +264,18 @@ func TestCitationsRepo_LoadCitationMappings_DescriptionLocaleAware(t *testing.T)
 		return m
 	}
 
+	// English-only: a legacy "fr" request behaves exactly like "en" — the English
+	// description, or no description at all; the French one never surfaces.
 	frRows, err := repo.LoadCitationMappings(ctxkeys.WithLocale(ctx, "fr"))
 	if err != nil {
-		t.Fatalf("FR LoadCitationMappings: %v", err)
+		t.Fatalf("legacy-locale LoadCitationMappings: %v", err)
 	}
 	fr := byNorm(frRows)
-	if got := fr["killing_spree"].Description; got == nil || *got != "Série de kills" {
-		t.Errorf("FR killing_spree Description = %v, want 'Série de kills'", got)
+	if got := fr["killing_spree"].Description; got == nil || *got != "Killing spree streak" {
+		t.Errorf("legacy-locale killing_spree Description = %v, want 'Killing spree streak'", got)
 	}
-	if got := fr["no_en_desc"].Description; got == nil || *got != "Description FR uniquement" {
-		t.Errorf("FR no_en_desc Description = %v, want 'Description FR uniquement'", got)
+	if got := fr["no_en_desc"].Description; got != nil {
+		t.Errorf("legacy-locale no_en_desc Description = %q, want nil (no English description)", *got)
 	}
 
 	enRows, err := repo.LoadCitationMappings(ctxkeys.WithLocale(ctx, "en"))

@@ -56,7 +56,7 @@ describe('gridForRatingTypes', () => {
 
 describe('subTierPosition', () => {
   it('CSR : sous-paliers de 50 pts (Diamant)', () => {
-    // Diamant CSR [1200,1500], 6 sous-paliers de 50. 1452 → sous-palier [1450,1500].
+    // Diamond CSR [1200,1500], 6 sub-tiers of 50. 1452 → sub-tier [1450,1500].
     const p = subTierPosition(CSR_TIER_GRID, 1452)
     expect(p).not.toBeNull()
     expect(p!.subTierMin).toBe(1450)
@@ -65,7 +65,7 @@ describe('subTierPosition', () => {
   })
 
   it('LUSR : largeur de sous-palier variable selon le tier (Platine = 100)', () => {
-    // Platine LUSR [1600,1800], 2 sous-paliers de 100. 1770 → [1700,1800].
+    // Platinum LUSR [1600,1800], 2 sub-tiers of 100. 1770 → [1700,1800].
     const p = subTierPosition(LUSR_TIER_GRID, 1770)
     expect(p).not.toBeNull()
     expect(p!.subTierMin).toBe(1700)
@@ -74,7 +74,7 @@ describe('subTierPosition', () => {
   })
 
   it('LUSR : Or = sous-paliers de 33.3 pts (≠ 50)', () => {
-    // Or LUSR [1400,1600], 6 sous-paliers ≈ 33.33. 1452 → [1433.3,1466.7].
+    // Gold LUSR [1400,1600], 6 sub-tiers ≈ 33.33. 1452 → [1433.3,1466.7].
     const p = subTierPosition(LUSR_TIER_GRID, 1452)
     expect(p).not.toBeNull()
     expect(p!.subTierWidth).toBeCloseTo(33.333, 2)
@@ -92,17 +92,17 @@ describe('subTierPosition', () => {
 })
 
 describe('localizeTierName', () => {
-  it('EN → FR (Gold → Or, Platinum → Platine)', () => {
-    expect(localizeTierName('Gold', 'en')).toBe('Or')
-    expect(localizeTierName('Platinum', 'en')).toBe('Platine')
-    expect(localizeTierName('Silver', 'en')).toBe('Argent')
-    expect(localizeTierName('Diamond', 'en')).toBe('Diamant')
+  it('English names stay as they are', () => {
+    expect(localizeTierName('Gold', 'en')).toBe('Gold')
+    expect(localizeTierName('Platinum', 'en')).toBe('Platinum')
   })
-  it('FR → EN (Or → Gold, Platine → Platinum)', () => {
+  it('legacy French names resolve to English (Or → Gold, Platine → Platinum)', () => {
     expect(localizeTierName('Or', 'en')).toBe('Gold')
     expect(localizeTierName('Platine', 'en')).toBe('Platinum')
+    expect(localizeTierName('Argent', 'en')).toBe('Silver')
+    expect(localizeTierName('Diamant', 'en')).toBe('Diamond')
   })
-  it('invariants de locale (Bronze, Onyx, Champion)', () => {
+  it('invariants (Bronze, Onyx, Champion)', () => {
     expect(localizeTierName('Bronze', 'en')).toBe('Bronze')
     expect(localizeTierName('Onyx', 'en')).toBe('Onyx')
     expect(localizeTierName('Champion', 'en')).toBe('Champion')
@@ -114,23 +114,20 @@ describe('localizeTierName', () => {
 })
 
 describe('localizeTierLabel', () => {
-  it('libellé FR baké sous UI EN (« Or IV » → « Gold IV »)', () => {
+  it('legacy French baked label → English (« Or IV » → « Gold IV »)', () => {
     expect(localizeTierLabel('Or IV', 'en')).toBe('Gold IV')
     expect(localizeTierLabel('Platine II', 'en')).toBe('Platinum II')
     expect(localizeTierLabel('Diamant III', 'en')).toBe('Diamond III')
   })
-  it('libellé H5 EN baké sous UI FR (« Platinum » → « Platine », arabe préservé)', () => {
-    expect(localizeTierLabel('Platinum', 'en')).toBe('Platine')
-    expect(localizeTierLabel('Platinum 4', 'en')).toBe('Platine 4')
-    expect(localizeTierLabel('Gold 3', 'en')).toBe('Or 3')
+  it('English baked label unchanged, Arabic sub-tier kept', () => {
+    expect(localizeTierLabel('Platinum', 'en')).toBe('Platinum')
+    expect(localizeTierLabel('Platinum 4', 'en')).toBe('Platinum 4')
+    expect(localizeTierLabel('Gold 3', 'en')).toBe('Gold 3')
+    expect(localizeTierLabel('Gold IV', 'en')).toBe('Gold IV')
   })
   it('Onyx (invariant) + suffixe valeur préservé', () => {
     expect(localizeTierLabel('Onyx', 'en')).toBe('Onyx')
     expect(localizeTierLabel('Onyx 1500', 'en')).toBe('Onyx 1500')
-  })
-  it('même locale : identité (« Or IV » sous UI FR reste « Or IV »)', () => {
-    expect(localizeTierLabel('Or IV', 'en')).toBe('Or IV')
-    expect(localizeTierLabel('Gold IV', 'en')).toBe('Gold IV')
   })
   it('sentinelles / null / vide → inchangés', () => {
     expect(localizeTierLabel('Placement', 'en')).toBe('Placement')
@@ -153,18 +150,18 @@ describe('skillTierSortValue (tri colonne Rang)', () => {
   })
 
   it('départage les sous-paliers (romain et arabe) au sein d’un palier', () => {
-    // Romain (LUSR) : Diamant III < Diamant VI.
+    // Roman (LUSR): Diamant III < Diamant VI.
     expect(skillTierSortValue('Diamant III')!).toBeLessThan(skillTierSortValue('Diamant VI')!)
-    // Arabe (CSR/H5) : Gold 3 < Gold 6.
+    // Arabic (CSR/H5): Gold 3 < Gold 6.
     expect(skillTierSortValue('Gold 3')!).toBeLessThan(skillTierSortValue('Gold 6')!)
-    // FR et EN du même palier tombent au même endroit.
+    // A legacy French label and its English form sort to the same place.
     expect(skillTierSortValue('Or IV')).toBe(skillTierSortValue('Gold IV'))
   })
 
   it('un sous-palier élevé ne dépasse jamais le palier supérieur', () => {
-    // Diamant VI reste sous Onyx (facteur 10000 par palier majeur).
+    // Diamant VI stays below Onyx (factor 10000 per major tier).
     expect(skillTierSortValue('Diamant VI')!).toBeLessThan(skillTierSortValue('Onyx')!)
-    // Onyx avec valeur CSR brute reste au-dessus d’Onyx nu, sous Champion.
+    // Onyx with a raw CSR value stays above bare Onyx, below Champion.
     expect(skillTierSortValue('Onyx 1500')!).toBeGreaterThan(skillTierSortValue('Onyx')!)
     expect(skillTierSortValue('Onyx 1500')!).toBeLessThan(skillTierSortValue('Champion')!)
   })
@@ -179,17 +176,17 @@ describe('skillTierSortValue (tri colonne Rang)', () => {
 })
 
 describe('composeTierLabel', () => {
-  it('nom localisé + sous-palier romain (Diamant III / Gold IV)', () => {
-    expect(composeTierLabel('Diamond', 3, 'en')).toBe('Diamant III')
+  it('name + Roman sub-tier (Diamond III / Gold IV)', () => {
+    expect(composeTierLabel('Diamond', 3, 'en')).toBe('Diamond III')
     expect(composeTierLabel('Gold', 4, 'en')).toBe('Gold IV')
-    expect(composeTierLabel('Platinum', 1, 'en')).toBe('Platine I')
+    expect(composeTierLabel('Platinum', 1, 'en')).toBe('Platinum I')
   })
   it('Onyx (palier ouvert) → nom seul, quel que soit le sous-palier', () => {
     expect(composeTierLabel('Onyx', 0, 'en')).toBe('Onyx')
     expect(composeTierLabel('Onyx', 3, 'en')).toBe('Onyx')
   })
   it('sous-palier hors 1..6 (0 ou >6) → nom seul', () => {
-    expect(composeTierLabel('Diamond', 0, 'en')).toBe('Diamant')
+    expect(composeTierLabel('Diamond', 0, 'en')).toBe('Diamond')
     expect(composeTierLabel('Gold', 7, 'en')).toBe('Gold')
   })
 })

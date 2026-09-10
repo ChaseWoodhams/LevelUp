@@ -43,7 +43,7 @@ describe('ApiHaloSection — tri CLIENT par en-têtes (I16)', () => {
 
   it('clic sur « Appels » trie par count, un 2e clic inverse l’ordre', () => {
     render(<ApiHaloSection perf={makePerf()} />)
-    const header = screen.getByText('Appels')
+    const header = screen.getByText('Calls')
     fireEvent.click(header)
     // 1er clic numérique → descendant : 20, 10, 5.
     expect(rowOrder(names)).toEqual(['bravo', 'charlie', 'alpha'])

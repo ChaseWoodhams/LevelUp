@@ -58,19 +58,19 @@ describe('buildSeasonMatchesOption', () => {
 describe('ExplorerTargetSeasonMatches', () => {
   it('rend le conteneur avec le titre', () => {
     const seasons: SeasonMatchCount[] = [{ season_id: 'season13', season_name: 'S13', matches: 5 }]
-    renderWithProviders(<ExplorerTargetSeasonMatches seasons={seasons} title="Matchs par saison" />)
+    renderWithProviders(<ExplorerTargetSeasonMatches seasons={seasons} title="Matches per season" />)
     expect(screen.getByTestId('explorer-target-season-matches')).toBeInTheDocument()
-    expect(screen.getByText('Matchs par saison')).toBeInTheDocument()
+    expect(screen.getByText('Matches per season')).toBeInTheDocument()
   })
 
   it('rend un placeholder titré (jamais masqué) si liste vide', () => {
     renderWithProviders(
-      <ExplorerTargetSeasonMatches seasons={[]} title="Matchs par saison" />,
+      <ExplorerTargetSeasonMatches seasons={[]} title="Matches per season" />,
     )
     // Jamais d'espace blanc silencieux : conteneur + barre de titre restent rendus,
     // et ChartCard affiche son état « empty » (testid stable, indépendant de la locale).
     expect(screen.getByTestId('explorer-target-season-matches')).toBeInTheDocument()
-    expect(screen.getByText('Matchs par saison')).toBeInTheDocument()
+    expect(screen.getByText('Matches per season')).toBeInTheDocument()
     expect(screen.getByTestId('chart-card-empty')).toBeInTheDocument()
   })
 
@@ -79,15 +79,15 @@ describe('ExplorerTargetSeasonMatches', () => {
   // local sans service record par saison).
   it('affiche le badge live_status quand local_partial', () => {
     renderWithProviders(
-      <ExplorerTargetSeasonMatches seasons={[]} title="Matchs par saison" liveStatus="local_partial" />,
+      <ExplorerTargetSeasonMatches seasons={[]} title="Matches per season" liveStatus="local_partial" />,
     )
     expect(screen.getByTestId('explorer-live-status-badge-local_partial')).toBeInTheDocument()
-    expect(screen.getByText('Live partiel')).toBeInTheDocument()
+    expect(screen.getByText('Partial live data')).toBeInTheDocument()
   })
 
   it('n\'affiche aucun badge sans liveStatus (compat antérieure au Lot A3)', () => {
     renderWithProviders(
-      <ExplorerTargetSeasonMatches seasons={[{ season_id: 's1', season_name: 'S1', matches: 3 }]} title="Matchs par saison" />,
+      <ExplorerTargetSeasonMatches seasons={[{ season_id: 's1', season_name: 'S1', matches: 3 }]} title="Matches per season" />,
     )
     expect(screen.queryByTestId(/explorer-live-status-badge-/)).not.toBeInTheDocument()
   })

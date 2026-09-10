@@ -67,7 +67,7 @@ describe('XboxLoginPage', () => {
     renderWithProviders(<XboxLoginPage />)
     await waitFor(() => {
       // Texte du disclaimer
-      expect(screen.getByText(/ne saisis ce code que si tu/i)).toBeInTheDocument()
+      expect(screen.getByText(/Only enter this code if YOU just clicked 'Sign in with Xbox' on LevelUp\./i)).toBeInTheDocument()
     })
   })
 
@@ -76,18 +76,18 @@ describe('XboxLoginPage', () => {
 
     // Le bouton "Connexion admin" est visible après le rendu du panel Xbox.
     await waitFor(() => {
-      expect(screen.getByText(/Connexion admin/i)).toBeInTheDocument()
+      expect(screen.getByText(/Admin login \(password\)/i)).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByText(/Connexion admin/i))
+    fireEvent.click(screen.getByText(/Admin login \(password\)/i))
 
     // Le panel admin password apparaît avec son avertissement.
     await waitFor(() => {
-      expect(screen.getByText(/connexion admin uniquement/i)).toBeInTheDocument()
+      expect(screen.getByText(/Admin login only\. Normal users sign in through Xbox\./i)).toBeInTheDocument()
     })
     // Champs de form présents.
     expect(screen.getByLabelText(/Identifiant/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Mot de passe/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Password/i)).toBeInTheDocument()
   })
 
   it('affiche une erreur + bouton Réessayer quand le start échoue (500)', async () => {
@@ -105,7 +105,7 @@ describe('XboxLoginPage', () => {
     renderWithProviders(<XboxLoginPage />)
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Réessayer/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument()
     })
     // Pas de code affiché : le flow n'a pas démarré.
     expect(screen.queryByText(/ABCD-1234/i)).not.toBeInTheDocument()
@@ -142,15 +142,15 @@ describe('XboxLoginPage', () => {
   it('toggle "Retour à la connexion Xbox" depuis le panel admin', async () => {
     renderWithProviders(<XboxLoginPage />)
     await waitFor(() => {
-      expect(screen.getByText(/Connexion admin/i)).toBeInTheDocument()
+      expect(screen.getByText(/Admin login \(password\)/i)).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByText(/Connexion admin/i))
+    fireEvent.click(screen.getByText(/Admin login \(password\)/i))
     await waitFor(() => {
-      expect(screen.getByText(/Retour à la connexion Xbox/i)).toBeInTheDocument()
+      expect(screen.getByText(/← Back to Xbox sign-in/i)).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByText(/Retour à la connexion Xbox/i))
+    fireEvent.click(screen.getByText(/← Back to Xbox sign-in/i))
     await waitFor(() => {
       // De retour : le user_code est de nouveau visible.
       expect(screen.getByText(/ABCD-1234/i)).toBeInTheDocument()

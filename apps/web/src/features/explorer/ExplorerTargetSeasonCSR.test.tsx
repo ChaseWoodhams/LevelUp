@@ -41,13 +41,13 @@ describe('ExplorerTargetSeasonCSR', () => {
 
   it('rend un placeholder titré (jamais masqué) si liste vide', () => {
     renderWithProviders(
-      <ExplorerTargetSeasonCSR csrs={[]} title="CSR" emptyMessage="Aucun classement CSR à afficher" />,
+      <ExplorerTargetSeasonCSR csrs={[]} title="CSR" emptyMessage="No CSR rankings to display" />,
     )
     // Carte titrée + message centré rendus (visibilité des manques), plus de null.
     expect(screen.getByTestId('explorer-target-season-csr')).toBeInTheDocument()
     expect(screen.getByText('CSR')).toBeInTheDocument()
     expect(screen.getByTestId('explorer-target-season-csr-empty')).toBeInTheDocument()
-    expect(screen.getByText('Aucun classement CSR à afficher')).toBeInTheDocument()
+    expect(screen.getByText('No CSR rankings to display')).toBeInTheDocument()
   })
 
   // Lot A3 (fin de la dégradation muette) : badge discret dans la barre de titre
@@ -58,12 +58,12 @@ describe('ExplorerTargetSeasonCSR', () => {
       <ExplorerTargetSeasonCSR
         csrs={[]}
         title="CSR"
-        emptyMessage="Aucun classement CSR à afficher"
+        emptyMessage="No CSR rankings to display"
         liveStatus="no_auth"
       />,
     )
     expect(screen.getByTestId('explorer-live-status-badge-no_auth')).toBeInTheDocument()
-    expect(screen.getByText('Données live indisponibles (authentification)')).toBeInTheDocument()
+    expect(screen.getByText('Live data unavailable (authentication)')).toBeInTheDocument()
   })
 
   it("n'affiche aucun badge quand liveStatus vaut ok (liste non vide)", () => {

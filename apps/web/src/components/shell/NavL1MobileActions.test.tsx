@@ -44,7 +44,7 @@ function setup(pathname = '/t/halo_infinite/players/test-player/home') {
 }
 
 function openMenu() {
-  fireEvent.click(screen.getByRole('button', { name: 'Ouvrir le menu compte et outils' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Open account and tools menu' }))
 }
 
 describe('NavL1MobileActions', () => {
@@ -58,7 +58,7 @@ describe('NavL1MobileActions', () => {
   it('affiche le bouton kebab', () => {
     setup()
     expect(
-      screen.getByRole('button', { name: 'Ouvrir le menu compte et outils' }),
+      screen.getByRole('button', { name: 'Open account and tools menu' }),
     ).toBeInTheDocument()
   })
 
@@ -79,14 +79,14 @@ describe('NavL1MobileActions', () => {
   it('rend les outils latéraux (Référentiels, Feedback)', () => {
     setup()
     openMenu()
-    expect(screen.getByRole('menuitem', { name: 'Référentiels' })).toBeInTheDocument()
-    expect(screen.getByRole('menuitem', { name: 'Envoyer un retour' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'References' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Send feedback' })).toBeInTheDocument()
   })
 
   it('ouvre le drawer Référentiels via son store et ferme le menu', () => {
     setup()
     openMenu()
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Référentiels' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'References' }))
     expect(useAssetDrawerStore.getState().isOpen).toBe(true)
     expect(screen.getByRole('menu', { hidden: true })).toHaveAttribute('aria-hidden', 'true')
   })
@@ -94,14 +94,14 @@ describe('NavL1MobileActions', () => {
   it('ouvre le drawer Feedback via son store', () => {
     setup()
     openMenu()
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Envoyer un retour' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Send feedback' }))
     expect(useFeedbackDrawerStore.getState().isOpen).toBe(true)
   })
 
   it('déclenche la déconnexion quand une session est ouverte', () => {
     setup()
     openMenu()
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Se déconnecter' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Log out' }))
     expect(mockMutate).toHaveBeenCalledTimes(1)
   })
 
@@ -109,6 +109,6 @@ describe('NavL1MobileActions', () => {
     useAppShellStore.setState({ currentUsername: null })
     setup()
     openMenu()
-    expect(screen.queryByRole('menuitem', { name: 'Se déconnecter' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Log out' })).not.toBeInTheDocument()
   })
 })

@@ -68,7 +68,7 @@ describe('CreateChallengeForm — cooldown UI', () => {
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
     expect(screen.getByText(/Dispo dans/i)).toBeInTheDocument()
-    const item = screen.getByText('Défi KDA').closest('li')
+    const item = screen.getByText('KDA challenge').closest('li')
     expect(item).toHaveAttribute('aria-disabled', 'true')
 
     // Clic sur un modèle en cooldown → pas de cible ajustée affichée (non sélectionné).
@@ -81,7 +81,7 @@ describe('CreateChallengeForm — cooldown UI', () => {
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
     expect(screen.queryByText(/Dispo dans/i)).not.toBeInTheDocument()
-    const item = screen.getByText('Défi KDA').closest('li')
+    const item = screen.getByText('KDA challenge').closest('li')
     fireEvent.click(item as HTMLElement)
     expect(screen.getByText(/Cible ajustée/i)).toBeInTheDocument()
   })
@@ -91,6 +91,6 @@ describe('CreateChallengeForm — cooldown UI', () => {
     mockCreate.error = { code: 'cooldown_active', message: 'prestige: cooldown actif sur cette métrique' }
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
-    expect(screen.getByText(/Métrique en repos \(cooldown\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/Metric on cooldown/i)).toBeInTheDocument()
   })
 })

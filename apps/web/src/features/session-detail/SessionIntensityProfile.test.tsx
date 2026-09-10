@@ -39,20 +39,20 @@ afterEach(() => vi.clearAllMocks())
 
 describe('SessionIntensityProfile', () => {
   it('rend le chart + le sous-titre quand au moins une manche a des frags', async () => {
-    render(<SessionIntensityProfile title="Intensité" rows={exploitableRows(5)} />)
+    render(<SessionIntensityProfile title="Intensity" rows={exploitableRows(5)} />)
     expect(await screen.findByTestId('echarts-mock')).toBeInTheDocument()
-    expect(screen.getByText('Répartition des frags par phase de match')).toBeInTheDocument()
+    expect(screen.getByText('Frag distribution across match phases')).toBeInTheDocument()
   })
 
   it('liste vide → état vide (message dans le bloc titré, pas de chart)', () => {
-    render(<SessionIntensityProfile title="Intensité" rows={[]} />)
+    render(<SessionIntensityProfile title="Intensity" rows={[]} />)
     expect(screen.getByTestId('chart-card-empty')).toBeInTheDocument()
     expect(screen.queryByTestId('echarts-mock')).toBeNull()
   })
 
   it('manches sans frag (Σ = 0) → état vide', () => {
     const zero = new Array<number>(10).fill(0)
-    render(<SessionIntensityProfile title="Intensité" rows={[row(zero, 'm1'), row(null, 'm2')]} />)
+    render(<SessionIntensityProfile title="Intensity" rows={[row(zero, 'm1'), row(null, 'm2')]} />)
     expect(screen.getByTestId('chart-card-empty')).toBeInTheDocument()
     expect(screen.queryByTestId('echarts-mock')).toBeNull()
   })

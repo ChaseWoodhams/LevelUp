@@ -36,13 +36,13 @@ describe('SessionParamPills', () => {
   it('affiche nb de matchs, catégorie FR et durée', () => {
     renderWithProviders(<SessionParamPills entry={entry()} />)
     expect(screen.getByText('8 matchs')).toBeInTheDocument()
-    expect(screen.getByText('Classé')).toBeInTheDocument() // Ranked → FR
+    expect(screen.getByText('Ranked')).toBeInTheDocument() // Ranked → FR
     expect(screen.getByText('35 min')).toBeInTheDocument() // 19h30 → 20h05
   })
 
   it('localise les catégories (Arena → Arène)', () => {
     renderWithProviders(<SessionParamPills entry={entry({ dominant_category: 'Arena' })} />)
-    expect(screen.getByText('Arène')).toBeInTheDocument()
+    expect(screen.getByText('Arena')).toBeInTheDocument()
   })
 
   it('ne rend rien si entry est null', () => {

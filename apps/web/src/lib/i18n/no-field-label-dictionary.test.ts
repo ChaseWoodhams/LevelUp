@@ -151,7 +151,7 @@ describe('garde-rail : aucun dictionnaire de libellés de FieldKey hors TOML', (
 
   it("l'heuristique distingue un libellé d'une valeur technique", () => {
     expect(looksLikeHumanLabel('Frags')).toBe(true)
-    expect(looksLikeHumanLabel('Taux de victoire')).toBe(true)
+    expect(looksLikeHumanLabel('Win rate')).toBe(true)
     expect(looksLikeHumanLabel('count')).toBe(false)
     expect(looksLikeHumanLabel('percent_1')).toBe(false)
     expect(looksLikeHumanLabel('var(--ac-kills)')).toBe(false)

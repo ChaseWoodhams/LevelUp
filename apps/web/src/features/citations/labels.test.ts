@@ -50,8 +50,8 @@ describe('citationCategoryLabel', () => {
 
   it('rend des libellés FR sans anglicisme pour les catégories traduisibles', () => {
     expect(citationCategoryLabel('weapon', 'en')).toBe('Armes')
-    expect(citationCategoryLabel('vehicle', 'en')).toBe('Véhicules')
-    expect(citationCategoryLabel('game_mode', 'en')).toBe('Modes de jeu')
+    expect(citationCategoryLabel('vehicle', 'en')).toBe('Vehicles')
+    expect(citationCategoryLabel('game_mode', 'en')).toBe('Game modes')
     expect(citationCategoryLabel('other', 'en')).toBe('Autres')
   })
 

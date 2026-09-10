@@ -522,22 +522,20 @@ func (r *HomeRepo) loadCitationMappingMeta(ctx context.Context, norms []string) 
 		return result
 	}
 	defer rows.Close()
-	enLocale := ctxkeys.Locale(ctx) == "en"
 	for rows.Next() {
 		var norm, display, displayEN, imagePath, tierTargets, description, descriptionEN string
 		if err := rows.Scan(&norm, &display, &displayEN, &imagePath, &tierTargets, &description, &descriptionEN); err != nil {
 			continue
 		}
-		// Locale-aware (GH2-B6 + GH4) : sous UI EN, le nom anglais prime (fallback FR)
-		// et la description EN (description_en) prime. Si description_en est absente →
-		// nom seul (masquée) : principe GH-5b « EN n'injecte jamais de FR ».
-		if enLocale {
-			if displayEN != "" {
-				display = displayEN
-			}
-			description = descriptionEN
+		// English-only (GH2-B6 + GH4): the English name wins, and the description is
+		// description_en or nothing — the legacy French citation_name_display is only a
+		// last resort for the NAME when no English name exists, and the French description
+		// is never served (GH-5b). This used to depend on the request locale being exactly
+		// "en", so a request without one got the French columns.
+		if displayEN != "" {
+			display = displayEN
 		}
-		result[norm] = citationMeta{display: display, imagePath: imagePath, tierTargets: tierTargets, description: description}
+		result[norm] = citationMeta{display: display, imagePath: imagePath, tierTargets: tierTargets, description: descriptionEN}
 	}
 	return result
 }

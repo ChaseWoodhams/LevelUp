@@ -67,7 +67,7 @@ afterEach(() => {
   navigateMock.mockClear()
 })
 
-const WAYPOINT_LABEL = 'Ouvrir sur Halo Waypoint'
+const WAYPOINT_LABEL = 'Open on Halo Waypoint'
 
 describe('SquadSynergyHistoryTable — non-régression', () => {
   it('rend les colonnes de base (date, carte, résultat)', () => {
@@ -75,7 +75,7 @@ describe('SquadSynergyHistoryTable — non-régression', () => {
       <SquadSynergyHistoryTable rows={[makeRow()]} playerSlug="Chocoboflor" />,
     )
     expect(screen.getByText('Live Fire')).toBeInTheDocument()
-    expect(screen.getByText('Victoire')).toBeInTheDocument()
+    expect(screen.getByText('Win')).toBeInTheDocument()
   })
 
   it('bloc vide : message noBlockData, pas de crash', () => {

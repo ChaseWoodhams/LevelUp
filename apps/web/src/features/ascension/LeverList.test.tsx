@@ -40,7 +40,7 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
         levers={[lever({ axis: 'map_avoidance', context_key: MAP_GUID, context_label: 'Aquarius' })]}
       />,
     )
-    expect(screen.getByText('Améliore ton taux de victoire sur Aquarius')).toBeInTheDocument()
+    expect(screen.getByText('Improve your win rate on Aquarius')).toBeInTheDocument()
     expect(screen.queryByText(new RegExp(MAP_GUID))).not.toBeInTheDocument()
   })
 
@@ -58,7 +58,7 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
 
   it('by_mode : interpole le libellé de mode (déjà lisible) [FR/EN]', () => {
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'mode_selection', context_key: 'CTF' })]} />)
-    expect(screen.getByText('Améliore ton taux de victoire en CTF')).toBeInTheDocument()
+    expect(screen.getByText('Improve your win rate in CTF')).toBeInTheDocument()
     cleanup()
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'mode_selection', context_key: 'CTF' })]} />)
     expect(screen.getByText('Improve your win rate in CTF')).toBeInTheDocument()
@@ -66,7 +66,7 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
 
   it('by_squad : mappe with_friends → escouade / squad selon la locale', () => {
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'squad_play', context_key: 'with_friends' })]} />)
-    expect(screen.getByText(/Améliore ton taux de victoire en/)).toHaveTextContent(
+    expect(screen.getByText(/Improve your win rate in/)).toHaveTextContent(
       getAscensionText('en').squadVsSoloSquad,
     )
     cleanup()
@@ -78,7 +78,7 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
 
   it('axe comportemental (accuracy) : phrase fixe sans contexte [FR/EN]', () => {
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'accuracy' })]} />)
-    expect(screen.getByText('Améliore ta précision')).toBeInTheDocument()
+    expect(screen.getByText('Improve your accuracy')).toBeInTheDocument()
     cleanup()
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'accuracy' })]} />)
     expect(screen.getByText('Improve your accuracy')).toBeInTheDocument()

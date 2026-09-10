@@ -110,7 +110,7 @@ describe('SquadFocusStrip — boucle défis (Lot 2)', () => {
     renderWithProviders(<SquadFocusStrip />)
 
     // Ouvre le panneau « Gérer » (escouade appariée).
-    fireEvent.click(screen.getByRole('button', { name: 'Gérer' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }))
 
     // Label FR affiché, template_id brut absent.
     expect(screen.getByText('Briseur de couronnes')).toBeInTheDocument()
@@ -133,13 +133,13 @@ describe('SquadFocusStrip — boucle défis (Lot 2)', () => {
     })
     mockContext([ROW('Bob', 'xB')])
     renderWithProviders(<SquadFocusStrip />)
-    fireEvent.click(screen.getByRole('button', { name: 'Gérer' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Réévaluer' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Re-evaluate' }))
 
     // Gamertags résolus depuis le roster + valeur/cible + badge « Atteint ».
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('9 / 7')).toBeInTheDocument()
-    expect(screen.getByText('Atteint')).toBeInTheDocument()
+    expect(screen.getByText('Reached')).toBeInTheDocument()
     expect(screen.getByText('4 / 7')).toBeInTheDocument()
   })
 })

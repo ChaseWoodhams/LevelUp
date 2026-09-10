@@ -46,8 +46,8 @@ describe('MediaPage', () => {
   it('affiche les filtres de type de média', async () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
-      expect(screen.getByText('Tous types')).toBeInTheDocument()
-      expect(screen.getByText('Captures')).toBeInTheDocument()
+      expect(screen.getByText('All types')).toBeInTheDocument()
+      expect(screen.getByText('Screenshots')).toBeInTheDocument()
     })
   })
 
@@ -61,29 +61,29 @@ describe('MediaPage', () => {
   it('affiche le sélecteur de tri', async () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
-      expect(screen.getByLabelText('Tri de la galerie')).toBeInTheDocument()
+      expect(screen.getByLabelText('Media sorting')).toBeInTheDocument()
     })
   })
 
   it('distingue filtres et tri dans la toolbar', async () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
-      expect(screen.getByText('Filtres :')).toBeInTheDocument()
-      expect(screen.getByText('Tri :')).toBeInTheDocument()
+      expect(screen.getByText('Filters:')).toBeInTheDocument()
+      expect(screen.getByText('Sort:')).toBeInTheDocument()
     })
   })
 
   it('utilise des listes déroulantes pour les cartes et les modes', async () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
-      expect(screen.getByLabelText('Carte de la galerie')).toBeInTheDocument()
-      expect(screen.getByLabelText('Mode de la galerie')).toBeInTheDocument()
-      expect(screen.getByRole('option', { name: 'Toutes cartes' })).toBeInTheDocument()
-      expect(screen.getByRole('option', { name: 'Tous modes' })).toBeInTheDocument()
+      expect(screen.getByLabelText('Media map')).toBeInTheDocument()
+      expect(screen.getByLabelText('Media mode')).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'All maps' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'All modes' })).toBeInTheDocument()
       // Refacto post-84ae65ca : les modes sont maintenant groupés par catégorie
       // via <optgroup>. "Slayer" est un optgroup label (pas une option ARIA)
       // contenant "Toutes catégories" comme option canonique.
-      const modeSelect = screen.getByLabelText('Mode de la galerie')
+      const modeSelect = screen.getByLabelText('Media mode')
       expect(modeSelect.querySelector('optgroup[label="Slayer"]')).not.toBeNull()
     })
   })
@@ -126,7 +126,7 @@ describe('MediaPage', () => {
       expect(screen.getByRole('option', { name: 'Recharge' })).toBeInTheDocument()
       // "Oddball" est maintenant un optgroup label (refacto post-84ae65ca,
       // les modes sont groupés par catégorie). On vérifie l'optgroup directement.
-      const modeSelect = screen.getByLabelText('Mode de la galerie')
+      const modeSelect = screen.getByLabelText('Media mode')
       expect(modeSelect.querySelector('optgroup[label="Oddball"]')).not.toBeNull()
     })
   })
@@ -156,14 +156,14 @@ describe('MediaPage', () => {
   it('affiche le toggle Aimés seulement', async () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
-      expect(screen.getByLabelText('Afficher seulement les médias aimés')).toBeInTheDocument()
+      expect(screen.getByLabelText('Show liked media only')).toBeInTheDocument()
     })
   })
 
   it('toggle Aimés est désactivé par défaut', async () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
-      const toggle = screen.getByLabelText('Afficher seulement les médias aimés')
+      const toggle = screen.getByLabelText('Show liked media only')
       expect(toggle).toHaveAttribute('aria-pressed', 'false')
     })
   })
@@ -171,7 +171,7 @@ describe('MediaPage', () => {
   it('cliquer sur un filtre de type ne lève pas d\'erreur', async () => {
     renderWithProviders(<MediaPage />)
     await waitFor(() => {
-      expect(screen.getByText('Captures')).toBeInTheDocument()
+      expect(screen.getByText('Screenshots')).toBeInTheDocument()
     })
     // Cliquer ne doit pas lever d'exception
     expect(() => fireEvent.click(screen.getByText('Captures'))).not.toThrow()

@@ -65,7 +65,7 @@ describe('CoverFlowModal — suppression définitive', () => {
         currentPlayerGamertag="JGtm"
       />,
     )
-    expect(screen.getByRole('button', { name: /Supprimer définitivement ce média/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Permanently delete this media/ })).toBeInTheDocument()
   })
 
   it('masque l\'action sur le média d\'un autre joueur (non-admin)', () => {
@@ -80,7 +80,7 @@ describe('CoverFlowModal — suppression définitive', () => {
         currentPlayerGamertag="JGtm"
       />,
     )
-    expect(screen.queryByRole('button', { name: /Supprimer définitivement ce média/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Permanently delete this media/ })).not.toBeInTheDocument()
   })
 
   it('affiche l\'action à un administrateur sur le média d\'un autre joueur', () => {
@@ -95,7 +95,7 @@ describe('CoverFlowModal — suppression définitive', () => {
         currentPlayerGamertag="JGtm"
       />,
     )
-    expect(screen.getByRole('button', { name: /Supprimer définitivement ce média/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Permanently delete this media/ })).toBeInTheDocument()
   })
 
   it('n\'affiche aucune action quand onDelete n\'est pas fourni', () => {
@@ -109,7 +109,7 @@ describe('CoverFlowModal — suppression définitive', () => {
         currentPlayerGamertag="JGtm"
       />,
     )
-    expect(screen.queryByRole('button', { name: /Supprimer définitivement ce média/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Permanently delete this media/ })).not.toBeInTheDocument()
   })
 
   it('ne supprime RIEN au clic : une confirmation est exigée', () => {
@@ -125,7 +125,7 @@ describe('CoverFlowModal — suppression définitive', () => {
         currentPlayerGamertag="JGtm"
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /Supprimer définitivement ce média/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Permanently delete this media/ }))
 
     expect(onDelete).not.toHaveBeenCalled()
     expect(screen.getByRole('alertdialog')).toBeInTheDocument()
@@ -148,7 +148,7 @@ describe('CoverFlowModal — suppression définitive', () => {
         currentPlayerGamertag="JGtm"
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /Supprimer définitivement ce média/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Permanently delete this media/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Supprimer définitivement' }))
 
     expect(onDelete).toHaveBeenCalledTimes(1)
@@ -168,8 +168,8 @@ describe('CoverFlowModal — suppression définitive', () => {
         currentPlayerGamertag="JGtm"
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /Supprimer définitivement ce média/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Annuler' }))
+    fireEvent.click(screen.getByRole('button', { name: /Permanently delete this media/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
 
     expect(onDelete).not.toHaveBeenCalled()
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()

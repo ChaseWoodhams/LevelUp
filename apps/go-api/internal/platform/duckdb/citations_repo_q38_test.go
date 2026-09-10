@@ -88,9 +88,9 @@ func TestLoadMatchCitationsForView_TopCitationsEnriched(t *testing.T) {
 		}
 	}
 
-	// killing_spree : display enrichi (depuis seedMetaDBSchema).
-	if rows[0].NameDisplay != "Killing Spree" {
-		t.Errorf("killing_spree NameDisplay = %q, want \"Killing Spree\"", rows[0].NameDisplay)
+	// killing_spree: enriched display, the English name seeded by seedMetaDBSchema.
+	if rows[0].NameDisplay != "Killing Spree (EN)" {
+		t.Errorf("killing_spree NameDisplay = %q, want \"Killing Spree (EN)\"", rows[0].NameDisplay)
 	}
 	if rows[0].Value != 100 {
 		t.Errorf("killing_spree Value = %d, want 100", rows[0].Value)

@@ -60,12 +60,12 @@ describe('SynthesisHighlightsSection', () => {
 
     it('affiche le titre "Meilleurs matchs"', () => {
       renderSection(fullPreview)
-      expect(screen.getByText('Meilleurs matchs')).toBeInTheDocument()
+      expect(screen.getByText('Best matches')).toBeInTheDocument()
     })
 
     it('affiche le titre "Matchs difficiles"', () => {
       renderSection(fullPreview)
-      expect(screen.getByText('Matchs difficiles')).toBeInTheDocument()
+      expect(screen.getByText('Tough matches')).toBeInTheDocument()
     })
 
     it('affiche les kills du meilleur match', () => {
@@ -111,27 +111,27 @@ describe('SynthesisHighlightsSection', () => {
   describe('fallback top_by_kda', () => {
     it('utilise top_by_kda quand top_by_kills est vide', () => {
       renderSection(fallbackPreview)
-      expect(screen.getByText('Meilleurs matchs')).toBeInTheDocument()
+      expect(screen.getByText('Best matches')).toBeInTheDocument()
       // kda=8.0
       expect(screen.getByText('8.00')).toBeInTheDocument()
     })
 
     it('n\'affiche pas "Matchs difficiles" si worst_by_deaths est vide', () => {
       renderSection(fallbackPreview)
-      expect(screen.queryByText('Matchs difficiles')).not.toBeInTheDocument()
+      expect(screen.queryByText('Tough matches')).not.toBeInTheDocument()
     })
   })
 
   describe('état vide', () => {
     it('affiche un EmptyStateNotice si toutes les listes sont vides', () => {
       renderSection(emptyPreview)
-      expect(screen.getByText(/Aucun match remarquable/i)).toBeInTheDocument()
+      expect(screen.getByText(/No remarkable match/i)).toBeInTheDocument()
     })
 
     it('n\'affiche pas de cartes de matchs si vide', () => {
       renderSection(emptyPreview)
-      expect(screen.queryByText('Meilleurs matchs')).not.toBeInTheDocument()
-      expect(screen.queryByText('Matchs difficiles')).not.toBeInTheDocument()
+      expect(screen.queryByText('Best matches')).not.toBeInTheDocument()
+      expect(screen.queryByText('Tough matches')).not.toBeInTheDocument()
     })
   })
 

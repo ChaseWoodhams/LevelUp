@@ -71,10 +71,10 @@ func TestResolveMedalLabels_CitationFallback(t *testing.T) {
 	}
 }
 
-// TestResolveMedalLabels_LocaleAware prouve GH2-B6 : la tuile de match Home sert
-// le nom/description de médaille dans la locale de requête. Sous UI EN, JAMAIS de
-// colonne FR (name_fr/description_fr) — parité avec la vue Match (GH-5b).
-func TestResolveMedalLabels_LocaleAware(t *testing.T) {
+// TestResolveMedalLabels_AlwaysEnglish: the Home match tile serves the medal name and
+// description from the English columns whatever locale is passed — the legacy
+// name_fr/description_fr columns are never read (parity with the Match view, GH-5b).
+func TestResolveMedalLabels_AlwaysEnglish(t *testing.T) {
 	db := openMemDB(t)
 	seedMedalDefsSchema(t, db)
 	ctx := context.Background()
@@ -85,12 +85,9 @@ func TestResolveMedalLabels_LocaleAware(t *testing.T) {
 		t.Fatalf("seed medal 300: %v", err)
 	}
 
-	fr := resolveMedalLabels(ctx, db, []int64{300}, "fr")
-	if fr[300].label != "Tueur de joie" {
-		t.Errorf("FR label = %q, want 'Tueur de joie'", fr[300].label)
-	}
-	if fr[300].description != "Fin d une serie" {
-		t.Errorf("FR description = %q, want 'Fin d une serie'", fr[300].description)
+	legacy := resolveMedalLabels(ctx, db, []int64{300}, "fr")
+	if legacy[300].label != "Killjoy" || legacy[300].description != "Ended a spree" {
+		t.Errorf("legacy locale: label=%q description=%q, want English", legacy[300].label, legacy[300].description)
 	}
 
 	en := resolveMedalLabels(ctx, db, []int64{300}, "en")

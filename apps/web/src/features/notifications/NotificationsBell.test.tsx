@@ -100,7 +100,7 @@ describe('NotificationsBell', () => {
     // Le libellé aria passe en "vide" quand le badge est à 0.
     await waitFor(() => {
       expect(
-        screen.getByRole('button', { name: 'Aucune notification non lue' }),
+        screen.getByRole('button', { name: 'No unread notifications' }),
       ).toBeInTheDocument()
     })
     expect(screen.queryByText('12')).toBeNull()

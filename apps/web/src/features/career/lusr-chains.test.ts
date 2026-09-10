@@ -65,7 +65,7 @@ describe('resolveLusrGroupsForDisplay', () => {
 
 describe('lusrChainLabel', () => {
   it('h5_arena → libellé i18n FR « Arène »', () => {
-    expect(lusrChainLabel('h5_arena', 'en')).toBe('Arène')
+    expect(lusrChainLabel('h5_arena', 'en')).toBe('Arena')
   })
 
   it('h5_arena → libellé i18n EN « Arena »', () => {

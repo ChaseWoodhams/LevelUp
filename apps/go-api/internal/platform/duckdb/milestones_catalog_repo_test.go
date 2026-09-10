@@ -66,9 +66,9 @@ func TestMilestoneCatalogRepo_UpsertOverwrites(t *testing.T) {
 		t.Fatalf("Upsert v1: %v", err)
 	}
 
-	// Update libellé FR.
+	// Update the English title (the one the reader serves).
 	updated := original
-	updated.TitleFR = "Centurion (révisé)"
+	updated.TitleEN = "Centurion (revised)"
 	if err := repo.Upsert(ctx, updated); err != nil {
 		t.Fatalf("Upsert v2: %v", err)
 	}
@@ -77,7 +77,7 @@ func TestMilestoneCatalogRepo_UpsertOverwrites(t *testing.T) {
 	if err != nil || len(got) != 1 {
 		t.Fatalf("ListByTitle: got=%v err=%v", got, err)
 	}
-	if got[0].TitleFR != "Centurion (révisé)" {
-		t.Errorf("TitleFR = %q, want updated", got[0].TitleFR)
+	if got[0].TitleEN != "Centurion (revised)" {
+		t.Errorf("TitleEN = %q, want updated", got[0].TitleEN)
 	}
 }

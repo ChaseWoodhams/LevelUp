@@ -146,7 +146,7 @@ describe('AscensionCoachingTab — composition (couche Coaching)', () => {
     mockShellState.currentPlayer = null
     render(<AscensionCoachingTab />)
     expect(
-      screen.getByText(/Sélectionne un joueur pour voir l'entraînement/i),
+      screen.getByText(/Select a player to view coaching/i),
     ).toBeInTheDocument()
   })
 })

@@ -29,18 +29,18 @@ describe('ExplorerLiveStatusBadge', () => {
   it('affiche le wording "authentification" pour no_auth', () => {
     renderWithProviders(<ExplorerLiveStatusBadge status="no_auth" />)
     expect(screen.getByTestId('explorer-live-status-badge-no_auth')).toBeInTheDocument()
-    expect(screen.getByText('Données live indisponibles (authentification)')).toBeInTheDocument()
+    expect(screen.getByText('Live data unavailable (authentication)')).toBeInTheDocument()
   })
 
   it('affiche le wording "erreur" pour failed', () => {
     renderWithProviders(<ExplorerLiveStatusBadge status="failed" />)
     expect(screen.getByTestId('explorer-live-status-badge-failed')).toBeInTheDocument()
-    expect(screen.getByText('Données live indisponibles (erreur)')).toBeInTheDocument()
+    expect(screen.getByText('Live data unavailable (error)')).toBeInTheDocument()
   })
 
   it('affiche "Live partiel" pour local_partial', () => {
     renderWithProviders(<ExplorerLiveStatusBadge status="local_partial" />)
     expect(screen.getByTestId('explorer-live-status-badge-local_partial')).toBeInTheDocument()
-    expect(screen.getByText('Live partiel')).toBeInTheDocument()
+    expect(screen.getByText('Partial live data')).toBeInTheDocument()
   })
 })

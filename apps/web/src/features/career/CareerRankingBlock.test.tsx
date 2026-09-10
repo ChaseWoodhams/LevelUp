@@ -84,14 +84,14 @@ describe('CareerRankingBlock — colonne LUSR title-aware', () => {
     renderWithProviders(<CareerRankingBlock playerSlug="p" lusrData={lusr} />)
 
     // Les 4 libellés connus présents.
-    expect(screen.getByText('Social · Assassin')).toBeInTheDocument()
-    expect(screen.getByText('Social · Objectif')).toBeInTheDocument()
-    expect(screen.getByText('Grande Équipe')).toBeInTheDocument()
+    expect(screen.getByText('Social · Slayer')).toBeInTheDocument()
+    expect(screen.getByText('Social · Objective')).toBeInTheDocument()
+    expect(screen.getByText('Big Team Battle')).toBeInTheDocument()
     expect(screen.getByText('Chaos')).toBeInTheDocument()
     // 3 groupes non classés (FR « Unranked »).
     expect(screen.getAllByText('Unranked')).toHaveLength(3)
     // Pas de ligne h5 en HINF.
-    expect(screen.queryByText('Arène')).not.toBeInTheDocument()
+    expect(screen.queryByText('Arena')).not.toBeInTheDocument()
   })
 
   it('Halo 5 : rend uniquement le groupe présent (h5_arena → « Arène »)', () => {
@@ -106,10 +106,10 @@ describe('CareerRankingBlock — colonne LUSR title-aware', () => {
     renderWithProviders(<CareerRankingBlock playerSlug="p" lusrData={lusr} />)
 
     // La ligne h5_arena s'affiche avec son libellé i18n.
-    expect(screen.getByText('Arène')).toBeInTheDocument()
+    expect(screen.getByText('Arena')).toBeInTheDocument()
     // Aucun groupe HINF figé n'est rendu (pas de « Unranked » HINF parasite).
-    expect(screen.queryByText('Social · Assassin')).not.toBeInTheDocument()
-    expect(screen.queryByText('Grande Équipe')).not.toBeInTheDocument()
+    expect(screen.queryByText('Social · Slayer')).not.toBeInTheDocument()
+    expect(screen.queryByText('Big Team Battle')).not.toBeInTheDocument()
     expect(screen.queryByText('Chaos')).not.toBeInTheDocument()
     expect(screen.queryByText('Unranked')).not.toBeInTheDocument()
   })
@@ -156,6 +156,6 @@ describe('CareerRankingBlock — colonne LUSR title-aware', () => {
     // La flèche « up » (▲) est rendue avec le tooltip vs saison précédente.
     const arrow = screen.getByText('▲')
     expect(arrow).toBeInTheDocument()
-    expect(arrow.getAttribute('title')).toContain('Évolution vs saison précédente')
+    expect(arrow.getAttribute('title')).toContain('Change vs previous season')
   })
 })

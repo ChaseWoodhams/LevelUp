@@ -84,7 +84,7 @@ describe('AddFriendModal — UI', () => {
     renderWithClient(
       <AddFriendModal gamertag="Alice" open={true} onClose={onClose} locale="en" />,
     )
-    fireEvent.click(screen.getByText(/Annuler/i))
+    fireEvent.click(screen.getByText(/Cancel/i))
     expect(onClose).toHaveBeenCalled()
   })
 

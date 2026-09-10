@@ -52,7 +52,7 @@ describe('HomeSessionCarousel', () => {
         onNavigate={onNavigate}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /Voir le détail de la session/i }))
+    fireEvent.click(screen.getByRole('button', { name: /View session details/i }))
     expect(onNavigate).toHaveBeenCalledWith(session.session_label, ['Alice', 'Bob'])
   })
 
@@ -69,7 +69,7 @@ describe('HomeSessionCarousel', () => {
         onNavigate={onNavigate}
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: /Voir le détail de la session/i }))
+    fireEvent.click(screen.getByRole('button', { name: /View session details/i }))
     expect(onNavigate).toHaveBeenCalledWith(session.session_label, [])
   })
 
@@ -84,29 +84,9 @@ describe('HomeSessionCarousel', () => {
         onNavigate={() => {}}
       />,
     )
-    const card = screen.getByRole('button', { name: /Voir le détail de la session/i })
+    const card = screen.getByRole('button', { name: /View session details/i })
     expect(card.className).toContain('border')
     expect(card.className).toContain('hover:border-primary')
-  })
-
-  it('i18n FR : Escouade, outcomes et durée de session en français', () => {
-    renderWithProviders(
-      <HomeSessionCarousel
-        sessions={[makeSession()]}
-        idx={0}
-        onIdxChange={() => {}}
-        variant="squad"
-        playerSlug="p"
-        onNavigate={() => {}}
-      />,
-    )
-    expect(screen.getByText('Escouade')).toBeInTheDocument()
-    expect(screen.getByText('3 matchs')).toBeInTheDocument()
-    expect(screen.getByText('2 Victoires')).toBeInTheDocument()
-    expect(screen.getByText('1 Défaite')).toBeInTheDocument()
-    expect(screen.getByText(/Durée de la session/)).toBeInTheDocument()
-    expect(screen.getByText('Équipe')).toBeInTheDocument()
-    expect(screen.getByText('Perso')).toBeInTheDocument()
   })
 
   it('i18n EN (GH2-B4) : Squad, outcomes et durée de session en anglais', () => {
@@ -130,7 +110,6 @@ describe('HomeSessionCarousel', () => {
     expect(screen.getByText('Self')).toBeInTheDocument()
     // Aucun libellé FR résiduel.
     expect(screen.queryByText('Escouade')).not.toBeInTheDocument()
-    expect(screen.queryByText(/Durée de la session/)).not.toBeInTheDocument()
     // aria de navigation EN.
     expect(screen.getByRole('button', { name: /View session details/i })).toBeInTheDocument()
   })

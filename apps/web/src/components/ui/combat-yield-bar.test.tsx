@@ -60,8 +60,8 @@ describe('CombatYieldBar', () => {
     )
     const wrapper = container.firstChild as HTMLElement
     fireEvent.mouseEnter(wrapper)
-    expect(screen.getByText(/Rendement/i)).toBeTruthy()
-    expect(screen.getByText(/Résistance/i)).toBeTruthy()
+    expect(screen.getByText(/Yield/i)).toBeTruthy()
+    expect(screen.getByText(/Resistance/i)).toBeTruthy()
     expect(screen.getByText(/dégâts\/frag/i)).toBeTruthy()
     expect(screen.getByText(/dégâts\/mort/i)).toBeTruthy()
   })
@@ -85,7 +85,7 @@ describe('CombatYieldBar', () => {
     expect(screen.getByText(/dmg\/kill/i)).toBeTruthy()
     expect(screen.getByText(/dmg\/death/i)).toBeTruthy()
     // Aucun libellé FR ne doit subsister sous EN.
-    expect(screen.queryByText(/dégâts/i)).toBeNull()
+    expect(screen.queryByText(/Damage/i)).toBeNull()
   })
 
   it('hides tooltip on mouse leave', () => {

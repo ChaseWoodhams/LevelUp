@@ -4,6 +4,10 @@
 //
 // Ces tests utilisent DuckDB in-memory. Ils sont exclus du build unitaire.
 // Lancer avec : go test -tags integration ./internal/sync/...
+//
+// English-only: the sync fetches en-US only. The legacy *_fr columns still exist in the
+// schema and carry the English value; a fr-FR response registered on the mock client
+// must never be requested.
 package sync
 
 import (
@@ -66,7 +70,7 @@ func TestSyncAchievements_Integration_UpsertInsertsRows(t *testing.T) {
 		t.Errorf("attendu 3 lignes dans xbox_achievement_definitions, obtenu %d", count)
 	}
 
-	// Vérifier données bilingues
+	// English name; the legacy name_fr column mirrors it.
 	var nameEN, nameFR string
 	if err := metadataDB.QueryRow(
 		"SELECT name_en, name_fr FROM xbox_achievement_definitions WHERE achievement_id = '1'",
@@ -76,8 +80,8 @@ func TestSyncAchievements_Integration_UpsertInsertsRows(t *testing.T) {
 	if nameEN != "First Steps" {
 		t.Errorf("name_en attendu 'First Steps', obtenu %q", nameEN)
 	}
-	if nameFR != "Premiers pas" {
-		t.Errorf("name_fr attendu 'Premiers pas', obtenu %q", nameFR)
+	if nameFR != "First Steps" {
+		t.Errorf("name_fr: want the English 'First Steps' (legacy column mirrors EN), got %q", nameFR)
 	}
 
 	// Vérifier player_achievements
@@ -123,7 +127,7 @@ func TestSyncAchievements_Integration_UpsertIdempotent(t *testing.T) {
 	}
 }
 
-func TestSyncAchievements_Integration_APICallsEN_FR(t *testing.T) {
+func TestSyncAchievements_Integration_APICallsENOnly(t *testing.T) {
 	metadataDB, playerDB := openMemForAchievements(t)
 
 	client := newMockXboxClient()
@@ -134,12 +138,12 @@ func TestSyncAchievements_Integration_APICallsEN_FR(t *testing.T) {
 		t.Fatalf("SyncAchievements: %v", err)
 	}
 
-	// Les deux langs doivent avoir été appelées exactement une fois
+	// en-US exactly once; fr-FR never, even though the mock could answer it.
 	if client.callCount["en-US"] != 1 {
 		t.Errorf("en-US attendu 1 appel, obtenu %d", client.callCount["en-US"])
 	}
-	if client.callCount["fr-FR"] != 1 {
-		t.Errorf("fr-FR attendu 1 appel, obtenu %d", client.callCount["fr-FR"])
+	if client.callCount["fr-FR"] != 0 {
+		t.Errorf("fr-FR: want 0 calls, got %d", client.callCount["fr-FR"])
 	}
 }
 
@@ -155,7 +159,7 @@ func TestSyncAchievements_Integration_APIError_ReturnError(t *testing.T) {
 	}
 }
 
-func TestSyncAchievements_Integration_LockedDescBilingual(t *testing.T) {
+func TestSyncAchievements_Integration_LockedDescEnglish(t *testing.T) {
 	metadataDB, playerDB := openMemForAchievements(t)
 
 	enData := []PlayerAchievementRaw{
@@ -182,7 +186,7 @@ func TestSyncAchievements_Integration_LockedDescBilingual(t *testing.T) {
 	if lockedEN != "Complete the hidden challenge" {
 		t.Errorf("locked_desc_en inattendu: %q", lockedEN)
 	}
-	if lockedFR != "Terminez le défi caché" {
-		t.Errorf("locked_desc_fr inattendu: %q", lockedFR)
+	if lockedFR != "Complete the hidden challenge" {
+		t.Errorf("locked_desc_fr: want the English text (legacy column mirrors EN), got %q", lockedFR)
 	}
 }

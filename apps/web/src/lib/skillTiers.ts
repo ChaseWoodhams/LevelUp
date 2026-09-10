@@ -153,9 +153,18 @@ interface TierNamePair {
   en: string
 }
 
-// Index des noms de palier connus (toute casse FR ou EN) → paire localisée.
-// Dérivé de LUSR_TIER_GRID (porte les 6 paires fr/en) + Champion (apex Halo 5,
-// au-dessus d'Onyx ; identique dans les deux langues).
+// Legacy French tier names, READ-ONLY. Labels baked before the English-only switch
+// ("Or IV", "Platine II") still sit in stored rows; they resolve to the English name
+// instead of surfacing raw French or sorting as unknown. Nothing writes these names.
+const LEGACY_FR_TIER_NAMES: Readonly<Record<string, string>> = {
+  argent: 'Silver',
+  or: 'Gold',
+  platine: 'Platinum',
+  diamant: 'Diamond',
+}
+
+// Index of known tier names (any case, English or legacy French) → English name.
+// Derived from LUSR_TIER_GRID + Champion (Halo 5 apex, above Onyx).
 const TIER_NAME_BY_KEY: Record<string, TierNamePair> = (() => {
   const out: Record<string, TierNamePair> = {}
   for (const t of LUSR_TIER_GRID.tiers) {
@@ -163,6 +172,7 @@ const TIER_NAME_BY_KEY: Record<string, TierNamePair> = (() => {
     out[t.en.toLowerCase()] = pair
   }
   out['champion'] = { en: 'Champion' }
+  for (const [legacy, en] of Object.entries(LEGACY_FR_TIER_NAMES)) out[legacy] = { en }
   return out
 })()
 
@@ -217,6 +227,9 @@ const TIER_ORDINAL_BY_KEY: Record<string, number> = (() => {
     out[t.en.toLowerCase()] = i
   })
   out['champion'] = LUSR_TIER_GRID.tiers.length
+  for (const [legacy, en] of Object.entries(LEGACY_FR_TIER_NAMES)) {
+    out[legacy] = LUSR_TIER_GRID.tiers.findIndex((t) => t.en === en)
+  }
   return out
 })()
 

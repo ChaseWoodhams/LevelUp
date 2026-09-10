@@ -322,25 +322,17 @@ func (r *MetadataRepo) loadAssetTranslationsPerLang(
 	return perAsset, nil
 }
 
-// pickAssetNameByPreferredLang choisit le nom selon preferredLangs, fallback déterministe
-// sur la première lang par ordre alphabétique.
+// pickAssetNameByPreferredLang returns the name in the first preferred language present,
+// or "" when none is. There is deliberately NO fallback to another language: with the
+// English-only preference list, the old "first language alphabetically" fallback served
+// a fr-FR row whenever an asset had no English one (a French playlist name in the career
+// CSR block, a French map name on Home). An empty result lets every caller keep the
+// canonical English name it already holds.
 func pickAssetNameByPreferredLang(langs map[string]string, preferredLangs []string) string {
 	for _, pref := range preferredLangs {
 		if n, present := langs[pref]; present {
 			return n
 		}
-	}
-	keys := make([]string, 0, len(langs))
-	for k := range langs {
-		keys = append(keys, k)
-	}
-	for i := 1; i < len(keys); i++ {
-		for j := i; j > 0 && keys[j] < keys[j-1]; j-- {
-			keys[j], keys[j-1] = keys[j-1], keys[j]
-		}
-	}
-	if len(keys) > 0 {
-		return langs[keys[0]]
 	}
 	return ""
 }

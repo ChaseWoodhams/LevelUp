@@ -69,7 +69,7 @@ describe('ArcPresetPicker', () => {
   it('affiche un état vide quand aucun preset', () => {
     mockPresets.current = []
     render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
-    expect(screen.getByText(/Aucun preset disponible/i)).toBeInTheDocument()
+    expect(screen.getByText(/No preset available/i)).toBeInTheDocument()
   })
 
   it('utilise le titre EN en locale en', () => {

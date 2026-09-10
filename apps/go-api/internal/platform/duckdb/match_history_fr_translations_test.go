@@ -1,11 +1,13 @@
 //go:build integration
 
-// match_history_fr_translations_test.go — tests d'intégration de
-// applyMatchHistoryFRTranslations (cf. thought_log 2026-05-09 root cause P2).
+// match_history_fr_translations_test.go — integration tests for
+// applyMatchHistoryFRTranslations (see thought_log 2026-05-09 root cause P2).
 //
-// Couvre spécifiquement le cas où pair_name brut est vide en DB et
-// asset_translations[pair_id, fr-FR] retourne l'EN raw "Arena:CTF on X" — le
-// helper analysis.ResolvePairName doit re-normaliser et re-lookup mode_name_tr.
+// Covers the case where the raw pair_name is empty in DB and
+// asset_translations[pair_id] returns the raw EN "Arena:CTF on X" — the helper
+// analysis.ResolvePairName must re-normalise it to the mode name. The product is
+// English-only: the legacy PairNameFR field carries that English mode name, and the
+// French mode_name_tr rows seeded below must never surface.
 package duckdb
 
 import (
@@ -37,7 +39,7 @@ func setupMetadataWithModeTranslations(t *testing.T) *DB {
 		}
 	}
 
-	// mode_name_tr : seeds critiques.
+	// mode_name_tr: legacy French rows the English reader must ignore.
 	for _, kv := range [][3]string{
 		{"CTF", "fr", "Capture du drapeau"},
 		{"Strongholds", "fr", "Bases"},
@@ -50,13 +52,13 @@ func setupMetadataWithModeTranslations(t *testing.T) *DB {
 		}
 	}
 
-	// asset_translations : pair_id corrompu — toutes les langues retournent l'EN raw.
+	// asset_translations: corrupted pair_id — every language returns the raw EN.
 	pairID := "bd1457cc-corrupted-pair"
 	for _, lang := range []string{"en-US", "fr", "fr-FR", "de-DE"} {
 		_, _ = db.Exec(ctx, `INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES (?, ?, ?, ?)`,
 			pairID, "pair", lang, "Arena:CTF on Shiro")
 	}
-	// pair_id correct — fr-FR a la traduction.
+	// Healthy pair_id — fr-FR carries a translation.
 	pairIDOK := "ok-pair-001"
 	_, _ = db.Exec(ctx, `INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES (?, ?, ?, ?)`,
 		pairIDOK, "pair", "fr-FR", "Capture du drapeau sur Aquarius")
@@ -71,22 +73,22 @@ func TestApplyMatchHistoryFRTranslations_HandlesCorruptedAssetTranslations(t *te
 	meta := setupMetadataWithModeTranslations(t)
 	pdb := &PlayerDB{Metadata: meta}
 
-	// Cas reproduisant le bug observé sur Chocoboflor :
+	// Reproduces the bug observed on Chocoboflor:
 	corruptedID := "bd1457cc-corrupted-pair"
 	pairNameOK := "Arena:CTF on Aquarius"
 	pairNameFROK := pairNameOK // COALESCE(NULL, EN)
 	emptyPairName := ""
-	pairNameFRPlaceholder := "Arena:CTF on Shiro" // ce que COALESCE renvoie si pair_name_fr stocké en EN
+	pairNameFRPlaceholder := "Arena:CTF on Shiro" // what COALESCE returns when pair_name_fr holds EN
 
 	rows := []domain.MatchHistoryRawRow{
-		// Cas A : pair_name brut renseigné, traduction directe via mode_name_tr.
+		// Case A: raw pair_name present, normalised directly.
 		{
 			MatchID:    "match-A",
 			PairName:   &pairNameOK,
 			PairNameFR: &pairNameFROK,
 		},
-		// Cas B (root cause P2) : pair_name vide, asset_translations a l'EN raw,
-		// le helper doit re-normaliser et trouver "CTF" → "Capture du drapeau".
+		// Case B (root cause P2): pair_name empty, asset_translations holds the raw EN;
+		// the helper must re-normalise and find "CTF".
 		{
 			MatchID:    "match-B",
 			PairName:   &emptyPairName,
@@ -97,11 +99,11 @@ func TestApplyMatchHistoryFRTranslations_HandlesCorruptedAssetTranslations(t *te
 
 	applyMatchHistoryFRTranslations(ctx, pdb, rows)
 
-	if got := derefString(rows[0].PairNameFR); got != "Capture du drapeau" {
-		t.Errorf("Cas A (pair_name OK): PairNameFR = %q, want %q", got, "Capture du drapeau")
+	if got := derefString(rows[0].PairNameFR); got != "CTF" {
+		t.Errorf("Case A (pair_name OK): PairNameFR = %q, want %q", got, "CTF")
 	}
-	if got := derefString(rows[1].PairNameFR); got != "Capture du drapeau" {
-		t.Errorf("Cas B (asset corrompu): PairNameFR = %q, want %q", got, "Capture du drapeau")
+	if got := derefString(rows[1].PairNameFR); got != "CTF" {
+		t.Errorf("Case B (corrupted asset): PairNameFR = %q, want %q", got, "CTF")
 	}
 }
 
@@ -139,13 +141,13 @@ func TestFiltersRepo_applyModeFRTranslations_HandlesCorruptedAssetTranslations(t
 	}
 	r.applyModeFRTranslations(ctx, rows)
 
-	if got := derefString(rows[0].PairNameFR); got != "Bases" {
-		t.Errorf("Cas A: PairNameFR = %q, want %q", got, "Bases")
+	if got := derefString(rows[0].PairNameFR); got != "Strongholds" {
+		t.Errorf("Case A: PairNameFR = %q, want %q", got, "Strongholds")
 	}
-	// Cas B et C : tous deux corrompus → re-normaliser puis re-lookup.
-	for i, want := range map[int]string{1: "Capture du drapeau", 2: "Assassin en équipe"} {
+	// Cases B and C: both corrupted → re-normalise to the English mode name.
+	for i, want := range map[int]string{1: "CTF", 2: "Team Slayer"} {
 		if got := derefString(rows[i].PairNameFR); got != want {
-			t.Errorf("Cas %s: PairNameFR = %q, want %q", rows[i].MatchID, got, want)
+			t.Errorf("Case %s: PairNameFR = %q, want %q", rows[i].MatchID, got, want)
 		}
 	}
 }

@@ -41,7 +41,7 @@ describe('HomePage', () => {
     // les libellés locaux kpi.i18n.ts (pas la clé brute).
     renderWithProviders(<HomePage />)
     await waitFor(() => {
-      expect(screen.getByText('Taux de victoire')).toBeInTheDocument()
+      expect(screen.getByText('Win rate')).toBeInTheDocument()
     })
   })
 
@@ -405,7 +405,7 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Défis actifs/i)).toBeInTheDocument()
+      expect(screen.getByText(/Active challenges/i)).toBeInTheDocument()
       expect(screen.getByTestId('home-challenges-completed')).toHaveTextContent('0 / 3 complétés')
       expect(screen.getByTestId('home-challenges-card')).toHaveClass('min-h-[14rem]')
       expect(
@@ -502,8 +502,8 @@ describe('HomePage', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('home-challenges-card')).toHaveClass('min-h-[14rem]')
-      expect(screen.getByText('Aucun défi actif')).toBeInTheDocument()
-      expect(screen.getByText(/Tous les défis visibles sont terminés/i)).toBeInTheDocument()
+      expect(screen.getByText('No active challenge')).toBeInTheDocument()
+      expect(screen.getByText(/All visible challenges are complete/i)).toBeInTheDocument()
     })
 
     expect(screen.queryByTestId('home-challenge-item')).not.toBeInTheDocument()
@@ -517,7 +517,7 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />)
     await waitFor(() => {
       expect(screen.getByText('Matchs')).toBeInTheDocument()
-      expect(screen.getByText('Taux de victoire')).toBeInTheDocument()
+      expect(screen.getByText('Win rate')).toBeInTheDocument()
       expect(screen.getByText('KDA')).toBeInTheDocument()
     })
   })
@@ -532,9 +532,9 @@ describe('HomePage', () => {
   it('affiche des messages explicites pour les sections vides', async () => {
     renderWithProviders(<HomePage />)
     await waitFor(() => {
-      expect(screen.getByText(/Aucune session récente disponible/i)).toBeInTheDocument()
-      expect(screen.getByText(/Aucun point saillant disponible/i)).toBeInTheDocument()
-      expect(screen.getByText(/Aucun média récent disponible/i)).toBeInTheDocument()
+      expect(screen.getByText(/No recent session available/i)).toBeInTheDocument()
+      expect(screen.getByText(/No highlight available/i)).toBeInTheDocument()
+      expect(screen.getByText(/No recent media available/i)).toBeInTheDocument()
     })
   })
 
@@ -640,7 +640,7 @@ describe('HomePage', () => {
       // La lightbox CoverFlowModal expose un bouton "Fermer" — assertion minimale
       // que le clic sur la card a bien ouvert la lightbox. Le lien "Voir le match"
       // n'est plus rendu dans la lightbox actuelle.
-      expect(screen.getByRole('button', { name: /Fermer/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Close/i })).toBeInTheDocument()
     })
   })
 
@@ -652,7 +652,7 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Accueil vide/i)).toBeInTheDocument()
+      expect(screen.getByText(/Empty home/i)).toBeInTheDocument()
     })
   })
 })

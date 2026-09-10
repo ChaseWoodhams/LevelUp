@@ -56,13 +56,13 @@ describe('MatchEncountersTable — tri CLIENT par en-têtes (I16)', () => {
   it('sans clic : ordre serveur conservé (aucun tri actif par défaut)', () => {
     renderTable(<MatchEncountersTable rows={rows()} hideCardWrapper />)
     expect(rowOrder(names)).toEqual(['Alpha', 'Bravo', 'Charlie'])
-    const header = screen.getByText('Rencontres').closest('th')
+    const header = screen.getByText('Encounters').closest('th')
     expect(header).toHaveAttribute('aria-sort', 'none')
   })
 
   it('clic sur « Rencontres » trie par count_together, un 2e clic inverse l’ordre', () => {
     renderTable(<MatchEncountersTable rows={rows()} hideCardWrapper />)
-    const header = screen.getByText('Rencontres').closest('th') as HTMLElement
+    const header = screen.getByText('Encounters').closest('th') as HTMLElement
     fireEvent.click(header)
     const afterFirstClick = rowOrder(names)
     expect(afterFirstClick).not.toEqual(['Alpha', 'Bravo', 'Charlie'])
@@ -74,7 +74,7 @@ describe('MatchEncountersTable — tri CLIENT par en-têtes (I16)', () => {
 
   it('colonne « Joueur » triable alphabétiquement', () => {
     renderTable(<MatchEncountersTable rows={rows()} hideCardWrapper />)
-    const header = screen.getByText('Joueur').closest('th') as HTMLElement
+    const header = screen.getByText('Player').closest('th') as HTMLElement
     fireEvent.click(header)
     expect(rowOrder(names)).toEqual(['Alpha', 'Bravo', 'Charlie'])
   })

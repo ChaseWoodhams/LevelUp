@@ -57,7 +57,7 @@ describe('ExplorerTargetVersusDonuts', () => {
     donuts.forEach((d) => expect(d.getAttribute('data-personal-avg')).toBe('0.55'))
     // Graphe présent avec ses 2 points + titre.
     expect(screen.getByTestId('frag-chart')).toHaveTextContent('2')
-    expect(screen.getByText('Écart de frags cumulé')).toBeInTheDocument()
+    expect(screen.getByText('Cumulative frag gap')).toBeInTheDocument()
   })
 
   it('masque le graphe quand aucun duel (frag_gap_series vide)', () => {
@@ -66,7 +66,7 @@ describe('ExplorerTargetVersusDonuts', () => {
     )
     expect(screen.getAllByTestId('donut')).toHaveLength(2)
     expect(screen.queryByTestId('frag-chart')).not.toBeInTheDocument()
-    expect(screen.queryByText('Écart de frags cumulé')).not.toBeInTheDocument()
+    expect(screen.queryByText('Cumulative frag gap')).not.toBeInTheDocument()
   })
 
   it('affiche « — » pour un rôle sans taux (jamais allié)', () => {
@@ -77,7 +77,7 @@ describe('ExplorerTargetVersusDonuts', () => {
     )
     // Un seul vrai donut (face à lui) ; « ensemble » tombe en état vide « — ».
     expect(screen.getAllByTestId('donut')).toHaveLength(1)
-    expect(screen.getByText('Taux de victoires ensemble')).toBeInTheDocument()
+    expect(screen.getByText('Win rate together')).toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()
   })
 

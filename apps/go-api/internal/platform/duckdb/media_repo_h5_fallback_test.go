@@ -20,7 +20,7 @@ import (
 )
 
 // newTestPlayerDBForH5MediaFallback : 1 match H5-like (noms NULL, ids présents),
-// 1 média associé, asset_translations peuplées (fr-FR).
+// 1 média associé, asset_translations populated (en-US).
 func newTestPlayerDBForH5MediaFallback(t *testing.T) *PlayerDB {
 	t.Helper()
 	player := openMemDB(t)
@@ -53,11 +53,11 @@ func newTestPlayerDBForH5MediaFallback(t *testing.T) *PlayerDB {
 			        'map-plaza', 'gv-slayer', 'pl-quick', FALSE)`); err != nil {
 		t.Fatalf("insert match: %v", err)
 	}
-	// Traductions (la cascade fr-FR → … existante).
+	// English asset names (en-US only; French rows are never read).
 	for _, q := range []string{
-		`INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES ('map-plaza', 'map', 'fr-FR', 'Plaza')`,
-		`INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES ('gv-slayer', 'game_variant', 'fr-FR', 'Assassin')`,
-		`INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES ('pl-quick', 'playlist', 'fr-FR', 'Partie rapide')`,
+		`INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES ('map-plaza', 'map', 'en-US', 'Plaza')`,
+		`INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES ('gv-slayer', 'game_variant', 'en-US', 'Slayer')`,
+		`INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES ('pl-quick', 'playlist', 'en-US', 'Quick Play')`,
 	} {
 		if _, err := meta.Exec(ctx, q); err != nil {
 			t.Fatalf("seed translations: %v\nSQL: %s", err, q)
@@ -103,8 +103,8 @@ func TestMediaH5Fallback_LabelsResolvedFromAssetTranslations(t *testing.T) {
 	if row.MapName == nil || *row.MapName != "Plaza" {
 		t.Errorf("MapName = %v, want 'Plaza' (fallback asset_translations map)", row.MapName)
 	}
-	if row.ModeName == nil || *row.ModeName != "Assassin" {
-		t.Errorf("ModeName = %v, want 'Assassin' (fallback game_variant)", row.ModeName)
+	if row.ModeName == nil || *row.ModeName != "Slayer" {
+		t.Errorf("ModeName = %v, want 'Slayer' (fallback game_variant)", row.ModeName)
 	}
 }
 
@@ -122,8 +122,8 @@ func TestMediaH5Fallback_FilterOptionsPopulated(t *testing.T) {
 	if opts.Maps[0].Label != "Plaza" {
 		t.Errorf("Maps[0].Label = %q, want 'Plaza'", opts.Maps[0].Label)
 	}
-	if len(opts.Playlists) != 1 || opts.Playlists[0].Label != "Partie rapide" {
-		t.Errorf("Playlists = %+v, want 1 option 'Partie rapide'", opts.Playlists)
+	if len(opts.Playlists) != 1 || opts.Playlists[0].Label != "Quick Play" {
+		t.Errorf("Playlists = %+v, want 1 option 'Quick Play'", opts.Playlists)
 	}
 }
 
@@ -134,12 +134,12 @@ func TestMediaH5Fallback_ModeFilterByLabel(t *testing.T) {
 	pdb := newTestPlayerDBForH5MediaFallback(t)
 	repo := NewMediaRepo(pdb)
 
-	rows, err := repo.LoadMediaFiles(context.Background(), domain.MediaFilters{ModeFilter: "Assassin"}, 100, 0)
+	rows, err := repo.LoadMediaFiles(context.Background(), domain.MediaFilters{ModeFilter: "Slayer"}, 100, 0)
 	if err != nil {
-		t.Fatalf("LoadMediaFiles (filtre Assassin): %v", err)
+		t.Fatalf("LoadMediaFiles (filtre Slayer): %v", err)
 	}
 	if len(rows) != 1 {
-		t.Fatalf("filtre mode 'Assassin' = %d rows, want 1", len(rows))
+		t.Fatalf("filtre mode 'Slayer' = %d rows, want 1", len(rows))
 	}
 	rows, err = repo.LoadMediaFiles(context.Background(), domain.MediaFilters{ModeFilter: "Capture du drapeau"}, 100, 0)
 	if err != nil {

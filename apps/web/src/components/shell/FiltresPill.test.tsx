@@ -135,8 +135,8 @@ describe('FiltresPill — zombie detection', () => {
       cascade: { experience_types: ['Ranked PvP'], playlists: [], modes: [], maps: [] },
       cascadeCount: 1,
     })
-    expect(screen.getByText(/1 filtre incompatible/i)).toBeInTheDocument()
-    const zombieEntry = screen.getByTitle(/incompatible avec les filtres actifs/i)
+    expect(screen.getByText(/1 incompatible filter/i)).toBeInTheDocument()
+    const zombieEntry = screen.getByTitle(/Incompatible with active filters/i)
     expect(zombieEntry).toBeInTheDocument()
   })
 
@@ -159,9 +159,9 @@ describe('FiltresPill — zombie detection', () => {
       cascade: { experience_types: [], playlists: ['Ranked Arena'], modes: [], maps: [] },
       cascadeCount: 1,
     })
-    expect(screen.getByText(/1 filtre incompatible/i)).toBeInTheDocument()
+    expect(screen.getByText(/1 incompatible filter/i)).toBeInTheDocument()
     // "Ranked Arena" apparaît barré (titre zombie)
-    const zombieLabels = screen.getAllByTitle(/incompatible avec les filtres actifs/i)
+    const zombieLabels = screen.getAllByTitle(/Incompatible with active filters/i)
     const zombieTexts = zombieLabels.map((el) => el.textContent)
     expect(zombieTexts.join(' ')).toContain('Ranked Arena')
   })
@@ -174,8 +174,8 @@ describe('FiltresPill — zombie detection', () => {
       cascade: { experience_types: [], playlists: [], modes: ['SWAT'], maps: [] },
       cascadeCount: 1,
     })
-    expect(screen.getByText(/1 filtre incompatible/i)).toBeInTheDocument()
-    const zombieLabels = screen.getAllByTitle(/incompatible avec les filtres actifs/i)
+    expect(screen.getByText(/1 incompatible filter/i)).toBeInTheDocument()
+    const zombieLabels = screen.getAllByTitle(/Incompatible with active filters/i)
     expect(zombieLabels.map((el) => el.textContent).join(' ')).toContain('SWAT')
   })
 
@@ -187,8 +187,8 @@ describe('FiltresPill — zombie detection', () => {
       cascade: { experience_types: [], playlists: [], modes: [], maps: ['Bazaar'] },
       cascadeCount: 1,
     })
-    expect(screen.getByText(/1 filtre incompatible/i)).toBeInTheDocument()
-    const zombieLabels = screen.getAllByTitle(/incompatible avec les filtres actifs/i)
+    expect(screen.getByText(/1 incompatible filter/i)).toBeInTheDocument()
+    const zombieLabels = screen.getAllByTitle(/Incompatible with active filters/i)
     expect(zombieLabels.map((el) => el.textContent).join(' ')).toContain('Bazaar')
   })
 
@@ -208,7 +208,7 @@ describe('FiltresPill — zombie detection', () => {
       },
       cascadeCount: 2,
     })
-    expect(screen.getByText(/2 filtres incompatibles/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 incompatible filters/i)).toBeInTheDocument()
   })
 
   it('plusieurs zombies sur 3 dimensions → compteur = 3', () => {
@@ -226,7 +226,7 @@ describe('FiltresPill — zombie detection', () => {
       },
       cascadeCount: 3,
     })
-    expect(screen.getByText(/3 filtres incompatibles/i)).toBeInTheDocument()
+    expect(screen.getByText(/3 incompatible filters/i)).toBeInTheDocument()
   })
 
   // ── 7. Sélection mixte : certaines OK, d'autres zombie ──────────────────
@@ -248,8 +248,8 @@ describe('FiltresPill — zombie detection', () => {
     const slayerCheckbox = screen.getByRole('checkbox', { name: /^Slayer/i })
     expect(slayerCheckbox).toBeChecked()
     // SWAT est zombie (barré avec titre)
-    expect(screen.getByText(/1 filtre incompatible/i)).toBeInTheDocument()
-    const zombieLabels = screen.getAllByTitle(/incompatible avec les filtres actifs/i)
+    expect(screen.getByText(/1 incompatible filter/i)).toBeInTheDocument()
+    const zombieLabels = screen.getAllByTitle(/Incompatible with active filters/i)
     expect(zombieLabels.map((el) => el.textContent).join(' ')).toContain('SWAT')
   })
 
@@ -264,7 +264,7 @@ describe('FiltresPill — zombie detection', () => {
       onSetCascade,
     })
     // Le label zombie contient une checkbox checked
-    const zombieEntry = screen.getByTitle(/incompatible avec les filtres actifs/i)
+    const zombieEntry = screen.getByTitle(/Incompatible with active filters/i)
     const zombieCheckbox = zombieEntry.querySelector('input[type="checkbox"]')
     expect(zombieCheckbox).toBeInTheDocument()
     fireEvent.click(zombieCheckbox!)
@@ -283,7 +283,7 @@ describe('FiltresPill — zombie detection', () => {
       cascadeCount: 1,
     })
     // Le bouton trigger doit afficher ⚠
-    const btn = screen.getByRole('button', { name: /^filtres/i })
+    const btn = screen.getByRole('button', { name: /^Filters/i })
     expect(btn).toHaveTextContent('⚠')
   })
 })
@@ -305,7 +305,7 @@ describe('FilterOmnibar — zombie en temps réel (useFiltersPreview)', () => {
 
   it('sans player slug, les options disponibles proviennent du resolvedContext commité', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /^filtres/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Filters/i }))
     expect(screen.getByRole('checkbox', { name: /^Slayer/i })).toBeInTheDocument()
   })
 
@@ -322,7 +322,7 @@ describe('FilterOmnibar — zombie en temps réel (useFiltersPreview)', () => {
     renderWithProviders(<FilterOmnibar />)
     // La pill Filtres doit afficher ⚠ sans qu'on ait cliqué sur Analyser
     await waitFor(() => {
-      const filtresPill = screen.getByRole('button', { name: /^filtres/i })
+      const filtresPill = screen.getByRole('button', { name: /^Filters/i })
       expect(filtresPill).toHaveTextContent('⚠')
     })
   })
@@ -335,7 +335,7 @@ describe('FilterOmnibar — zombie en temps réel (useFiltersPreview)', () => {
       maps: [],
     })
     renderWithProviders(<FilterOmnibar />)
-    const filtresPill = screen.getByRole('button', { name: /^filtres/i })
+    const filtresPill = screen.getByRole('button', { name: /^Filters/i })
     expect(filtresPill).not.toHaveTextContent('⚠')
   })
 })

@@ -29,11 +29,11 @@ vi.mock('echarts-for-react', () => ({
 }))
 
 const LABELS: FdaGapCumulativeLabels = {
-  series: 'Écart cumulé',
-  real: 'Réel',
+  series: 'Cumulative gap',
+  real: 'Actual',
   expected: 'Attendu',
   gap: 'Écart',
-  avgCaption: 'Écart moyen par match',
+  avgCaption: 'Average gap per match',
   perMatch: '/match',
 }
 
@@ -105,7 +105,7 @@ describe('buildFdaGapCumulativeOption', () => {
     ) as unknown as OptShape
     // 2 séries : le cumul signé (aire) + FDA attendu par match.
     expect(opt.series).toHaveLength(2)
-    expect(opt.series[0].name).toBe('Écart cumulé')
+    expect(opt.series[0].name).toBe('Cumulative gap')
     // Cumul du différentiel réel − attendu, arrondi 2 décimales.
     expect(opt.series[0].data).toEqual([0.5, 0.1, 1.1])
     // Aire ancrée à 0 + markLine 0 + dégradé divergent (linéaire).
@@ -118,7 +118,7 @@ describe('buildFdaGapCumulativeOption', () => {
     expect(opt.series[1].data).toEqual([1, 1.2, 1])
     // Axe Y UNIQUE (objet, pas tableau) + légende sur les 2 séries.
     expect(Array.isArray(opt.yAxis)).toBe(false)
-    expect(opt.legend?.data).toEqual(['Écart cumulé', 'Attendu'])
+    expect(opt.legend?.data).toEqual(['Cumulative gap', 'Attendu'])
     expect(opt.xAxis.boundaryGap).toBe(false)
     expect(opt.xAxis.data).toHaveLength(3)
   })
@@ -170,14 +170,14 @@ describe('buildFdaGapCumulativeOption', () => {
 describe('TimeseriesFdaGapTrend — masquage capability', () => {
   it('capability expected_stats présente → chart rendu', async () => {
     setTitleCaps(['expected_stats'])
-    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Écart cumulé au FDA attendu" />)
+    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Cumulative KDA gap to expected" />)
     expect(await screen.findByTestId('echarts-mock')).toBeInTheDocument()
   })
 
   it('capability expected_stats absente → non rendu (null)', () => {
     setTitleCaps(['ranked'])
     const { container } = render(
-      <TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Écart cumulé au FDA attendu" />,
+      <TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Cumulative KDA gap to expected" />,
     )
     expect(container).toBeEmptyDOMElement()
     expect(screen.queryByTestId('echarts-mock')).toBeNull()
@@ -187,7 +187,7 @@ describe('TimeseriesFdaGapTrend — masquage capability', () => {
   // avec l'instance Sessions (clé commune `common.charts.fda_gap_tooltip`).
   it('aide ⓘ rendue à côté du titre', async () => {
     setTitleCaps(['expected_stats'])
-    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Écart cumulé au FDA attendu" />)
+    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Cumulative KDA gap to expected" />)
     await screen.findByTestId('echarts-mock')
     expect(screen.getByRole('button', { name: /info/i })).toBeInTheDocument()
   })
@@ -202,11 +202,11 @@ describe('TimeseriesFdaGapTrend — KPI écart moyen par match', () => {
         rows={[row(2.0, 1.0), row(1.0, 1.0)]}
         labels={LABELS}
         locale="en"
-        title="Écart cumulé au FDA attendu"
+        title="Cumulative KDA gap to expected"
       />,
     )
     const kpi = await screen.findByTestId('fda-gap-avg')
-    expect(kpi).toHaveTextContent('Écart moyen par match')
+    expect(kpi).toHaveTextContent('Average gap per match')
     expect(kpi).toHaveTextContent('+0,5/match')
   })
 
@@ -217,7 +217,7 @@ describe('TimeseriesFdaGapTrend — KPI écart moyen par match', () => {
         rows={[row(1.5, undefined), row(0.8, undefined)]}
         labels={LABELS}
         locale="en"
-        title="Écart cumulé au FDA attendu"
+        title="Cumulative KDA gap to expected"
       />,
     )
     const kpi = await screen.findByTestId('fda-gap-avg')

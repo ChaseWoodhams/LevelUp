@@ -93,7 +93,7 @@ describe('PeriodSessionRail', () => {
     // Le contrat garantit désormais started_at_utc/ended_at_utc (requis) → le rail
     // affiche le label de session FORMATÉ (« Session du … ») plutôt que le label
     // brut. Assertion TZ-indépendante (formatSessionLabel formate en heure locale).
-    expect(screen.getByText(/Session du/)).toBeTruthy()
+    expect(screen.getByText(/Session of/)).toBeTruthy()
     expect(screen.getByLabelText(/Session précédente|Previous session/)).toBeTruthy()
     expect(screen.getByLabelText(/Session suivante|Next session/)).toBeTruthy()
   })
@@ -121,7 +121,7 @@ describe('PeriodSessionRail', () => {
 
     renderWithProviders(<PeriodSessionRail />)
     expect(screen.getByLabelText(/Période précédente|Previous period/)).toBeTruthy()
-    expect(screen.getByText(/du.+au/i)).toBeTruthy()
+    expect(screen.getByText(/From .+ to/)).toBeTruthy()
   })
 
   it('matchCount : affiche le compteur de matchs en multi-session (où le rail n\'en a pas) + le trailing', () => {
@@ -135,10 +135,10 @@ describe('PeriodSessionRail', () => {
     store.setSessions({ picked_sessions: ['s-1', 's-2'], gap_minutes: DEFAULT_GAP_MINUTES })
 
     renderWithProviders(
-      <PeriodSessionRail matchCount={42} trailing={<button type="button">Voir les matchs</button>} />,
+      <PeriodSessionRail matchCount={42} trailing={<button type="button">View matches</button>} />,
     )
     expect(screen.getByText(/42 match/i)).toBeTruthy()
-    expect(screen.getByText('Voir les matchs')).toBeTruthy()
+    expect(screen.getByText('View matches')).toBeTruthy()
   })
 
   it('clic ◀ Précédente bascule vers la session plus ancienne (label en sortie)', () => {

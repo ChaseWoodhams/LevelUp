@@ -85,9 +85,10 @@ func TestWeaponAccuracyRepo_Load_AggregatesPerWeapon(t *testing.T) {
 	if w42.Label != "BR75" {
 		t.Errorf("weapon 42 label = %q, want BR75", w42.Label)
 	}
+	// weapon_labels name_en wins; the seeded name_fr ("Pistolet") is never served.
 	w100 := byWeapon[100]
-	if w100.ShotsFired != 50 || w100.ShotsLanded != 45 || w100.Label != "Pistolet" {
-		t.Errorf("weapon 100 = %d/%d %q, want 45/50 Pistolet", w100.ShotsLanded, w100.ShotsFired, w100.Label)
+	if w100.ShotsFired != 50 || w100.ShotsLanded != 45 || w100.Label != "Magnum" {
+		t.Errorf("weapon 100 = %d/%d %q, want 45/50 Magnum", w100.ShotsLanded, w100.ShotsFired, w100.Label)
 	}
 }
 

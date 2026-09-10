@@ -146,7 +146,7 @@ describe('distributionBucketsToSeries', () => {
 })
 
 describe('correlationPointsToSeries', () => {
-  const labels = { win: 'Victoires', loss: 'Défaites', unknown: 'Inconnu' }
+  const labels = { win: 'Victoires', loss: 'Losses', unknown: 'Inconnu' }
   // P7.1 (revue 2026-04-29) : DTO renommé `label` (composite "kills_vs_kd")
   // → metric_x_key/metric_y_key séparés, et x/y → x_value/y_value.
   // Le caller assemble le composite "metric_x_vs_metric_y" pour filtrer.
@@ -175,7 +175,7 @@ describe('correlationPointsToSeries', () => {
     const series = correlationPointsToSeries(points, 'kills_vs_kd', labels)
     expect(series.map((s) => (s.meta as { gamertag: string }).gamertag)).toEqual([
       'Victoires',
-      'Défaites',
+      'Losses',
       'Inconnu',
     ])
   })

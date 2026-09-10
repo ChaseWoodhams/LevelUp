@@ -19,7 +19,7 @@ const WIN_MATCH: RecentMatchItem = {
   narrative_badges: ['dominant', 'remontada'],
   map_ui: 'Aquarius',
   mode_ui: 'Assassin : Arène',
-  playlist_ui: 'Arène classée',
+  playlist_ui: 'Ranked Arena',
   kills: 15,
   assists: 4,
   deaths: 2,
@@ -37,7 +37,7 @@ const LOSS_MATCH: RecentMatchItem = {
   title: 'Empyrean · CTF',
   detail: '5K / 10D',
   started_at: '2026-04-11T18:00:00Z',
-  outcome_label: 'Défaite',
+  outcome_label: 'Loss',
   outcome_tone: 'loss',
   kills: 5,
   assists: 2,
@@ -55,7 +55,7 @@ describe('MatchCard', () => {
     render(<MatchCard match={WIN_MATCH} locale="en" />)
     expect(screen.getByText('Assassin sur Aquarius')).toBeTruthy()
     expect(screen.queryByText('Assassin : Arène sur Aquarius')).toBeNull()
-    expect(screen.getByText('Arène classée')).toBeTruthy()
+    expect(screen.getByText('Ranked Arena')).toBeTruthy()
   })
 
   it('utilise le connecteur anglais quand la locale UI est en', () => {
@@ -115,9 +115,9 @@ describe('MatchCard', () => {
     render(<MatchCard match={WIN_MATCH} />)
     const bar = screen.getByTestId('match-card-kda-bar')
     expect(bar).toBeTruthy()
-    expect(screen.getByText('frags')).toBeTruthy()
-    expect(screen.getByText('assist.')).toBeTruthy()
-    expect(screen.getByText('morts')).toBeTruthy()
+    expect(screen.getByText('kills')).toBeTruthy()
+    expect(screen.getByText('assists')).toBeTruthy()
+    expect(screen.getByText('deaths')).toBeTruthy()
     expect(bar.textContent).toContain('15')
     expect(bar.textContent).toContain('4')
     expect(bar.textContent).toContain('2')
@@ -127,9 +127,9 @@ describe('MatchCard', () => {
     render(<MatchCard match={LOSS_MATCH} />)
     const bar = screen.getByTestId('match-card-kda-bar')
     expect(bar).toBeTruthy()
-    expect(screen.getByText('frags')).toBeTruthy()
-    expect(screen.getByText('assist.')).toBeTruthy()
-    expect(screen.getByText('morts')).toBeTruthy()
+    expect(screen.getByText('kills')).toBeTruthy()
+    expect(screen.getByText('assists')).toBeTruthy()
+    expect(screen.getByText('deaths')).toBeTruthy()
     expect(bar.textContent).toContain('5')
     expect(bar.textContent).toContain('2')
     expect(bar.textContent).toContain('10')
@@ -169,14 +169,14 @@ describe('MatchCard', () => {
 
     it('perf absente SANS signal de placement → aucune mention (ni 0, ni badge)', () => {
       render(<MatchCard match={LOSS_MATCH} locale="en" />)
-      expect(screen.queryByText(/En placement/)).toBeNull()
+      expect(screen.queryByText(/In placement/)).toBeNull()
       expect(screen.queryByText('0')).toBeNull()
     })
 
     it('perf présente → score affiché, pas de mention de placement', () => {
       render(<MatchCard match={WIN_MATCH} locale="en" />)
       expect(screen.getByText('12')).toBeTruthy()
-      expect(screen.queryByText(/En placement/)).toBeNull()
+      expect(screen.queryByText(/In placement/)).toBeNull()
     })
   })
 })

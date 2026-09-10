@@ -121,7 +121,7 @@ describe('IssueTable — tri CLIENT par en-têtes (I16)', () => {
         sortable
       />,
     )
-    const header = screen.getByText('Matchs')
+    const header = screen.getByText('Matches')
     fireEvent.click(header)
     expect(rowOrder(names)).toEqual(['bravo', 'alpha', 'charlie'])
   })

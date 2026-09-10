@@ -78,13 +78,13 @@ describe('MatchScoreboard — tri CLIENT par en-têtes (I16)', () => {
   it('sans clic : ordre serveur conservé (aucun tri actif par défaut)', () => {
     renderScoreboard(<MatchScoreboard rows={rows()} t={MATCH_VIEW_TEXT.en} />)
     expect(rowOrder(names)).toEqual(['Alpha', 'Bravo', 'Charlie'])
-    const fragsHeader = screen.getByText('Frags').closest('th')
+    const fragsHeader = screen.getByText('Kills').closest('th')
     expect(fragsHeader).toHaveAttribute('aria-sort', 'none')
   })
 
   it('clic sur « Frags » trie par frags, un 2e clic inverse l’ordre', () => {
     renderScoreboard(<MatchScoreboard rows={rows()} t={MATCH_VIEW_TEXT.en} />)
-    const fragsHeader = screen.getByText('Frags').closest('th') as HTMLElement
+    const fragsHeader = screen.getByText('Kills').closest('th') as HTMLElement
     fireEvent.click(fragsHeader)
     const afterFirstClick = rowOrder(names)
     expect(afterFirstClick).not.toEqual(['Alpha', 'Bravo', 'Charlie'])

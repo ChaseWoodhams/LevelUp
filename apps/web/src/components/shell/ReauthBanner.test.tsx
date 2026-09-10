@@ -29,8 +29,8 @@ describe('ReauthBanner', () => {
     useAppShellStore.setState({ reauthRequired: true })
     renderWithProviders(<ReauthBanner />)
     expect(screen.getByRole('alert')).toBeInTheDocument()
-    expect(screen.getByText(/connexion Xbox a expiré/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Rafraîchir/i })).toBeInTheDocument()
+    expect(screen.getByText(/The Xbox connection has expired — data sync is paused\./i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Refresh/i })).toBeInTheDocument()
   })
 
   it('rend le message et le bouton en anglais quand locale=en', () => {
@@ -43,7 +43,7 @@ describe('ReauthBanner', () => {
   it('device mode (pas de redirect) : le bouton navigue vers /login', () => {
     useAppShellStore.setState({ reauthRequired: true, oauthCodeFlowEnabled: false })
     renderWithProviders(<ReauthBanner />)
-    fireEvent.click(screen.getByRole('button', { name: /Rafraîchir/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Refresh/i }))
     expect(navigateMock).toHaveBeenCalledWith({ to: '/login' })
   })
 })

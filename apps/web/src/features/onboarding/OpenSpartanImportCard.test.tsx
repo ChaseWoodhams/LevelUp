@@ -198,7 +198,7 @@ describe('OpenSpartanImportCard — failure path', () => {
     const failure = screen.getByTestId('openspartan-failure')
     expect(failure.textContent).toMatch(/n'appartient pas au compte/i)
     // Retry button drops us back to idle.
-    fireEvent.click(within(failure).getByRole('button', { name: /réessayer/i }))
+    fireEvent.click(within(failure).getByRole('button', { name: /Retry/i }))
     expect(screen.getByTestId('openspartan-dropzone')).toBeTruthy()
   })
 })
@@ -207,7 +207,7 @@ describe('failureMessageFromCode — unit', () => {
   it('maps every documented Error.Code to a localised sentence', () => {
     const cases: Array<{ code: string; expected: RegExp }> = [
       { code: 'xuid_mismatch', expected: /pas au compte Xbox/i },
-      { code: 'owner_low_confidence', expected: /vérifier/i },
+      { code: 'owner_low_confidence', expected: /Check/i },
       { code: 'not_openspartan_db', expected: /OpenSpartan reconnaissable/i },
       { code: 'upload_too_large', expected: /max 1 Go/i },
       { code: 'demo_mode', expected: /mode démo/i },

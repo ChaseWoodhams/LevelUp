@@ -56,13 +56,13 @@ vi.mock('@/stores/appShellStore', () => ({
 }))
 
 const LABELS: LocalFilterBarLabels = {
-  experience: 'Expérience',
-  experienceAll: 'Toutes',
-  experienceRanked: 'Classé',
+  experience: 'Experience',
+  experienceAll: 'All',
+  experienceRanked: 'Ranked',
   experienceUnranked: 'Unranked',
   playlists: 'Playlists',
   modes: 'Modes',
-  reset: 'Réinitialiser',
+  reset: 'Reset',
 }
 
 beforeEach(() => {
@@ -94,7 +94,7 @@ describe('useLocalFilterBar', () => {
     }
     render(<Wrapper />)
 
-    expect(screen.getByRole('button', { name: /Expérience\s*:/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Experience\s*:/ })).toBeInTheDocument()
   })
 
   it('committedHash a le format FNV-1a 32 bits (8 hex chars)', () => {
@@ -112,9 +112,9 @@ describe('useLocalFilterBar', () => {
     render(<Wrapper />)
 
     // Avant clic : seul le trigger est visible (les options du popup absentes)
-    const trigger = screen.getByRole('button', { name: /Expérience\s*:/ })
+    const trigger = screen.getByRole('button', { name: /Experience\s*:/ })
     // Avant clic : pas de bouton option "Classé X" (count concaténé en accessible name).
-    expect(screen.queryByRole('button', { name: /^Classé\d*$/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Ranked\d*$/ })).not.toBeInTheDocument()
 
     act(() => {
       fireEvent.click(trigger)
@@ -122,8 +122,8 @@ describe('useLocalFilterBar', () => {
 
     // Après clic : les 3 options sont rendues — leur accessible name concatène
     // le label et le count (ex: "Toutes30", "Classé10", "Unranked20").
-    expect(screen.getByRole('button', { name: /^Toutes\d+$/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^Classé\d+$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^All\d+$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Ranked\d+$/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Unranked\d+$/ })).toBeInTheDocument()
   })
 
@@ -141,7 +141,7 @@ describe('useLocalFilterBar', () => {
     }
     render(<Wrapper />)
 
-    expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Playlists/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Modes/ })).toBeInTheDocument()
   })

@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/features/match-replay/i18n.ts
- * Origin at commit: 4cc6e4b97 — the commit that last changed it, so
+ * Origin at commit: a1520ad0c — the commit that last changed it, so
  * `git diff 4cc6e4b97 HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts

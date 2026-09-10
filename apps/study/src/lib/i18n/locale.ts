@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/lib/i18n/locale.ts
- * Origin at commit: 7a79c7961 — the commit that last changed it, so
+ * Origin at commit: a1520ad0c — the commit that last changed it, so
  * `git diff 7a79c7961 HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts

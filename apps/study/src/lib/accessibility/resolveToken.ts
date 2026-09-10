@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/lib/accessibility/resolveToken.ts
- * Origin at commit: 8d2558d6b — the commit that last changed it, so
+ * Origin at commit: 677574859 — the commit that last changed it, so
  * `git diff 8d2558d6b HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts

@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/features/match-replay/rosterLogic.ts
- * Origin at commit: 0afd83f7e — the commit that last changed it, so
+ * Origin at commit: 677574859 — the commit that last changed it, so
  * `git diff 0afd83f7e HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts

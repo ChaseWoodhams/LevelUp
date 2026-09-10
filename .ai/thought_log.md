@@ -61309,3 +61309,28 @@ fails; the run was stopped at `platform/session`, so later packages are unmeasur
 **Next step**: remove the unused locale parameters together with their call sites, move the web
 tests to English, fix the three integration failures, bump the origin SHA of the five `apps/study`
 copies this commit changes, then take the PR out of draft.
+
+---
+
+## [2026-09-10] Study branch: the OpenAPI contract regenerated from the branch's own Go code
+
+**Status**: Complete.
+
+**Context**: PR #27's `Frontend` job failed on `Type-check` (34 TS errors: `name_fr`,
+`description_fr`, `locale`, ... "does not exist"). `37591d6de` committed an `openapi.yaml`, and the
+`apps/web` client generated from it, that had been produced from the uncommitted English-only
+working tree: 0 `*_fr` fields against 21 on `main`, while the branch's Go structs still declare
+them. Local runs never saw it because they ran on the full working tree, where Go code, contract
+and clients were all English together.
+
+**Technical decision**: regenerate rather than hand-edit. `go run ./cmd/openapi-gen` from the
+branch's Go code, then `npm run generate-types` in `apps/web` and `apps/study`; the contract that
+results differs from `main` only by what the study branch actually adds.
+
+**Results**: `openapi-gen -check` ok; both generated-types freshness checks ok; `go test ./contracttest` ok.
+`apps/web` typecheck ok with the cache purged (34 errors before); `apps/study` typecheck ok and
+418 passed tests, after the hand-built replay fixture gains the `fr` labels the bilingual contract
+requires (it had also been written against the English contract). The contract now differs from
+`main` by 27 lines: the six BridgeHealth weapon-witness counters and `matchClockZeroMs`.
+
+**Next step**: push and let CI rule on PR #27.

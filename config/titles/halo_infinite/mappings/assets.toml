@@ -7,7 +7,7 @@
 # Lue au boot par internal/games/mappings/loader_assets.go.
 #
 # Convention : sections [assets.{kind}.{id}].
-# Champs obligatoires : labels.en, labels.en, display_order.
+# Champs obligatoires : labels.en, display_order.
 # Champs optionnels : color_token, icon.
 #
 # Toute modification breaking incrémente schema_version (cf. tools/mappings/CHANGELOG.md).

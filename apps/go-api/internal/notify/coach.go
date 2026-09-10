@@ -44,7 +44,7 @@ func BuildCoachEmbed(in CoachEmbedInput, labels NotifyLabels) Embed {
 	lang := "en"
 	embed := Embed{
 		Title:       T("discord_coach_title", lang),
-		Description: coachCategoryLabel(in.Category, lang),
+		Description: coachCategoryLabel(in.Category),
 		Color:       coachColor(in.Severity),
 		Footer:      &EmbedFooter{Text: discordFooterText(labels)},
 		Timestamp:   time.Now().UTC().Format(time.RFC3339),
@@ -132,14 +132,11 @@ func coachColor(severity string) int {
 	}
 }
 
-// coachCategoryLabel humanise une catégorie coach (FR/EN). Fallback : la clé
-// brute si la catégorie n'est pas connue (dégradation propre, jamais de panic).
-func coachCategoryLabel(category, lang string) string {
-	lang = "en"
-	if m, ok := coachCategoryLabels[category]; ok {
-		if lbl, ok := m[lang]; ok && lbl != "" {
-			return lbl
-		}
+// coachCategoryLabel returns the English label of a coach category. Fallback: the raw
+// key when the category is unknown (clean degradation, never a panic).
+func coachCategoryLabel(category string) string {
+	if lbl, ok := coachCategoryLabels[category]; ok && lbl != "" {
+		return lbl
 	}
 	if category == "" {
 		return "-"
@@ -147,24 +144,29 @@ func coachCategoryLabel(category, lang string) string {
 	return category
 }
 
-// coachCategoryLabels : libellés humanisés FR/EN des catégories coach relayées
-// (source des clés : internal/progression/coach/emitter.go via
-// AlertType.NotificationCategory ; garde-rail de cohérence dans le package
-// internal/notifications/external). Registre neutre et non-culpabilisant, aligné
-// sur l'esprit du coach (signaux positifs / à consolider).
-var coachCategoryLabels = map[string]map[string]string{
-	"personal_record":     {"en": "Personal record"},
-	"record_near_miss":    {"en": "Record within reach"},
-	"milestone_unlocked":  {"en": "Milestone unlocked"},
-	"milestone_near_miss": {"en": "Milestone within reach"},
-	"lusr_tier_approach":  {"en": "LUSR tier approach"},
-	"streak_milestone":    {"en": "Streak milestone"},
-	"comeback_welcome":    {"en": "Comeback"},
-	"threshold_crossed":   {"en": "Threshold crossed"},
-	"trend_consolidate":   {"en": "Axis to consolidate"},
-	"pattern_strength":    {"en": "Strength detected"},
-	"pattern_weakness":    {"en": "Weakness detected"},
-	"pattern_behavior":    {"en": "Play pattern"},
-	"pattern_lever":       {"en": "Priority lever"},
-	"combat_pattern":      {"en": "Combat profile"},
+// Category key and label also asserted by this package's tests.
+const (
+	coachCategoryPatternLever   = "pattern_lever"
+	coachLabelMilestoneUnlocked = "Milestone unlocked"
+)
+
+// coachCategoryLabels: English labels of the relayed coach categories (keys come from
+// internal/progression/coach/emitter.go via AlertType.NotificationCategory; consistency
+// guard-rail in internal/notifications/external). Neutral, non-judgemental wording,
+// in the coach's spirit (positive signals / things to consolidate).
+var coachCategoryLabels = map[string]string{
+	"personal_record":         "Personal record",
+	"record_near_miss":        "Record within reach",
+	"milestone_unlocked":      coachLabelMilestoneUnlocked,
+	"milestone_near_miss":     "Milestone within reach",
+	"lusr_tier_approach":      "LUSR tier approach",
+	"streak_milestone":        "Streak milestone",
+	"comeback_welcome":        "Comeback",
+	"threshold_crossed":       "Threshold crossed",
+	"trend_consolidate":       "Axis to consolidate",
+	"pattern_strength":        "Strength detected",
+	"pattern_weakness":        "Weakness detected",
+	"pattern_behavior":        "Play pattern",
+	coachCategoryPatternLever: "Priority lever",
+	"combat_pattern":          "Combat profile",
 }

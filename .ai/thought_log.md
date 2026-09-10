@@ -61406,3 +61406,42 @@ whose integration runs were green.
 
 **Next step**: bump the study copy SHAs, push, let CI rule, take PR #28 out of draft; retarget it
 to `main` once #27 is merged.
+
+---
+
+## [2026-09-10] English-only branch: the three CI gates the local run did not cover
+
+**Status**: Complete (pending CI on PR #28).
+
+**Technical decision**: CI on `1959b125b` failed three jobs that the local gate run had not
+reproduced; each is fixed at its cause.
+
+- **Frontend `lint:fields`**: `tools/lint-no-hardcoded-fields.mjs` only recognised
+  `labels = { en = "…", fr = "…" }`, so on the English-only mappings it extracted nothing and
+  exited on its own "parser broken?" guard. It now reads `labels = { en = "…" }` (122 labels,
+  no violation). The garbled header comments the conversion left in the mapping TOMLs
+  ("labels.en, labels.en", "en+fr") are corrected for both titles.
+- **Go lint (6 issues)**: two SA4009 — `coachCategoryLabel` and `applyMatchHeaderMetaLabels`
+  overwrote their `lang`/`locale` parameter with "en" and kept unreachable French branches;
+  both parameters and the dead branches are gone, and the coach label table is a flat
+  English map (two strings the tests also assert are constants, which settles goconst). A
+  literal "en-US" now uses `LangCodeEN`. The `unused` `loadPairAssetNames` was the tip of a
+  dead cluster: `FiltersRepo.applyModeFRTranslations`, `applyMapFRTranslations` and
+  `applyPlaylistFRTranslations` had no production caller left after the conversion, so they,
+  the five helpers only they used, their now-unused imports and the one test that exercised
+  `applyModeFRTranslations` are deleted (CLAUDE.md: no dead code kept alive by tests).
+- **Go coverage baseline**: the suite itself was green (`go test: exit=0`); the presence gate
+  refused because 65 tests deleted by the conversion (French locale fallbacks, FR seeds, FR
+  label loaders) were still in `.ai/baselines/tests_pre_migration.jsonl`. Following the
+  repository procedure (commit 6fe3110e2), all their event lines are removed by a tool, plus
+  the filter test deleted above: 550 lines for 66 tests, nothing added, final newline kept.
+  Before removal each one was checked as really gone from the sources; two subtest names
+  ("EN", "FR" of `TestChallengeLanguageCandidates`, whose table now loops over language
+  codes) were confirmed by reading the test, since such short names grep everywhere.
+
+**Results**: `lint:fields` ok; web build and `test:coverage` (TZ=UTC) pass, 3,498 tests;
+`go vet`, `go build ./...`, gofmt 1.26.1 clean; `golangci-lint --new-from-merge-base=origin/main`
+0 issues; `go test` for `platform/duckdb`, `notify`, `service` ok, and the duckdb integration
+tests for filters and FR translations ok.
+
+**Next step**: push, let CI rule, take PR #28 out of draft.

@@ -4,7 +4,7 @@
 # Lue au boot par internal/games/mappings/loader_outcomes.go.
 #
 # Clés admises : win | loss | tie | dnf (alignées sur canonical/enums.go Outcome).
-# Champs obligatoires : labels.en, labels.en, color_token.
+# Champs obligatoires : labels.en, color_token.
 # Champ optionnel : raw_code (entier brut du titre, MT-06/PMT-5) — code interne
 #   encodé dans la donnée (Halo : win=2, loss=3, tie=1, dnf=4). Sert au seam
 #   int↔canonique (OutcomeMappingSet.Canonical / RawCode / SQLIsWinExpr). Les

@@ -453,7 +453,7 @@ func (r *LeaderboardRepo) resolvePlaylistNamesFromCatalog(ctx context.Context, i
 			var id, name, lang string
 			if rows.Scan(&id, &name, &lang) == nil && strings.TrimSpace(name) != "" {
 				switch lang {
-				case "en-US", "en":
+				case LangCodeEN, "en":
 					enMap[id] = name
 				}
 			}

@@ -6,9 +6,9 @@
 # Convention : sections indexées par FieldKey canonique (cf. canonical/fields.go).
 # Une section absente = le titre ne supporte pas ce champ pour les surfaces produit.
 #
-# Champs obligatoires : labels.en, labels.en, storage_unit, display_unit,
+# Champs obligatoires : labels.en, storage_unit, display_unit,
 # format, display_order, group.
-# Champs optionnels : description (en+fr conjointement), icon.
+# Champs optionnels : description (en), icon.
 #
 # Toute modification breaking incrémente schema_version (cf. tools/mappings/CHANGELOG.md).
 

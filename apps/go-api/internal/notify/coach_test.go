@@ -122,20 +122,16 @@ func TestBuildCoachEmbed_LinkFieldOptional(t *testing.T) {
 	}
 }
 
-// TestCoachCategoryLabel_LangFallback : lang vide → défaut FR (un relais sans lang
-// configuré doit rester humanisé, pas retomber sur la clé brute) ; catégorie
-// inconnue → clé brute ; catégorie vide → "-" (jamais un libellé vide dans l'embed).
-func TestCoachCategoryLabel_LangFallback(t *testing.T) {
-	if got := coachCategoryLabel("milestone_unlocked", ""); got != "Milestone unlocked" {
-		t.Errorf("empty lang -> English label expected, got %q", got)
+// TestCoachCategoryLabel_Fallback: known category → English label; unknown category →
+// raw key; empty category → "-" (never an empty label in the embed).
+func TestCoachCategoryLabel_Fallback(t *testing.T) {
+	if got := coachCategoryLabel("milestone_unlocked"); got != coachLabelMilestoneUnlocked {
+		t.Errorf("known category -> English label expected, got %q", got)
 	}
-	if got := coachCategoryLabel("milestone_unlocked", "es"); got != "Milestone unlocked" {
-		t.Errorf("unsupported lang -> English fallback expected, got %q", got)
-	}
-	if got := coachCategoryLabel("cat_inconnue", "en"); got != "cat_inconnue" {
+	if got := coachCategoryLabel("cat_inconnue"); got != "cat_inconnue" {
 		t.Errorf("catégorie inconnue → clé brute attendue, obtenu %q", got)
 	}
-	if got := coachCategoryLabel("", "en"); got != "-" {
+	if got := coachCategoryLabel(""); got != "-" {
 		t.Errorf("catégorie vide → \"-\" attendu, obtenu %q", got)
 	}
 }

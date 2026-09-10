@@ -10,10 +10,7 @@ package duckdb
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
 	"strings"
-	"time"
 
 	"levelup/go-api/internal/analysis"
 	"levelup/go-api/internal/domain"
@@ -196,42 +193,3 @@ func loadModeFRBatch(ctx context.Context, pdb *PlayerDB, modeENSet map[string]st
 // (2026-07-25) — source unique du SQL sur metadata.mode_name_tr, cf. le
 // garde-rail no_mode_name_tr_literal_test.go. Aucun changement de signature ni
 // de comportement pour les callers de ce fichier.
-
-// loadPairAssetNames charge asset_translations[asset_type='pair', lang='fr'|'fr-FR']
-// pour les pair_id donnés. Helper partagé entre match_history et filters pour
-// le fallback de re-lookup mode_name_tr (cf. analysis.ResolvePairName).
-// Best-effort : retourne nil en cas d'erreur.
-func loadPairAssetNames(ctx context.Context, meta *DB, pairIDs []string) map[string]string {
-	if meta == nil || len(pairIDs) == 0 {
-		return nil
-	}
-	ph := strings.TrimRight(strings.Repeat("?,", len(pairIDs)), ",")
-	q := fmt.Sprintf(`SELECT asset_id, name FROM asset_translations
-		WHERE asset_type = 'pair' AND lang IN ('en-US', 'en') AND asset_id IN (%s)
-		ORDER BY asset_id, CASE WHEN lang = 'en-US' THEN 0 ELSE 1 END`, ph)
-	args := make([]any, len(pairIDs))
-	for i, id := range pairIDs {
-		args[i] = id
-	}
-	ctx2, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	// QueryRecovered : auto-réparation si handle metadata FATAL-invalidated (bug ART).
-	rows, err := meta.QueryRecovered(ctx2, q, args...)
-	if err != nil {
-		if !isTableNotFoundErr(err) {
-			slog.WarnContext(ctx, "fr_translations: loadPairAssetNames failed", "err", err)
-		}
-		return nil
-	}
-	defer rows.Close()
-	out := make(map[string]string, len(pairIDs))
-	for rows.Next() {
-		var id, name string
-		if rows.Scan(&id, &name) == nil {
-			if _, exists := out[id]; !exists {
-				out[id] = strings.TrimSpace(name)
-			}
-		}
-	}
-	return out
-}

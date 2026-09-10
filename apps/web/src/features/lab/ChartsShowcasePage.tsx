@@ -33,7 +33,7 @@ import { TimeseriesLineChart } from '@/components/charts/TimeseriesLineChart'
 
 import { TimeseriesKdaBars } from '@/features/timeseries/TimeseriesKdaBars'
 import type { TimeseriesMatchRow } from '@/lib/api/types'
-import { DOW_LABELS_FR } from '@/lib/formatters'
+import { DOW_LABELS_EN } from '@/lib/formatters'
 
 // ─── Sample data ───────────────────────────────────────────────────────────
 
@@ -112,7 +112,7 @@ const HEATMAP_SERIES = [
       const value = 0.5 + 0.2 * Math.sin((hour / 12) * Math.PI * 2 + day)
       return {
         x: String(hour + 8).padStart(2, '0'),
-        y: DOW_LABELS_FR[day],
+        y: DOW_LABELS_EN[day],
         value: Math.round(value * 1000) / 1000,
         detail: { count: 3 + ((hour * 5 + day * 3) % 18) },
       }

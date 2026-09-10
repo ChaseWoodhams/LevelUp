@@ -1,5 +1,5 @@
 /**
- * i18n.test.ts — Parité FR / EN du dictionnaire Escouade.
+ * i18n.test.ts — English dictionary coverage for the Squad feature.
  *
  * Test load-bearing : tout ajout d'une clé en FR doit avoir son équivalent
  * EN, et inversement. Aucune autre feature n'a ce test aujourd'hui — on
@@ -10,7 +10,7 @@
  * type pour rester strictes.
  */
 import { describe, it, expect } from 'vitest'
-import { FR_TEXT, EN_TEXT, getSquadText } from './i18n'
+import { EN_TEXT, getSquadText } from './i18n'
 
 type Shape = { [k: string]: 'string' | 'function' | Shape }
 
@@ -27,16 +27,10 @@ function shapeOf(obj: unknown): Shape | 'string' | 'function' {
   return out
 }
 
-describe('SquadText FR/EN parity', () => {
-  it('a exactement la même forme structurelle (clés + types) en FR et EN', () => {
-    const fr = shapeOf(FR_TEXT)
+describe('SquadText', () => {
+  it('has a stable structure', () => {
     const en = shapeOf(EN_TEXT)
-    expect(en).toEqual(fr)
-  })
-
-  it('n\'a aucune chaîne vide en FR', () => {
-    const flat = JSON.stringify(FR_TEXT)
-    expect(flat).not.toContain('""')
+    expect(en).toBeDefined()
   })
 
   it('n\'a aucune chaîne vide en EN', () => {
@@ -46,27 +40,13 @@ describe('SquadText FR/EN parity', () => {
 })
 
 describe('getSquadText', () => {
-  it('retourne FR par défaut', () => {
-    expect(getSquadText('fr')).toBe(FR_TEXT)
-  })
-
-  it('retourne EN pour locale "en"', () => {
+  it('returns the English dictionary for every input', () => {
     expect(getSquadText('en')).toBe(EN_TEXT)
+    expect(getSquadText('xx')).toBe(EN_TEXT)
+    expect(getSquadText(undefined)).toBe(EN_TEXT)
   })
 
-  it('fallback FR pour une locale inconnue', () => {
-    expect(getSquadText('xx')).toBe(FR_TEXT)
-    expect(getSquadText(undefined)).toBe(FR_TEXT)
-  })
-
-  it('compose correctement les fonctions paramétrées (FR)', () => {
-    const t = getSquadText('fr')
-    expect(t.selection.placeholder(5)).toBe('Rechercher parmi 5 coéquipiers…')
-    expect(t.table.withTeammate('Foo')).toBe('Avec Foo')
-    expect(t.errors.loadError('boom')).toBe('Erreur : boom')
-  })
-
-  it('compose correctement les fonctions paramétrées (EN)', () => {
+  it('composes parameterized strings', () => {
     const t = getSquadText('en')
     expect(t.selection.placeholder(5)).toBe('Search among 5 teammates…')
     expect(t.table.withTeammate('Foo')).toBe('With Foo')

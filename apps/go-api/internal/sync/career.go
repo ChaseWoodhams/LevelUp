@@ -233,7 +233,7 @@ func syncPlayerCSRs(
 //
 // Les playlists pour lesquelles l'API ne renvoie aucune entrée (jamais jouées)
 // sont volontairement ignorées : la lecture catalogue-first (GetCSRSnapshots)
-// synthétise alors une ligne "Non classé" cohérente avec le seuil de la saison.
+// synthétise alors une ligne "Unranked" cohérente avec le seuil de la saison.
 func AugmentWithActiveRankedCSRs(
 	ctx context.Context,
 	client HaloClient,
@@ -262,16 +262,10 @@ func AugmentWithActiveRankedCSRs(
 			continue
 		}
 		if res == nil {
-			continue // pas d'entrée → catalogue-first affichera "Non classé"
+			continue // pas d'entrée → catalogue-first affichera "Unranked"
 		}
-		switch locale {
-		case "fr":
-			res.PlaylistName = pl.NameFR
-		case "":
-			// skip : garder le PlaylistName renvoyé par l'API.
-		default:
-			res.PlaylistName = pl.NameEN
-		}
+		_ = locale
+		res.PlaylistName = pl.NameEN
 		res.Queue = pl.Queue
 		res.Input = pl.Input
 		csrs = append(csrs, *res)

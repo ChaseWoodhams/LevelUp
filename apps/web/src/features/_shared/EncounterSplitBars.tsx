@@ -49,14 +49,14 @@ function SplitBar({
 export function AllyEnemySplitBar({
   allyCount,
   enemyCount,
-  locale,
+  locale: _locale,
 }: {
   allyCount: number
   enemyCount: number
   locale: Locale
 }) {
-  const ttAlly = locale === 'en' ? `${allyCount} matches as ally` : `${allyCount} matchs en allié`
-  const ttEnemy = locale === 'en' ? `${enemyCount} matches as enemy` : `${enemyCount} matchs en ennemi`
+  const ttAlly = `${allyCount} matches as ally`
+  const ttEnemy = `${enemyCount} matches as enemy`
   return (
     <SplitBar
       leftCount={allyCount}
@@ -72,14 +72,14 @@ export function AllyEnemySplitBar({
 export function KDSplitBar({
   kills,
   deaths,
-  locale,
+  locale: _locale,
 }: {
   kills: number
   deaths: number
   locale: Locale
 }) {
-  const ttKills = locale === 'en' ? `${kills} kills dealt` : `${kills} frags infligés`
-  const ttDeaths = locale === 'en' ? `${deaths} deaths suffered` : `${deaths} morts subies`
+  const ttKills = `${kills} kills dealt`
+  const ttDeaths = `${deaths} deaths suffered`
   return (
     <SplitBar
       leftCount={kills}

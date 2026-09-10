@@ -52,7 +52,7 @@ describe('MatchCard', () => {
   })
 
   it('affiche le titre centré mode sur carte et la playlist', () => {
-    render(<MatchCard match={WIN_MATCH} locale="fr" />)
+    render(<MatchCard match={WIN_MATCH} locale="en" />)
     expect(screen.getByText('Assassin sur Aquarius')).toBeTruthy()
     expect(screen.queryByText('Assassin : Arène sur Aquarius')).toBeNull()
     expect(screen.getByText('Arène classée')).toBeTruthy()
@@ -65,7 +65,7 @@ describe('MatchCard', () => {
 
   it('strip le nom de carte EN collé au mode même si map_ui est FR (régression "Slayer on Forest sur Forêt")', () => {
     const crossLang: RecentMatchItem = { ...WIN_MATCH, mode_ui: 'Slayer on Forest', map_ui: 'Forêt' }
-    render(<MatchCard match={crossLang} locale="fr" />)
+    render(<MatchCard match={crossLang} locale="en" />)
     expect(screen.getByText('Slayer sur Forêt')).toBeTruthy()
     expect(screen.queryByText('Slayer on Forest sur Forêt')).toBeNull()
   })
@@ -153,12 +153,12 @@ describe('MatchCard', () => {
     }
 
     it('affiche « En placement (8/10) » à la place du score', () => {
-      render(<MatchCard match={IN_PLACEMENT} locale="fr" />)
+      render(<MatchCard match={IN_PLACEMENT} locale="en" />)
       expect(screen.getByText('En placement (8/10)')).toBeTruthy()
     })
 
     it('n\'affiche JAMAIS un 0 fabriqué pour une perf absente', () => {
-      render(<MatchCard match={IN_PLACEMENT} locale="fr" />)
+      render(<MatchCard match={IN_PLACEMENT} locale="en" />)
       expect(screen.queryByText('0')).toBeNull()
     })
 
@@ -168,13 +168,13 @@ describe('MatchCard', () => {
     })
 
     it('perf absente SANS signal de placement → aucune mention (ni 0, ni badge)', () => {
-      render(<MatchCard match={LOSS_MATCH} locale="fr" />)
+      render(<MatchCard match={LOSS_MATCH} locale="en" />)
       expect(screen.queryByText(/En placement/)).toBeNull()
       expect(screen.queryByText('0')).toBeNull()
     })
 
     it('perf présente → score affiché, pas de mention de placement', () => {
-      render(<MatchCard match={WIN_MATCH} locale="fr" />)
+      render(<MatchCard match={WIN_MATCH} locale="en" />)
       expect(screen.getByText('12')).toBeTruthy()
       expect(screen.queryByText(/En placement/)).toBeNull()
     })

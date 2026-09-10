@@ -53,9 +53,6 @@ const t = {
   usersDescription: '',
   openUsersButton: 'Ouvrir',
   interfaceTitle: 'Interface',
-  langLabel: 'Langue',
-  langFr: 'FR',
-  langEn: 'EN',
   timezoneLabel: 'Fuseau',
   showRecords: 'Records',
   normalizeModeLabels: 'Normaliser modes',
@@ -143,7 +140,7 @@ beforeEach(() => {
     currentTitleSlug: 'halo_infinite',
     availableTitles: [],
     isTitleSwitching: false,
-    locale: 'fr',
+    locale: 'en',
     hintsVisible: true,
     capabilities: {
       can_read_local_data: true,
@@ -519,37 +516,37 @@ describe('formatLastSeen', () => {
 
   it('< 1 min → "moins d\'1 min"', () => {
     const ts = new Date(baseNow.getTime() - 30_000).toISOString()
-    expect(formatLastSeen(ts, 'Halo Infinite', t, 'fr', baseNow))
+    expect(formatLastSeen(ts, 'Halo Infinite', t, 'en', baseNow))
       .toBe("Vu il y a moins d'1 min sur Halo Infinite")
   })
 
   it('< 60 min → "{N} min"', () => {
     const ts = new Date(baseNow.getTime() - 5 * 60_000).toISOString()
-    expect(formatLastSeen(ts, 'Halo Infinite', t, 'fr', baseNow))
+    expect(formatLastSeen(ts, 'Halo Infinite', t, 'en', baseNow))
       .toBe('Vu il y a 5 min sur Halo Infinite')
   })
 
   it('< 24 h → "{N} h"', () => {
     const ts = new Date(baseNow.getTime() - 3 * 3_600_000).toISOString()
-    expect(formatLastSeen(ts, 'Halo Infinite', t, 'fr', baseNow))
+    expect(formatLastSeen(ts, 'Halo Infinite', t, 'en', baseNow))
       .toBe('Vu il y a 3 h sur Halo Infinite')
   })
 
   it('< 7 j → "{N} j"', () => {
     const ts = new Date(baseNow.getTime() - 2 * 86_400_000).toISOString()
-    expect(formatLastSeen(ts, 'Halo Infinite', t, 'fr', baseNow))
+    expect(formatLastSeen(ts, 'Halo Infinite', t, 'en', baseNow))
       .toBe('Vu il y a 2 j sur Halo Infinite')
   })
 
   it('> 7 j → format absolu', () => {
     const ts = '2026-05-10T08:00:00Z'
-    const out = formatLastSeen(ts, 'Halo Infinite', t, 'fr', baseNow)
+    const out = formatLastSeen(ts, 'Halo Infinite', t, 'en', baseNow)
     expect(out).toMatch(/Vu le .* sur Halo Infinite/)
     expect(out).toContain('Halo Infinite')
   })
 
   it('timestamp invalide → "Jamais vu en jeu"', () => {
-    expect(formatLastSeen('not-a-date', 'Halo Infinite', t, 'fr', baseNow))
+    expect(formatLastSeen('not-a-date', 'Halo Infinite', t, 'en', baseNow))
       .toBe('Jamais vu en jeu')
   })
 })

@@ -261,16 +261,16 @@ func GetTierForRating(rating float64) (*SkillTier, int) {
 func FormatTierLabel(rating float64) string {
 	tier, sub := GetTierForRating(rating)
 	if tier == nil {
-		return "Non classé"
+		return "Unranked"
 	}
 	if sub == 0 {
-		return tier.NameFR
+		return tier.Name
 	}
 	r, ok := romanNumerals[sub]
 	if !ok {
-		return tier.NameFR
+		return tier.Name
 	}
-	return tier.NameFR + " " + r
+	return tier.Name + " " + r
 }
 
 // ── Helpers math ────────────────────────────────────────────────────────────

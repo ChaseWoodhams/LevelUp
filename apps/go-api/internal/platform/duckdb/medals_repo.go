@@ -38,7 +38,7 @@ func (r *MedalsRepo) ListAllMedals(ctx context.Context, locale string) ([]domain
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	labelExpr, descExpr := medalLabelDescCoalesceSQL(locale)
+	labelExpr, descExpr := medalLabelDescCoalesceSQL()
 	query := `
 		SELECT md.medal_name_id,
 		       ` + labelExpr + ` AS label,
@@ -48,7 +48,7 @@ func (r *MedalsRepo) ListAllMedals(ctx context.Context, locale string) ([]domain
 		       COALESCE(md.difficulty_index, 0)                   AS difficulty_index,
 		       COALESCE(md.personal_score, 0)                     AS personal_score
 		FROM medal_definitions md
-		` + medalTranslationJoinsSQL(locale) + `
+		` + medalTranslationJoinsSQL() + `
 		ORDER BY md.medal_name_id`
 
 	rows, err := r.pdb.Metadata.Query(ctx, query)

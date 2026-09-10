@@ -9,7 +9,7 @@
 import { useState } from 'react'
 import { useAppShellStore } from '@/stores/appShellStore'
 import type { Cadence, Challenge, Tier } from '@/lib/prestige'
-import { TIER_COLORS, TIER_LABELS_FR } from '@/lib/prestige'
+import { TIER_COLORS, TIER_LABELS_EN } from '@/lib/prestige'
 import { useAssetLabel } from '@/lib/i18n/fieldMappings'
 import { getPrestigeText } from '../i18n'
 
@@ -72,7 +72,7 @@ export function ObjectiveRow({ challenge, currentValue, onClick }: ObjectiveRowP
   const cadence: Cadence = challenge.cadence
   const tierColor = TIER_COLORS[tier]
   const tierLabelFromTOML = useAssetLabel('challenge_tier', tier)
-  const tierLabel = tierLabelFromTOML !== tier ? tierLabelFromTOML : TIER_LABELS_FR[tier]
+  const tierLabel = tierLabelFromTOML !== tier ? tierLabelFromTOML : TIER_LABELS_EN[tier]
 
   const target = challenge.target
   const progressPercent = target > 0

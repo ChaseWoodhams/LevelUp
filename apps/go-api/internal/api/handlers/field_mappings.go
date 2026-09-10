@@ -143,13 +143,11 @@ func (h *FieldMappingsHandler) Mount(r chi.Router, opts ...humacore.MountOption)
 	huma.Get(api, "/titles/{slug}/field-mappings", h.handleGet, humacore.Op("getTitleFieldMappings", "Field mappings TOML d'un titre", "titles"))
 }
 
-// fieldMappingsInput : {slug} path + ?locale= optionnel + If-None-Match (ETag
 // conditionnel). Le slug est validé côté handler pour reproduire le 400
 // missing_slug d'origine (chi route un slug vide rarement, mais le contrat le
 // couvrait explicitement).
 type fieldMappingsInput struct {
 	Slug        string `path:"slug"`
-	Locale      string `query:"locale"`
 	IfNoneMatch string `header:"If-None-Match"`
 }
 
@@ -170,21 +168,18 @@ type fieldMappingsOutput struct {
 func (h *FieldMappingsHandler) handleGet(ctx context.Context, in *fieldMappingsInput) (*fieldMappingsOutput, error) {
 	slug := in.Slug
 	if slug == "" {
-		return nil, humacore.NewError(http.StatusBadRequest, "missing_slug", "title slug requis")
+		return nil, humacore.NewError(http.StatusBadRequest, "missing_slug", "title slug is required")
 	}
 
 	// Locale inconnue → la fallback EN est gérée par FieldMapping.Label.
 	// On conserve la valeur d'origine dans la réponse pour que le frontend
 	// sache ce qu'il a demandé.
-	locale := in.Locale
-	if locale == "" {
-		locale = mappings.LocaleFR
-	}
+	locale := mappings.LocaleEN
 
 	set, ok := h.registry.Get(slug)
 	if !ok {
 		return nil, humacore.NewError(http.StatusNotFound, "title_not_found",
-			fmt.Sprintf("title %q n'a pas de field mappings chargés", slug))
+			fmt.Sprintf("title %q has no field mappings loaded", slug))
 	}
 
 	resp := fieldMappingsResponse{

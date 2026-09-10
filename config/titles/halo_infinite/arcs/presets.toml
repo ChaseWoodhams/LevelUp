@@ -15,9 +15,7 @@ title_slug     = "halo_infinite"
 [[arcs]]
 id              = "halo_infinite.slayer"
 title_en        = "The Slayer"
-title_fr        = "L'assassin"
 description_en  = "Become the offensive force your team needs."
-description_fr  = "Deviens la force offensive dont ton équipe a besoin."
 
   [[arcs.steps]]
   position    = 1
@@ -39,9 +37,7 @@ description_fr  = "Deviens la force offensive dont ton équipe a besoin."
 [[arcs]]
 id              = "halo_infinite.support"
 title_en        = "The Support"
-title_fr        = "Le Support"
 description_en  = "Lift your team without seeking the spotlight."
-description_fr  = "Soutiens ton équipe sans chercher la lumière."
 
   [[arcs.steps]]
   position    = 1
@@ -63,9 +59,7 @@ description_fr  = "Soutiens ton équipe sans chercher la lumière."
 [[arcs]]
 id              = "halo_infinite.consistent"
 title_en        = "The Consistent"
-title_fr        = "Le Consistant"
 description_en  = "Reliability beats brilliance over the long run."
-description_fr  = "La régularité bat les coups d'éclat sur la durée."
 
   [[arcs.steps]]
   position    = 1
@@ -87,9 +81,7 @@ description_fr  = "La régularité bat les coups d'éclat sur la durée."
 [[arcs]]
 id              = "halo_infinite.explorer"
 title_en        = "The Explorer"
-title_fr        = "L'Explorateur"
 description_en  = "Master every map and every mode."
-description_fr  = "Maîtrise toutes les maps et tous les modes."
 
   [[arcs.steps]]
   position    = 1
@@ -117,9 +109,7 @@ description_fr  = "Maîtrise toutes les maps et tous les modes."
 [[arcs]]
 id              = "halo_infinite.marksman"
 title_en        = "The Marksman"
-title_fr        = "Le Tireur d'Élite"
 description_en  = "Tighten your aim, session by session, then make it last."
-description_fr  = "Affine ta visée session après session, puis tiens-la dans le temps."
 
   [[arcs.steps]]
   position    = 1
@@ -141,9 +131,7 @@ description_fr  = "Affine ta visée session après session, puis tiens-la dans l
 [[arcs]]
 id              = "halo_infinite.survivor"
 title_en        = "The Survivor"
-title_fr        = "Le Survivant"
 description_en  = "Stay alive when others fall. KDR first, then defy expectations."
-description_fr  = "Reste en vie quand les autres tombent. Le KDR d'abord, puis défier les attentes."
 
   [[arcs.steps]]
   position    = 1

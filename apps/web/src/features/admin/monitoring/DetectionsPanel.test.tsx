@@ -31,10 +31,10 @@ function mockDetectionsList() {
 }
 
 describe('DetectionsPanel — note dialog', () => {
-  beforeEach(() => useAppShellStore.setState({ locale: 'fr' }))
+  beforeEach(() => useAppShellStore.setState({ locale: 'en' }))
   afterEach(() => {
     vi.restoreAllMocks()
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   it('Annuler le dialog → aucune mutation PATCH', async () => {

@@ -21,22 +21,16 @@ func makeHelpHandler(t *testing.T, dir string) *handlers.HelpHandler {
 	return handlers.NewHelpHandler(builder, filepath.Join(dir, "data", "cache"))
 }
 
-// setupHelpRepo crée un répertoire temporaire avec des fichiers RELEASE_NOTES.md.
-func setupHelpRepo(t *testing.T, contentEN, contentFR string) string {
+// setupHelpRepo creates a temporary repository with English release notes.
+func setupHelpRepo(t *testing.T, contentEN string) string {
 	t.Helper()
 	dir := t.TempDir()
 	docsDir := filepath.Join(dir, "docs")
-	docsFRDir := filepath.Join(dir, "docs", "FR")
-	if err := os.MkdirAll(docsFRDir, 0o755); err != nil {
+	if err := os.MkdirAll(docsDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(docsDir, "RELEASE_NOTES.md"), []byte(contentEN), 0o600); err != nil {
 		t.Fatal(err)
-	}
-	if contentFR != "" {
-		if err := os.WriteFile(filepath.Join(docsFRDir, "RELEASE_NOTES.md"), []byte(contentFR), 0o600); err != nil {
-			t.Fatal(err)
-		}
 	}
 	return dir
 }
@@ -57,26 +51,13 @@ const sampleReadmeEN = `# LevelUp
 Some content.
 `
 
-const sampleReadmeFR = `# LevelUp
-
-## Dernières nouveautés
-
-**v7.0 — Défis**
-- Fonctionnalité A
-
-**v6.5 — Heatmap**
-- Fonctionnalité C
-
-## Fonctionnalités
-`
-
 func TestHelpHandler_EN_ReturnsWhatsNew(t *testing.T) {
-	dir := setupHelpRepo(t, sampleReadmeEN, sampleReadmeFR)
+	dir := setupHelpRepo(t, sampleReadmeEN)
 	h := makeHelpHandler(t, dir)
 	r := chi.NewRouter()
 	h.Mount(r)
 
-	req := httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=en", nil)
+	req := httptest.NewRequest(http.MethodGet, "/help/release-notes", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -99,34 +80,13 @@ func TestHelpHandler_EN_ReturnsWhatsNew(t *testing.T) {
 	}
 }
 
-func TestHelpHandler_FR_ReturnsWhatsNew(t *testing.T) {
-	dir := setupHelpRepo(t, sampleReadmeEN, sampleReadmeFR)
+func TestHelpHandler_DefaultsToEnglish(t *testing.T) {
+	dir := setupHelpRepo(t, sampleReadmeEN)
 	h := makeHelpHandler(t, dir)
 	r := chi.NewRouter()
 	h.Mount(r)
 
-	req := httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=fr", nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
-	}
-	var resp map[string]string
-	_ = json.Unmarshal(w.Body.Bytes(), &resp)
-	content := resp["content"]
-	if !contains(content, "Défis") {
-		t.Errorf("expected FR content (Défis), got: %q", content)
-	}
-}
-
-func TestHelpHandler_DefaultLangFR(t *testing.T) {
-	dir := setupHelpRepo(t, sampleReadmeEN, sampleReadmeFR)
-	h := makeHelpHandler(t, dir)
-	r := chi.NewRouter()
-	h.Mount(r)
-
-	// Pas de paramètre lang → défaut FR
+	// No language parameter is accepted; the handler serves English.
 	req := httptest.NewRequest(http.MethodGet, "/help/release-notes", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
@@ -136,8 +96,8 @@ func TestHelpHandler_DefaultLangFR(t *testing.T) {
 	}
 	var resp map[string]string
 	_ = json.Unmarshal(w.Body.Bytes(), &resp)
-	if !contains(resp["content"], "Défis") {
-		t.Errorf("expected FR default content, got: %q", resp["content"])
+	if !contains(resp["content"], "Challenges") {
+		t.Errorf("expected English default content, got: %q", resp["content"])
 	}
 }
 
@@ -147,7 +107,7 @@ func TestHelpHandler_MissingReleaseNotes_Returns500(t *testing.T) {
 	r := chi.NewRouter()
 	h.Mount(r)
 
-	req := httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=en", nil)
+	req := httptest.NewRequest(http.MethodGet, "/help/release-notes", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -157,13 +117,13 @@ func TestHelpHandler_MissingReleaseNotes_Returns500(t *testing.T) {
 }
 
 func TestHelpHandler_CacheHit(t *testing.T) {
-	dir := setupHelpRepo(t, sampleReadmeEN, "")
+	dir := setupHelpRepo(t, sampleReadmeEN)
 	h := makeHelpHandler(t, dir)
 	r := chi.NewRouter()
 	h.Mount(r)
 
 	w1 := httptest.NewRecorder()
-	r.ServeHTTP(w1, httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=en", nil))
+	r.ServeHTTP(w1, httptest.NewRequest(http.MethodGet, "/help/release-notes", nil))
 	if w1.Code != http.StatusOK {
 		t.Fatalf("first call: expected 200, got %d", w1.Code)
 	}
@@ -173,7 +133,7 @@ func TestHelpHandler_CacheHit(t *testing.T) {
 	_ = os.WriteFile(filepath.Join(dir, "docs", "RELEASE_NOTES.md"), []byte(newContent), 0o600)
 
 	w2 := httptest.NewRecorder()
-	r.ServeHTTP(w2, httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=en", nil))
+	r.ServeHTTP(w2, httptest.NewRequest(http.MethodGet, "/help/release-notes", nil))
 
 	var resp map[string]string
 	_ = json.Unmarshal(w2.Body.Bytes(), &resp)
@@ -191,12 +151,12 @@ func TestHelpHandler_VersionOrder(t *testing.T) {
 **v6.5 — Mid**
 - mid feature
 `
-	dir := setupHelpRepo(t, readme, "")
+	dir := setupHelpRepo(t, readme)
 	h := makeHelpHandler(t, dir)
 	r := chi.NewRouter()
 	h.Mount(r)
 
-	req := httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=en", nil)
+	req := httptest.NewRequest(http.MethodGet, "/help/release-notes", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -216,13 +176,13 @@ func TestHelpHandler_VersionOrder(t *testing.T) {
 }
 
 func TestHelpHandler_DiskCacheSurvivesRestart(t *testing.T) {
-	dir := setupHelpRepo(t, sampleReadmeEN, "")
+	dir := setupHelpRepo(t, sampleReadmeEN)
 	// Premier handler — construit le cache et l'écrit sur disque.
 	h1 := makeHelpHandler(t, dir)
 	r1 := chi.NewRouter()
 	h1.Mount(r1)
 	w1 := httptest.NewRecorder()
-	r1.ServeHTTP(w1, httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=en", nil))
+	r1.ServeHTTP(w1, httptest.NewRequest(http.MethodGet, "/help/release-notes", nil))
 	if w1.Code != http.StatusOK {
 		t.Fatalf("first handler: expected 200, got %d: %s", w1.Code, w1.Body.String())
 	}
@@ -235,7 +195,7 @@ func TestHelpHandler_DiskCacheSurvivesRestart(t *testing.T) {
 	r2 := chi.NewRouter()
 	h2.Mount(r2)
 	w2 := httptest.NewRecorder()
-	r2.ServeHTTP(w2, httptest.NewRequest(http.MethodGet, "/help/release-notes?lang=en", nil))
+	r2.ServeHTTP(w2, httptest.NewRequest(http.MethodGet, "/help/release-notes", nil))
 	if w2.Code != http.StatusOK {
 		t.Fatalf("second handler: expected 200, got %d: %s", w2.Code, w2.Body.String())
 	}

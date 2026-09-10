@@ -38,7 +38,7 @@ describe('buildLusrSeries', () => {
         cp({ playlist_group: 'arena',  playlist_name: 'Partie rapide', recorded_at: '2026-04-01' }),
         cp({ playlist_group: 'social', playlist_name: 'Partie rapide', recorded_at: '2026-04-02' }),
       ],
-      'fr',
+      'en',
     )
     expect(series).toHaveLength(1)
     const meta = series[0].meta as { label: string; groupKey: string }
@@ -54,7 +54,7 @@ describe('buildLusrSeries', () => {
         cp({ playlist_group: 'fun',    playlist_name: 'Super Fiesta' }),
         cp({ playlist_group: 'ranked', playlist_name: 'Ranked Slayer' }),
       ],
-      'fr',
+      'en',
     )
     const labels = series.map((s) => (s.meta as { label: string }).label).sort()
     expect(labels).toEqual([
@@ -74,7 +74,7 @@ describe('buildLusrSeries', () => {
         cp({ playlist_group: 'arena', playlist_name: uuid2 }),
         cp({ playlist_group: 'arena', playlist_name: 'Partie rapide' }),
       ],
-      'fr',
+      'en',
     )
     expect(series).toHaveLength(1)
     expect(series[0].datapoints).toHaveLength(1)
@@ -100,7 +100,7 @@ describe('buildLusrSeries', () => {
   })
 
   it('ignore les checkpoints sans recorded_at', () => {
-    const series = buildLusrSeries([cp({ recorded_at: null })], 'fr')
+    const series = buildLusrSeries([cp({ recorded_at: null })], 'en')
     expect(series).toHaveLength(0)
   })
 
@@ -110,7 +110,7 @@ describe('buildLusrSeries', () => {
         cp({ rating_type: 'LUSR', playlist_group: 'ranked', playlist_name: 'Ranked Arena' }),
         cp({ rating_type: 'CSR',  playlist_group: 'ranked', playlist_name: 'Ranked Arena' }),
       ],
-      'fr',
+      'en',
     )
     expect(series).toHaveLength(2)
     const labels = series.map((s) => (s.meta as { label: string }).label).sort()

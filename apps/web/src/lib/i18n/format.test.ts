@@ -8,80 +8,48 @@ describe('formatMessage', () => {
     resetFormatterCache()
   })
 
-  it('resout une cle simple en FR', () => {
-    expect(formatMessage(commonManifest, 'common.period.last_1y', 'fr')).toBe('Dernière année')
-  })
-
-  it('resout une cle simple en EN', () => {
+  it('resolves a simple English message', () => {
     expect(formatMessage(commonManifest, 'common.period.last_1y', 'en')).toBe('Last year')
   })
 
-  it('applique pluralisation ICU one en FR', () => {
-    expect(formatMessage(commonManifest, 'common.kpi.matches_count', 'fr', { n: 1 })).toBe('1 match')
-  })
-
-  it('applique pluralisation ICU other en FR', () => {
-    expect(formatMessage(commonManifest, 'common.kpi.matches_count', 'fr', { n: 5 })).toBe('5 matchs')
-  })
-
-  it('applique pluralisation ICU one en EN', () => {
+  it('applies ICU pluralization', () => {
     expect(formatMessage(commonManifest, 'common.kpi.matches_count', 'en', { n: 1 })).toBe('1 match')
-  })
-
-  it('applique pluralisation ICU other en EN', () => {
     expect(formatMessage(commonManifest, 'common.kpi.matches_count', 'en', { n: 12 })).toBe('12 matches')
   })
 
-  it('retourne la cle si elle est absente du manifest', () => {
-    // @ts-expect-error : on teste volontairement une cle hors du type.
-    expect(formatMessage(commonManifest, 'unknown.key', 'fr')).toBe('unknown.key')
+  it('returns the key for a missing manifest entry', () => {
+    // @ts-expect-error: intentionally exercise an unknown key.
+    expect(formatMessage(commonManifest, 'unknown.key', 'en')).toBe('unknown.key')
   })
 
-  it('memoize les formatters (pas de re-compilation a chaque appel)', () => {
-    // Verifie indirectement : 1000 appels avec la meme cle doivent etre rapides.
-    // Le formatter est cache par (locale, message).
+  it('memoizes formatters', () => {
     const start = performance.now()
     for (let i = 0; i < 1000; i++) {
-      formatMessage(commonManifest, 'common.kpi.matches_count', 'fr', { n: i })
+      formatMessage(commonManifest, 'common.kpi.matches_count', 'en', { n: i })
     }
-    const duration = performance.now() - start
-    // Avec cache, on s'attend a < 50ms pour 1000 appels. Sans cache (re-compile
-    // chaque fois) ca prendrait plusieurs centaines de ms. On laisse une marge
-    // confortable pour les CI lentes.
-    expect(duration).toBeLessThan(500)
+    expect(performance.now() - start).toBeLessThan(500)
   })
 
-  it('court-circuite MessageFormat si pas d\'accolades et pas de vars', () => {
-    // Tres simple : la string ne contient pas d'accolades, pas d'interpolation.
-    // Le code prend le chemin rapide (return message) sans creer de formatter.
-    expect(formatMessage(commonManifest, 'common.outcome.win', 'fr')).toBe('Victoire')
+  it('uses the fast path for messages without variables', () => {
     expect(formatMessage(commonManifest, 'common.outcome.win', 'en')).toBe('Win')
   })
 
-  it('retourne la cle si la locale demandee est manquante (defensive)', () => {
+  it('returns the key when the English value is empty', () => {
     const partialManifest = {
-      'test.partial': { fr: 'FR uniquement', en: '' },
+      'test.partial': { en: '' },
     } as const
     expect(formatMessage(partialManifest, 'test.partial', 'en')).toBe('test.partial')
-    expect(formatMessage(partialManifest, 'test.partial', 'fr')).toBe('FR uniquement')
   })
 })
 
-// ─── Test de coherence cross-reference du manifest commonManifest ────────────
-//
-// Conformement au PLAN_META_FOUNDATIONS_GO § 3.1.11 : on verifie que le
-// manifest a bien fr ET en pour chaque cle (le build step le verifie deja
-// mais on laisse un test runtime pour la garde defensive).
-
 describe('commonManifest integrity', () => {
-  it('toutes les cles ont fr ET en non vides', () => {
+  it('has a non-empty English value for every key', () => {
     for (const [key, entry] of Object.entries(commonManifest)) {
-      expect(entry.fr, `cle "${key}" : fr manquant`).toBeTruthy()
-      expect(entry.en, `cle "${key}" : en manquant`).toBeTruthy()
+      expect(entry.en, `key "${key}" has no English value`).toBeTruthy()
     }
   })
 
-  it('aucune cle vide', () => {
+  it('contains at least one message', () => {
     expect(Object.keys(commonManifest).length).toBeGreaterThan(0)
   })
 })

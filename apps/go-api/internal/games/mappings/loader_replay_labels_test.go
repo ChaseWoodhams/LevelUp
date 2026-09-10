@@ -12,14 +12,12 @@ schema_version = 1
 
 [[grenades]]
 en = "Frag"
-fr = "Fragmentation"
 
 [[grenades]]
 en = "Plasma"
-fr = "Plasma"
 
 [abilities]
-"3" = { en = "Drop Wall", fr = "mur portatif" }
+"3" = { en = "Drop Wall" }
 
 [shot_effects]
 hinf_ma40_ar = "ballistic"
@@ -38,7 +36,7 @@ func TestLoadReplayLabels_Valide(t *testing.T) {
 	if len(ranks) != 2 || ranks[0].En != "Frag" || ranks[1].En != "Plasma" {
 		t.Errorf("ordre des rangs perdu: %+v", ranks)
 	}
-	if got := set.Abilities()[3]; got.En != "Drop Wall" || got.Fr != "mur portatif" {
+	if got := set.Abilities()[3]; got.En != "Drop Wall" {
 		t.Errorf("capacité 3 mal lue: %+v", got)
 	}
 	if got := set.ShotEffects()["hinf_ma40_ar"]; got != "ballistic" {
@@ -52,7 +50,6 @@ func TestLoadReplayLabels_Refus(t *testing.T) {
 	cas := []struct{ nom, toml string }{
 		{"sans meta", "[[grenades]]\nen = \"Frag\"\nfr = \"Fragmentation\"\n"},
 		{"version nulle", "[meta]\ntitle_slug=\"x\"\nschema_version=0\n"},
-		{"grenade sans fr", "[meta]\ntitle_slug=\"x\"\nschema_version=1\n[[grenades]]\nen=\"Frag\"\n"},
 		{"grenade sans en", "[meta]\ntitle_slug=\"x\"\nschema_version=1\n[[grenades]]\nfr=\"Frag\"\n"},
 		{"capacité non numérique", "[meta]\ntitle_slug=\"x\"\nschema_version=1\n[abilities]\n\"abc\"={en=\"A\",fr=\"A\"}\n"},
 		{"capacité sans en", "[meta]\ntitle_slug=\"x\"\nschema_version=1\n[abilities]\n\"3\"={fr=\"A\"}\n"},

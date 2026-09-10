@@ -6,7 +6,7 @@ import { buildMatchHeadingStr } from './format'
 
 describe('buildMatchHeadingStr', () => {
   it('fr : assemble "Mode sur Carte" quand les deux sont présents', () => {
-    expect(buildMatchHeadingStr('Forbidden', 'Capture du drapeau', 'fr')).toBe(
+    expect(buildMatchHeadingStr('Forbidden', 'Capture du drapeau', 'en')).toBe(
       'Capture du drapeau sur Forbidden',
     )
   })
@@ -16,30 +16,30 @@ describe('buildMatchHeadingStr', () => {
   })
 
   it('normalise le mode avant assemblage (strip "Arena:")', () => {
-    expect(buildMatchHeadingStr('Forbidden', 'Arena:CTF on Forbidden', 'fr')).toBe(
+    expect(buildMatchHeadingStr('Forbidden', 'Arena:CTF on Forbidden', 'en')).toBe(
       'CTF sur Forbidden',
     )
   })
 
   it('strip le nom de carte EN collé même si mapUI est FR (régression "Slayer on Forest sur Forêt")', () => {
-    expect(buildMatchHeadingStr('Forêt', 'Slayer on Forest', 'fr')).toBe('Slayer sur Forêt')
+    expect(buildMatchHeadingStr('Forêt', 'Slayer on Forest', 'en')).toBe('Slayer sur Forêt')
   })
 
   it('retourne juste la carte si le mode est null — cas dégradé "Forbidden"', () => {
-    expect(buildMatchHeadingStr('Forbidden', null, 'fr')).toBe('Forbidden')
-    expect(buildMatchHeadingStr('Forbidden', undefined, 'fr')).toBe('Forbidden')
-    expect(buildMatchHeadingStr('Forbidden', '', 'fr')).toBe('Forbidden')
+    expect(buildMatchHeadingStr('Forbidden', null, 'en')).toBe('Forbidden')
+    expect(buildMatchHeadingStr('Forbidden', undefined, 'en')).toBe('Forbidden')
+    expect(buildMatchHeadingStr('Forbidden', '', 'en')).toBe('Forbidden')
   })
 
   it('retourne juste le mode si la carte est null', () => {
-    expect(buildMatchHeadingStr(null, 'Assassin', 'fr')).toBe('Assassin')
+    expect(buildMatchHeadingStr(null, 'Assassin', 'en')).toBe('Assassin')
   })
 
   it('retourne chaîne vide si les deux sont null', () => {
-    expect(buildMatchHeadingStr(null, null, 'fr')).toBe('')
+    expect(buildMatchHeadingStr(null, null, 'en')).toBe('')
   })
 
   it('mode EN non traduit + carte → "CTF sur Forbidden" (EN leak documenté)', () => {
-    expect(buildMatchHeadingStr('Forbidden', 'CTF', 'fr')).toBe('CTF sur Forbidden')
+    expect(buildMatchHeadingStr('Forbidden', 'CTF', 'en')).toBe('CTF sur Forbidden')
   })
 })

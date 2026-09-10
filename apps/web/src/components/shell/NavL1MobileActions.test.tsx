@@ -50,7 +50,7 @@ function openMenu() {
 describe('NavL1MobileActions', () => {
   beforeEach(() => {
     mockMutate.mockClear()
-    useAppShellStore.setState({ locale: 'fr', currentUsername: 'tester' })
+    useAppShellStore.setState({ locale: 'en', currentUsername: 'tester' })
     useAssetDrawerStore.setState({ isOpen: false })
     useFeedbackDrawerStore.setState({ isOpen: false })
   })

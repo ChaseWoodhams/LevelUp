@@ -289,7 +289,7 @@ func (r *ExplorerRepo) GetTargetRecentMatches(
 	// pair_name_fr est NULL en base → ResolveModeUI ne produit que de l'EN. On
 	// applique la traduction FR canonique (metadata.mode_name_tr), même source
 	// que l'historique de matchs / la home, pour le donut "Répartition des modes".
-	r.translateModeUIsFR(ctx, out)
+	r.resolveModeUIsFromPairID(ctx, out)
 	// Fallback libellés via asset_translations pour les matchs dont map/mode restent
 	// vides après la résolution ci-dessus — cas Halo 5, où map_name/pair_name sont
 	// NULL sur 100 % des matchs du registre (l'Explorer affichait des lignes vides).
@@ -313,7 +313,7 @@ func (r *ExplorerRepo) resolveTargetRecentAssetNames(ctx context.Context, rows [
 		return
 	}
 	meta := NewMetadataRepoFromDB(r.pdb.Metadata)
-	langs := PreferredLangsForLocale("fr")
+	langs := PreferredAssetLanguages()
 	// map : MapUI vide ← type "map" par MapAssetID.
 	fillRecentAssetNames(ctx, meta, langs, rows, recentAssetSlot{
 		assetType: assetTypeMap,
@@ -374,7 +374,7 @@ func fillRecentAssetNames(
 // TranslateModeUIsFR expose translateModeUIsFR (port.ExplorerRepository) pour que
 // l'ExplorerService homogénéise la source LIVE du profil de combat avec la locale.
 func (r *ExplorerRepo) TranslateModeUIsFR(ctx context.Context, rows []domain.ExplorerTargetRecentMatch) {
-	r.translateModeUIsFR(ctx, rows)
+	r.resolveModeUIsFromPairID(ctx, rows)
 }
 
 // translateModeUIsFR remplace en place les libellés de mode EN normalisés
@@ -383,38 +383,7 @@ func (r *ExplorerRepo) TranslateModeUIsFR(ctx context.Context, rows []domain.Exp
 // requête en erreur (loguée par le helper canonique, pas avalée). Clé = sous-mode
 // EN normalisé (même convention que career).
 func (r *ExplorerRepo) translateModeUIsFR(ctx context.Context, rows []domain.ExplorerTargetRecentMatch) {
-	if len(rows) == 0 || r.pdb == nil {
-		return
-	}
-	// Source LIVE : ModeUI est souvent vide (le MatchInfo brut de l'API n'expose pas
-	// de PublicName, seulement des AssetId). On résout d'abord le mode depuis l'AssetId
-	// du pair via shared.match_registry, AVANT la traduction FR ci-dessous.
 	r.resolveModeUIsFromPairID(ctx, rows)
-	if r.pdb.Metadata == nil {
-		return
-	}
-	modeSet := make(map[string]struct{})
-	for i := range rows {
-		if rows[i].ModeUI != "" {
-			modeSet[rows[i].ModeUI] = struct{}{}
-		}
-	}
-	if len(modeSet) == 0 {
-		return
-	}
-	modes := make([]string, 0, len(modeSet))
-	for m := range modeSet {
-		modes = append(modes, m)
-	}
-	// Résolution FR via la source unique du SQL mode_name_tr (mode_name_tr.go).
-	// Variante best-effort : l'erreur est loguée (plus avalée en silence) et
-	// l'EN conservé.
-	fr := loadModeNamesFRForKeys(ctx, r.pdb.Metadata, modes)
-	for i := range rows {
-		if t, ok := fr[rows[i].ModeUI]; ok {
-			rows[i].ModeUI = t
-		}
-	}
 }
 
 // resolveModeUIsFromPairID remplit ModeUI (EN normalisé) des rows LIVE qui n'ont
@@ -442,7 +411,7 @@ func (r *ExplorerRepo) resolveModeUIsFromPairID(ctx context.Context, rows []doma
 	}
 	defer release()
 	placeholders := strings.TrimRight(strings.Repeat("?,", len(idList)), ",")
-	q := fmt.Sprintf(`SELECT pair_id, MIN(pair_name), MIN(pair_name_fr)
+	q := fmt.Sprintf(`SELECT pair_id, MIN(pair_name)
 		FROM match_registry WHERE pair_id IN (%s) AND pair_name IS NOT NULL
 		GROUP BY pair_id`, placeholders)
 	args := make([]any, len(idList))
@@ -454,12 +423,12 @@ func (r *ExplorerRepo) resolveModeUIsFromPairID(ctx context.Context, rows []doma
 		return
 	}
 	defer qrows.Close()
-	type pairNames struct{ name, nameFR sql.NullString }
+	type pairNames struct{ name sql.NullString }
 	byID := make(map[string]pairNames, len(idList))
 	for qrows.Next() {
 		var id string
 		var p pairNames
-		if scanErr := qrows.Scan(&id, &p.name, &p.nameFR); scanErr == nil {
+		if scanErr := qrows.Scan(&id, &p.name); scanErr == nil {
 			byID[id] = p
 		}
 	}
@@ -471,14 +440,11 @@ func (r *ExplorerRepo) resolveModeUIsFromPairID(ctx context.Context, rows []doma
 		if !ok {
 			continue
 		}
-		var namePtr, frPtr *string
+		var namePtr *string
 		if p.name.Valid {
 			namePtr = &p.name.String
 		}
-		if p.nameFR.Valid {
-			frPtr = &p.nameFR.String
-		}
-		if mode := analysis.ResolveModeUI(namePtr, frPtr); mode != nil {
+		if mode := analysis.ResolveModeUI(namePtr, nil); mode != nil {
 			rows[i].ModeUI = *mode
 		}
 	}
@@ -504,7 +470,7 @@ func scanTargetRecentMatch(rows *sql.Rows) (domain.ExplorerTargetRecentMatch, er
 	}
 	// Libellé de mode normalisé + localisé (FR-preferring) — helper canonique
 	// partagé avec home / match-view / historique (ResolveModeUI =
-	// COALESCE(pair_name_fr, pair_name) → NormalizeModeLabel).
+	// pair_name → NormalizeModeLabel).
 	if mode := analysis.ResolveModeUI(pairName, pairNameFR); mode != nil {
 		m.ModeUI = *mode
 	}

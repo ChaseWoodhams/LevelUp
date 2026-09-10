@@ -143,15 +143,14 @@ function ProposalRow({ proposal, t, onAccept, onDismiss, accepting, dismissing }
 
 /**
  * Tente d'extraire un libellé lisible depuis reason_params (JSON). Le backend
- * y injecte label_fr / label_en selon la locale. Fallback : signal kind.
+ * y injecte label_en. Fallback : signal kind.
  */
 function readableReason(p: CoachProposal, t: CoachStrings): string {
   if (!p.reason_params) return ''
   try {
     const parsed = JSON.parse(p.reason_params) as Record<string, unknown>
-    const labelFR = typeof parsed.label_fr === 'string' ? parsed.label_fr : ''
     const labelEN = typeof parsed.label_en === 'string' ? parsed.label_en : ''
-    return labelFR || labelEN || ''
+    return labelEN
   } catch {
     void t // pas de fallback utilisable depuis t — silently empty
     return ''

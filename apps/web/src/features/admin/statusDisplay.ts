@@ -114,25 +114,25 @@ export function schedulerOutcomeToAdminStatus(outcome: SchedulerOutcome | string
 }
 
 /**
- * Libellé FR/EN des types de jobs connus (JobType backend). Type inconnu →
+ * English labels for known backend job types. Unknown type →
  * type brut (mono côté UI) : repérable sans crash quand un nouveau type
  * apparaît côté Go.
  */
-const JOB_TYPE_LABELS: Record<string, { fr: string; en: string }> = {
-  setup_smoke_test: { fr: 'Test de configuration', en: 'Setup smoke test' },
-  initial_sync: { fr: 'Sync initiale', en: 'Initial sync' },
-  delta_sync_all: { fr: 'Sync delta (tous)', en: 'Delta sync (all)' },
-  backfill: { fr: 'Backfill', en: 'Backfill' },
-  reindex_media: { fr: 'Réindexation médias', en: 'Media reindex' },
-  scan_media: { fr: 'Scan médias', en: 'Media scan' },
-  transcode_media: { fr: 'Transcodage média', en: 'Media transcode' },
-  sessions_recalculate: { fr: 'Recalcul des sessions', en: 'Sessions recalculation' },
-  openspartan_import: { fr: 'Import OpenSpartan', en: 'OpenSpartan import' },
-  forced_sync_cycle: { fr: 'Cycle de sync forcé', en: 'Forced sync cycle' },
-  player_convergence: { fr: 'Convergence joueur', en: 'Player convergence' },
-  catalog_refresh: { fr: 'Refresh catalogue', en: 'Catalog refresh' },
+const JOB_TYPE_LABELS: Record<string, string> = {
+  setup_smoke_test: 'Setup smoke test',
+  initial_sync: 'Initial sync',
+  delta_sync_all: 'Delta sync (all)',
+  backfill: 'Backfill',
+  reindex_media: 'Media reindex',
+  scan_media: 'Media scan',
+  transcode_media: 'Media transcode',
+  sessions_recalculate: 'Sessions recalculation',
+  openspartan_import: 'OpenSpartan import',
+  forced_sync_cycle: 'Forced sync cycle',
+  player_convergence: 'Player convergence',
+  catalog_refresh: 'Catalog refresh',
 }
 
-export function jobTypeLabel(jobType: string, locale: AdminLocale): string {
-  return JOB_TYPE_LABELS[jobType]?.[locale] ?? jobType
+export function jobTypeLabel(jobType: string, _locale: AdminLocale): string {
+  return JOB_TYPE_LABELS[jobType] ?? jobType
 }

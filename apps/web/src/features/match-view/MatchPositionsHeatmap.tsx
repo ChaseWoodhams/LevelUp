@@ -38,14 +38,6 @@ interface MatchPositionsHeatmapProps {
 }
 
 const TEXT = {
-  fr: {
-    title: 'Heatmap des positions',
-    teamAll: 'Global',
-    team0: 'Équipe A',
-    team1: 'Équipe B',
-    empty: 'Aucune position décodée pour ce match.',
-    note: 'Positions au niveau match (sans attribution joueur).',
-  },
   en: {
     title: 'Positions heatmap',
     teamAll: 'Global',

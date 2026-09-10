@@ -431,7 +431,7 @@ type ExplorerMatchesRow struct {
 	OutcomeLabel        string    `json:"outcome_label"`
 	ScoreLabel          string    `json:"score_label"`
 	IsWithFriends       bool      `json:"is_with_friends"`
-	ExperienceTypeLabel string    `json:"experience_type_label" default:"Non classé"`
+	ExperienceTypeLabel string    `json:"experience_type_label" default:"Unranked"`
 	MatchURL            string    `json:"match_url"`
 	// Combat stats
 	Kills   int `json:"kills,omitempty"`

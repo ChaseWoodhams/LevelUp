@@ -73,7 +73,7 @@ function makeSquadScore(): SquadScoreCard {
 // ─── Setup ────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
   // Mock useFieldMappings : on retourne les libellés outcomes FR.
   vi.spyOn(fieldMappingsModule, 'useOutcomeLabel').mockImplementation((key: string) => {
     const map: Record<string, string> = {

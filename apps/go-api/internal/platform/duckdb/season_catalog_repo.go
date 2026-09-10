@@ -16,7 +16,6 @@ import (
 // SeasonName : nom d'une saison CSR persisté dans season_catalog (C2).
 type SeasonName struct {
 	DisplayName string // nom d'Operation EN
-	NameFR      string // traduction fr-FR (peut être vide → fallback EN)
 	Major       int
 	Minor       int
 }
@@ -28,7 +27,7 @@ type SeasonName struct {
 // retombe sur son libellé dérivé).
 func LoadSeasonCatalogNames(ctx context.Context, sharedDB *sql.DB, titleSlug string) (map[string]SeasonName, error) {
 	rows, err := sharedDB.QueryContext(ctx,
-		`SELECT season_id, COALESCE(display_name, ''), COALESCE(name_fr, ''),
+		`SELECT season_id, COALESCE(display_name, ''),
 			COALESCE(season_major, 0), COALESCE(season_minor, 0)
 		 FROM season_catalog WHERE title_slug = ?`, titleSlug)
 	if err != nil {
@@ -42,7 +41,7 @@ func LoadSeasonCatalogNames(ctx context.Context, sharedDB *sql.DB, titleSlug str
 	for rows.Next() {
 		var id string
 		var sn SeasonName
-		if err := rows.Scan(&id, &sn.DisplayName, &sn.NameFR, &sn.Major, &sn.Minor); err != nil {
+		if err := rows.Scan(&id, &sn.DisplayName, &sn.Major, &sn.Minor); err != nil {
 			return nil, fmt.Errorf("LoadSeasonCatalogNames scan: %w", err)
 		}
 		out[strings.ToLower(strings.TrimSpace(id))] = sn
@@ -50,23 +49,14 @@ func LoadSeasonCatalogNames(ctx context.Context, sharedDB *sql.DB, titleSlug str
 	return out, rows.Err()
 }
 
-// SeasonSelectorLabel compose "Saison N · Nom" (locale != en) / "Season N · Name"
-// (en) pour un season_id, à partir des noms persistés (match insensible à la casse).
-// Retourne `fallback` si la saison n'est pas au catalogue (jamais scrapée) — préserve
-// le libellé dérivé existant.
-func SeasonSelectorLabel(locale, seasonID string, names map[string]SeasonName, fallback string) string {
+// SeasonSelectorLabel returns the English season label.
+func SeasonSelectorLabel(_ string, seasonID string, names map[string]SeasonName, fallback string) string {
 	sn, ok := names[strings.ToLower(strings.TrimSpace(seasonID))]
 	if !ok {
 		return fallback
 	}
 	name := strings.TrimSpace(sn.DisplayName)
-	if locale != "en" && strings.TrimSpace(sn.NameFR) != "" {
-		name = strings.TrimSpace(sn.NameFR)
-	}
-	word := "Saison"
-	if locale == "en" {
-		word = "Season"
-	}
+	word := "Season"
 	switch {
 	case sn.Major > 0 && name != "":
 		return fmt.Sprintf("%s %d · %s", word, sn.Major, name)

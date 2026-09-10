@@ -1,7 +1,7 @@
 // Package service — release_notes_service.go : extraction des notes de version.
 //
-// Source unique : docs/RELEASE_NOTES.md (EN) et docs/FR/RELEASE_NOTES.md (FR).
-// Toutes les versions y sont consignées ; plus de fallback git sur le README.
+// Single source: docs/RELEASE_NOTES.md.
+// All versions are stored in one English document.
 package service
 
 import (
@@ -15,22 +15,22 @@ import (
 	"strings"
 )
 
-// ReleaseNotesService lit docs/RELEASE_NOTES.md (source unique des notes user-facing).
+// ReleaseNotesService reads docs/RELEASE_NOTES.md.
 type ReleaseNotesService struct {
 	repoRoot string
 }
 
-// NewReleaseNotesService crée le service.
+// NewReleaseNotesService creates the service.
 func NewReleaseNotesService(repoRoot string) *ReleaseNotesService {
 	return &ReleaseNotesService{repoRoot: repoRoot}
 }
 
-// Build retourne le markdown complet des release notes pour `lang` (fr|en).
+// Build returns the complete release notes markdown. lang is retained for compatibility.
 func (s *ReleaseNotesService) Build(_ context.Context, lang string) (string, error) {
 	return s.buildFromDisk(lang)
 }
 
-// buildFromDisk est le fallback : lit le README depuis le disque sans git.
+// buildFromDisk reads the release notes from disk without git.
 func (s *ReleaseNotesService) buildFromDisk(lang string) (string, error) {
 	relPath := releaseNotesRelPath(lang)
 	absPath := filepath.Join(s.repoRoot, filepath.FromSlash(relPath))
@@ -46,15 +46,16 @@ func (s *ReleaseNotesService) buildFromDisk(lang string) (string, error) {
 }
 
 func releaseNotesRelPath(lang string) string {
-	if lang == "fr" {
-		return "docs/FR/RELEASE_NOTES.md"
-	}
+	_ = lang
 	return "docs/RELEASE_NOTES.md"
 }
 
 // assembleReleaseBlocks trie les blocs de version (descendant) et les
 // concatène en markdown.
 func assembleReleaseBlocks(blocks map[string]string, lang string) string {
+	_ = lang
+	_ = lang
+	_ = lang
 	keys := make([]string, 0, len(blocks))
 	for k := range blocks {
 		keys = append(keys, k)
@@ -64,11 +65,7 @@ func assembleReleaseBlocks(blocks map[string]string, lang string) string {
 	})
 
 	var sb strings.Builder
-	if lang == "fr" {
-		sb.WriteString("## Dernières nouveautés\n\n")
-	} else {
-		sb.WriteString("## What's new\n\n")
-	}
+	sb.WriteString("## What's new\n\n")
 	for i, k := range keys {
 		block := blocks[k]
 		sb.WriteString(block)
@@ -108,7 +105,7 @@ func extractWhatsNewBlocks(content string) map[string]string {
 		stripped := strings.TrimSpace(line)
 
 		if !inSection {
-			if stripped == "## What's new" || stripped == "## Dernières nouveautés" {
+			if stripped == "## What's new" {
 				inSection = true
 			}
 			continue

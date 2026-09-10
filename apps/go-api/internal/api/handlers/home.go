@@ -58,10 +58,9 @@ func (h *HomeHandler) Mount(r chi.Router, opts ...humacore.MountOption) {
 
 // ─── Inputs/Outputs Huma ─────────────────────────────────────────────────────
 
-// homePageInput : {player_slug} + X-LevelUp-Locale (résolution locale) + If-None-Match (ETag).
+// homePageInput : {player_slug} + If-None-Match (ETag).
 type homePageInput struct {
 	PlayerSlug  string `path:"player_slug"`
-	Locale      string `header:"X-LevelUp-Locale"`
 	IfNoneMatch string `header:"If-None-Match"`
 }
 
@@ -75,36 +74,10 @@ type homePageOutput struct {
 	Body         []byte
 }
 
-// resolveLocaleFromHeader détermine la locale à utiliser pour cette requête.
-// Priorité : header X-LevelUp-Locale (envoyé par le frontend) → settings store
-// (app_settings.json:lang) → "fr" par défaut.
-//
-// Le header permet au frontend de basculer la locale en runtime sans dépendre
-// d'un re-bootstrap après modification de app_settings.json.
-func (h *HomeHandler) resolveLocaleFromHeader(ctx context.Context, localeHeader string) string {
-	if v := strings.ToLower(strings.TrimSpace(localeHeader)); v != "" {
-		if strings.HasPrefix(v, "en") {
-			return "en"
-		}
-		if strings.HasPrefix(v, "fr") {
-			return "fr"
-		}
-	}
-	if h.settingsStore == nil {
-		return "fr"
-	}
-	settings, err := h.settingsStore.Load()
-	if err != nil {
-		slog.DebugContext(ctx, "home: locale settings load failed, fallback fr", "err", err)
-		return "fr"
-	}
-	if settings == nil {
-		return "fr"
-	}
-	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(settings.Lang)), "en") {
-		return "en"
-	}
-	return "fr"
+// resolveLocaleFromHeader preserves the service seam while the product exposes
+// one supported UI locale.
+func (h *HomeHandler) resolveLocaleFromHeader(ctx context.Context) string {
+	return "en"
 }
 
 // handleGetHomePage retourne la page d'accueil agrégée (migré Huma).
@@ -116,7 +89,7 @@ func (h *HomeHandler) handleGetHomePage(ctx context.Context, in *homePageInput) 
 		return nil, humacore.NewError(http.StatusNotFound, "player_not_found", "joueur introuvable")
 	}
 
-	page, err := svc.GetHomePage(sctx, gamertag, h.resolveLocaleFromHeader(ctx, in.Locale))
+	page, err := svc.GetHomePage(sctx, gamertag, h.resolveLocaleFromHeader(ctx))
 	if err != nil {
 		slog.ErrorContext(sctx, "home: GetHomePage error", "err", err, "gamertag", gamertag)
 		// Phase 5 ART : distinguer FATAL DB (recovery en cours, retry possible)

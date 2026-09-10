@@ -86,7 +86,6 @@ interface FilterOmnibarProps {
 // Libellés du sélecteur de contexte (FR/EN). Module-level pour éviter une
 // recréation par rendu.
 const CONTEXT_LABELS: Record<Locale, Record<'solo' | 'squad' | 'all', string>> = {
-  fr: { solo: 'Solo', squad: 'Escouade', all: 'Mixte' },
   en: { solo: 'Solo', squad: 'Squad', all: 'Mixed' },
 }
 const CONTEXT_ORDER = ['solo', 'squad', 'all'] as const
@@ -339,7 +338,7 @@ export function FilterOmnibar({ matchContext, filterStore = useSoloFilterStore, 
                   : 'text-muted-foreground hover:text-foreground',
               ].join(' ')}
             >
-              {CONTEXT_LABELS[locale === 'en' ? 'en' : 'fr'][ctx]}
+              {CONTEXT_LABELS[locale === 'en' ? 'en' : 'en'][ctx]}
             </button>
           ))}
         </div>

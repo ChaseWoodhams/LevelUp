@@ -26,7 +26,7 @@ func TestIsCrawler(t *testing.T) {
 }
 
 func TestDefaultMeta(t *testing.T) {
-	m := DefaultMeta("https://demo.lvelup.info", "/players/demo-player/home", LocaleFR)
+	m := DefaultMeta("https://demo.lvelup.info", "/players/demo-player/home", LocaleEN)
 	if m.URL != "https://demo.lvelup.info/players/demo-player/home" {
 		t.Errorf("URL = %q", m.URL)
 	}
@@ -36,8 +36,8 @@ func TestDefaultMeta(t *testing.T) {
 	if m.ImageWidth != 1200 || m.ImageHeight != 630 {
 		t.Errorf("dimensions = %dx%d", m.ImageWidth, m.ImageHeight)
 	}
-	if !strings.Contains(m.Description, "victoire") {
-		t.Errorf("FR description attendue, got %q", m.Description)
+	if !strings.Contains(m.Description, "win rate") {
+		t.Errorf("English description expected, got %q", m.Description)
 	}
 	en := DefaultMeta("https://lvelup.info", "/", LocaleEN)
 	if !strings.Contains(en.Description, "win rate") {
@@ -45,10 +45,10 @@ func TestDefaultMeta(t *testing.T) {
 	}
 }
 
-func TestPlayerMeta_FR(t *testing.T) {
+func TestPlayerMeta_English(t *testing.T) {
 	m := PlayerMeta("https://demo.lvelup.info", "/players/demo-player/home",
 		"JGtm", "Halo Infinite",
-		KPIInput{KDR: ptrF(1.42), WinRate: 0.58, TotalMatches: 320}, LocaleFR)
+		KPIInput{KDR: ptrF(1.42), WinRate: 0.58, TotalMatches: 320}, LocaleEN)
 
 	if !strings.Contains(m.Title, "JGtm") {
 		t.Errorf("Title doit contenir le gamertag, got %q", m.Title)
@@ -56,7 +56,7 @@ func TestPlayerMeta_FR(t *testing.T) {
 	if !strings.Contains(m.Title, "Halo Infinite") {
 		t.Errorf("Title doit contenir le titre, got %q", m.Title)
 	}
-	for _, want := range []string{"KDR 1.42", "58 % de victoires", "320 matchs"} {
+	for _, want := range []string{"KDR 1.42", "58% win rate", "320 matches"} {
 		if !strings.Contains(m.Description, want) {
 			t.Errorf("Description %q doit contenir %q", m.Description, want)
 		}
@@ -77,29 +77,29 @@ func TestPlayerMeta_EN(t *testing.T) {
 }
 
 func TestPlayerMeta_MissingKPIs(t *testing.T) {
-	// KDR nil + 0 matchs → pas de "KDR", pas de "matchs", mais win rate present.
+	// KDR nil + 0 matches omits KDR and matches while retaining the win rate.
 	m := PlayerMeta("https://lvelup.info", "/players/foo/home",
-		"Foo", "", KPIInput{KDR: nil, WinRate: 0.0, TotalMatches: 0}, LocaleFR)
+		"Foo", "", KPIInput{KDR: nil, WinRate: 0.0, TotalMatches: 0}, LocaleEN)
 	if strings.Contains(m.Description, "KDR") {
 		t.Errorf("KDR nil ne doit pas apparaitre, got %q", m.Description)
 	}
-	if strings.Contains(m.Description, "matchs") {
-		t.Errorf("0 matchs ne doit pas apparaitre, got %q", m.Description)
+	if strings.Contains(m.Description, "matches") {
+		t.Errorf("0 matches should not appear, got %q", m.Description)
 	}
-	if !strings.Contains(m.Description, "0 % de victoires") {
-		t.Errorf("win rate attendu, got %q", m.Description)
+	if !strings.Contains(m.Description, "0% win rate") {
+		t.Errorf("win rate expected, got %q", m.Description)
 	}
 
 	// Gamertag vide → repli sur le titre generique.
-	empty := PlayerMeta("https://lvelup.info", "/", "", "", KPIInput{}, LocaleFR)
-	if empty.Title != defaultTitle(LocaleFR) {
+	empty := PlayerMeta("https://lvelup.info", "/", "", "", KPIInput{}, LocaleEN)
+	if empty.Title != defaultTitle(LocaleEN) {
 		t.Errorf("gamertag vide → titre generique, got %q", empty.Title)
 	}
 }
 
 func TestRenderTags_Escaping(t *testing.T) {
 	m := PlayerMeta("https://lvelup.info", "/players/foo/home",
-		`Ev"il<script>`, "", KPIInput{WinRate: 0.5}, LocaleFR)
+		`Ev"il<script>`, "", KPIInput{WinRate: 0.5}, LocaleEN)
 	tags := m.RenderTags()
 	if strings.Contains(tags, `Ev"il<script>`) {
 		t.Errorf("valeur non echappee dans les balises:\n%s", tags)
@@ -120,7 +120,7 @@ func TestRenderTags_Escaping(t *testing.T) {
 
 func TestRender_ReplacesBlock(t *testing.T) {
 	tmpl := []byte("<head>\n    <!-- og:start -->\n    <meta property=\"og:title\" content=\"OLD\" />\n    <!-- og:end -->\n  </head>")
-	m := DefaultMeta("https://lvelup.info", "/", LocaleFR)
+	m := DefaultMeta("https://lvelup.info", "/", LocaleEN)
 	out := string(Render(tmpl, m))
 
 	if strings.Contains(out, "OLD") {
@@ -133,7 +133,7 @@ func TestRender_ReplacesBlock(t *testing.T) {
 	if !strings.Contains(out, markerStart) || !strings.Contains(out, markerEnd) {
 		t.Errorf("marqueurs perdus:\n%s", out)
 	}
-	out2 := string(Render([]byte(out), PlayerMeta("https://x.io", "/p", "Bob", "", KPIInput{WinRate: 1}, LocaleFR)))
+	out2 := string(Render([]byte(out), PlayerMeta("https://x.io", "/p", "Bob", "", KPIInput{WinRate: 1}, LocaleEN)))
 	if !strings.Contains(out2, "Bob") {
 		t.Errorf("second Render non applique:\n%s", out2)
 	}
@@ -141,7 +141,7 @@ func TestRender_ReplacesBlock(t *testing.T) {
 
 func TestRender_NoMarkers_Unchanged(t *testing.T) {
 	tmpl := []byte("<head><title>x</title></head>")
-	out := Render(tmpl, DefaultMeta("https://lvelup.info", "/", LocaleFR))
+	out := Render(tmpl, DefaultMeta("https://lvelup.info", "/", LocaleEN))
 	if string(out) != string(tmpl) {
 		t.Errorf("gabarit sans marqueurs doit rester inchange, got %q", out)
 	}
@@ -149,12 +149,12 @@ func TestRender_NoMarkers_Unchanged(t *testing.T) {
 
 func TestParseLocale(t *testing.T) {
 	cases := map[string]Locale{
-		"":                        LocaleFR,
-		"fr-FR,fr;q=0.9":          LocaleFR,
+		"":                        LocaleEN,
+		"fr-FR,fr;q=0.9":          LocaleEN,
 		"en-US,en;q=0.9,fr;q=0.8": LocaleEN,
 		"en":                      LocaleEN,
-		"de-DE":                   LocaleFR, // langue inconnue → defaut FR
-		"fr":                      LocaleFR,
+		"de-DE":                   LocaleEN, // langue inconnue → defaut FR
+		"fr":                      LocaleEN,
 	}
 	for al, want := range cases {
 		if got := ParseLocale(al); got != want {
@@ -171,11 +171,11 @@ func TestLocaleFromParams(t *testing.T) {
 		want       Locale
 	}{
 		{"lang=en prime sur Accept-Language fr", "en", "fr-FR,fr;q=0.9", LocaleEN},
-		{"lang=fr prime sur Accept-Language en", "fr", "en-US,en;q=0.9", LocaleFR},
+		{"lang=fr prime sur Accept-Language en", "fr", "en-US,en;q=0.9", LocaleEN},
 		{"lang insensible a la casse + espaces", " EN ", "fr-FR", LocaleEN},
 		{"lang vide → repli Accept-Language en", "", "en-US,en;q=0.9", LocaleEN},
-		{"lang inconnu → repli Accept-Language fr", "de", "fr-FR", LocaleFR},
-		{"tout vide → defaut FR", "", "", LocaleFR},
+		{"lang inconnu → repli Accept-Language fr", "de", "fr-FR", LocaleEN},
+		{"tout vide → defaut FR", "", "", LocaleEN},
 	}
 	for _, c := range cases {
 		if got := LocaleFromParams(c.queryLang, c.acceptLang); got != c.want {

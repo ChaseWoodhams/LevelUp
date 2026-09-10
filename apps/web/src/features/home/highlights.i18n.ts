@@ -24,8 +24,8 @@ interface HighlightTextDict {
   }
 }
 
-export function normalizeHighlightLocale(locale?: string | null): Locale {
-  return locale === 'en' ? 'en' : 'fr'
+export function normalizeHighlightLocale(_locale?: string | null): Locale {
+  return 'en'
 }
 
 function t(

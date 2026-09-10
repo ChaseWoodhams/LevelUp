@@ -21,9 +21,9 @@ import { commonManifest, type CommonManifestKey } from '@/lib/i18n/generated/com
 const API = '/api/v1'
 
 // Traducteur FR pour les tests unitaires de failureMessageFromCode (le composant
-// injecte le t() du store locale ; ici on force 'fr' pour asserter les libellés).
+// injecte le t() du store locale ; ici on force 'en' pour asserter les libellés).
 const tFr = (key: CommonManifestKey, vars?: Record<string, string | number>) =>
-  formatMessage(commonManifest, key, 'fr', vars)
+  formatMessage(commonManifest, key, 'en', vars)
 
 function renderCard() {
   const client = new QueryClient({

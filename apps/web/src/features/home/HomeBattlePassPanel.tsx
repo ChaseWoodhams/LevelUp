@@ -33,7 +33,7 @@ export function HomeBattlePassPanel({
   errorHint?: string | null
 }) {
   const locale = useAppShellStore((state) => state.locale)
-  const intlLocale = locale === 'en' ? 'en-GB' : 'fr-FR'
+  const intlLocale = 'en-US'
   const t = useCallback((key: HomeManifestKey) => formatMessage(homeManifest, key, locale), [locale])
   // Labels du contenu de pass (paliers, cR, raretés…) — réutilise l'i18n palmares.
   const passContentLabels = getPalmaresText(normalizePalmaresLocale(locale)).seasonPass.content

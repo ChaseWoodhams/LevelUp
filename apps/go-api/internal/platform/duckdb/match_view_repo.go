@@ -167,7 +167,7 @@ func (r *MatchViewRepo) GetMatchMeta(ctx context.Context, matchID string) (*doma
 		return nil, fmt.Errorf("MatchViewRepo.GetMatchMeta: %w", err)
 	}
 	// Résolution unifiée des noms d'asset via MetadataRepo.ResolveAssetName.
-	// Cascade FR-FR → fr → en-US → en (PreferredLangsForLocale("fr")), une seule
+	// Cascade FR-FR → fr → en-US → en (PreferredAssetLanguages()), une seule
 	// requête SQL par asset, source unique de vérité (asset_translations).
 	if row.MapAssetID != nil {
 		row.MapNameFR = r.resolveAssetName(ctx, "map", *row.MapAssetID)
@@ -196,14 +196,14 @@ func (r *MatchViewRepo) GetMatchMeta(ctx context.Context, matchID string) (*doma
 		}
 	}
 	// Résolution du libellé de mode — même cascade que applyMatchHistoryFRTranslations :
-	// ResolveAssetNamesBulk(pair) → loadModeFRBatch(mode_name_tr) → ResolvePairNameFR.
+	// ResolveAssetNamesBulk(pair) → loadModeFRBatch(mode_name_tr) → ResolvePairName.
 	// pair_name_fr est toujours NULL en DB (non écrit par sync) : seul ce chemin
 	// produit "Capture du drapeau" au lieu de l'EN normalisé.
 	{
 		var pairAssetName string
 		if r.pdb.Metadata != nil && row.PairAssetID != nil {
 			metaRepo := NewMetadataRepoFromDB(r.pdb.Metadata)
-			langs := PreferredLangsForLocale("fr")
+			langs := PreferredAssetLanguages()
 			pairNames, _ := metaRepo.ResolveAssetNamesBulk(ctx, "pair", []string{*row.PairAssetID}, langs)
 			pairAssetName = strings.TrimSpace(pairNames[*row.PairAssetID])
 		}
@@ -222,21 +222,10 @@ func (r *MatchViewRepo) GetMatchMeta(ctx context.Context, matchID string) (*doma
 			extracted = analysis.ExtractKnownMode(normAsset, knownModes)
 		}
 
-		modeENSet := make(map[string]struct{})
-		for _, en := range []string{normRaw, normAsset, extracted} {
-			if en != "" {
-				modeENSet[en] = struct{}{}
-			}
-		}
-		modeFR := loadModeFRBatch(ctx, r.pdb, modeENSet)
-
-		// Priorité au mode canonique extrait + traduit (variante → mode connu FR),
-		// sinon cascade historique ResolvePairNameFR (modes standards / cas limites).
-		if extracted != "" && modeFR[extracted] != "" {
-			fr := modeFR[extracted]
-			row.ModeNameFR = &fr
-		} else if fr := analysis.ResolvePairNameFR(rawPairName, derefString(row.PairNameFR), pairAssetName, modeFR); fr != "" {
-			row.ModeNameFR = &fr
+		if extracted != "" {
+			row.ModeNameFR = &extracted
+		} else if english := analysis.ResolvePairName(rawPairName, derefString(row.PairNameFR), pairAssetName, nil); english != "" {
+			row.ModeNameFR = &english
 		}
 	}
 	// Fallback mode data-driven (title-agnostic) : quand le titre n'a PAS de pair
@@ -323,7 +312,7 @@ func (r *MatchViewRepo) resolveAssetName(ctx context.Context, assetType, assetID
 		return nil
 	}
 	meta := NewMetadataRepoFromDB(r.pdb.Metadata)
-	name, _, ok, err := meta.ResolveAssetName(ctx, assetType, assetID, PreferredLangsForLocale("fr"))
+	name, _, ok, err := meta.ResolveAssetName(ctx, assetType, assetID, PreferredAssetLanguages())
 	if err != nil || !ok || strings.TrimSpace(name) == "" {
 		return nil
 	}
@@ -339,7 +328,7 @@ func (r *MatchViewRepo) resolveAssetNameEN(ctx context.Context, assetType, asset
 		return nil
 	}
 	meta := NewMetadataRepoFromDB(r.pdb.Metadata)
-	name, _, ok, err := meta.ResolveAssetName(ctx, assetType, assetID, PreferredLangsForLocale("en"))
+	name, _, ok, err := meta.ResolveAssetName(ctx, assetType, assetID, PreferredAssetLanguages())
 	if err != nil || !ok || strings.TrimSpace(name) == "" {
 		return nil
 	}

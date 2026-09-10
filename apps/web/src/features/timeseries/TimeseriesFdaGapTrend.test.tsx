@@ -170,14 +170,14 @@ describe('buildFdaGapCumulativeOption', () => {
 describe('TimeseriesFdaGapTrend — masquage capability', () => {
   it('capability expected_stats présente → chart rendu', async () => {
     setTitleCaps(['expected_stats'])
-    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="fr" title="Écart cumulé au FDA attendu" />)
+    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Écart cumulé au FDA attendu" />)
     expect(await screen.findByTestId('echarts-mock')).toBeInTheDocument()
   })
 
   it('capability expected_stats absente → non rendu (null)', () => {
     setTitleCaps(['ranked'])
     const { container } = render(
-      <TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="fr" title="Écart cumulé au FDA attendu" />,
+      <TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Écart cumulé au FDA attendu" />,
     )
     expect(container).toBeEmptyDOMElement()
     expect(screen.queryByTestId('echarts-mock')).toBeNull()
@@ -187,7 +187,7 @@ describe('TimeseriesFdaGapTrend — masquage capability', () => {
   // avec l'instance Sessions (clé commune `common.charts.fda_gap_tooltip`).
   it('aide ⓘ rendue à côté du titre', async () => {
     setTitleCaps(['expected_stats'])
-    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="fr" title="Écart cumulé au FDA attendu" />)
+    render(<TimeseriesFdaGapTrend rows={[row(1.5, 1.0), row(0.8, 1.2)]} labels={LABELS} locale="en" title="Écart cumulé au FDA attendu" />)
     await screen.findByTestId('echarts-mock')
     expect(screen.getByRole('button', { name: /info/i })).toBeInTheDocument()
   })
@@ -201,7 +201,7 @@ describe('TimeseriesFdaGapTrend — KPI écart moyen par match', () => {
       <TimeseriesFdaGapTrend
         rows={[row(2.0, 1.0), row(1.0, 1.0)]}
         labels={LABELS}
-        locale="fr"
+        locale="en"
         title="Écart cumulé au FDA attendu"
       />,
     )
@@ -216,7 +216,7 @@ describe('TimeseriesFdaGapTrend — KPI écart moyen par match', () => {
       <TimeseriesFdaGapTrend
         rows={[row(1.5, undefined), row(0.8, undefined)]}
         labels={LABELS}
-        locale="fr"
+        locale="en"
         title="Écart cumulé au FDA attendu"
       />,
     )

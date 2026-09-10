@@ -70,7 +70,7 @@ function setVisibility(state: DocumentVisibilityState) {
 
 describe('NotificationsBell', () => {
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   afterEach(() => {

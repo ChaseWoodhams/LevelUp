@@ -29,7 +29,7 @@ export function RelationSplitBar({
   rightToken,
   leftLabel,
   rightLabel,
-  locale = 'fr',
+  locale = 'en',
 }: RelationSplitBarProps) {
   const total = leftValue + rightValue
   const leftPct = total > 0 ? Math.round((leftValue / total) * 100) : 50

@@ -37,7 +37,7 @@ export function formatLastSeen(
   timestamp: string,
   titleName: string,
   t: SettingsText,
-  locale: Locale = 'fr',
+  locale: Locale = 'en',
   now: Date = new Date(),
 ): string {
   const past = new Date(timestamp)
@@ -51,13 +51,13 @@ export function formatLastSeen(
 
   let duration: string
   if (diffMin < 1) {
-    duration = locale === 'fr' ? "moins d'1 min" : 'less than 1 min'
+    duration = 'less than 1 min'
   } else if (diffMin < 60) {
     duration = `${diffMin} min`
   } else if (diffH < 24) {
-    duration = locale === 'fr' ? `${diffH} h` : `${diffH} hr`
+    duration = `${diffH} hr`
   } else if (diffD < 7) {
-    duration = locale === 'fr' ? `${diffD} j` : `${diffD} day${diffD > 1 ? 's' : ''}`
+    duration = `${diffD} day${diffD > 1 ? 's' : ''}`
   } else {
     // Format absolu pour les dates anciennes.
     const date = past.toLocaleDateString(intlLocale(locale), {

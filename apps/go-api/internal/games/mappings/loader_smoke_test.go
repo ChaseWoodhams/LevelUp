@@ -35,16 +35,12 @@ func TestLoadHaloInfiniteFieldsTOML(t *testing.T) {
 			t.Errorf("FieldKey %q absent du fields.toml HI", k)
 		}
 	}
-
-	// Spot check : kills doit avoir les libellés FR/EN attendus.
 	kills, ok := set.Get(canonical.FieldKills)
 	if !ok {
 		t.Fatalf("FieldKills introuvable")
 	}
-	labelFR, fallback := kills.Label("fr")
-	if fallback || labelFR != "Frags" {
-		t.Errorf("kills FR = %q (fallback=%v), want Frags", labelFR, fallback)
-	}
+
+	// Spot check: the English label is the canonical field mapping.
 	labelEN, fallback := kills.Label("en")
 	if fallback || labelEN != "Kills" {
 		t.Errorf("kills EN = %q (fallback=%v), want Kills", labelEN, fallback)

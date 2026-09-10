@@ -196,18 +196,9 @@ func (s *BootstrapService) Build(ctx context.Context, sess *domain.SessionData) 
 		}
 	}
 
-	// Locale par défaut : en démo, on force la locale vitrine (cfg.DemoLocale, défaut
-	// "en" — audience internationale de la vitrine publique). Le visiteur peut toujours
-	// basculer la langue en session côté client (store appShell + header X-LevelUp-Locale) ;
-	// le PATCH /settings restant refusé en démo, ce choix n'est pas persisté côté serveur.
-	// Les tests E2E pinnent LEVELUP_DEMO_LOCALE=fr pour exercer l'UI française.
-	locale := settingsExcerpt.Lang
-	if s.cfg.DemoMode {
-		locale = s.cfg.DemoLocale
-		if locale == "" {
-			locale = "en"
-		}
-	}
+	// The public runtime is English-only. Historical settings and demo
+	// configuration may still contain locale values, but they are ignored.
+	locale := "en"
 
 	return &domain.BootstrapResponse{
 		SetupRequired:        setupRequired,
@@ -410,9 +401,8 @@ func buildCapabilities(cfg *config.AppConfig, settings map[string]interface{}) d
 }
 
 func buildSettingsExcerpt(cfg *config.AppConfig, settings map[string]interface{}) domain.SettingsExcerpt {
-	lang := getStringSetting(settings, "lang", cfg.Lang)
 	return domain.SettingsExcerpt{
-		Lang:                lang,
+		Lang:                "en",
 		UserTimezone:        getStringSetting(settings, "user_timezone", "Europe/Paris"),
 		ShowRecords:         getBoolSetting(settings, "show_records", true),
 		NormalizeModeLabels: getBoolSetting(settings, "normalize_mode_labels", true),

@@ -29,31 +29,6 @@ export interface MediaAudioConfigText {
   closeAriaLabel: string
 }
 
-const FR: MediaAudioConfigText = {
-  gearAriaLabel: 'Réglage des pistes audio',
-  title: 'Pistes audio des médias',
-  intro:
-    "Déclare le rôle de tes pistes audio pour les prochains transcodages. L'ordre des pistes de ta configuration d'enregistrement est stable, ce réglage s'applique à tous tes futurs médias.",
-  modeAuto: 'Automatique',
-  modeAutoHint: "L'analyse détecte seule le jeu et les voix.",
-  modeManual: 'Manuel',
-  modeManualHint: 'Le rôle de chaque piste est déclaré manuellement, dans leur ordre.',
-  tracksLabel: 'Pistes',
-  tracksHint: 'Piste 1 = première piste audio du fichier.',
-  trackLabel: (n) => `Piste ${n}`,
-  roleGame: 'Jeu',
-  roleVoice: 'Voix',
-  roleOther: 'Autres pistes',
-  addTrack: 'Ajouter une piste',
-  removeTrack: 'Retirer',
-  emptyManual: 'Ajoute au moins une piste.',
-  cancel: 'Annuler',
-  save: 'Enregistrer',
-  saving: 'Enregistrement…',
-  saveError: "Échec de l'enregistrement",
-  closeAriaLabel: 'Fermer',
-}
-
 const EN: MediaAudioConfigText = {
   gearAriaLabel: 'Audio tracks settings',
   title: 'Media audio tracks',
@@ -79,8 +54,8 @@ const EN: MediaAudioConfigText = {
   closeAriaLabel: 'Close',
 }
 
-const TEXT: Record<Locale, MediaAudioConfigText> = { fr: FR, en: EN }
+const TEXT: Record<Locale, MediaAudioConfigText> = { en: EN }
 
-export function getMediaAudioConfigText(locale?: string | null): MediaAudioConfigText {
-  return TEXT[locale === 'en' ? 'en' : 'fr']
+export function getMediaAudioConfigText(_locale?: string | null): MediaAudioConfigText {
+  return TEXT['en']
 }

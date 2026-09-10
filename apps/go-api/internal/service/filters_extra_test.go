@@ -250,11 +250,11 @@ func TestFilterBySet_WithValues(t *testing.T) {
 
 // ---------- mapUI ----------
 
-func TestMapUI_FRPreferred(t *testing.T) {
-	en, fr := aquariusMap, "Verseau"
+func TestMapUI_EnglishPreferred(t *testing.T) {
+	en, fr := aquariusMap, "Legacy Map"
 	row := domain.FilterMatchRow{MapName: &en, MapNameFR: &fr}
-	if got := mapUI(row); got != "Verseau" {
-		t.Errorf("expected FR, got %s", got)
+	if got := mapUI(row); got != aquariusMap {
+		t.Errorf("expected English map, got %s", got)
 	}
 }
 

@@ -10,979 +10,747 @@
 # ─── États globaux ─────────────────────────────────────────────────────────
 
 [session.empty.no_sessions_title]
-fr = "Aucune session disponible"
 en = "No session available"
 
 [session.empty.no_sessions_description]
-fr = "Aucune session n'est disponible dans le scope courant. Vérifie le découpage de sessions ou élargis les filtres."
 en = "No session is available in the current scope. Check session bucketing or broaden filters."
 
 [session.errors.retry]
-fr = "Réessayer"
 en = "Retry"
 
 # ─── Filtres locaux (barre sticky) ────────────────────────────────────────
 
 [session.filters.experience]
-fr = "Expérience"
 en = "Experience"
 
 [session.filters.experience_all]
-fr = "Toutes"
 en = "All"
 
 [session.filters.experience_ranked]
-fr = "Classé"
 en = "Ranked"
 
 [session.filters.experience_unranked]
-fr = "Non classé"
 en = "Unranked"
 
 [session.filters.playlists]
-fr = "Sélections"
 en = "Playlists"
 
 [session.filters.modes]
-fr = "Modes"
 en = "Modes"
 
 [session.filters.reset]
-fr = "Réinitialiser"
 en = "Reset"
 
 # ─── Détail (SessionDetailPage) ────────────────────────────────────────────
 
 [session.detail.loading]
-fr = "Chargement de la session…"
 en = "Loading session…"
 
 [session.detail.load_error]
-fr = "Erreur lors du chargement de la session."
 en = "Failed to load session."
 
 [session.detail.empty_title]
-fr = "Sessions indisponibles"
 en = "Sessions unavailable"
 
 [session.detail.empty_description]
-fr = "Aucune réponse exploitable n'a été renvoyée pour cette page. Vérifie les sessions calculées et les filtres actifs."
 en = "No exploitable response returned for this page. Check computed sessions and active filters."
 
 [session.detail.no_session_in_scope_title]
-fr = "Aucune session disponible"
 en = "No session available"
 
 [session.detail.no_session_in_scope_description]
-fr = "Aucune session n'a pu être reconstruite avec les filtres actuels."
 en = "No session could be reconstructed with the current filters."
 
 [session.detail.header_compare]
-fr = "Comparer"
 en = "Compare"
 
 [session.detail.header_compare_aria]
-fr = "Comparer à une autre session"
 en = "Compare to another session"
 
 [session.detail.header_synergies]
-fr = "Voir les synergies"
 en = "View synergies"
 
 [session.detail.header_synergies_aria]
-fr = "Voir les synergies d'escouade de cette session"
 en = "View this session's squad synergies"
 
 [session.detail.compare_tooltip_title]
-fr = "Comparaison côte à côte"
 en = "Side-by-side comparison"
 
 [session.detail.compare_tooltip_desc]
-fr = "Affiche une deuxième session à droite — mêmes graphes, même tableaux, pour comparer les performances sur une session similaire sans changer de page."
 en = "Shows a second session on the right — same charts, same tables — to compare performance from a similar session without switching pages."
 
 [session.detail.compare_tooltip_suggested]
-fr = "Session suggérée"
 en = "Suggested session"
 
 
 # Pills de paramètres de session (L3 + drawer compare)
 [session.detail.pill_matches]
-fr = "{count} matchs"
 en = "{count} matches"
 
 [session.detail.pill_solo]
-fr = "Solo"
 en = "Solo"
 
 [session.detail.pill_squad]
-fr = "Escouade"
 en = "Squad"
 
 [session.detail.category_ranked]
-fr = "Classé"
 en = "Ranked"
 
 [session.detail.category_arena]
-fr = "Arène"
 en = "Arena"
 
 [session.detail.category_firefight]
-fr = "Firefight"
 en = "Firefight"
 
 [session.detail.category_btb]
-fr = "Grande équipe"
 en = "Big Team"
 
 [session.detail.session_active]
-fr = "Session active"
 en = "Active session"
 
 [session.detail.session_compared]
-fr = "Session comparée"
 en = "Compared session"
 
 [session.detail.smart_selection]
-fr = "Sélection intelligente"
 en = "Smart selection"
 
 [session.detail.no_compare_title]
-fr = "Aucune session de comparaison"
 en = "No comparison session"
 
 [session.detail.matches_card]
-fr = "Détail des matchs"
 en = "Match details"
 
 [session.detail.summary_unavailable_title]
-fr = "Session indisponible"
 en = "Session unavailable"
 
 [session.detail.summary_unavailable_description]
-fr = "La session demandée n'a pas pu être reconstruite avec les filtres actuels."
 en = "Requested session could not be reconstructed with the current filters."
 
 # Stats du résumé
 [session.detail.stat_matches]
-fr = "Matchs"
 en = "Matches"
 
 [session.detail.stat_kda]
-fr = "KDA"
 en = "KDA"
 
 [session.detail.stat_perf_score]
-fr = "Score perf."
 en = "Perf. score"
 
 [session.detail.stat_kills_per_match]
-fr = "Frags / match"
 en = "Frags / match"
 
 [session.detail.stat_avg_life]
-fr = "Durée de vie"
 en = "Avg. life"
 
 [session.detail.stat_off_def]
-fr = "Rendement / Résistance"
 en = "Yield / Resistance"
 
 # Variante courte affichée en mode compact (colonne divisée, drawer compare ouvert).
 [session.detail.stat_off_def_short]
-fr = "Rend. / Résist."
 en = "Yield / Res."
 
 # Compare metrics table
 [session.detail.compare_col_metric]
-fr = "Métrique"
 en = "Metric"
 
 [session.detail.compare_col_session_active]
-fr = "Session active"
 en = "Active session"
 
 [session.detail.compare_col_session_compared]
-fr = "Session comparée"
 en = "Compared session"
 
 [session.detail.compare_col_delta]
-fr = "Delta"
 en = "Delta"
 
 [session.detail.compare_metrics_empty_title]
-fr = "Comparaison indisponible"
 en = "Comparison unavailable"
 
 [session.detail.compare_metrics_empty_description]
-fr = "Aucune métrique comparative n'a été calculée pour cette paire de sessions."
 en = "No comparative metric was computed for this session pair."
 
 # Charts session-detail (séries de stats par match)
 [session.detail.chart_outcomes_title]
-fr = "Résultats de la session"
 en = "Session results"
 
 [session.detail.donut_winrate_center]
-fr = "Victoires"
 en = "Win rate"
 
 [session.detail.chart_kills_donut_title]
-fr = "Répartition F / D / A"
 en = "F / D / A breakdown"
 
 [session.detail.chart_perf_title]
-fr = "Score de performance"
 en = "Performance score"
 
 [session.detail.chart_perf_series]
-fr = "Score performance"
 en = "Performance score"
 
 [session.detail.chart_perf_mean]
-fr = "moy."
 en = "avg."
 
 [session.detail.chart_fda_per_game_title]
-fr = "Frags / Morts / Assistances par match"
 en = "Kills / Deaths / Assists per game"
 
 [session.detail.chart_fda_per_minute_title]
-fr = "Stats par minute — Frags / Morts / Assistances"
 en = "Per-minute stats — Kills / Deaths / Assists"
 
 [session.detail.chart_fda_radar_series]
-fr = "Moyenne / match"
 en = "Avg / game"
 
 [session.detail.chart_engagement_title]
-fr = "Engagement"
 en = "Engagement"
 
 [session.detail.engagement_axis]
-fr = "évén./min vs attendu"
 en = "events/min vs expected"
 
 # Écart d'engagement cumulé (P4) — cumul du résidu évén./min pondéré par la durée.
 [session.detail.chart_engagement_cumulative_title]
-fr = "Écart d'engagement cumulé"
 en = "Cumulative engagement gap"
 
 [session.detail.engagement_cumulative_series]
-fr = "Écart cumulé"
 en = "Cumulative gap"
 
 [session.detail.engagement_cumulative_match]
-fr = "Écart du match"
 en = "Match gap"
 
 [session.detail.engagement_cumulative_axis]
-fr = "événements (excès/déficit)"
 en = "events (surplus/deficit)"
 
 [session.detail.chart_mode_breakdown_title]
-fr = "Modes joués"
 en = "Modes played"
 
 [session.detail.mode_breakdown_count]
-fr = "matchs"
 en = "matches"
 
 [session.detail.chart_net_score_title]
-fr = "Solde frags − morts cumulé"
 en = "Cumulative net score"
 
 [session.detail.net_score_series]
-fr = "Net cumulé"
 en = "Cumulative net"
 
 # Écart cumulé au FDA attendu (D2 + retouche UX 2026-07-24) — cumul du
 # différentiel réel vs attendu + courbe FDA attendu par match (axe secondaire).
 [session.detail.chart_fda_gap_title]
-fr = "Écart cumulé au FDA attendu"
 en = "Cumulative KDA gap to expected"
 
 [session.detail.fda_gap_series]
-fr = "Écart cumulé"
 en = "Cumulative gap"
 
 [session.detail.fda_gap_real]
-fr = "Réel"
 en = "Actual"
 
 [session.detail.fda_gap_expected]
-fr = "Attendu"
 en = "Expected"
 
 [session.detail.fda_gap_gap]
-fr = "Écart"
 en = "Gap"
 
 # Intensité — profil médian des parts de frags par phase + enveloppe P25–P75.
 [session.detail.chart_intensity_title]
-fr = "Intensité"
 en = "Intensity"
 
 [session.detail.chart_intensity_subtitle]
-fr = "Répartition des frags par phase de match"
 en = "Frag distribution across match phases"
 
 [session.detail.chart_intensity_tooltip]
-fr = "Chaque match est découpé en 10 tranches de durée égale. Le trait plein montre à quel moment tes frags tombent : à gauche le début du match, à droite la fin. La zone colorée autour dit à quel point ça change d'un match à l'autre — large, tu joues très différemment selon les parties ; étroite, tu fais toujours à peu près pareil. Le pointillé est le niveau d'un match où tes frags seraient répartis également du début à la fin : au-dessus, c'est un moment fort de tes matchs, en dessous un moment creux."
 en = "Each match is split into 10 equal slices. The solid line shows when your kills happen: start of the match on the left, end on the right. The shaded band around it shows how much this changes from match to match — wide means you play very differently depending on the game, narrow means you play much the same way every time. The dashed line is the level of a match where your kills would be spread evenly from start to finish: above it is a strong stretch of your matches, below it a quiet one."
 
 [session.detail.chart_intensity_median]
-fr = "Médiane"
 en = "Median"
 
 [session.detail.chart_intensity_envelope]
-fr = "Enveloppe P25–P75"
 en = "P25–P75 envelope"
 
 [session.detail.chart_intensity_ref]
-fr = "10 %"
 en = "10%"
 
 # Balance des dégâts cumulée (P3) — dégâts nets ÷ PV-pour-tuer, exprimée en vies.
 [session.detail.chart_net_lives_title]
-fr = "Balance des dégâts cumulée"
 en = "Cumulative damage balance"
 
 [session.detail.net_lives_series]
-fr = "Balance cumulée"
 en = "Cumulative balance"
 
 [session.detail.net_lives_match]
-fr = "Balance du match"
 en = "Match balance"
 
 [session.detail.net_lives_average_caption]
-fr = "Balance moyenne par match"
 en = "Average balance per match"
 
 [session.detail.net_lives_average_unit]
-fr = "vies/match"
 en = "lives/match"
 
 [session.detail.net_lives_tooltip]
-fr = "Balance des dégâts = (dégâts infligés − dégâts subis) ÷ {{HP}} PV, exprimée en vies. Positif = la balance porte l'équipe ; négatif = elle coûte plus qu'elle ne rapporte."
 en = "Damage balance = (damage dealt − damage taken) ÷ {{HP}} HP, expressed in lives. Positive = the balance carries the team; negative = it costs more than it brings."
 
 [session.detail.col_rating_delta]
-fr = "Δ rang"
 en = "Δ rank"
 
 [session.detail.col_win_prob]
-fr = "Pronostic"
 en = "Win odds"
 
 [session.detail.win_prob_expected]
-fr = "Match attendu"
 en = "Expected match"
 
 [session.detail.win_prob_upset]
-fr = "Surprise"
 en = "Upset"
 
 [session.detail.win_prob_strong_perf]
-fr = "Belle performance"
 en = "Strong performance"
 
 [session.detail.win_prob_balanced]
-fr = "Match équilibré"
 en = "Balanced match"
 
 [session.detail.win_prob_aria]
-fr = "Probabilité de victoire"
 en = "Win probability"
 
 [session.detail.chart_mmr_title]
-fr = "Challenge MMR"
 en = "MMR challenge"
 
 [session.detail.mmr_team]
-fr = "Équipe"
 en = "Team"
 
 [session.detail.mmr_enemy]
-fr = "Adverse"
 en = "Enemy"
 
 [session.detail.chart_damage_title]
-fr = "Dégâts infligés / subis par match"
 en = "Damage dealt / taken per match"
 
 [session.detail.chart_placement_title]
-fr = "Répartition des placements"
 en = "Placement breakdown"
 
 [session.detail.ocdr_axis_oc]
-fr = "Rendement"
 en = "Yield"
 
 [session.detail.ocdr_axis_dr]
-fr = "Résistance"
 en = "Resistance"
 
 [session.detail.chart_frags_radar_title]
-fr = "Stats de frags"
 en = "Frag stats"
 
 [session.detail.chart_frags_radar_series]
-fr = "Session"
 en = "Session"
 
 [session.detail.radar_spree]
-fr = "Folie meurtrière (max)"
 en = "Killing spree (max)"
 
 [session.detail.radar_headshots]
-fr = "Tirs à la tête"
 en = "Headshots"
 
 [session.detail.radar_perfect]
-fr = "Frags parfaits"
 en = "Perfect kills"
 
 # XP de carrière (estimée) — MIROIR des clés Timeseries (timeseries.progression.
 # career_xp_*), titre identique par cohérence entre les deux pages (V72-13).
 [session.detail.career_xp_title]
-fr = "XP de carrière (estimée)"
 en = "Career XP (estimated)"
 
 [session.detail.career_xp_tooltip]
-fr = "Estimation : XP = multiplicateur d'éra × score personnel du match (×1 avant le 18/11/2025, ×2 depuis — Operation: Infinite). Matchs connus uniquement ; le Firefight et les playlists à multiplicateur spécial sont exclus ou approximés."
 en = "Estimate: XP = era multiplier × the match's personal score (×1 before 2025-11-18, ×2 since — Operation: Infinite). Known matches only; Firefight and playlists with special multipliers are excluded or approximated."
 
 [session.detail.career_xp_cumulative]
-fr = "XP de carrière cumulée sur la session (estimée)"
 en = "Career XP accumulated over the session (estimated)"
 
 [session.detail.career_xp_per_match]
-fr = "XP estimée gagnée par match (2 × score personnel depuis nov. 2025)"
 en = "Estimated XP earned per match (2 × personal score since Nov 2025)"
 
 [session.detail.chart_empty]
-fr = "Aucune donnée à représenter."
 en = "No data to display."
 
 # Drawer compare (Phase 3)
 [session.detail.drawer_close_aria]
-fr = "Fermer le panneau de comparaison"
 en = "Close comparison panel"
 
 # Label du header L3 drawer. Le libellé de session est porté par le sélecteur déroulant
 # à côté (plus besoin d'interpoler {label} dans le titre, d'où la suppression de l'ancien
 # `drawer_title` = "Comparaison · {label}").
 [session.detail.compare_label]
-fr = "Comparaison"
 en = "Comparison"
 
 [session.detail.drawer_prev_session]
-fr = "Session précédente"
 en = "Previous session"
 
 [session.detail.drawer_next_session]
-fr = "Session suivante"
 en = "Next session"
 
 [session.detail.drawer_no_compare]
-fr = "Aucune session à comparer pour le moment."
 en = "No session to compare for now."
 
 # ─── Comparaison A/B (SessionComparePage) ─────────────────────────────────
 
 [session.compare.loading]
-fr = "Chargement de la comparaison…"
 en = "Loading comparison…"
 
 [session.compare.load_error]
-fr = "Erreur lors du chargement."
 en = "Failed to load."
 
 [session.compare.empty_title]
-fr = "Comparaison indisponible"
 en = "Comparison unavailable"
 
 [session.compare.empty_description]
-fr = "Aucune réponse exploitable n'a été renvoyée pour cette page. Vérifie les sessions calculées et les filtres actifs."
 en = "No exploitable response returned for this page. Check computed sessions and active filters."
 
 [session.compare.session_a_label]
-fr = "Session A"
 en = "Session A"
 
 [session.compare.session_b_label]
-fr = "Session B"
 en = "Session B"
 
 [session.compare.placeholder_select]
-fr = "— Sélectionner —"
 en = "— Select —"
 
 [session.compare.not_selected]
-fr = "Non sélectionnée"
 en = "Not selected"
 
 [session.compare.session_card_title]
-fr = "Session {side}{suffix}"
 en = "Session {side}{suffix}"
 
 [session.compare.label_matches]
-fr = "Matchs :"
 en = "Matches:"
 
 [session.compare.label_wins]
-fr = "Victoires :"
 en = "Wins:"
 
 [session.compare.label_losses]
-fr = "Défaites :"
 en = "Losses:"
 
 [session.compare.label_kda]
-fr = "KDA :"
 en = "KDA:"
 
 [session.compare.label_perf_score]
-fr = "Score perf. :"
 en = "Perf. score:"
 
 # Sections charts/tables compare
 [session.compare.outcomes_title]
-fr = "Répartition des résultats"
 en = "Outcomes distribution"
 
 [session.compare.outcomes_empty_title]
-fr = "Répartition indisponible"
 en = "Distribution unavailable"
 
 [session.compare.outcomes_empty_description]
-fr = "Le comparatif n'a renvoyé aucun donut de résultats pour les sessions choisies."
 en = "Comparison returned no outcomes donut for the selected sessions."
 
 [session.compare.donut.wins]
-fr = "Victoires"
 en = "Wins"
 
 [session.compare.donut.losses]
-fr = "Défaites"
 en = "Losses"
 
 [session.compare.donut.other]
-fr = "Autres"
 en = "Other"
 
 [session.compare.summary_title]
-fr = "Résumé des écarts"
 en = "Gap summary"
 
 [session.compare.summary_empty_title]
-fr = "Résumé indisponible"
 en = "Summary unavailable"
 
 [session.compare.summary_empty_description]
-fr = "Aucune métrique résumée n'a été calculée pour les sessions sélectionnées."
 en = "No summary metric computed for the selected sessions."
 
 [session.compare.metrics_title]
-fr = "Métriques comparées"
 en = "Compared metrics"
 
 [session.compare.metrics_empty_title]
-fr = "Aucune métrique détaillée"
 en = "No detailed metric"
 
 [session.compare.metrics_empty_description]
-fr = "Le tableau comparatif est vide pour les sessions choisies."
 en = "Comparison table is empty for the selected sessions."
 
 [session.compare.maps_title]
-fr = "Par carte"
 en = "By map"
 
 [session.compare.maps_empty_title]
-fr = "Aucune comparaison par carte"
 en = "No comparison by map"
 
 [session.compare.maps_empty_description]
-fr = "Aucune ligne par carte n'est disponible pour les sessions sélectionnées."
 en = "No row by map available for the selected sessions."
 
 [session.compare.modes_title]
-fr = "Par mode de jeu"
 en = "By game mode"
 
 [session.compare.modes_empty_title]
-fr = "Aucune comparaison par mode"
 en = "No comparison by mode"
 
 [session.compare.modes_empty_description]
-fr = "Le backend n'a renvoyé aucune ventilation par mode pour cette paire de sessions."
 en = "Backend returned no breakdown by mode for this session pair."
 
 [session.compare.metric_col_metric]
-fr = "Métrique"
 en = "Metric"
 
 [session.compare.metric_col_session_a]
-fr = "Session A"
 en = "Session A"
 
 [session.compare.metric_col_session_b]
-fr = "Session B"
 en = "Session B"
 
 [session.compare.metric_col_delta]
-fr = "Delta"
 en = "Delta"
 
 [session.compare.incomplete_title]
-fr = "Comparaison incomplète"
 en = "Incomplete comparison"
 
 [session.compare.incomplete_description]
-fr = "Sélectionne une session A et une session B pour afficher les graphiques et tableaux comparatifs."
 en = "Select a session A and a session B to display comparison charts and tables."
 
 # ─── Charts de comparaison (charts 07–10) ─────────────────────────────────
 
 [session.compare.radar_title]
-fr = "Profil global — A vs B"
 en = "Overall profile — A vs B"
 
 [session.compare.radar_axis_kd]
-fr = "K/D"
 en = "K/D"
 
 [session.compare.radar_axis_winrate]
-fr = "Victoires %"
 en = "Win %"
 
 [session.compare.radar_axis_accuracy]
-fr = "Précision %"
 en = "Accuracy %"
 
 [session.compare.bar_metrics_title]
-fr = "Métriques clés — A vs B"
 en = "Key metrics — A vs B"
 
 [session.compare.cumulative_title]
-fr = "Score cumulé par match"
 en = "Cumulative score per match"
 
 [session.compare.cumulative_axis_match]
-fr = "Match"
 en = "Match"
 
 [session.compare.cumulative_axis_score]
-fr = "Solde W/L cumulé"
 en = "Cumulative W/L balance"
 
 [session.compare.cumulative_equilibrium]
-fr = "Équilibre"
 en = "Equilibrium"
 
 [session.compare.kd_progression_title]
-fr = "Évolution K/D par match"
 en = "K/D progression per match"
 
 [session.compare.kd_progression_axis_kd]
-fr = "K/D"
 en = "K/D"
 
 [session.compare.kd_progression_baseline]
-fr = "Seuil 1.0"
 en = "1.0 baseline"
 
 [session.compare.chart_empty]
-fr = "Aucune donnée disponible pour les sessions sélectionnées."
 en = "No data available for the selected sessions."
 
 [session.compare.map_col_map]
-fr = "Carte"
 en = "Map"
 
 [session.compare.map_col_a_matches]
-fr = "A — Matchs"
 en = "A — Matches"
 
 [session.compare.map_col_a_wl]
-fr = "A — V/D"
 en = "A — W/L"
 
 [session.compare.map_col_b_matches]
-fr = "B — Matchs"
 en = "B — Matches"
 
 [session.compare.map_col_b_wl]
-fr = "B — V/D"
 en = "B — W/L"
 
 [session.compare.mode_col_mode]
-fr = "Mode"
 en = "Mode"
 
 [session.compare.mode_col_a_matches]
-fr = "A — Matchs"
 en = "A — Matches"
 
 [session.compare.mode_col_a_wins]
-fr = "A — Victoires"
 en = "A — Wins"
 
 [session.compare.mode_col_b_matches]
-fr = "B — Matchs"
 en = "B — Matches"
 
 [session.compare.mode_col_b_wins]
-fr = "B — Victoires"
 en = "B — Wins"
 
 # --- Chart 01 : Skill Rating ---
 
 [session.compare.skill_title]
-fr = "Skill Rating"
 en = "Skill Rating"
 
 [session.compare.skill_empty]
-fr = "Aucun skill rating disponible pour ces sessions."
 en = "No skill rating available for these sessions."
 
 [session.compare.skill_delta_label]
-fr = "Progression"
 en = "Progression"
 
 # --- Chart 04 : Match highlights ---
 
 [session.compare.highlight_title]
-fr = "Matchs marquants"
 en = "Match highlights"
 
 [session.compare.highlight_best]
-fr = "Meilleur match"
 en = "Best match"
 
 [session.compare.highlight_worst]
-fr = "Pire match"
 en = "Worst match"
 
 [session.compare.highlight_empty]
-fr = "Aucune donnée de performance disponible."
 en = "No performance data available."
 
 [session.compare.highlight_kda]
-fr = "K/D"
 en = "K/D"
 
 [session.compare.highlight_score]
-fr = "Score"
 en = "Score"
 
 # --- Chart 06 : MMR ---
 
 [session.compare.mmr_title]
-fr = "MMR moyen de la session"
 en = "Session average MMR"
 
 [session.compare.mmr_team]
-fr = "MMR Team"
 en = "Team MMR"
 
 [session.compare.mmr_enemy]
-fr = "MMR Adversaire"
 en = "Enemy MMR"
 
 [session.compare.mmr_empty]
-fr = "MMR non disponible pour ces sessions."
 en = "MMR not available for these sessions."
 
 # --- Chart 13 : Profil de participation ---
 
 [session.compare.participation_title]
-fr = "Profil de participation"
 en = "Participation profile"
 
 [session.compare.participation_combat]
-fr = "Combat"
 en = "Combat"
 
 [session.compare.participation_survival]
-fr = "Survie"
 en = "Survival"
 
 [session.compare.participation_support]
-fr = "Support"
 en = "Support"
 
 [session.compare.participation_score]
-fr = "Score"
 en = "Score"
 
 [session.compare.participation_objective]
-fr = "Objectif"
 en = "Objective"
 
 [session.compare.participation_impact]
-fr = "Impact"
 en = "Impact"
 
 [session.compare.participation_empty]
-fr = "Aucune donnée de participation disponible."
 en = "No participation data available."
 
 # --- Chart 14 : Historique des matchs ---
 
 [session.compare.history_title]
-fr = "Historique des matchs"
 en = "Match history"
 
 [session.compare.history_tab_a]
-fr = "Session A"
 en = "Session A"
 
 [session.compare.history_tab_b]
-fr = "Session B"
 en = "Session B"
 
 [session.compare.history_col_date]
-fr = "Date"
 en = "Date"
 
 [session.compare.history_col_kda]
-fr = "K/D/A"
 en = "K/D/A"
 
 [session.compare.history_col_mode]
-fr = "Mode"
 en = "Mode"
 
 [session.compare.history_col_perf]
-fr = "Score perf."
 en = "Perf. score"
 
 [session.compare.history_win]
-fr = "V"
 en = "W"
 
 [session.compare.history_loss]
-fr = "D"
 en = "L"
 
 [session.compare.history_other]
-fr = "-"
 en = "-"
 
 [session.compare.history_empty]
-fr = "Aucun match dans cette session."
 en = "No matches in this session."
 
 # ─── Kills Donut (A|B côte à côte) ──────────────────────────────────────────
 
 [session.compare.kills_donut_title]
-fr = "Répartition K/D/A"
 en = "K/D/A Breakdown"
 
 [session.compare.kills_donut_empty]
-fr = "Aucun match disponible."
 en = "No matches available."
 
 # ─── Outcome Tape (A|B empilées) ─────────────────────────────────────────────
 
 [session.compare.outcome_tape_title]
-fr = "Enchaînement résultats"
 en = "Outcome Sequence"
 
 [session.compare.outcome_tape_empty]
-fr = "Aucun match disponible."
 en = "No matches available."
 
 # ─── Performance Score Progression ───────────────────────────────────────────
 
 [session.compare.perf_progression_title]
-fr = "Progression score de performance"
 en = "Performance Score Progression"
 
 [session.compare.perf_progression_axis_match]
-fr = "Match"
 en = "Match"
 
 [session.compare.perf_progression_axis_score]
-fr = "Score perf."
 en = "Perf. score"
 
 [session.compare.perf_progression_empty]
-fr = "Données de performance indisponibles."
 en = "Performance data unavailable."
 
 # ─── LUSR / CSR Progression ──────────────────────────────────────────────────
 
 [session.compare.skill_progression_title]
-fr = "Progression LUSR / CSR"
 en = "LUSR / CSR Progression"
 
 [session.compare.skill_progression_axis_match]
-fr = "Match"
 en = "Match"
 
 [session.compare.skill_progression_axis_rating]
-fr = "Rating"
 en = "Rating"
 
 [session.compare.skill_progression_empty]
-fr = "Aucune donnée de rating disponible (session non classée ?)."
 en = "No rating data available (unranked session?)."
 
 # ─── OC / DR (Rendement offensif / Résistance défensive) ────────────────────
 
 [session.compare.ocdr_title]
-fr = "Rendement · Résistance"
 en = "Yield · Resistance"
 
 [session.compare.ocdr_empty]
-fr = "Aucune donnée de dégâts disponible."
 en = "No damage data available."
 
 # ─── Engagement ──────────────────────────────────────────────────────────────
 
 [session.compare.engagement_title]
-fr = "Engagement moyen"
 en = "Average Engagement"
 
 [session.compare.engagement_progression_title]
-fr = "Progression engagement"
 en = "Engagement Progression"
 
 [session.compare.engagement_axis_match]
-fr = "Match"
 en = "Match"
 
 [session.compare.engagement_axis_score]
-fr = "Score"
 en = "Score"
 
 [session.compare.engagement_empty]
-fr = "Données d'engagement indisponibles."
 en = "Engagement data unavailable."
 
 # ─── Indisponibilité / accès (ADR 0029) ──────────────────────────────────────
 
 [session.detail.unavailable_title]
-fr = "Session indisponible"
 en = "Session unavailable"
 
 [session.detail.unavailable_not_found]
-fr = "Cette session n'existe pas ou ne fait pas partie des matchs disponibles."
 en = "This session doesn't exist or isn't part of the available matches."
 
 [session.detail.action_home]
-fr = "Accueil"
 en = "Home"
 
 [session.detail.action_matches]
-fr = "Mes matchs"
 en = "My matches"
 
 [session.detail.action_back]
-fr = "Précédent"
 en = "Back"

@@ -52,13 +52,6 @@ const (
 	OutcomeToneDNF  = "dnf"
 )
 
-var homeOutcomeLabels = map[int]string{
-	homeOutcomeWin:  "Victoire",
-	homeOutcomeLoss: "DÃ©faite",
-	homeOutcomeTie:  "Ã‰galitÃ©",
-	homeOutcomeDNF:  "Abandon",
-}
-
 var homeOutcomeLabelsEN = map[int]string{
 	homeOutcomeWin:  "Victory",
 	homeOutcomeLoss: "Defeat",
@@ -84,45 +77,27 @@ func IsRawAssetUUID(s string) bool {
 }
 
 // labelFR retourne fr si non vide, sinon en.
-func labelFR(fr, en string) string {
-	if fr != "" {
-		return fr
-	}
+func labelFR(_ string, en string) string {
 	return en
 }
 
-func normalizeHomeLocale(locale string) string {
-	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(locale)), "en") {
-		return "en"
-	}
-	return "fr"
+func normalizeHomeLocale(_ string) string {
+	return "en"
 }
 
-func labelForLocale(locale, fr, en string) string {
-	if normalizeHomeLocale(locale) == "en" {
-		if strings.TrimSpace(en) != "" {
-			return en
-		}
-		return fr
-	}
-	return labelFR(fr, en)
+func labelForLocale(_ string, _ string, en string) string {
+	return en
 }
 
-func outcomeLabelForLocale(outcome int, locale string) string {
-	if normalizeHomeLocale(locale) == "en" {
-		if label, ok := homeOutcomeLabelsEN[outcome]; ok {
-			return label
-		}
-		return homeOutcomeLabelFallback
-	}
-	if label, ok := homeOutcomeLabels[outcome]; ok {
+func outcomeLabelForLocale(outcome int, _ string) string {
+	if label, ok := homeOutcomeLabelsEN[outcome]; ok {
 		return label
 	}
 	return homeOutcomeLabelFallback
 }
 
 func outcomeLabel(code int) string {
-	if l, ok := homeOutcomeLabels[code]; ok {
+	if l, ok := homeOutcomeLabelsEN[code]; ok {
 		return l
 	}
 	return "DNF"

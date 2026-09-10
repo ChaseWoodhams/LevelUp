@@ -43,7 +43,7 @@ function mockSquadContext(overrides: Partial<ReturnType<typeof squadContextModul
 }
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 afterEach(() => {

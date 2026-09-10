@@ -76,12 +76,12 @@ function BriefingToggleChevron({ collapsed }: { collapsed: boolean }) {
 function formatPeriod(
   start: string | null | undefined,
   end: string | null | undefined,
-  locale: string,
+  _locale: string,
 ): string | undefined {
   if (!start) return undefined
   // Intervalle daté COMPLET (année incluse) via le helper canonique formatDateRange —
   // factorise mois/année (« 3–12 mars 2025 ») ; date simple si end absent/égal.
-  return formatDateRange(start, end, locale === 'en' ? 'en-US' : 'fr-FR')
+  return formatDateRange(start, end, 'en-US')
 }
 
 export function ExplorerBriefingStrip({ briefing, t }: Props) {

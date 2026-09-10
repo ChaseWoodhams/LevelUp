@@ -92,7 +92,8 @@ func headerGameplayDurationSeconds(meta *domain.MatchMetaRaw) *int64 {
 // on Bazaar » (GH-9). EN = noms canoniques API (MapNameEN, pair_name EN, PlaylistName
 // brut) ; FR = traductions (comportement historique préservé à l'octet).
 func applyMatchHeaderMetaLabels(h *domain.MatchViewHeader, meta *domain.MatchMetaRaw, locale string) {
-	isEN := locale == "en"
+	locale = "en"
+	isEN := true
 	h.StartTime = meta.StartTime
 	if meta.StartTime != nil {
 		h.StartTimeLabel = formatDateLong(*meta.StartTime, locale)

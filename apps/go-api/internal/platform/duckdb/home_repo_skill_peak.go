@@ -530,7 +530,7 @@ func unrankedBadgeURL(placementsCompleted int, titleSlug string) *string {
 // que sous le dossier du titre par défaut (static/ranks/halo_infinite/). Un titre
 // additionnel (ex. halo_5) n'a pas de dossier ranks/ propre : composer l'URL avec son
 // slug produisait /static/ranks/halo_5/unranked_0.png → 404 (file-server nu, sans
-// fallback) → le front affichait « ? » sur les playlists « Non classé » H5. On résout
+// fallback) → le front affichait « ? » sur les playlists « Unranked » H5. On résout
 // donc toujours vers le titre par défaut — cohérent avec le fallback static HINF des
 // insignes CSR matured (buildHomeSkillPeakBadgeURLForThreshold ci-dessus).
 //

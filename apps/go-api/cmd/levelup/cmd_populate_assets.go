@@ -1,5 +1,5 @@
 // cmd_populate_assets.go — sous-commande `levelup populate-assets` : peuple
-// asset_translations (multilingue) depuis l'API Discovery UGC.
+// asset_translations (English metadata) from the Discovery UGC API.
 //
 // Historique : vivait dans cmd/populate-assets (binaire standalone, réécriture
 // Go du script Python, Sprint 54). Migré en sous-commande de la CLI levelup
@@ -10,7 +10,7 @@
 //
 // Usage :
 //
-//	levelup populate-assets [--types map,playlist] [--langs fr-FR,de-DE]
+//	levelup populate-assets [--types map,playlist]
 //	                        [--dry-run] [--force] [--concurrency N]
 //	                        [--freshness JOURS] [--title-id slug]
 package main
@@ -37,7 +37,6 @@ func runPopulateAssets(cfg *config.AppConfig, args []string) error {
 	fs := flag.NewFlagSet("populate-assets", flag.ExitOnError)
 	var (
 		typesFlag       = fs.String("types", "", "Types d'assets (ex: map,playlist) — vide = tous")
-		langsFlag       = fs.String("langs", "", "Langues BCP-47 (ex: fr-FR,de-DE) — vide = toutes")
 		dryRun          = fs.Bool("dry-run", false, "Simule sans écrire")
 		force           = fs.Bool("force", false, "Re-fetch même si déjà présent")
 		concurrencyFlag = fs.Int("concurrency", 10, "Requêtes parallèles max")
@@ -49,7 +48,7 @@ func runPopulateAssets(cfg *config.AppConfig, args []string) error {
 	}
 
 	types := parseAssetTypes(*typesFlag)
-	langs := parseLangs(*langsFlag)
+	langs := []string{domain.DefaultLanguage}
 
 	slog.Info("populate-assets",
 		"types", types,
@@ -432,32 +431,6 @@ func parseAssetTypes(raw string) []halo.AssetType {
 		if p != "" {
 			result = append(result, halo.AssetType(p))
 		}
-	}
-	return result
-}
-
-// parseLangs parse la string "--langs fr-FR,de-DE" en slice de codes BCP-47.
-func parseLangs(raw string) []string {
-	if raw == "" {
-		return domain.TargetLanguages
-	}
-	parts := strings.Split(raw, ",")
-	validSet := make(map[string]bool)
-	for _, lang := range domain.TargetLanguages {
-		validSet[lang] = true
-	}
-
-	var result []string
-	for _, p := range parts {
-		p = strings.TrimSpace(p)
-		if validSet[p] {
-			result = append(result, p)
-		} else if p != "" {
-			slog.Warn("langue invalide ignorée", "lang", p)
-		}
-	}
-	if len(result) == 0 {
-		return []string{domain.DefaultLanguage}
 	}
 	return result
 }

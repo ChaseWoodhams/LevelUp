@@ -46,7 +46,7 @@ func (r *EngagementScoreRepo) LoadMatchEngagementContext(
 			COALESCE(mp.personal_score, 0),
 			COALESCE(mp.kills, 0),
 			COALESCE(mp.assists, 0),
-			COALESCE(mr.map_name_fr, mr.map_name),
+			COALESCE(mr.map_name, ''),
 			mr.map_id
 		FROM match_registry mr
 		JOIN match_participants mp ON mr.match_id = mp.match_id
@@ -78,8 +78,8 @@ func (r *EngagementScoreRepo) LoadMatchEngagementContext(
 	// retombe sur l'EN. On resout le nom FR via metadata.asset_translations
 	// (meme source canonique que applyMapFRTranslations). Best-effort.
 	if mapID.Valid && mapID.String != "" {
-		if fr, ok := r.resolveMapNameFR(ctx, mapID.String); ok {
-			mctx.MapName = &fr
+		if name, ok := r.resolveMapName(ctx, mapID.String); ok {
+			mctx.MapName = &name
 		}
 	}
 
@@ -99,19 +99,19 @@ func (r *EngagementScoreRepo) LoadMatchEngagementContext(
 	return &mctx, nil
 }
 
-// resolveMapNameFR resout le nom FR d'une map depuis metadata.asset_translations
+// resolveMapName resout le nom FR d'une map depuis metadata.asset_translations
 // par asset_id (= map_id). match_registry.map_name_fr etant toujours NULL, c'est
 // la seule source FR fiable (cf. reference_asset_translations_fr + filters_repo
 // applyMapFRTranslations). Best-effort : ("", false) si Metadata absent, pas de
 // ligne FR ou erreur — l'appelant garde alors le nom EN.
-func (r *EngagementScoreRepo) resolveMapNameFR(ctx context.Context, mapID string) (string, bool) {
+func (r *EngagementScoreRepo) resolveMapName(ctx context.Context, mapID string) (string, bool) {
 	if r.pdb == nil || r.pdb.Metadata == nil {
 		return "", false
 	}
 	const q = `
 		SELECT name FROM asset_translations
-		WHERE asset_type = 'map' AND asset_id = ? AND lang IN ('fr-FR', 'fr')
-		ORDER BY CASE WHEN lang = 'fr-FR' THEN 0 ELSE 1 END
+		WHERE asset_type = 'map' AND asset_id = ? AND lang IN ('en-US', 'en')
+		ORDER BY CASE WHEN lang = 'en-US' THEN 0 ELSE 1 END
 		LIMIT 1
 	`
 	rows, err := r.pdb.Metadata.QueryRecovered(ctx, q, mapID)

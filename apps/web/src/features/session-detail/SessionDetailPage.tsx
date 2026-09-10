@@ -29,7 +29,6 @@ import { Spinner } from '@/components/ui/spinner'
 import { apiErrorCode } from '@/lib/api/client'
 import { useSoloFilterStore } from '@/stores/soloFilterStore'
 import { useSessionContextStore } from '@/stores/sessionContextStore'
-import { useAppShellStore } from '@/stores/appShellStore'
 
 import { useEffectiveHpToKill } from '@/lib/damage/effectiveHp'
 
@@ -55,7 +54,6 @@ export function SessionDetailPage() {
   const sessionMatchContext = useSessionContextStore((s) => s.matchContext)
   // Locale envoyée au backend pour la résolution FR/EN des cartes/modes/playlists
   // (aligné Home/Explorer) ; incluse dans la queryKey → refetch au changement de locale.
-  const locale = useAppShellStore((s) => s.locale)
 
   // Le contexte filtre le périmètre (solo/escouade/mixte). On l'injecte dans les
   // filtres envoyés au backend (sessions listées, session par défaut, prev/next,
@@ -89,13 +87,11 @@ export function SessionDetailPage() {
       session_label: sessionLabel || undefined,
       compare_session_label: compareSessionLabel || undefined,
       enable_compare: enableCompare,
-      locale,
     },
     `${filterContextHash}:${sessionMatchContext}`,
     sessionLabel,
     compareSessionLabel,
     enableCompare,
-    locale,
   )
 
   // En-tête L3 sticky : il doit se coller SOUS la NavL2 (elle-même sticky top-0 dans

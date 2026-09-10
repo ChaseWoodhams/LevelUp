@@ -18,7 +18,6 @@ vi.mock('@/lib/api/client', () => ({
   // getApiTitleSlug) : le mock doit exposer ces exports sinon l'import du store échoue.
   getApiTitleSlug: () => 'halo_infinite',
   setApiTitleSlug: vi.fn(),
-  setApiLocale: vi.fn(),
 }))
 
 const mockResponse: AchievementsPageResponse = {
@@ -33,9 +32,7 @@ const mockResponse: AchievementsPageResponse = {
     {
       achievement_id: 'a',
       name_en: 'First',
-      name_fr: 'Premier',
       description_en: 'Desc',
-      description_fr: 'Description',
       gamerscore: 10,
       is_secret: false,
       unlocked: true,

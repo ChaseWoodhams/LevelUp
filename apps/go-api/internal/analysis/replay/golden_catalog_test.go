@@ -40,15 +40,15 @@ func goldenCatalog(t *testing.T) LabelCatalog {
 
 	byKey := map[string]Label{}
 	for k, v := range names.Names() {
-		byKey[k] = Label{En: v.En, Fr: v.Fr}
+		byKey[k] = Label{En: v.En}
 	}
 	abilities := map[int]Label{}
 	for idx, v := range labels.Abilities() {
-		abilities[idx] = Label{En: v.En, Fr: v.Fr}
+		abilities[idx] = Label{En: v.En}
 	}
 	grenades := make([]Label, 0, len(labels.GrenadeRanks()))
 	for _, v := range labels.GrenadeRanks() {
-		grenades = append(grenades, Label{En: v.En, Fr: v.Fr})
+		grenades = append(grenades, Label{En: v.En})
 	}
 	return NewLabelCatalog(
 		weapons.FilmshellWeaponKeysByFamily(), byKey, labels.ShotEffects(), grenades, abilities)
@@ -85,9 +85,8 @@ func TestCatalogueDuTitreNommeLesArmesDuFilmDeReference(t *testing.T) {
 		t.Fatal("aucune arme nommée : la jointure famille -> weapon_key -> nom est rompue")
 	}
 	for family, lbl := range cat.Weapons {
-		if lbl.En == "" || lbl.Fr == "" {
-			t.Errorf("famille %08X : libellé incomplet (en=%q fr=%q) — les deux langues sont obligatoires",
-				family, lbl.En, lbl.Fr)
+		if lbl.En == "" {
+			t.Errorf("famille %08X : libellé anglais incomplet", family)
 		}
 	}
 	if len(cat.Grenades) != 4 {

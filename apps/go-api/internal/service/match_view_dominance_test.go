@@ -379,10 +379,10 @@ func TestBuildMatchHeader_ModeFallbackNormalized(t *testing.T) {
 			want:     "Slayer",
 		},
 		{
-			name:       "ModeNameFR prioritaire sur pair_name",
+			name:       "English pair label wins over legacy translation",
 			pairName:   "Slayer : Forbidden",
-			modeNameFR: strPtr("Assassin"),
-			want:       "Assassin",
+			modeNameFR: strPtr("Legacy Mode"),
+			want:       "Slayer",
 		},
 		{
 			// Régression "Slayer on Forest sur Forêt" : ModeNameFR arrive brut
@@ -507,7 +507,7 @@ func TestBuildMatchHeader_IsFavorite(t *testing.T) {
 }
 
 // TestBuildMatchHeader_PlaylistFR : la traduction FR a priorité sur le label brut.
-func TestBuildMatchHeader_PlaylistFR(t *testing.T) {
+func TestBuildMatchHeader_PlaylistEnglish(t *testing.T) {
 	t.Parallel()
 	en := "Ranked Arena"
 	fr := "Arène classée"
@@ -516,8 +516,8 @@ func TestBuildMatchHeader_PlaylistFR(t *testing.T) {
 		PlaylistNameFR: &fr,
 	}
 	h := buildMatchHeader(context.Background(), "m1", meta, nil, nil, nil, nil, false)
-	if h.PlaylistLabel != fr {
-		t.Errorf("PlaylistLabel = %q, want %q (FR prioritaire)", h.PlaylistLabel, fr)
+	if h.PlaylistLabel != en {
+		t.Errorf("PlaylistLabel = %q, want %q", h.PlaylistLabel, en)
 	}
 
 	// Sans FR : fallback brut EN

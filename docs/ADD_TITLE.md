@@ -1,7 +1,4 @@
 # Adding a New Game Title to LevelUp
-
-French version: [FR/ADD_TITLE.md](FR/ADD_TITLE.md)
-
 > **Architecture**: title-aware v7 — `data/titles/<slug>/` layout, config-driven title
 > registry (`config/titles/<slug>/`). See [ADR 0008](adr/0008-db-schema-multi-title-and-xuid-global.md)
 > (filesystem-path isolation, no `title_id` column) and

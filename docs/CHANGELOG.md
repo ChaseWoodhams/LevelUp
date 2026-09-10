@@ -4,8 +4,6 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-> French version: [FR/CHANGELOG.md](FR/CHANGELOG.md)
-
 ## [7.3.0] - 2026-07-26
 
 > Point release built on the "v7.3 Notion backlog" (branch `feat/v7.3-notion-batch`): an overtime flag measured against a declarative regulation table, a first kill / first death chart replacing two histograms that disagreed with each other, size-based log rotation, and a sweep of fixes on Prestige objectives, the demo, the Halo 5 Achievements page, the language switch and the DuckDB write path. It also folds in the quick-win batch **deployed ahead of the release on 2026-07-26** (`1b18ae609`: `public/` assets in the prod image, objective view in the snapshot, match-view layout, Objectives participation axis), which never carried a version number of its own. **Post-deploy actions are required — see *Ops*.**

@@ -81,13 +81,13 @@ func (m *mockSquadRepo) LoadMainTeamParticipants(_ context.Context, _ string, _ 
 func (m *mockSquadRepo) LoadSynthesisHeatmap(_ context.Context, _ string) ([]domain.SynthesisHeatmapRow, error) {
 	return m.heatmapRows, m.heatmapErr
 }
-func (m *mockSquadRepo) LoadAssetTranslationsFR(_ context.Context, assetType string, _ []string) (map[string]string, error) {
+func (m *mockSquadRepo) LoadAssetNames(_ context.Context, assetType string, _ []string) (map[string]string, error) {
 	if m.assetFR == nil {
 		return nil, nil
 	}
 	return m.assetFR[assetType], nil
 }
-func (m *mockSquadRepo) LoadModeTranslationsFR(_ context.Context, _ []string) (map[string]string, error) {
+func (m *mockSquadRepo) LoadModeNames(_ context.Context, _ []string) (map[string]string, error) {
 	return m.modeFR, nil
 }
 func (m *mockSquadRepo) LoadMapStatsForSquad(_ context.Context, _ string, _, _ []string) (map[string]domain.MapSquadStats, error) {

@@ -105,7 +105,7 @@ function makeItem(overrides: Partial<MediaItemRow>): MediaItemRow {
 describe('MediaThumbnailCard — affichage map / fallback match', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -192,7 +192,7 @@ describe('MediaThumbnailCard — affichage map / fallback match', () => {
 describe('MediaThumbnailCard — icône "ouvrir le match"', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -343,7 +343,7 @@ describe('MediaThumbnailCard — troncature du nom de map', () => {
 describe('MediaThumbnailCard — lien "+ Associer"', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 

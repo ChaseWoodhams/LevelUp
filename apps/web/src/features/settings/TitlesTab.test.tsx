@@ -16,7 +16,7 @@ vi.mock('./queries', () => ({
   usePurgeTitleData: () => ({ mutate, isPending: false }),
 }))
 
-const t = getSettingsText('fr')
+const t = getSettingsText('en')
 
 beforeEach(() => {
   mutate.mockClear()

@@ -36,7 +36,7 @@ const SESSIONS: SessionLabelEntry[] = [
 function setup(
   selected: string[] = [],
   onChange = vi.fn(),
-  locale: ManifestLocale = 'fr',
+  locale: ManifestLocale = 'en',
 ) {
   const utils = render(
     <SessionMultiSelect
@@ -75,7 +75,7 @@ describe('SessionMultiSelect — label du bouton déclencheur', () => {
         sessions={SESSIONS}
         selected={[]}
         onChange={vi.fn()}
-        locale="fr"
+        locale="en"
         placeholder="Choisir une session…"
       />,
     )

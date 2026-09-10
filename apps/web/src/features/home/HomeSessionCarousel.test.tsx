@@ -11,10 +11,10 @@ import type { SessionSummaryItem } from '@/lib/api/types'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { HomeSessionCarousel } from './HomeSessionCarousel'
 
-// Libellés résolus par clé i18n (GH2-B4) — locale 'fr' épinglée pour les
+// Libellés résolus par clé i18n (GH2-B4) — locale 'en' épinglée pour les
 // assertions historiques FR ; le bloc « i18n EN » bascule explicitement en 'en'.
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 function makeSession(overrides: Partial<SessionSummaryItem> = {}): SessionSummaryItem {

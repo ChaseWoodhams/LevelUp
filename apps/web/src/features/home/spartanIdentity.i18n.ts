@@ -29,9 +29,9 @@ interface SpartanIdentityTextDict {
 }
 
 export function normalizeSpartanIdentityLocale(
-  locale?: string | null,
+	_locale?: string | null,
 ): Locale {
-  return locale === 'en' ? 'en' : 'fr'
+  return 'en'
 }
 
 function t(

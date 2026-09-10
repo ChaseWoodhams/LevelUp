@@ -53,35 +53,6 @@ interface RailText {
 }
 
 const TEXTS: Record<Locale, RailText> = {
-  fr: {
-    prev: '◀ Précédente',
-    next: 'Suivante ▶',
-    latest: 'Dernière',
-    prevTitle: 'Plus ancienne',
-    nextTitle: 'Plus récente',
-    latestTitle: 'La plus récente',
-    ariaNav: 'Navigation période / session',
-    ariaPrevSession: 'Session précédente',
-    ariaNextSession: 'Session suivante',
-    ariaLatestSession: 'Aller à la dernière session',
-    ariaPrevPeriod: 'Période précédente',
-    ariaNextPeriod: 'Période suivante',
-    ariaPrevSeason: 'Saison précédente',
-    ariaNextSeason: 'Saison suivante',
-    prevSeasonTitle: 'Saison précédente',
-    nextSeasonTitle: 'Saison suivante',
-    positionLabel: (idx, total) => `${idx + 1} / ${total}`,
-    matchCountSuffix: (n) => ` · ${n} match${n > 1 ? 's' : ''}`,
-    multiSessionLabel: (n) => `${n} sessions sélectionnées`,
-    multiSessionTooltip: 'Désélectionnez des sessions pour activer la navigation',
-    allTimeLabel: (n) => `Toutes les sessions (${n})`,
-    allTimeTooltip: 'Choisissez une période ou une session via les filtres pour activer la navigation',
-    periodLabel: (start, end) => `Période du ${start} au ${end}`,
-    periodDuration: (days) => `${days} jour${days > 1 ? 's' : ''}`,
-    seasonRangeLabel: (start, end) => `du ${start} au ${end}`,
-    auto: 'auto',
-    autoTitle: 'Sélection automatique : nouvelle session détectée.',
-  },
   en: {
     prev: '◀ Previous',
     next: 'Next ▶',
@@ -154,20 +125,16 @@ function formatSessionLabel(
     const timeFmt = new Intl.DateTimeFormat(intlLocale(locale), {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: locale !== 'fr',
+      hour12: locale !== 'en',
     })
     const dateLabel = dateFmt.format(start)
     const startTime = timeFmt.format(start)
     const end = endedAtUTC ? new Date(endedAtUTC) : null
     if (end && !isNaN(end.getTime()) && end.getTime() !== start.getTime()) {
       const endTime = timeFmt.format(end)
-      return locale === 'fr'
-        ? `Session du ${dateLabel} de ${startTime} à ${endTime}`
-        : `Session of ${dateLabel} from ${startTime} to ${endTime}`
+      return `Session of ${dateLabel} from ${startTime} to ${endTime}`
     }
-    return locale === 'fr'
-      ? `Session du ${dateLabel} à ${startTime}`
-      : `Session of ${dateLabel} at ${startTime}`
+    return `Session of ${dateLabel} at ${startTime}`
   } catch {
     return sessionLabel
   }
@@ -208,7 +175,7 @@ export function PeriodSessionRail({
   const resolvedContext = filterStore((s) => s.resolvedContext)
   const seasons = useSeasons()
 
-  const locale = (useAppShellStore((s) => s.locale) as Locale) ?? 'fr'
+  const locale = (useAppShellStore((s) => s.locale) as Locale) ?? 'en'
   const t = TEXTS[locale]
 
   const allSessions = resolvedContext?.session_options?.all_sessions ?? []

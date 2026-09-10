@@ -32,10 +32,8 @@ type milestoneEntryTOML struct {
 	Metric      string  `toml:"metric"`
 	Threshold   float64 `toml:"threshold"`
 	TitleEN     string  `toml:"title_en"`
-	TitleFR     string  `toml:"title_fr"`
 	Icon        string  `toml:"icon"`
 	Condition   string  `toml:"condition"`
-	ConditionFR string  `toml:"condition_fr"`
 	ConditionEN string  `toml:"condition_en"`
 }
 
@@ -71,8 +69,8 @@ func parseCatalogBytes(data []byte) ([]CatalogEntry, error) {
 		if m.Threshold <= 0 {
 			return nil, fmt.Errorf("milestones: entry %s threshold must be > 0, got %v", m.ID, m.Threshold)
 		}
-		if m.TitleEN == "" || m.TitleFR == "" {
-			return nil, fmt.Errorf("milestones: entry %s missing title_en or title_fr", m.ID)
+		if m.TitleEN == "" {
+			return nil, fmt.Errorf("milestones: entry %s missing title_en", m.ID)
 		}
 		out = append(out, CatalogEntry{
 			ID:          m.ID,
@@ -80,10 +78,10 @@ func parseCatalogBytes(data []byte) ([]CatalogEntry, error) {
 			Metric:      m.Metric,
 			Threshold:   m.Threshold,
 			TitleEN:     m.TitleEN,
-			TitleFR:     m.TitleFR,
+			TitleFR:     m.TitleEN,
 			Icon:        m.Icon,
 			Condition:   m.Condition,
-			ConditionFR: m.ConditionFR,
+			ConditionFR: m.ConditionEN,
 			ConditionEN: m.ConditionEN,
 		})
 	}

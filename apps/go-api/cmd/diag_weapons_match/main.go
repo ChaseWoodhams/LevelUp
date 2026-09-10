@@ -273,7 +273,7 @@ func main() {
 		lbl := "NOT FOUND (meta unavailable)"
 		if meta != nil {
 			var label sql.NullString
-			_ = meta.QueryRow(`SELECT COALESCE(name_fr, name_en) FROM weapon_labels WHERE weapon_id = ?`, wid).Scan(&label)
+			_ = meta.QueryRow(`SELECT COALESCE(name_en, '') FROM weapon_labels WHERE weapon_id = ?`, wid).Scan(&label)
 			lbl = "NOT FOUND"
 			if label.Valid {
 				lbl = label.String
@@ -301,7 +301,7 @@ func main() {
 		lbl := "NOT FOUND (meta unavailable)"
 		if meta != nil {
 			var label sql.NullString
-			_ = meta.QueryRow(`SELECT COALESCE(name_fr, name_en) FROM weapon_labels WHERE weapon_id = ?`, wid).Scan(&label)
+			_ = meta.QueryRow(`SELECT COALESCE(name_en, '') FROM weapon_labels WHERE weapon_id = ?`, wid).Scan(&label)
 			lbl = "NOT FOUND"
 			if label.Valid {
 				lbl = label.String

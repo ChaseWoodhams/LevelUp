@@ -101,17 +101,16 @@ func LoadWeaponNamesFromBytes(path string, raw []byte) (*WeaponNameSet, error) {
 	for rawKey, entry := range doc.Weapons {
 		key := strings.TrimSpace(rawKey)
 		en := strings.TrimSpace(entry.En)
-		fr := strings.TrimSpace(entry.Fr)
 		if key == "" {
 			return nil, fmt.Errorf("%s: weapon_key vide", path)
 		}
 		if en == "" {
 			return nil, fmt.Errorf("%s: weapon_key %q sans en (nom EN obligatoire)", path, key)
 		}
-		if fr == "" {
-			return nil, fmt.Errorf("%s: weapon_key %q sans fr (mettre le EN si aucun FR officiel)", path, key)
+		if strings.TrimSpace(entry.Fr) != "" {
+			return nil, fmt.Errorf("%s: weapon_key %q contains the removed fr field; use en only", path, key)
 		}
-		names[key] = WeaponName{En: en, Fr: fr}
+		names[key] = WeaponName{En: en, Fr: en}
 	}
 	if len(names) == 0 {
 		return nil, fmt.Errorf("%s: aucune arme dans [weapons]", path)

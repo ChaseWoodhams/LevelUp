@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 )
 
@@ -20,8 +19,8 @@ import (
 // les traductions fr-FR ET en-US (battlepass_{track,item}_translations) : on
 // ordonne le COALESCE selon la locale, au lieu du FR-first figé historique
 // (« Rewards des battlepass pas traduits en ENG »).
-func bpPreferEN(ctx context.Context) bool {
-	return strings.EqualFold(ctxkeys.Locale(ctx), "en")
+func bpPreferEN(_ context.Context) bool {
+	return true
 }
 
 // bpLocaleOrderedCoalesce ordonne un COALESCE par préférence de locale : les sources
@@ -29,13 +28,8 @@ func bpPreferEN(ctx context.Context) bool {
 // ANGLAISES (dont value = chaîne canonique en-US Waypoint), frExprs = sources françaises.
 // Centralise l'ordre locale-aware des libellés d'items Battle Pass (loadItemMetadataMap
 // + fillItemsFromAssetIndex) — évite une 3e copie divergente de l'ordonnancement.
-func bpLocaleOrderedCoalesce(preferEN bool, enExprs, frExprs []string) string {
-	ordered := make([]string, 0, len(enExprs)+len(frExprs))
-	if preferEN {
-		ordered = append(append(ordered, enExprs...), frExprs...)
-	} else {
-		ordered = append(append(ordered, frExprs...), enExprs...)
-	}
+func bpLocaleOrderedCoalesce(enExprs []string) string {
+	ordered := append([]string(nil), enExprs...)
 	return "COALESCE(" + strings.Join(ordered, ", ") + ")"
 }
 
@@ -49,12 +43,10 @@ func bpLocaleOrderedCoalesce(preferEN bool, enExprs, frExprs []string) string {
 // doit précéder les traductions étrangères en préférence EN — sinon EN retombe sur
 // `.translations.fr-FR` (bug « récompenses Battle Pass restent en FR quand l'UI passe EN »).
 func bpItemFieldCoalesce(ctx context.Context, jsonKey, col string) string {
-	frJSON := fmt.Sprintf("json_extract_string(d.raw_payload_json, '$.CommonData.%s.translations.fr-FR')", jsonKey)
 	enJSON := fmt.Sprintf("json_extract_string(d.raw_payload_json, '$.CommonData.%s.translations.en-US')", jsonKey)
 	val := fmt.Sprintf("json_extract_string(d.raw_payload_json, '$.CommonData.%s.value')", jsonKey)
 	en := []string{"t_en." + col, enJSON, val}
-	fr := []string{"t_fr." + col, frJSON}
-	return bpLocaleOrderedCoalesce(bpPreferEN(ctx), en, fr)
+	return bpLocaleOrderedCoalesce(en)
 }
 
 func (r *SeasonPassRepo) LoadSeasonPassTracks(ctx context.Context, _, _ string) ([]domain.SeasonPassTrackSummary, error) {
@@ -68,10 +60,7 @@ func (r *SeasonPassRepo) LoadSeasonPassTracks(ctx context.Context, _, _ string) 
 
 	// Récupère la définition la plus récente par track + traduction dans la locale
 	// de requête (fallback sur l'autre langue).
-	trackNameExpr := "COALESCE(t_fr.track_name, t_en.track_name)"
-	if bpPreferEN(ctx) {
-		trackNameExpr = "COALESCE(t_en.track_name, t_fr.track_name)"
-	}
+	trackNameExpr := "COALESCE(t_en.track_name, '')"
 	query := fmt.Sprintf(`
 		WITH latest AS (
 			SELECT reward_track_path, content_hash, xp_per_rank, is_current, last_seen_at,
@@ -83,10 +72,6 @@ func (r *SeasonPassRepo) LoadSeasonPassTracks(ctx context.Context, _, _ string) 
 		       %s AS track_name
 		       , d.battlepass_image_path, d.background_image_path, d.raw_payload_json
 		FROM latest d
-		LEFT JOIN battlepass_track_translations t_fr
-		       ON t_fr.reward_track_path = d.reward_track_path
-		      AND t_fr.content_hash = d.content_hash
-		      AND t_fr.lang = 'fr-FR'
 		LEFT JOIN battlepass_track_translations t_en
 		       ON t_en.reward_track_path = d.reward_track_path
 		      AND t_en.content_hash = d.content_hash
@@ -224,10 +209,6 @@ func (r *SeasonPassRepo) loadItemMetadataMap(
 		       d.quality,
 		       d.item_type
 		FROM latest d
-		LEFT JOIN battlepass_item_translations t_fr
-		       ON t_fr.inventory_item_path = d.inventory_item_path
-		      AND t_fr.content_hash = d.content_hash
-		      AND t_fr.lang = 'fr-FR'
 		LEFT JOIN battlepass_item_translations t_en
 		       ON t_en.inventory_item_path = d.inventory_item_path
 		      AND t_en.content_hash = d.content_hash
@@ -312,20 +293,17 @@ func (r *SeasonPassRepo) fillItemsFromAssetIndex(
 	// Resolution locale-aware (cf. bpItemFieldCoalesce) : value = chaine canonique en-US
 	// (source ANGLAISE), translations.{loc} = etranger. asset_index n'a pas de table de
 	// traduction denormalisee -> uniquement les fallbacks JSON du raw_json.
-	preferEN := bpPreferEN(ctx)
-	assetTitle := bpLocaleOrderedCoalesce(preferEN,
+	assetTitle := bpLocaleOrderedCoalesce(
 		[]string{
 			"json_extract_string(raw_json, '$.CommonData.Title.translations.en-US')",
 			"json_extract_string(raw_json, '$.CommonData.Title.value')",
 		},
-		[]string{"json_extract_string(raw_json, '$.CommonData.Title.translations.fr-FR')"},
 	)
-	assetDesc := bpLocaleOrderedCoalesce(preferEN,
+	assetDesc := bpLocaleOrderedCoalesce(
 		[]string{
 			"json_extract_string(raw_json, '$.CommonData.Description.translations.en-US')",
 			"json_extract_string(raw_json, '$.CommonData.Description.value')",
 		},
-		[]string{"json_extract_string(raw_json, '$.CommonData.Description.translations.fr-FR')"},
 	)
 	query := fmt.Sprintf(`
 		SELECT id,

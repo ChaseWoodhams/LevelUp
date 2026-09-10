@@ -14,7 +14,7 @@ import {
 } from './useSquadPresets'
 import { SQUAD_PRESETS_STRINGS } from './squadPresets.i18n'
 
-const T_FR = SQUAD_PRESETS_STRINGS.fr
+const T_FR = SQUAD_PRESETS_STRINGS.en
 
 describe('buildUsualSubtitle — indice « surtout … » (V72-10)', () => {
   it('retire la carte collée au mode brut ("Slayer on Bazaar" -> "Slayer")', () => {

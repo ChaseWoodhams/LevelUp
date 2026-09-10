@@ -42,8 +42,8 @@ func TestItemDefLocalizedText_MapWithTranslations(t *testing.T) {
 			"en-US": "Noctua Coating",
 		},
 	}
-	if got := itemDefLocalizedText(v, "fr-FR"); got != "Revêtement Noctua" {
-		t.Errorf("got %q, want %q", got, "Revêtement Noctua")
+	if got := itemDefLocalizedText(v, "fr-FR"); got != "Noctua Coating" {
+		t.Errorf("got %q, want %q", got, "Noctua Coating")
 	}
 	if got := itemDefLocalizedText(v, "en-US"); got != "Noctua Coating" {
 		t.Errorf("got %q, want %q", got, "Noctua Coating")
@@ -131,18 +131,6 @@ func TestUpsertItemDefinition_InsertsStructuredData(t *testing.T) {
 		t.Errorf("display_path = %q, want %q", displayPath, "progression/items/coat.png")
 	}
 
-	// Vérifier battlepass_item_translations fr-FR
-	var titleFR string
-	if err := db.QueryRow(ctx, `
-		SELECT title FROM battlepass_item_translations
-		WHERE inventory_item_path = 'Inventory/Coat-01.json' AND lang = 'fr-FR'`).
-		Scan(&titleFR); err != nil {
-		t.Fatalf("SELECT translations fr-FR: %v", err)
-	}
-	if titleFR != "Revêtement Légendaire" {
-		t.Errorf("title fr-FR = %q, want %q", titleFR, "Revêtement Légendaire")
-	}
-
 	// Vérifier battlepass_item_translations en-US
 	var titleEN string
 	if err := db.QueryRow(ctx, `
@@ -185,8 +173,8 @@ func TestUpsertItemDefinition_Idempotent(t *testing.T) {
 		WHERE inventory_item_path = 'Inventory/Charm-01.json'`).Scan(&translationCount); err != nil {
 		t.Fatalf("COUNT battlepass_item_translations: %v", err)
 	}
-	if translationCount != 2 { // fr-FR + en-US
-		t.Errorf("translation count = %d, want 2", translationCount)
+	if translationCount != 1 {
+		t.Errorf("translation count = %d, want 1", translationCount)
 	}
 }
 

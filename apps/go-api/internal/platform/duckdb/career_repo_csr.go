@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 )
 
@@ -19,7 +18,7 @@ import (
 //
 // Algo catalogue-first : le catalogue est la source de vérité pour QUELLES
 // playlists afficher. Pour chaque entrée catalogue on overlay le snapshot du
-// joueur si disponible, sinon "Non classé" synthétique. Les snapshots hors
+// joueur si disponible, sinon "Unranked" synthétique. Les snapshots hors
 // catalogue (playlists inactives jouées par le joueur) sont ajoutés en fin de
 // liste. Dégradation : si le catalogue est vide/indisponible → snapshots seuls.
 //
@@ -103,15 +102,15 @@ func (r *CareerRepo) enrichCSRPlaylistNames(ctx context.Context, playlists []dom
 	if len(ids) == 0 {
 		return
 	}
-	frNames, err := NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(ctx, "playlist", ids, PreferredLangsForLocale("fr"))
+	enNames, err := NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(ctx, "playlist", ids, PreferredAssetLanguages())
 	if err != nil {
 		return
 	}
-	locale := ctxkeys.Locale(ctx)
 	for i := range playlists {
 		id := strings.TrimSpace(playlists[i].PlaylistID)
-		// PlaylistName persisté = nom canonique EN → sert de candidat EN.
-		playlists[i].PlaylistName = resolvePlaylistNameForLocale(locale, strings.TrimSpace(frNames[id]), playlists[i].PlaylistName)
+		if name := strings.TrimSpace(enNames[id]); name != "" {
+			playlists[i].PlaylistName = name
+		}
 	}
 }
 

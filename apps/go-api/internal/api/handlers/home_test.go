@@ -67,8 +67,8 @@ func TestHomeHandler_GetHomePage_OK(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
 	}
-	if mock.pageLocale != "fr" {
-		t.Fatalf("expected default locale fr, got %q", mock.pageLocale)
+	if mock.pageLocale != "en" {
+		t.Fatalf("expected default locale en, got %q", mock.pageLocale)
 	}
 }
 
@@ -163,10 +163,9 @@ func TestHomeHandler_GetHomePage_UsesSettingsLanguage(t *testing.T) {
 // TestHomeHandler_GetHomePage_HeaderOverridesSettings : le header
 // X-LevelUp-Locale envoyé par le frontend prime sur app_settings.json.
 // Permet au frontend de basculer la locale en runtime sans re-bootstrap.
-func TestHomeHandler_GetHomePage_HeaderOverridesSettings(t *testing.T) {
+func TestHomeHandler_GetHomePage_UsesEnglishLocale(t *testing.T) {
 	dir := t.TempDir()
 	settingsPath := filepath.Join(dir, "app_settings.json")
-	// Settings en EN, mais le frontend demande FR via header.
 	if err := os.WriteFile(settingsPath, []byte(`{"lang":"en"}`), 0o600); err != nil {
 		t.Fatalf("write app_settings.json: %v", err)
 	}
@@ -184,7 +183,7 @@ func TestHomeHandler_GetHomePage_HeaderOverridesSettings(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", w.Code)
 	}
-	if mock.pageLocale != "fr" {
-		t.Fatalf("expected locale fr from header (overriding settings=en), got %q", mock.pageLocale)
+	if mock.pageLocale != "en" {
+		t.Fatalf("expected fixed English locale, got %q", mock.pageLocale)
 	}
 }

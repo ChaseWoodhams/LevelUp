@@ -24,7 +24,7 @@ const bootstrapFixture = {
   setup_state: 'ready',
   current_player: playerFixture,
   available_players: [playerFixture],
-  locale: 'fr',
+  locale: 'en',
   hints_visible_default: true,
   feature_flags: {
     v7_enabled: true,
@@ -45,7 +45,7 @@ const bootstrapFixture = {
     can_manage_instance: true,
   },
   settings_excerpt: {
-    lang: 'fr',
+    lang: 'en',
     user_timezone: 'UTC',
     show_records: true,
     normalize_mode_labels: true,
@@ -65,7 +65,7 @@ const careerFixture = {
     is_max_rank: false,
     recorded_at: null,
   },
-  hero_progress: { xp_total_required: 100000, xp_remaining: 50000, percentage: 50, current_rank: 12, total_ranks: 272, max_rank_name_fr: 'Héros', max_rank_name_en: 'Hero' },
+  hero_progress: { xp_total_required: 100000, xp_remaining: 50000, percentage: 50, current_rank: 12, total_ranks: 272, max_rank_name_en: 'Hero' },
   projections: null,
   xp_history: [],
   lusr: null,
@@ -144,8 +144,8 @@ const seasonPassFixture = {
 // L'état setup est porté par BootstrapResponse.setup_state.
 
 const settingsFixture = {
-  lang: 'fr',
-  discord_lang: 'fr',
+  lang: 'en',
+  discord_lang: 'en',
   user_timezone: 'UTC',
   normalize_mode_labels: true,
   show_records: true,
@@ -482,7 +482,7 @@ export const handlers = [
     return HttpResponse.json({
       title_slug: params.slug,
       schema_version: 1,
-      locale: url.searchParams.get('locale') ?? 'fr',
+      locale: url.searchParams.get('locale') ?? 'en',
       fields: {},
       assets: {
         cadence: {

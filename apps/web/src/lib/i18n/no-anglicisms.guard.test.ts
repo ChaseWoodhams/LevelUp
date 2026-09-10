@@ -32,7 +32,7 @@
  *
  * MÉTHODE — on résout la valeur FR réellement servie à l'utilisateur (jamais
  * de regex sur le fichier source brut, qui mélangerait FR et EN) :
- *   - dicts hand-written : on appelle le getter/l'objet avec la locale 'fr'
+ *   - dicts hand-written : on appelle le getter/l'objet avec la locale 'en'
  *     (même résolution que le runtime applicatif), puis on parcourt
  *     récursivement les valeurs. Les valeurs FONCTIONS (templates avec
  *     paramètres, ex. `(n) => \`Match ${n}\``) ne sont PAS invoquées : audit
@@ -174,8 +174,8 @@ function scanDict(source: string, frValue: unknown): Offender[] {
 function flattenManifestFr(obj: unknown, prefix: string, out: Map<string, string>): void {
   if (!obj || typeof obj !== 'object') return
   const rec = obj as Record<string, unknown>
-  if (typeof rec.fr === 'string' && typeof rec.en === 'string') {
-    out.set(prefix, rec.fr)
+  if (typeof rec.en === 'string' && typeof rec.en === 'string') {
+    out.set(prefix, rec.en)
     return
   }
   for (const [k, v] of Object.entries(rec)) {
@@ -213,11 +213,11 @@ function formatOffenders(offenders: Offender[]): string {
 describe('garde-rail anti-anglicismes FR (I15 + I15-bis, périmètre = fichiers traités)', () => {
   it('dictionnaires hand-written : aucun anglicisme interdit côté FR', () => {
     const offenders = [
-      ...scanDict('notifications', getNotificationsText('fr')),
-      ...scanDict('ascension', getAscensionText('fr')),
-      ...scanDict('match-view', MATCH_VIEW_TEXT.fr),
-      ...scanDict('squad', getSquadText('fr')),
-      ...scanDict('session-briefing', getBriefingTexts('fr')),
+      ...scanDict('notifications', getNotificationsText('en')),
+      ...scanDict('ascension', getAscensionText('en')),
+      ...scanDict('match-view', MATCH_VIEW_TEXT.en),
+      ...scanDict('squad', getSquadText('en')),
+      ...scanDict('session-briefing', getBriefingTexts('en')),
     ]
     expect(offenders, `Anglicismes détectés :\n${formatOffenders(offenders)}`).toEqual([])
   })

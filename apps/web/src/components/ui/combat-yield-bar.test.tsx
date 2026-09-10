@@ -11,7 +11,7 @@ import { useAppShellStore } from '@/stores/appShellStore'
 describe('CombatYieldBar', () => {
   afterEach(() => {
     // Restaure la locale par défaut du store entre les tests (GH3-3).
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
   it('renders without error with no props', () => {
     const { container } = render(<CombatYieldBar />)
@@ -49,7 +49,7 @@ describe('CombatYieldBar', () => {
   })
 
   it('shows tooltip on hover when data is present (FR)', () => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
     const { container } = render(
       <CombatYieldBar
         offensiveConversion={0.9}

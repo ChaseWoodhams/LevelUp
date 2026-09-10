@@ -47,43 +47,6 @@ export interface BriefingTexts {
   pluralize: (count: number, singular: string) => string
 }
 
-const FR: BriefingTexts = {
-  rail: {
-    resultsLabel: 'Résultats',
-  },
-  verdict: {
-    teamScore: "Score d'équipe",
-    deltaBonusPositive: (d) => `Bonus équipe +${d}`,
-    deltaBonusNegative: (d) => `Malus équipe ${d}`,
-  },
-  drill: {
-    activeView: (gt) => `Vue active : ${gt}`,
-    resetButton: '✕ revenir à mes stats',
-  },
-  grid: {
-    titleSelf: 'Mes stats sur cette session',
-    trendHint: "▲/▼ vs moyenne d'équipe sur la session",
-    matchesPlayed: 'Matchs joués',
-    totalDuration: 'Durée totale',
-    fragsPerMatch: 'Frags par match',
-    deathsPerMatch: 'Morts par match',
-    assistsPerMatch: 'Assistances par match',
-    accuracy: 'Précision moy.',
-    lifespan: 'Durée de vie moy.',
-    perMin: '/min',
-    perMatch: '/match',
-    rankDeltaCSR: 'Delta CSR',
-    rankDeltaLUSR: 'Delta LUSR',
-    rendement: 'Rendement',
-    resistance: 'Résistance',
-    offDef: 'Rendement / Résist.',
-    refBaseline: 'réf. 100%',
-  },
-  // FR : ajout "s" si count > 1, sauf "Abandon" qui prend aussi "s".
-  // Toutes nos labels (Victoire/Défaite/Égalité/Abandon) suivent la même règle.
-  pluralize: (count, singular) => (count > 1 ? `${singular}s` : singular),
-}
-
 const EN: BriefingTexts = {
   rail: {
     resultsLabel: 'Results',
@@ -125,6 +88,6 @@ const EN: BriefingTexts = {
   },
 }
 
-export function getBriefingTexts(locale: Locale): BriefingTexts {
-  return locale === 'en' ? EN : FR
+export function getBriefingTexts(_locale: Locale): BriefingTexts {
+  return EN
 }

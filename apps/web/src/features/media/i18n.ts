@@ -80,8 +80,8 @@ export interface MediaText {
   }
 }
 
-export function normalizeMediaLocale(locale?: string | null): Locale {
-  return locale === 'en' ? 'en' : 'fr'
+export function normalizeMediaLocale(_locale?: string | null): Locale {
+  return 'en'
 }
 
 function t(locale: Locale, key: MediaManifestKey, values?: Record<string, string | number>): string {

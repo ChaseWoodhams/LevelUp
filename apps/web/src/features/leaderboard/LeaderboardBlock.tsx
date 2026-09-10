@@ -52,15 +52,15 @@ const COL_HIDE_LG = 'hidden lg:table-cell'
  * Playlists classées (asset IDs stables) — FALLBACK bilingue si le catalogue
  * dynamique (snapshots réellement en base) est vide. Dès que le catalogue est
  * présent, on s'appuie sur `display_name` renvoyé par l'API (déjà résolu selon la
- * locale via le header X-LevelUp-Locale côté backend).
+ * locale via le header canonical English API responses côté backend).
  */
-const PLAYLISTS: { id: string; fr: string; en: string }[] = [
-  { id: 'edfef3ac-9cbe-4fa2-b949-8f29deafd483', fr: 'Arène classée', en: 'Ranked Arena' },
-  { id: 'dcb2e24e-05fb-4390-8076-32a0cdb4326e', fr: 'Assassin classé', en: 'Ranked Slayer' },
-  { id: 'fa5aa2a3-2428-4912-a023-e1eeea7b877c', fr: 'Duo classé', en: 'Ranked Doubles' },
-  { id: '6233381c-fc96-40b9-b1ff-f6a4de72dd7a', fr: 'Snipers classés', en: 'Ranked Snipers' },
-  { id: '57e417dd-7366-4dda-9bdd-2802151d5e81', fr: 'Tactique classé', en: 'Ranked Tactical' },
-  { id: '71734db4-4b8e-4682-9206-62b6eff92582', fr: 'Chacun pour soi classé', en: 'Ranked FFA' },
+const PLAYLISTS: { id: string; label: string }[] = [
+  { id: 'edfef3ac-9cbe-4fa2-b949-8f29deafd483', label: 'Ranked Arena' },
+  { id: 'dcb2e24e-05fb-4390-8076-32a0cdb4326e', label: 'Ranked Slayer' },
+  { id: 'fa5aa2a3-2428-4912-a023-e1eeea7b877c', label: 'Ranked Doubles' },
+  { id: '6233381c-fc96-40b9-b1ff-f6a4de72dd7a', label: 'Ranked Snipers' },
+  { id: '57e417dd-7366-4dda-9bdd-2802151d5e81', label: 'Ranked Tactical' },
+  { id: '71734db4-4b8e-4682-9206-62b6eff92582', label: 'Ranked FFA' },
 ]
 
 // SEASONS (libellés de saison) déplacé dans ./seasons.i18n.ts — dict i18n local
@@ -99,7 +99,7 @@ function formatStatValue(entry: LeaderboardEntry, locale: ManifestLocale): strin
 
 // MetricWithTrend vient du composant PARTAGÉ components/ui/metric-trend (extrait
 // par le chantier leaderboard, garde-rail metric-trend.guard.test.ts) — l'ex-copie
-// locale a été retirée à la fusion campagne↔leaderboard (2026-07-10).
+  // English-only API responses are canonical; title changes scope the cache key.
 const fmtPct = (v: number, locale: ManifestLocale): string =>
   `${(v * 100).toLocaleString(intlLocale(locale), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 
@@ -127,7 +127,7 @@ export function LeaderboardBlock({ playerSlug, onHoverEntry }: LeaderboardBlockP
   const { data: catalog } = useLeaderboardCatalog(playerSlug)
   // Suffixe « (archivée) » sur les saisons non enrichies (classement CSR scrappé mais
   // pas de stats détaillées — historique au-delà de l'horizon API). Calculé hors useMemo
-  // pour rester stable (dépend de la locale via t), et passé en dépendance.
+  // English-only API responses are canonical; title changes scope the cache key.
   const archivedBadge = t('common.leaderboard.season_archived_badge')
   const seasonOptions: SelectorOption[] = useMemo(
     () =>
@@ -142,12 +142,12 @@ export function LeaderboardBlock({ playerSlug, onHoverEntry }: LeaderboardBlockP
   const allPlaylistOptions: SelectorOption[] = useMemo(
     () =>
       catalog?.playlists?.length
-        ? // Le backend renvoie un display_name DÉJÀ localisé (header X-LevelUp-Locale :
-          // cascade asset_translations[locale] > rankedplaylists locale > canonique > id).
+        ? // Le backend renvoie un display_name DÉJÀ localisé (header canonical English API responses :
+  // English-only API responses are canonical; title changes scope the cache key.
           // On l'utilise directement, sans table FR codée en dur.
           catalog.playlists.map((p) => ({ value: p.id, label: p.display_name || p.id }))
         : // Catalogue vide (avant le 1er snapshot) : fallback bilingue local.
-          PLAYLISTS.map((p) => ({ value: p.id, label: locale === 'en' ? p.en : p.fr })),
+          PLAYLISTS.map((p) => ({ value: p.id, label: p.label })),
     [catalog, locale],
   )
 
@@ -187,7 +187,7 @@ export function LeaderboardBlock({ playerSlug, onHoverEntry }: LeaderboardBlockP
       to: '/{-$lang}/t/$titleSlug/players/$playerSlug/explorer',
       params: { titleSlug, playerSlug },
       // On transmet le xuid (connu de la ligne) pour que l'Explorer affiche le
-      // profil live même si le joueur n'est pas dans les données locales (sinon
+  // English-only API responses are canonical; title changes scope the cache key.
       // ResolveXUIDByGamertag échoue côté backend pour un joueur du classement
       // mondial jamais croisé).
       search: { mode: 'player', target: gamertag, targetXuid: xuid || undefined },

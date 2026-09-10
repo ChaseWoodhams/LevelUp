@@ -71,7 +71,7 @@ func TestResolveAssetName_FallbackToEN_WhenFRMissing(t *testing.T) {
 
 	// Forbidden n'a que en-US ; demande locale fr → cascade EN
 	name, lang, ok, err := repo.ResolveAssetName(ctx, "map", "forbidden-uuid",
-		PreferredLangsForLocale("fr"))
+		PreferredAssetLanguages())
 	if err != nil {
 		t.Fatalf("ResolveAssetName: %v", err)
 	}
@@ -90,7 +90,7 @@ func TestResolveAssetName_NotFound(t *testing.T) {
 	setupResolveFixtures(t, db, ctx)
 
 	_, _, ok, err := repo.ResolveAssetName(ctx, "map", "missing-uuid",
-		PreferredLangsForLocale("fr"))
+		PreferredAssetLanguages())
 	if err != nil {
 		t.Fatalf("ResolveAssetName: %v", err)
 	}
@@ -107,17 +107,17 @@ func TestResolveAssetName_AssetTypeIsolation(t *testing.T) {
 
 	// pair-quickplay existe seulement en asset_type='pair'
 	_, _, ok, _ := repo.ResolveAssetName(ctx, "map", "pair-quickplay",
-		PreferredLangsForLocale("fr"))
+		PreferredAssetLanguages())
 	if ok {
 		t.Error("attendu ok=false : asset_type='map' ne doit pas matcher un asset_type='pair'")
 	}
 	name, _, ok, err := repo.ResolveAssetName(ctx, "pair", "pair-quickplay",
-		PreferredLangsForLocale("fr"))
+		PreferredAssetLanguages())
 	if err != nil {
 		t.Fatalf("ResolveAssetName: %v", err)
 	}
-	if !ok || name != "Partie rapide : Assassin" {
-		t.Errorf("attendu (Partie rapide : Assassin), obtenu (%s, ok=%v)", name, ok)
+	if !ok || name != "Quick Play : Slayer" {
+		t.Errorf("expected (Quick Play : Slayer), got (%s, ok=%v)", name, ok)
 	}
 }
 
@@ -129,7 +129,7 @@ func TestResolveAssetName_LocaleENPrefers_EN(t *testing.T) {
 
 	// Locale "en" → préfère en-US même si fr-FR existe (Shiro)
 	name, lang, ok, err := repo.ResolveAssetName(ctx, "map", "shiro-uuid",
-		PreferredLangsForLocale("en"))
+		PreferredAssetLanguages())
 	if err != nil {
 		t.Fatalf("ResolveAssetName: %v", err)
 	}
@@ -151,7 +151,7 @@ func TestResolveAssetNamesBulk_MixedAvailability(t *testing.T) {
 
 	ids := []string{"shiro-uuid", "catalyst-uuid", "forbidden-uuid", "missing-uuid"}
 	out, err := repo.ResolveAssetNamesBulk(ctx, "map", ids,
-		PreferredLangsForLocale("fr"))
+		PreferredAssetLanguages())
 	if err != nil {
 		t.Fatalf("ResolveAssetNamesBulk: %v", err)
 	}
@@ -183,7 +183,7 @@ func TestResolveAssetNamesBulk_EmptyInput(t *testing.T) {
 	setupResolveFixtures(t, db, ctx)
 
 	out, err := repo.ResolveAssetNamesBulk(ctx, "map", nil,
-		PreferredLangsForLocale("fr"))
+		PreferredAssetLanguages())
 	if err != nil {
 		t.Fatalf("ResolveAssetNamesBulk: %v", err)
 	}
@@ -192,23 +192,9 @@ func TestResolveAssetNamesBulk_EmptyInput(t *testing.T) {
 	}
 }
 
-func TestPreferredLangsForLocale(t *testing.T) {
-	cases := []struct {
-		locale string
-		first  string
-	}{
-		{"fr", "fr-FR"},
-		{"fr-FR", "fr-FR"},
-		{"FR", "fr-FR"},
-		{"en", "en-US"},
-		{"en-US", "en-US"},
-		{"de", "fr-FR"}, // locale inconnue → défaut FR-first
-		{"", "fr-FR"},
-	}
-	for _, c := range cases {
-		got := PreferredLangsForLocale(c.locale)
-		if len(got) == 0 || got[0] != c.first {
-			t.Errorf("PreferredLangsForLocale(%q): first=%v, attendu %q", c.locale, got, c.first)
-		}
+func TestPreferredAssetLanguages(t *testing.T) {
+	got := PreferredAssetLanguages()
+	if len(got) != 2 || got[0] != "en-US" || got[1] != "en" {
+		t.Fatalf("PreferredAssetLanguages() = %v, want [en-US en]", got)
 	}
 }

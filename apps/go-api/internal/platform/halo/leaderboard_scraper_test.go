@@ -196,11 +196,9 @@ func TestFetchActiveSeasonAndCatalog(t *testing.T) {
 	}
 }
 
-// TestFetchSeasons_TranslationsFR valide, sur la fixture réelle, que FetchSeasons
-// résout le nom FR depuis translations["fr-FR"] (csrseason12-1 → "Ombres") et
-// retombe sur le DisplayName EN quand aucune traduction FR n'existe (csrseason13-2
-// "Infinite" n'a que des locales qps-ploc).
-func TestFetchSeasons_TranslationsFR(t *testing.T) {
+// TestFetchSeasons_EnglishNames verifies that FetchSeasons uses the canonical
+// English display name even when the fixture contains other translations.
+func TestFetchSeasons_EnglishNames(t *testing.T) {
 	body, err := os.ReadFile(filepath.Join("testdata", "leaderboard_sample.html"))
 	if err != nil {
 		t.Skipf("fixture absente (%v)", err)
@@ -221,15 +219,15 @@ func TestFetchSeasons_TranslationsFR(t *testing.T) {
 	for _, s := range seasons {
 		byID[s.SeasonID] = struct{ en, fr string }{s.DisplayName, s.NameFR}
 	}
-	if got := byID["csrseason12-1"]; got.en != "Shadows" || got.fr != "Ombres" {
-		t.Errorf("csrseason12-1 = %+v, attendu {Shadows, Ombres}", got)
+	if got := byID["csrseason12-1"]; got.en != "Shadows" || got.fr != "Shadows" {
+		t.Errorf("csrseason12-1 = %+v, want {Shadows, Shadows}", got)
 	}
-	if got := byID["csrseason11-1"]; got.fr != "Dernier bastion" {
-		t.Errorf("csrseason11-1 FR = %q, attendu \"Dernier bastion\"", got.fr)
+	if got := byID["csrseason11-1"]; got.en != "Last Stand" || got.fr != "Last Stand" {
+		t.Errorf("csrseason11-1 = %+v, want {Last Stand, Last Stand}", got)
 	}
-	// Pas de fr-FR pour csrseason13-2 → fallback EN.
+	// No English translation row for csrseason13-2: use the source display name.
 	if got := byID["csrseason13-2"]; got.en != "Infinite" || got.fr != "Infinite" {
-		t.Errorf("csrseason13-2 = %+v, attendu fallback {Infinite, Infinite}", got)
+		t.Errorf("csrseason13-2 = %+v, want fallback {Infinite, Infinite}", got)
 	}
 }
 

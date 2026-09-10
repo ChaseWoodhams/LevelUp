@@ -19,7 +19,7 @@ const mockShellState = {
   currentPlayer: { player_slug: 'demo-player', gamertag: 'DemoPlayer' } as
     | { player_slug: string; gamertag: string }
     | null,
-  locale: 'fr' as 'fr' | 'en',
+  locale: 'en' as 'en' | 'en',
   currentTitleSlug: 'halo_infinite',
 }
 
@@ -88,7 +88,7 @@ describe('AscensionCoachingTab — composition (couche Coaching)', () => {
       player_slug: 'demo-player',
       gamertag: 'DemoPlayer',
     }
-    mockShellState.locale = 'fr'
+    mockShellState.locale = 'en'
     mockProfile.current = null
     mockPatterns.current = null
   })

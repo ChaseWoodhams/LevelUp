@@ -32,8 +32,8 @@ function isEncounterSemanticToken(s: string): s is SemanticToken {
   return s.startsWith('narrative-') || s.startsWith('outcome-') || s.startsWith('perf-')
 }
 
-function renderEncounterBadges(badges: MatchEncounterBadge[], locale: string) {
-  const manifestLocale: Locale = locale === 'en' ? 'en' : 'fr'
+function renderEncounterBadges(badges: MatchEncounterBadge[], _locale: string) {
+  const manifestLocale: Locale = 'en'
   const sqT = (key: SquadManifestKey, values?: Record<string, string | number>) =>
     formatMessage(squadManifest, key, manifestLocale, values)
   return badges.map((badge, i) => {

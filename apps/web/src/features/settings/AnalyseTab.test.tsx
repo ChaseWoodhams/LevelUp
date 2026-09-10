@@ -39,7 +39,7 @@ vi.mock('@/features/settings/queries', () => ({
   useRecalculateSessions: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 
-const t = getSettingsText('fr')
+const t = getSettingsText('en')
 
 function renderTab(merged: Partial<SettingsResponse>, onChange = vi.fn()) {
   renderWithProviders(<AnalyseTab merged={merged} handleChange={onChange} t={t} />)

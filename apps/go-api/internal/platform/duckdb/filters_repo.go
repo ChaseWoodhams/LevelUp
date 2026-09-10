@@ -64,9 +64,6 @@ func (r *FiltersRepo) LoadMatchesForFilters(ctx context.Context) ([]domain.Filte
 	// deviennent des raffinements idempotents sur les noms nouvellement remplis.
 	r.applyAssetNamesFromMetadata(ctx, results)
 
-	r.applyModeFRTranslations(ctx, results)
-	r.applyMapFRTranslations(ctx, results)
-	r.applyPlaylistFRTranslations(ctx, results)
 	return results, nil
 }
 
@@ -215,7 +212,7 @@ func (r *FiltersRepo) GetAvailablePlaylists(ctx context.Context) ([]domain.Label
 
 	q := `
 	SELECT DISTINCT
-	    COALESCE(r.playlist_name_fr, r.playlist_name, '') AS label,
+	    COALESCE(r.playlist_name, '') AS label,
 	    COALESCE(r.playlist_name, '')                     AS value
 	FROM match_registry r
 	JOIN match_participants p ON r.match_id = p.match_id
@@ -254,7 +251,7 @@ func (r *FiltersRepo) GetAvailableMaps(ctx context.Context) ([]domain.LabelValue
 
 	q := `
 	SELECT DISTINCT
-	    COALESCE(r.map_name_fr, r.map_name, '') AS label,
+	    COALESCE(r.map_name, '') AS label,
 	    COALESCE(r.map_name, '')                AS value
 	FROM match_registry r
 	JOIN match_participants p ON r.match_id = p.match_id

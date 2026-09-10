@@ -15,10 +15,10 @@ import type { SeasonEntry } from '@/lib/i18n/fieldMappings'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { SaisonPill } from './SaisonPill'
 
-// Libellés résolus par clé i18n (GH2-B1) — locale 'fr' épinglée pour les
+// Libellés résolus par clé i18n (GH2-B1) — locale 'en' épinglée pour les
 // assertions historiques FR ; le bloc « i18n EN » bascule explicitement en 'en'.
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 function makeSeasons(): SeasonEntry[] {

@@ -99,7 +99,7 @@ type proposalDTO struct {
 	Strength      float64    `json:"strength"`
 	Origin        string     `json:"origin"` // "catalog" | "synthesized"
 	ReasonKeyEN   string     `json:"reason_key_en,omitempty"`
-	ReasonKeyFR   string     `json:"reason_key_fr,omitempty"`
+	ReasonKeyFR   string     `json:"-"`
 	ReasonParams  string     `json:"reason_params,omitempty"` // JSON raw
 	Status        string     `json:"status"`
 	CreatedAt     time.Time  `json:"created_at"`

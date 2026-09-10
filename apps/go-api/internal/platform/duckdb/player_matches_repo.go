@@ -279,15 +279,15 @@ SELECT
     COALESCE(r.duration_seconds, 0)                   AS duration_seconds,
     COALESCE(r.map_id, '')                            AS map_id,
     COALESCE(r.map_name, '')                          AS map_name,
-    COALESCE(r.map_name_fr, '')                       AS map_name_fr,
+    COALESCE(r.map_name, '')                          AS map_name_fr,
     COALESCE(r.playlist_id, '')                       AS playlist_id,
     COALESCE(r.playlist_name, '')                     AS playlist_name,
-    COALESCE(r.playlist_name_fr, '')                  AS playlist_name_fr,
+    COALESCE(r.playlist_name, '')                     AS playlist_name_fr,
     COALESCE(r.game_variant_id, '')                   AS variant_id,
     COALESCE(r.game_variant_name, '')                 AS variant_name,
     COALESCE(r.pair_id, '')                           AS pair_id,
     COALESCE(r.pair_name, '')                         AS pair_name,
-    COALESCE(r.pair_name_fr, '')                      AS pair_name_fr,
+    COALESCE(r.pair_name, '')                         AS pair_name_fr,
     CASE
         WHEN COALESCE(r.is_ranked, FALSE)
             OR STRPOS(LOWER(COALESCE(r.playlist_name, '')), 'ranked') > 0

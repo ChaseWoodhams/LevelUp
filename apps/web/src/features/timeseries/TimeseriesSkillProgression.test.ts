@@ -36,7 +36,7 @@ describe('buildProgressionSeries', () => {
       makeRow({ index: 1 }), // match non noté
       makeRow({ index: 2, skill_rating_value: 1520, skill_rating_type: 'lusr', skill_playlist_group: 'ranked' }),
     ]
-    const series = buildProgressionSeries(rows, 'fr')
+    const series = buildProgressionSeries(rows, 'en')
     expect(series).toHaveLength(1)
     expect(series[0].values).toEqual([1500, null, 1520])
     expect(series[0].ratingType).toBe('lusr')
@@ -47,7 +47,7 @@ describe('buildProgressionSeries', () => {
       makeRow({ index: 0, skill_rating_value: 1500, skill_rating_type: 'lusr', skill_playlist_group: 'open' }),
       makeRow({ index: 1, skill_rating_value: 1200, skill_rating_type: 'csr', skill_playlist_group: 'arena' }),
     ]
-    expect(buildProgressionSeries(rows, 'fr')).toHaveLength(2)
+    expect(buildProgressionSeries(rows, 'en')).toHaveLength(2)
   })
 
   it('marque une rupture de saison à l\'index du nouveau match', () => {
@@ -55,7 +55,7 @@ describe('buildProgressionSeries', () => {
       makeRow({ index: 0, skill_rating_value: 1500, skill_rating_type: 'lusr', skill_playlist_group: 'ranked', skill_season_id: 'S1' }),
       makeRow({ index: 1, skill_rating_value: 1480, skill_rating_type: 'lusr', skill_playlist_group: 'ranked', skill_season_id: 'S2' }),
     ]
-    expect(buildProgressionSeries(rows, 'fr')[0].seasonBreaks).toEqual([1])
+    expect(buildProgressionSeries(rows, 'en')[0].seasonBreaks).toEqual([1])
   })
 
   it('isole les matchs de placement en points scatter (midpoint), hors de la ligne', () => {
@@ -64,12 +64,12 @@ describe('buildProgressionSeries', () => {
       makeRow({ index: 1, skill_rating_value: 0, skill_rating_type: 'lusr', skill_playlist_group: 'ranked', skill_measurement_remaining: 3 }),
       makeRow({ index: 2, skill_rating_value: 1600, skill_rating_type: 'lusr', skill_playlist_group: 'ranked', skill_measurement_remaining: 0 }),
     ]
-    const series = buildProgressionSeries(rows, 'fr')
+    const series = buildProgressionSeries(rows, 'en')
     expect(series[0].values).toEqual([1400, null, 1600]) // placement laissé null dans la ligne
     expect(series[0].placementPoints).toEqual([[1, 1500]]) // midpoint des valeurs réelles
   })
 
   it('retourne [] si aucun match noté', () => {
-    expect(buildProgressionSeries([makeRow({ index: 0 }), makeRow({ index: 1 })], 'fr')).toEqual([])
+    expect(buildProgressionSeries([makeRow({ index: 0 }), makeRow({ index: 1 })], 'en')).toEqual([])
   })
 })

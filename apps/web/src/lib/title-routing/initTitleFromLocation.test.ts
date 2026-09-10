@@ -8,11 +8,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const setApiTitleSlug = vi.fn()
-const setApiLocale = vi.fn()
 
 vi.mock('@/lib/api/client', () => ({
   setApiTitleSlug: (slug: string | null) => setApiTitleSlug(slug),
-  setApiLocale: (locale: string) => setApiLocale(locale),
 }))
 
 import { initTitleFromLocation } from './initTitleFromLocation'
@@ -20,30 +18,25 @@ import { initTitleFromLocation } from './initTitleFromLocation'
 describe('initTitleFromLocation', () => {
   beforeEach(() => {
     setApiTitleSlug.mockClear()
-    setApiLocale.mockClear()
   })
 
-  it('segment titre présent → setApiTitleSlug(slug), pas de locale', () => {
+  it('segment titre présent → setApiTitleSlug(slug)', () => {
     initTitleFromLocation('/t/halo_5/players/x/home')
     expect(setApiTitleSlug).toHaveBeenCalledWith('halo_5')
-    expect(setApiLocale).not.toHaveBeenCalled()
   })
 
-  it('segments langue + titre → les deux setters', () => {
+  it('segments langue + titre → setApiTitleSlug(slug)', () => {
     initTitleFromLocation('/en/t/halo_infinite/players/x/home')
     expect(setApiTitleSlug).toHaveBeenCalledWith('halo_infinite')
-    expect(setApiLocale).toHaveBeenCalledWith('en')
   })
 
   it('page agnostique (aucun segment) → aucun setter', () => {
     initTitleFromLocation('/settings')
     expect(setApiTitleSlug).not.toHaveBeenCalled()
-    expect(setApiLocale).not.toHaveBeenCalled()
   })
 
   it('page joueur legacy sans segment → aucun setter (no-op Phase 1)', () => {
     initTitleFromLocation('/players/x/home')
     expect(setApiTitleSlug).not.toHaveBeenCalled()
-    expect(setApiLocale).not.toHaveBeenCalled()
   })
 })

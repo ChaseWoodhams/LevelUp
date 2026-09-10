@@ -70,7 +70,6 @@ export function useSetMatchFavorite(playerSlug: string) {
         queryKey: queryKeys.home(
           playerSlug,
           useAppShellStore.getState().currentTitleSlug,
-          useAppShellStore.getState().locale,
         ),
       })
       void queryClient.invalidateQueries({ queryKey: queryKeys.matchHistoryAll(playerSlug) })

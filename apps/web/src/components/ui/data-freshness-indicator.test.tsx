@@ -16,21 +16,21 @@ const buildLabelFR = (date: string) => `Dernière synchronisation réussie le ${
 describe('DataFreshnessIndicator', () => {
   it('ne rend rien quand snapshotAt est null', () => {
     const { container } = render(
-      <DataFreshnessIndicator snapshotAt={null} buildLabel={buildLabelFR} locale="fr-FR" />,
+      <DataFreshnessIndicator snapshotAt={null} buildLabel={buildLabelFR} locale="en-US" />,
     )
     expect(container.firstChild).toBeNull()
   })
 
   it('ne rend rien quand snapshotAt est undefined', () => {
     const { container } = render(
-      <DataFreshnessIndicator snapshotAt={undefined} buildLabel={buildLabelFR} locale="fr-FR" />,
+      <DataFreshnessIndicator snapshotAt={undefined} buildLabel={buildLabelFR} locale="en-US" />,
     )
     expect(container.firstChild).toBeNull()
   })
 
   it('ne rend rien quand snapshotAt est une chaîne non parsable', () => {
     const { container } = render(
-      <DataFreshnessIndicator snapshotAt="pas une date" buildLabel={buildLabelFR} locale="fr-FR" />,
+      <DataFreshnessIndicator snapshotAt="pas une date" buildLabel={buildLabelFR} locale="en-US" />,
     )
     expect(container.firstChild).toBeNull()
   })
@@ -40,7 +40,7 @@ describe('DataFreshnessIndicator', () => {
       <DataFreshnessIndicator
         snapshotAt="2026-05-10T14:32:00Z"
         buildLabel={buildLabelFR}
-        locale="fr-FR"
+        locale="en-US"
       />,
     )
     const indicator = screen.getByTestId('data-freshness-indicator')
@@ -70,7 +70,7 @@ describe('DataFreshnessIndicator', () => {
       <DataFreshnessIndicator
         snapshotAt="2026-05-10T14:32:00Z"
         buildLabel={buildLabelFR}
-        locale="fr-FR"
+        locale="en-US"
         className="text-rose-500 hover:text-rose-300"
       />,
     )

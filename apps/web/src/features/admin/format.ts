@@ -11,12 +11,6 @@ import type { Locale } from '@/lib/i18n/locale'
 export type AdminLocale = Locale
 
 const REL = {
-  fr: {
-    justNow: "à l'instant",
-    minutesAgo: (n: number) => `il y a ${n} min`,
-    hoursAgo: (n: number) => `il y a ${n} h`,
-    daysAgo: (n: number) => `il y a ${n} j`,
-  },
   en: {
     justNow: 'just now',
     minutesAgo: (n: number) => `${n} min ago`,
@@ -49,13 +43,13 @@ export function adminRelativeTime(iso: string | undefined, locale: AdminLocale, 
  * Formate une durée en millisecondes en libellé compact : "850 ms",
  * "2,4 s" / "2.4 s", "1 min 05 s", "1 h 12 min". Négatif/NaN → '—'.
  */
-export function formatDurationMs(ms: number | undefined, locale: AdminLocale): string {
+export function formatDurationMs(ms: number | undefined, _locale: AdminLocale): string {
   if (ms === undefined || Number.isNaN(ms) || ms < 0) return '—'
   if (ms < 1000) return `${Math.round(ms)} ms`
   const seconds = ms / 1000
   if (seconds < 60) {
     const rounded = Math.round(seconds * 10) / 10
-    const text = locale === 'fr' ? String(rounded).replace('.', ',') : String(rounded)
+    const text = String(rounded)
     return `${text} s`
   }
   const totalMinutes = Math.floor(seconds / 60)
@@ -80,13 +74,13 @@ export function adminAbsoluteTime(iso: string | undefined, locale: AdminLocale):
 }
 
 /** Formate un intervalle scheduler en minutes vers un libellé lisible. */
-export function formatIntervalMinutes(minutes: number | undefined, locale: AdminLocale): string {
+export function formatIntervalMinutes(minutes: number | undefined, _locale: AdminLocale): string {
   if (!minutes || minutes <= 0) return '—'
   if (minutes < 60) return `${minutes} min`
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
   if (rest === 0) return `${hours} h`
-  return locale === 'fr' ? `${hours} h ${rest} min` : `${hours} h ${rest} min`
+  return hours + ' h ' + rest + ' min'
 }
 
 /** Formate un volume d'octets en unité lisible (Ko/Mo/Go — décimal, FR). */
@@ -95,8 +89,8 @@ export function formatBytes(bytes: number | undefined, locale: AdminLocale): str
   const abs = Math.abs(bytes)
   const fmt = (v: number, unit: string) =>
     `${v.toLocaleString(intlLocale(locale), { maximumFractionDigits: 1 })} ${unit}`
-  if (abs < 1_000) return fmt(bytes, locale === 'fr' ? 'o' : 'B')
-  if (abs < 1_000_000) return fmt(bytes / 1_000, locale === 'fr' ? 'Ko' : 'KB')
-  if (abs < 1_000_000_000) return fmt(bytes / 1_000_000, locale === 'fr' ? 'Mo' : 'MB')
-  return fmt(bytes / 1_000_000_000, locale === 'fr' ? 'Go' : 'GB')
+  if (abs < 1_000) return fmt(bytes, 'B')
+  if (abs < 1_000_000) return fmt(bytes / 1_000, 'KB')
+  if (abs < 1_000_000_000) return fmt(bytes / 1_000_000, 'MB')
+  return fmt(bytes / 1_000_000_000, 'GB')
 }

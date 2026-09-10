@@ -105,7 +105,6 @@ func TestTemplate_JSONRoundtrip(t *testing.T) {
 		EvalType:        EvalThreshold,
 		ModeFilter:      "universal",
 		LabelEN:         "Stay sharp",
-		LabelFR:         "Reste affûté",
 		NormalTarget:    1.10,
 		HeroicTarget:    1.35,
 		LegendaryTarget: 1.60,
@@ -121,9 +120,7 @@ func TestPresetArc_JSONRoundtrip(t *testing.T) {
 		ID:            "halo_infinite.slayer",
 		TitleSlug:     "halo_infinite",
 		TitleEN:       "The Slayer",
-		TitleFR:       "Le Slayer",
 		DescriptionEN: "Become the force",
-		DescriptionFR: "Deviens la force",
 		SchemaVersion: 1,
 		UpdatedAt:     time.Now().UTC().Truncate(time.Second),
 		Steps: []PresetArcStep{

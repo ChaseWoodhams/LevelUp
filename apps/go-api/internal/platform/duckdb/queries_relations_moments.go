@@ -124,7 +124,7 @@ recent AS (
         COALESCE(d.kills_on_rival, 0)  AS kills_on_rival,
         COALESCE(d.deaths_by_rival, 0) AS deaths_by_rival,
         COALESCE(r.pair_name, '')               AS mode,
-        COALESCE(r.map_name_fr, r.map_name, '') AS map_name
+        COALESCE(r.map_name, '') AS map_name
     FROM match_registry r
     JOIN match_participants p1 ON r.match_id = p1.match_id AND p1.xuid = ?
     JOIN match_participants p2 ON r.match_id = p2.match_id AND p2.xuid = ?

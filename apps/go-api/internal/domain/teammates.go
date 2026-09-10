@@ -18,8 +18,6 @@ type TeammatesQueryRequest struct {
 	// Multi-sessions : l'union des labels sélectionnés est appliquée côté service.
 	PickedSoloSessions  []string `json:"picked_solo_session_labels,omitempty"`
 	PickedSquadSessions []string `json:"picked_squad_session_labels,omitempty"`
-	// Locale de l'utilisateur (ex. "fr", "en") pour les libellés localisés.
-	Locale string `json:"locale,omitempty"`
 	// FilterExactComposition restreint la population aux matchs où AUCUN autre
 	// coéquipier connu (hors sélection) n'était sur l'équipe du joueur principal.
 	//

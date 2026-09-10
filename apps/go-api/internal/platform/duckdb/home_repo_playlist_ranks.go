@@ -451,15 +451,6 @@ func splitCSV(s string) []string {
 
 // resolvePlaylistNameForLocale retourne le nom de playlist adapté à la locale.
 // Pour "en*" → préfère l'anglais ; sinon → préfère le français.
-func resolvePlaylistNameForLocale(locale, fr, en string) string {
-	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(locale)), "en") {
-		if strings.TrimSpace(en) != "" {
-			return en
-		}
-		return fr
-	}
-	if strings.TrimSpace(fr) != "" {
-		return fr
-	}
-	return en
+func resolvePlaylistNameForLocale(_ string, _ string, en string) string {
+	return strings.TrimSpace(en)
 }

@@ -155,9 +155,9 @@ type Template struct {
 	ModeFilter  string     `json:"mode_filter"` // "universal" | "pvp" | "ranked" | "pve"
 
 	LabelEN       string `json:"label_en"`
-	LabelFR       string `json:"label_fr"`
+	LabelFR       string `json:"-"`
 	DescriptionEN string `json:"description_en,omitempty"`
-	DescriptionFR string `json:"description_fr,omitempty"`
+	DescriptionFR string `json:"-"`
 
 	NormalTarget    float64 `json:"normal_target"`
 	HeroicTarget    float64 `json:"heroic_target"`
@@ -212,9 +212,9 @@ type PresetArc struct {
 	ID            string          `json:"id"`
 	TitleSlug     string          `json:"title_slug"`
 	TitleEN       string          `json:"title_en"`
-	TitleFR       string          `json:"title_fr"`
+	TitleFR       string          `json:"-"`
 	DescriptionEN string          `json:"description_en,omitempty"`
-	DescriptionFR string          `json:"description_fr,omitempty"`
+	DescriptionFR string          `json:"-"`
 	SchemaVersion int             `json:"schema_version"`
 	UpdatedAt     time.Time       `json:"updated_at"`
 	Steps         []PresetArcStep `json:"steps,omitempty"` // hydraté à la demande
@@ -298,7 +298,7 @@ type SquadChallengeParticipant struct {
 // embarqué (JSON aplati) : la vue est un sur-ensemble strict de SquadChallenge.
 type SquadChallengeView struct {
 	SquadChallenge
-	LabelFR string `json:"label_fr,omitempty"`
+	LabelFR string `json:"-"`
 	LabelEN string `json:"label_en,omitempty"`
 	// Expired : expires_at dépassé (comparé à l'horloge canonique UTC du service).
 	// Le défi reste listé (le membre peut le voir et le supprimer) mais l'UI le

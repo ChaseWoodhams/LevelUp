@@ -345,21 +345,11 @@ func pickAssetNameByPreferredLang(langs map[string]string, preferredLangs []stri
 	return ""
 }
 
-// PreferredLangsForLocale retourne l'ordre de préférence linguistique standard
-// pour une locale UI courte (ex. "fr" → ["fr-FR","fr","en-US","en"]).
-// Centralise la convention pour que tous les callers (match-view, home,
-// citations…) utilisent la même cascade.
-func PreferredLangsForLocale(locale string) []string {
-	switch strings.ToLower(strings.TrimSpace(locale)) {
-	case "fr", "fr-fr", "fr_fr":
-		return []string{LangCodeFR, "fr", LangCodeEN, "en"}
-	case "en", "en-us", "en_us":
-		return []string{LangCodeEN, "en", LangCodeFR, "fr"}
-	default:
-		// Locale inconnue : préférence par défaut FR (le projet est FR-first),
-		// puis EN, puis n'importe quoi.
-		return []string{LangCodeFR, "fr", LangCodeEN, "en"}
-	}
+// PreferredAssetLanguages returns the English asset lookup order used by all
+// repositories. Historical localized rows remain readable, but active reads
+// and new ingestion use the canonical English entries.
+func PreferredAssetLanguages() []string {
+	return []string{LangCodeEN, "en"}
 }
 
 // UpsertMapImageRegistry insère ou met à jour une entrée dans map_images_registry.

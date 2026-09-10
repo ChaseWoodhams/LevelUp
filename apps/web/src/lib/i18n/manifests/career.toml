@@ -15,535 +15,413 @@
 # ─── Header & navigation ────────────────────────────────────────────────────
 
 [career.tabs.progression]
-fr = "Progression"
 en = "Progression"
 
 [career.tabs.citations]
-fr = "Citations"
 en = "Citations"
 
 [career.tabs.season_pass]
-fr = "Pass saisonnier"
 en = "Season pass"
 
 # ─── Summary card ───────────────────────────────────────────────────────────
 
 [career.summary.rank_label]
-fr = "Rang"
 en = "Rank"
 
 [career.summary.xp_total]
-fr = "XP total"
 en = "Total XP"
 
 [career.summary.xp_to_next]
-fr = "Vers le prochain rang"
 en = "To next rank"
 
 [career.summary.estimated_rank_cap]
-fr = "Atteinte rang max estimée"
 en = "Estimated rank cap date"
 
 [career.summary.estimated_hero]
-fr = "Atteinte du rang max estimée"
 en = "Estimated max rank date"
 
 [career.summary.xp_next_rank]
-fr = "XP prochain rang"
 en = "XP next rank"
 
 [career.summary.xp_remaining]
-fr = "XP restante"
 en = "XP remaining"
 
 [career.summary.rank_position]
-fr = "Rang"
 en = "Rank"
 
 [career.summary.next_rank]
-fr = "Prochain rang"
 en = "Next rank"
 
 [career.summary.max_rank_reached]
-fr = "Rang maximum atteint"
 en = "Max rank reached"
 
 # ─── Charts (titres + axes) ────────────────────────────────────────────────
 
 [career.charts.rank_progress]
-fr = "Progression du rang"
 en = "Rank progress"
 
 # Libellé « progression vers le rang max » avec le NOM du rang sommet interpolé
 # ({rank} = « Héros » Halo Infinite, « SR 152 » Halo 5, résolu par le titre). Le
 # vocabulaire du rang max n'est jamais codé en dur : il vient du payload/catalogue.
 [career.charts.max_rank_progress]
-fr = "Progression vers {rank}"
 en = "Progress to {rank}"
 
 # Repli générique du nom de rang max quand la source ne le fournit pas (titre sans
 # catalogue de rangs, dégradation) — interpolé dans max_rank_progress.
 [career.charts.max_rank_generic]
-fr = "le rang max"
 en = "max rank"
 
 [career.charts.xp_history_title]
-fr = "Historique XP"
 en = "XP history"
 
 [career.charts.xp_history_axis_y]
-fr = "XP cumulé"
 en = "Cumulative XP"
 
 # Libellés courts du type de courbe dans le tooltip XP (real/estimated/optimistic).
 # `proj-normal` n'a pas d'entrée ici : son libellé est le nom du rang max résolu
 # dynamiquement (title-agnostic, cf. max_rank_generic) — jamais ces 3 clés.
 [career.charts.xp_type_real]
-fr = "réel"
 en = "actual"
 
 [career.charts.xp_type_estimated]
-fr = "estimé"
 en = "estimated"
 
 [career.charts.xp_type_optimistic]
-fr = "optimiste"
 en = "optimistic"
 
 [career.charts.lusr_rating_title]
-fr = "Rating LUSR"
 en = "LUSR rating"
 
 [career.charts.lusr_rating_axis_y]
-fr = "LUSR"
 en = "LUSR"
 
 [career.charts.placeholder_unavailable]
-fr = "Graphique indisponible"
 en = "Chart unavailable"
 
 [career.charts.placeholder_description]
-fr = "La vue carrière n'a renvoyé aucune donnée exploitable pour cette section."
 en = "The career view returned no exploitable data for this section."
 
 # ─── Top matches ────────────────────────────────────────────────────────────
 
 [career.top_matches.section_title]
-fr = "Meilleurs matchs récents"
 en = "Recent best matches"
 
 [career.top_matches.see_all]
-fr = "Voir tous les top matchs"
 en = "View all top matches"
 
 [career.top_matches.empty_title]
-fr = "Top matchs indisponibles"
 en = "Top matches unavailable"
 
 [career.top_matches.empty_description]
-fr = "Aucun match distinctif n'a été calculé pour cette page de carrière."
 en = "No distinctive match was computed for this career page."
 
 [career.top_matches.col_match]
-fr = "Match"
 en = "Match"
 
 [career.top_matches.col_kda]
-fr = "K/D/A"
 en = "K/D/A"
 
 [career.top_matches.col_kd]
-fr = "K/D"
 en = "K/D"
 
 [career.top_matches.col_outcome]
-fr = "Résultat"
 en = "Outcome"
 
 # ─── Encounters (Némésis / Souffre-douleurs) ───────────────────────────────
 
 [career.encounters.section_title]
-fr = "Rencontres fréquentes"
 en = "Frequent encounters"
 
 [career.encounters.col_opponent]
-fr = "Adversaire"
 en = "Opponent"
 
 [career.encounters.col_count]
-fr = "Matchs"
 en = "Matches"
 
 [career.encounters.col_winrate]
-fr = "Taux de victoire"
 en = "Win rate"
 
 [career.encounters.col_last_seen]
-fr = "Dernier match"
 en = "Last seen"
 
 # ─── Citations onglet ──────────────────────────────────────────────────────
 
 [career.citations.section_total]
-fr = "Citations totales"
 en = "Total citations"
 
 [career.citations.section_unique_types]
-fr = "Types uniques"
 en = "Unique types"
 
 [career.citations.distribution_title]
-fr = "Distribution des citations"
 en = "Citation distribution"
 
 # ─── États transverses ─────────────────────────────────────────────────────
 
 [career.empty.no_data]
-fr = "Aucune donnée disponible"
 en = "No data available"
 
 [career.errors.load_failed]
-fr = "Erreur lors du chargement de la carrière"
 en = "Failed to load career data"
 
 [career.errors.retry]
-fr = "Réessayer"
 en = "Retry"
 
 [career.errors.loading_progression]
-fr = "Chargement de la progression…"
 en = "Loading progression…"
 
 [career.errors.load_progression_failed]
-fr = "Erreur lors du chargement de la progression."
 en = "Error loading progression."
 
 # ─── Gauges (titres des charts career.01–04) ──────────────────────────────
 
 [career.charts.rank_gauge_title]
-fr = "Progression vers le prochain rang"
 en = "Progress to next rank"
 
 [career.charts.hero_gauge_title]
-fr = "Progression vers le rang max"
 en = "Progress to max rank"
 
 [career.charts.lusr_evolution_title]
-fr = "Évolution LUSR / CSR"
 en = "LUSR / CSR evolution"
 
 # ─── LUSR playlist groups (1 courbe / 1 card par groupe) ─────────────────
 
 [career.lusr.group.arena]
-fr = "Arène"
 en = "Arena"
 
 [career.lusr.group.btb]
-fr = "Grand combat"
 en = "Big Team Battle"
 
 [career.lusr.group.fun]
-fr = "Social"
 en = "Social"
 
 [career.lusr.group.ranked]
-fr = "Classé"
 en = "Ranked"
 
 # ─── LUSR empty state ─────────────────────────────────────────────────────
 
 [career.lusr.no_data_title]
-fr = "Aucun rating LUSR disponible"
 en = "No LUSR rating available"
 
 # ─── Section Matchs marquants (15 best + 15 worst, format Explorer) ─────────
 
 [career.highlight_matches.section_title]
-fr = "Matchs marquants"
 en = "Highlight matches"
 
 [career.highlight_matches.tab_best]
-fr = "Meilleures performances"
 en = "Best performances"
 
 [career.highlight_matches.tab_worst]
-fr = "Pires performances"
 en = "Worst performances"
 
 [career.highlight_matches.empty]
-fr = "Aucun match marquant calculable pour le moment."
 en = "No highlight match computed yet."
 
 [career.highlight_matches.filter_experience]
-fr = "Expérience"
 en = "Experience"
 
 [career.highlight_matches.filter_seasons]
-fr = "Saisons"
 en = "Seasons"
 
 [career.highlight_matches.filter_modes]
-fr = "Modes"
 en = "Modes"
 
 [career.highlight_matches.filter_playlists]
-fr = "Sélections"
 en = "Playlists"
 
 [career.highlight_matches.reset_filters]
-fr = "Réinitialiser"
 en = "Reset"
 
 [career.highlight_matches.experience_all]
-fr = "Toutes"
 en = "All"
 
 [career.highlight_matches.experience_ranked]
-fr = "Classé"
 en = "Ranked"
 
 [career.highlight_matches.experience_unranked]
-fr = "Non classé"
 en = "Unranked"
 
 # ─── Section Joueurs les plus croisés (hors amis) ───────────────────────────
 
 [career.top_encounters.section_title]
-fr = "Joueurs les plus croisés"
 en = "Most encountered players"
 
 [career.top_encounters.section_hint]
-fr = "Hors amis configurés"
 en = "Excluding configured friends"
 
 [career.top_encounters.empty]
-fr = "Aucun joueur récurrent rencontré."
 en = "No recurring encounters yet."
 
 # ─── Section Top némésis / Top souffre-douleur ──────────────────────────────
 
 [career.rivals.section_title]
-fr = "Rivalités"
 en = "Rivalries"
 
 [career.rivals.nemesis_title]
-fr = "Top némésis"
 en = "Top nemeses"
 
 [career.rivals.victims_title]
-fr = "Top souffre-douleur"
 en = "Top victims"
 
 [career.rivals.col_rank]
-fr = "#"
 en = "#"
 
 [career.rivals.col_player]
-fr = "Joueur"
 en = "Player"
 
 [career.rivals.col_frags]
-fr = "Frags"
 en = "Kills"
 
 [career.rivals.col_deaths]
-fr = "Morts"
 en = "Deaths"
 
 [career.rivals.col_ratio]
-fr = "Ratio"
 en = "Ratio"
 
 [career.rivals.col_matches]
-fr = "Matchs"
 en = "Matches"
 
 [career.rivals.empty]
-fr = "Pas encore assez de duels enregistrés."
 en = "Not enough duels recorded yet."
 
 [career.lusr.no_data_description]
-fr = "Aucun checkpoint LUSR n'a été enregistré pour ce joueur."
 en = "No LUSR checkpoint recorded for this player."
 
 # ─── LUSR chain labels (clés = valeurs de playlist_group en DB) ───────────
 
 [career.lusr.chain.arena_slayer]
-fr = "Social · Assassin"
 en = "Social · Slayer"
 
 [career.lusr.chain.arena_objectif]
-fr = "Social · Objectif"
 en = "Social · Objective"
 
 [career.lusr.chain.btb]
-fr = "Grande Équipe"
 en = "Big Team Battle"
 
 [career.lusr.chain.chaos]
-fr = "Chaos"
 en = "Chaos"
 
 [career.lusr.chain.h5_arena]
-fr = "Arène"
 en = "Arena"
 
 # ─── Progression tab ──────────────────────────────────────────────────────
 
 [career.empty.progression_unavailable]
-fr = "Données de progression indisponibles"
 en = "Progression data unavailable"
 
 [career.empty.no_response_description]
-fr = "Aucune réponse exploitable n'a été renvoyée pour cette page."
 en = "No exploitable response returned for this page."
 
 # ─── Ranking block (CareerRankingBlock) ──────────────────────────────────
 
 [career.ranking.title]
-fr = "Classements"
 en = "Rankings"
 
 [career.ranking.tooltip]
-fr = "CSR : classement officiel Halo Waypoint par sélection classée. LUSR : rating local calculé depuis les matchs synchés."
 en = "CSR: official Halo Waypoint ranking per ranked playlist. LUSR: local rating calculated from synced matches."
 
 [career.ranking.csr_section]
-fr = "CSR"
 en = "CSR"
 
 [career.ranking.lusr_section]
-fr = "LUSR"
 en = "LUSR"
 
 [career.ranking.lusr_tooltip]
-fr = "Le LUSR (LevelUp Skill Rating) est calculé localement depuis les résultats récents. Indépendant du CSR officiel et de la saison."
 en = "LUSR (LevelUp Skill Rating) is calculated locally from recent results. Independent from the official CSR and from the season."
 
 [career.ranking.lusr_cumulative]
-fr = "Cumulatif · hors saison"
 en = "Cumulative · season-independent"
 
 [career.ranking.season_label]
-fr = "Saison"
 en = "Season"
 
 [career.ranking.csr_no_data_title]
-fr = "Pas de données CSR"
 en = "No CSR data"
 
 [career.ranking.csr_no_data_description]
-fr = "Lance une synchronisation pour récupérer tes classements en partie classée."
 en = "Run a sync to retrieve your ranked standings."
 
 [career.ranking.lusr_no_data_title]
-fr = "Pas de données LUSR"
 en = "No LUSR data"
 
 [career.ranking.lusr_no_data_description]
-fr = "Aucun checkpoint LUSR disponible pour ce joueur."
 en = "No LUSR checkpoint available for this player."
 
 [career.ranking.placement]
-fr = "En placement"
 en = "In placement"
 
 [career.ranking.unranked]
-fr = "Non classé"
 en = "Unranked"
 
 [career.ranking.vs_prev_season]
-fr = "Évolution vs saison précédente"
 en = "Change vs previous season"
 
 # ─── Encounters (table additional columns) ──────────────────────────────────
 
 [career.encounters.col_player]
-fr = "Joueur"
 en = "Player"
 
 [career.encounters.col_as_teammate]
-fr = "En équipe"
 en = "As teammate"
 
 [career.encounters.col_as_enemy]
-fr = "Adverse"
 en = "As enemy"
 
 # ─── Tooltips d'en-tête (V72-04, icône ⓘ) ────────────────────────────────────
 
 [career.encounters.col_count_tooltip]
-fr = "Nombre total de matchs joués avec ce joueur, alliés et adversaires confondus."
 en = "Total matches played with this player, allies and enemies combined."
 
 [career.encounters.col_as_teammate_tooltip]
-fr = "Nombre de matchs où ce joueur était dans la même équipe."
 en = "Matches where this player was on the same team."
 
 [career.encounters.col_as_enemy_tooltip]
-fr = "Nombre de matchs où ce joueur était dans l'équipe adverse."
 en = "Matches where this player was on the enemy team."
 
 [career.encounters.col_avg_kda_tooltip]
-fr = "FDA moyen de ce joueur sur les matchs communs (impact par match, pas frags/morts)."
 en = "This player's average KDA across shared matches (per-match impact, not kills/deaths)."
 
 [career.encounters.players_suffix]
-fr = "joueurs"
 en = "players"
 
 [career.encounters.loading]
-fr = "Chargement…"
 en = "Loading…"
 
 [career.encounters.empty]
-fr = "Aucune rencontre enregistrée."
 en = "No encounter recorded."
 
 # ─── Compare action ────────────────────────────────────────────────────────
 
 [career.actions.compare]
-fr = "Comparer"
 en = "Compare"
 
 # ─── Top matches (table columns) ────────────────────────────────────────────
 
 [career.top_matches.col_index]
-fr = "#"
 en = "#"
 
 [career.top_matches.col_waypoint_aria]
-fr = "Ouvrir sur Halo Waypoint"
 en = "Open on Halo Waypoint"
 
 [career.top_matches.col_date]
-fr = "Date"
 en = "Date"
 
 [career.top_matches.col_map_mode]
-fr = "Carte / Mode"
 en = "Map / Mode"
 
 [career.top_matches.col_kills_short]
-fr = "K"
 en = "K"
 
 [career.top_matches.col_deaths_short]
-fr = "D"
 en = "D"
 
 [career.top_matches.col_score]
-fr = "Score"
 en = "Score"
 
 [career.top_matches.default_title_best]
-fr = "Meilleurs matchs"
 en = "Best matches"
 
 [career.top_matches.default_title_worst]
-fr = "Pires matchs"
 en = "Worst matches"
 
 [career.top_matches.default_title_neutral]
-fr = "Top matchs"
 en = "Top matches"

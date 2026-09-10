@@ -45,7 +45,7 @@ describe('NavL1', () => {
     useAppShellStore.setState({
       currentPlayer: { player_slug: 'test-player', gamertag: 'TestPlayer' } as unknown as ReturnType<typeof useAppShellStore.getState>['currentPlayer'],
       availablePlayers: [{ player_slug: 'test-player', gamertag: 'TestPlayer' }] as unknown as ReturnType<typeof useAppShellStore.getState>['availablePlayers'],
-      locale: 'fr',
+      locale: 'en',
       authMode: 'none',
       isAdmin: false,
       // Baseline fail-open : titre courant introuvable dans availableTitles → toutes

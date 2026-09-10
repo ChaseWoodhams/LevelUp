@@ -2,7 +2,7 @@
  * CareerHighlightMatchesSection — section "Matchs marquants" de la page Carrière.
  *
  * Filtres locaux à la section (state non synchronisé avec le store global) :
- *  - Expérience : single-select Tous / Classé / Non classé
+ *  - Expérience : single-select Tous / Classé / Unranked
  *  - Saisons    : multi-select (réutilise MultiSelectFilter de l'Explorer)
  *
  * Cascade côté backend : les counts par option respectent l'autre filtre actif

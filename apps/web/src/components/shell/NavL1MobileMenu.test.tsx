@@ -32,7 +32,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-// Libellés référencés par clé i18n (résolus au rendu) — locale 'fr' fixée dans
+// Libellés référencés par clé i18n (résolus au rendu) — locale 'en' fixée dans
 // beforeEach ⇒ 'Accueil' / 'Solo' / 'Sessions' rendus. Les `to` sont des templates
 // de route typés (title-scoped) ; le mock de Link les résout en URL concrète.
 const SECTIONS: L1Section[] = [
@@ -70,7 +70,7 @@ function setup(pathname = '/t/halo_infinite/players/test-player/home') {
 
 describe('NavL1MobileMenu', () => {
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   it('affiche le bouton hamburger', () => {

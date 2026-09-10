@@ -50,10 +50,9 @@ export function useLeaderboardCatalog(playerSlug: string) {
   // Locale dans la clé : à la bascule de langue, la clé change → TanStack refetch
   // le catalogue (display_name saisons/playlists relocalisés côté backend). Remplace
   // l'ex-invalidation ciblée du layout titre (clé = invalidation).
-  const locale = useAppShellStore((s) => s.locale)
   const titleSlug = useAppShellStore((s) => s.currentTitleSlug)
   return useQuery<LeaderboardCatalog>({
-    queryKey: queryKeys.leaderboardCatalog(playerSlug, titleSlug, locale),
+    queryKey: queryKeys.leaderboardCatalog(playerSlug, titleSlug),
     queryFn: () =>
       api.get<LeaderboardCatalog>(`/players/${playerSlug}/pages/leaderboard/catalog`),
     enabled: !!playerSlug,

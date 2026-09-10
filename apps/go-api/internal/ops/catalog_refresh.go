@@ -198,53 +198,30 @@ func refreshGameVariantsCatalog(ctx context.Context, metadataDB, sharedDB *sql.D
 	return n, rows.Err()
 }
 
-// refreshPairsCatalog : map_mode_pair_definitions + pair_mode_label_translations
-// depuis match_registry (ART-safe). Tolère l'absence de pair_name_fr.
+// refreshPairsCatalog refreshes pair definitions and their English labels from
+// match_registry using the append/retry-safe write path.
 func refreshPairsCatalog(ctx context.Context, metadataDB, sharedDB *sql.DB, titleSlug string) (int, error) {
-	const withFR = `
+	const query = `
 		SELECT pair_id,
 			COALESCE(MAX(pair_version_id) FILTER (WHERE pair_version_id IS NOT NULL AND pair_version_id != ''), '') AS version_id,
 			FIRST(pair_name    ORDER BY start_time DESC NULLS LAST) AS name,
-			FIRST(pair_name_fr ORDER BY start_time DESC NULLS LAST) AS name_fr,
 			FIRST(map_id          ORDER BY start_time DESC NULLS LAST) AS map_id,
 			FIRST(game_variant_id ORDER BY start_time DESC NULLS LAST) AS game_variant_id,
 			FIRST(mode_category   ORDER BY start_time DESC NULLS LAST) AS mode_category
 		FROM match_registry
 		WHERE pair_id IS NOT NULL AND pair_id != '' AND pair_name IS NOT NULL
 		GROUP BY pair_id`
-	const withoutFR = `
-		SELECT pair_id,
-			COALESCE(MAX(pair_version_id) FILTER (WHERE pair_version_id IS NOT NULL AND pair_version_id != ''), '') AS version_id,
-			FIRST(pair_name   ORDER BY start_time DESC NULLS LAST) AS name,
-			FIRST(map_id          ORDER BY start_time DESC NULLS LAST) AS map_id,
-			FIRST(game_variant_id ORDER BY start_time DESC NULLS LAST) AS game_variant_id,
-			FIRST(mode_category   ORDER BY start_time DESC NULLS LAST) AS mode_category
-		FROM match_registry
-		WHERE pair_id IS NOT NULL AND pair_id != '' AND pair_name IS NOT NULL
-		GROUP BY pair_id`
-
-	hasFR := true
-	rows, err := sharedDB.QueryContext(ctx, withFR)
+	rows, err := sharedDB.QueryContext(ctx, query)
 	if err != nil {
-		hasFR = false
-		slog.WarnContext(ctx, "pair_name_fr absent, fallback sans FR", "err", err)
-		if rows, err = sharedDB.QueryContext(ctx, withoutFR); err != nil {
-			return 0, fmt.Errorf("query pairs (fallback): %w", err)
-		}
+		return 0, fmt.Errorf("query pairs: %w", err)
 	}
 	defer rows.Close()
 	n := 0
 	for rows.Next() {
 		var id, versionID, name string
-		var nameFR, mapID, gameVariantID, modeCategory sql.NullString
-		var scanErr error
-		if hasFR {
-			scanErr = rows.Scan(&id, &versionID, &name, &nameFR, &mapID, &gameVariantID, &modeCategory)
-		} else {
-			scanErr = rows.Scan(&id, &versionID, &name, &mapID, &gameVariantID, &modeCategory)
-		}
-		if scanErr != nil {
-			return n, fmt.Errorf("scan pair: %w", scanErr)
+		var mapID, gameVariantID, modeCategory sql.NullString
+		if err := rows.Scan(&id, &versionID, &name, &mapID, &gameVariantID, &modeCategory); err != nil {
+			return n, fmt.Errorf("scan pair: %w", err)
 		}
 		if err := upsertPairDefinition(ctx, metadataDB, titleSlug, id, versionID, name, mapID.String, gameVariantID.String, modeCategory.String); err != nil {
 			slog.WarnContext(ctx, "upsert pair", "id", id, "err", err)
@@ -254,11 +231,6 @@ func refreshPairsCatalog(ctx context.Context, metadataDB, sharedDB *sql.DB, titl
 		if name != "" {
 			if lblErr := upsertPairLabel(ctx, metadataDB, titleSlug, id, "en", name); lblErr != nil {
 				slog.WarnContext(ctx, "upsert pair label (en)", "id", id, "err", lblErr)
-			}
-		}
-		if nameFR.Valid && nameFR.String != "" {
-			if lblErr := upsertPairLabel(ctx, metadataDB, titleSlug, id, "fr", nameFR.String); lblErr != nil {
-				slog.WarnContext(ctx, "upsert pair label (fr)", "id", id, "err", lblErr)
 			}
 		}
 	}

@@ -30,7 +30,7 @@ interface Props {
 }
 
 /** Libellé i18n d'une cause de rejet. */
-function causeLabel(cause: string, t: (typeof REPLAY_TEXT)['fr']): string {
+function causeLabel(cause: string, t: (typeof REPLAY_TEXT)['en']): string {
   switch (cause) {
     case 'noSlot':
       return t.causeNoSlot
@@ -44,11 +44,11 @@ function causeLabel(cause: string, t: (typeof REPLAY_TEXT)['fr']): string {
 }
 
 /** Libellé i18n d'un calque. */
-function layerLabel(key: string, t: (typeof REPLAY_TEXT)['fr']): string {
+function layerLabel(key: string, t: (typeof REPLAY_TEXT)['en']): string {
   return key === 'shots' ? t.layerShots : t.layerGrenades
 }
 
-function LayerRow({ s, t }: { s: LayerSummary; t: (typeof REPLAY_TEXT)['fr'] }) {
+function LayerRow({ s, t }: { s: LayerSummary; t: (typeof REPLAY_TEXT)['en'] }) {
   // Le taux colore le RAPPORT, jamais le nombre seul : c'est le rapport qui se juge.
   const token = s.nominal ? 'success' : 'warning'
   return (

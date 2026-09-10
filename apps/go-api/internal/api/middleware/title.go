@@ -10,7 +10,6 @@ package middleware
 import (
 	"log/slog"
 	"net/http"
-	"strings"
 
 	"levelup/go-api/internal/ctxkeys"
 	titlePkg "levelup/go-api/internal/domain/title"
@@ -44,16 +43,10 @@ func TitleExtractor(registry *titlePkg.Registry) func(http.Handler) http.Handler
 	}
 }
 
-// resolveLocale lit la locale UI depuis le header X-LevelUp-Locale (posé par le
-// front sur toutes les requêtes, cf. setApiLocale). Normalise vers "fr"/"en" ;
-// valeur vide ou inconnue → "fr" (cohérent avec le défaut de ctxkeys.Locale).
+// resolveLocale keeps the request context compatible with older service seams.
+// The application now has one supported UI locale.
 func resolveLocale(r *http.Request) string {
-	switch strings.ToLower(strings.TrimSpace(r.Header.Get("X-LevelUp-Locale"))) {
-	case "en", "en-us", "en_us":
-		return "en"
-	default:
-		return "fr"
-	}
+	return "en"
 }
 
 // resolveTitleSlug détermine le titre courant pour la requête.

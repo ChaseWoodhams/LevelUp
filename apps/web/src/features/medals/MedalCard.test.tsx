@@ -30,7 +30,7 @@ function medal(over: Partial<MedalSummaryItem>): MedalSummaryItem {
 
 describe('MedalCard', () => {
   it('count===0 : compteur en token destructive (rouge) + aria « jamais obtenue » + icône estompée', () => {
-    const { container } = render(<MedalCard item={medal({ count: 0, difficulty_key: 'heroic' })} locale="fr" />)
+    const { container } = render(<MedalCard item={medal({ count: 0, difficulty_key: 'heroic' })} locale="en" />)
     const counter = screen.getByText('0')
     expect(counter.className).toContain('text-destructive')
     expect(counter.className).not.toContain('text-foreground')
@@ -42,7 +42,7 @@ describe('MedalCard', () => {
 
   it('count>0 : compteur en token foreground (pas destructive) + aria « obtenue N fois »', () => {
     const { container } = render(
-      <MedalCard item={medal({ count: 5, difficulty_key: 'legendary', name: 'Assassin' })} locale="fr" />,
+      <MedalCard item={medal({ count: 5, difficulty_key: 'legendary', name: 'Assassin' })} locale="en" />,
     )
     const counter = screen.getByText('5')
     expect(counter.className).toContain('text-foreground')
@@ -52,7 +52,7 @@ describe('MedalCard', () => {
   })
 
   it('Halo 5 (difficulty_key numérique) : AUCUNE pastille de rareté factice', () => {
-    render(<MedalCard item={medal({ count: 3, difficulty_key: '2', name: 'Assassinat' })} locale="fr" />)
+    render(<MedalCard item={medal({ count: 3, difficulty_key: '2', name: 'Assassinat' })} locale="en" />)
     expect(screen.getByText('3')).toBeTruthy()
     expect(screen.queryByText('Héroïque')).toBeNull()
     expect(screen.queryByText('Légendaire')).toBeNull()

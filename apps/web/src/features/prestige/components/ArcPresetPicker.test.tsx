@@ -31,7 +31,6 @@ function preset(over: Partial<PresetArc>): PresetArc {
     id: 'p1',
     title_slug: 'halo_infinite',
     title_en: 'Spartan Ascension',
-    title_fr: 'Ascension du Spartan',
     schema_version: 1,
     updated_at: '2026-01-01T00:00:00Z',
     steps: [
@@ -53,7 +52,7 @@ describe('ArcPresetPicker', () => {
 
   it('affiche les presets avec titre FR et aperçu du nombre d\'objectifs', () => {
     mockPresets.current = [preset({})]
-    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="fr" onClose={vi.fn()} />)
+    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
 
     expect(screen.getByText('Ascension du Spartan')).toBeInTheDocument()
     expect(screen.getByText(/2 objectifs/i)).toBeInTheDocument()
@@ -61,7 +60,7 @@ describe('ArcPresetPicker', () => {
 
   it('adopte un preset au clic sur « Adopter »', () => {
     mockPresets.current = [preset({ id: 'p-kda' })]
-    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="fr" onClose={vi.fn()} />)
+    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Adopter' }))
     expect(adoptMutate).toHaveBeenCalledWith('p-kda', expect.objectContaining({ onSuccess: expect.any(Function) }))
@@ -69,7 +68,7 @@ describe('ArcPresetPicker', () => {
 
   it('affiche un état vide quand aucun preset', () => {
     mockPresets.current = []
-    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="fr" onClose={vi.fn()} />)
+    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
     expect(screen.getByText(/Aucun preset disponible/i)).toBeInTheDocument()
   })
 

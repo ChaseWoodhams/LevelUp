@@ -38,10 +38,10 @@ function formatMatchDuration(secs: number): string {
   return `${m}m ${s.toString().padStart(2, '0')}s`
 }
 
-function formatMatchDateTime(isoDate: string, timezone: string, locale: Locale): string {
+function formatMatchDateTime(isoDate: string, timezone: string, _locale: Locale): string {
   const date = new Date(isoDate)
   if (isNaN(date.getTime())) return ''
-  const intlLocale = locale === 'en' ? 'en-GB' : 'fr-FR'
+  const intlLocale = 'en-US'
   return new Intl.DateTimeFormat(intlLocale, {
     timeZone: timezone,
     day: 'numeric',
@@ -52,9 +52,9 @@ function formatMatchDateTime(isoDate: string, timezone: string, locale: Locale):
   }).format(date)
 }
 
-function buildMatchHeading(match: RecentMatchItem, locale: Locale): string {
+function buildMatchHeading(match: RecentMatchItem, _locale: Locale): string {
   const normalizedMode = normalizeModeLabel(match.mode_ui, match.map_ui)
-  const connector = locale === 'en' ? 'on' : 'sur'
+  const connector = 'on'
 
   if (normalizedMode && match.map_ui) {
     return `${normalizedMode} ${connector} ${match.map_ui}`
@@ -63,7 +63,7 @@ function buildMatchHeading(match: RecentMatchItem, locale: Locale): string {
   return normalizedMode ?? match.map_ui ?? match.title
 }
 
-export function MatchCard({ match: m, locale = 'fr', timezone = 'UTC', onClick, onToggleFavorite, favoriteDisabled }: MatchCardProps) {
+export function MatchCard({ match: m, locale = 'en', timezone = 'UTC', onClick, onToggleFavorite, favoriteDisabled }: MatchCardProps) {
   const heading = buildMatchHeading(m, locale)
   const t = (key: CommonManifestKey) => formatMessage(commonManifest, key, locale)
   // KDA NET ((k+a/3)−d) pour les 2 titres (API Infinite / FDA Halo 5), possiblement

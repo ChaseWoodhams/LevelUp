@@ -56,7 +56,7 @@ func (r *MediaRepo) SetMediaMatchAssociation(ctx context.Context, filePath, matc
 	var mapN, pairN sql.NullString
 	if db, release, err := r.pdb.SharedReadDB().Get(ctx); err == nil {
 		_ = db.QueryRowContext(ctx, `
-			SELECT COALESCE(r.map_name_fr, r.map_name), COALESCE(r.pair_name_fr, r.pair_name)
+			SELECT r.map_name, r.pair_name
 			FROM match_registry r WHERE r.match_id = ? LIMIT 1
 		`, matchID).Scan(&mapN, &pairN)
 		release()

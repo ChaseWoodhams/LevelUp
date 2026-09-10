@@ -15,7 +15,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 
 describe('ReauthBanner', () => {
   afterEach(() => {
-    useAppShellStore.setState({ reauthRequired: false, oauthCodeFlowEnabled: false, locale: 'fr' })
+    useAppShellStore.setState({ reauthRequired: false, oauthCodeFlowEnabled: false, locale: 'en' })
     navigateMock.mockReset()
   })
 

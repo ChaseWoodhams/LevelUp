@@ -10,9 +10,9 @@ import (
 // mode se dérive du pair_name SINON du game_variant. Halo 5 n'a pas de pair_name → son
 // mode (game_variant) doit remonter (sinon « aucun mode renseigné », signalement #3).
 func TestEnrichRow_ModeFallbackToGameVariant(t *testing.T) {
-	assassin := "Assassin"
-	// H5 : pas de pair, game_variant FR présent → mode résolu (non vide).
-	h5 := domain.MatchHistoryRawRow{MatchID: "m1", GameVariantNameFR: &assassin}
+	teamSlayer := "Team Slayer"
+	// H5 : pas de pair, game_variant présent → mode résolu (non vide).
+	h5 := domain.MatchHistoryRawRow{MatchID: "m1", GameVariantName: &teamSlayer}
 	if got := enrichRow(h5, nil, rowFormatters{}); got.ModeUI == nil || *got.ModeUI == "" {
 		t.Errorf("H5: mode vide alors que game_variant présent (ModeUI=%v)", got.ModeUI)
 	}
@@ -36,14 +36,14 @@ func TestEnrichRow_ModeFallbackToGameVariant(t *testing.T) {
 // modes) matche sur le game_variant quand le pair est absent (H5) ; le pair prime
 // pour les rows Infinite (non-régression).
 func TestFilterByExplorerModeNames_GameVariantFallback(t *testing.T) {
-	assassin := "Assassin"
+	teamSlayer := "Team Slayer"
 	strongholds := "Strongholds"
 	rows := []domain.MatchHistoryRawRow{
-		{MatchID: "h5", GameVariantNameFR: &assassin}, // pair absent → variant
+		{MatchID: "h5", GameVariantName: &teamSlayer}, // pair absent → variant
 		{MatchID: "inf", PairName: &strongholds},      // pair présent
 	}
 
-	got := filterByExplorerModeNames(rows, []string{"Assassin"})
+	got := filterByExplorerModeNames(rows, []string{"Team Slayer"})
 	if len(got) != 1 || got[0].MatchID != "h5" {
 		t.Errorf("variant fallback: attendu h5, obtenu %v", got)
 	}
@@ -57,10 +57,10 @@ func TestFilterByExplorerModeNames_GameVariantFallback(t *testing.T) {
 // TestComputeExplorerAvailableOptions_GameVariantMode : les facettes modes
 // incluent le game_variant des rows sans pair (H5) — sinon « Modes » resterait vide.
 func TestComputeExplorerAvailableOptions_GameVariantMode(t *testing.T) {
-	assassin := "Assassin"
+	teamSlayer := "Team Slayer"
 	strongholds := "Strongholds"
 	rows := []domain.MatchHistoryRawRow{
-		{MatchID: "h5", GameVariantNameFR: &assassin},
+		{MatchID: "h5", GameVariantName: &teamSlayer},
 		{MatchID: "inf", PairName: &strongholds},
 	}
 
@@ -73,8 +73,8 @@ func TestComputeExplorerAvailableOptions_GameVariantMode(t *testing.T) {
 		}
 		return false
 	}
-	if !hasMode("Assassin") {
-		t.Errorf("facette modes doit inclure 'Assassin' (game_variant H5), obtenu %v", modes)
+	if !hasMode("Team Slayer") {
+		t.Errorf("mode facets must include 'Team Slayer' (H5 game_variant), got %v", modes)
 	}
 	if !hasMode("Strongholds") {
 		t.Errorf("facette modes doit inclure 'Strongholds' (pair Infinite), obtenu %v", modes)

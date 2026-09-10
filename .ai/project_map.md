@@ -15,7 +15,7 @@
 
 > 🧭 **Chantier Go — corpus restructuré** : point d'entrée dans `.ai/go_migration_v2/README.md` ; le corpus historique détaillé reste dans `.ai/go_migration/`.
 
-> 📘 **Onboarding nouveau dev** : `docs/FOUNDATIONS_GUIDE.md` (EN) + `docs/FR/FOUNDATIONS_GUIDE.md` — guide consolidé sur les 4 fondations transverses (canonical types + adapters + i18n manifests + ECharts wrappers). 4 ADRs dans `docs/adr/000{1,2,3,4}.md`.
+> **Onboarding**: docs/FOUNDATIONS_GUIDE.md covers canonical types, adapters, English-only manifests, and ECharts wrappers. See docs/adr/000{1,2,3,4}.md.
 
 ## ⚠️ Limitations Connues
 
@@ -128,7 +128,7 @@ data/
 - `apps/go-api/internal/games/halo_infinite/` : `DataAdapter` (wrap `CareerSource`, projette vers `CareerSnapshot`) + `SemanticAdapter` (wrap `FieldMappingSet`).
 - `apps/go-api/internal/games/synthetic_title_b/` : corpus synthétique de tests d'isolation cross-titres (jamais référencé en prod).
 - `apps/go-api/internal/games/{adapter,resolver}.go` : interfaces `TitleDataAdapter` + `TitleSemanticAdapter` (SRP), `StaticResolver` injecté au boot.
-- `apps/go-api/internal/api/handlers/field_mappings.go` : `GET /api/v1/titles/{slug}/field-mappings?locale=fr` (ETag + Cache-Control), exposé seulement si `MULTI_TITLE_API_ENABLED=true`.
+- apps/go-api/internal/api/handlers/field_mappings.go: GET /api/v1/titles/{slug}/field-mappings (ETag + Cache-Control), exposed only when MULTI_TITLE_API_ENABLED=true.
 - `apps/go-api/internal/api/handlers/multi_title_preview.go` : `GET /api/v1/titles/{slug}/preview/career?xuid=...` — proof-of-concept end-to-end du pipeline canonique avec libellés FR/EN.
 - `config/titles/halo_infinite/mappings/fields.toml` + `config/titles/synthetic_title_b/mappings/fields.toml` : TOML versionnés Git, source de vérité des libellés/format/group.
 - `apps/web/src/lib/i18n/fieldMappings.ts` : hook React `useFieldLabel(key)` + `useFieldMappings()` consommant l'endpoint backend via TanStack Query (staleTime infini), fallback gracieux sur la key.
@@ -314,7 +314,7 @@ data/
 
 > Convention :
 > - `docs/` = documentation EN (publique)
-> - `docs/FR/` = sources FR
+> - The repository has one active English documentation tree.
 > - `docs/archive/` = docs conservées mais non traduites
 
 | Document | Contenu |

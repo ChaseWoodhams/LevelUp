@@ -155,11 +155,11 @@ export function useSquadPresets({
   playerSlug,
   currentPlayerXuid,
   hasLinkedIdentity,
-  locale,
+  locale: _locale,
   selectedRows,
   activeContextLabels,
 }: UseSquadPresetsOptions): UseSquadPresetsResult {
-  const t = SQUAD_PRESETS_STRINGS[locale === 'en' ? 'en' : 'fr']
+  const t = SQUAD_PRESETS_STRINGS['en']
   const [manageMode, setManageMode] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')

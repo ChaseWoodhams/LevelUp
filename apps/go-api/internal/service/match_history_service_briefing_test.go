@@ -29,7 +29,7 @@ func briefingRaw(id string, daysAgo, outcome, kills, deaths, assists int, perf f
 		r.MapNameFR = &mapFR
 	}
 	if pairFR != "" {
-		r.PairNameFR = &pairFR
+		r.PairName = &pairFR
 	}
 	if playlist != "" {
 		r.PlaylistName = &playlist

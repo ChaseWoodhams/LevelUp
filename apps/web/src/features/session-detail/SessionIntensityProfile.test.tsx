@@ -32,7 +32,7 @@ function exploitableRows(n: number): IntensityMatchRow[] {
 }
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 afterEach(() => vi.clearAllMocks())

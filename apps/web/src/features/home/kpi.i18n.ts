@@ -41,8 +41,8 @@ interface KPITextDict {
   kills: (count: number) => string
 }
 
-export function normalizeKPILocale(locale?: string | null): Locale {
-  return locale === 'en' ? 'en' : 'fr'
+export function normalizeKPILocale(_locale?: string | null): Locale {
+  return 'en'
 }
 
 function t(loc: Locale, key: HomeManifestKey): string {

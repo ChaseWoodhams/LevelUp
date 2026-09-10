@@ -73,13 +73,11 @@ export function ExplorerTargetSeasonCSR({ csrs, title, emptyMessage, liveStatus 
         <ul className="flex w-full flex-col divide-y divide-border/40">
           {csrs.map((c) => {
             // tier vide = NON CLASSÉ cette saison (état valide, pas une erreur) :
-            // libellé « Non classé » + badge unranked_0.png. La liste ne contient que
+            // libellé « Unranked » + badge unranked_0.png. La liste ne contient que
             // des playlists avec données → pas de cas « irrécupérable » ici.
             const unranked = c.current.tier.trim() === ''
             const label = unranked
-              ? locale === 'en'
-                ? 'Unranked'
-                : 'Non classé'
+              ? 'Unranked'
               : tierLabel(c.current.tier, c.current.sub_tier, locale)
             // Badge tout à DROITE (après le label). Unranked → unranked_0.png ;
             // classé → badge de rang (fallback unranked_0 si l'image manque).

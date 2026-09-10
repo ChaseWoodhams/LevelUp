@@ -13,7 +13,7 @@ vi.mock('@/lib/damage/effectiveHp', () => ({
 
 // Locale FR fixe (le sélecteur reçoit un state minimal).
 vi.mock('@/stores/appShellStore', () => ({
-  useAppShellStore: (sel: (s: { locale: string }) => unknown) => sel({ locale: 'fr' }),
+  useAppShellStore: (sel: (s: { locale: string }) => unknown) => sel({ locale: 'en' }),
 }))
 
 const kpis: MatchSummaryKpis = {

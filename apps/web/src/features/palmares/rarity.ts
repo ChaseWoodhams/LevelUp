@@ -10,14 +10,6 @@
 
 export type RarityTier = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic'
 
-const RARITY_LABELS_FR: Record<RarityTier, string> = {
-  common: 'Commun',
-  rare: 'Rare',
-  epic: 'Épique',
-  legendary: 'Légendaire',
-  mythic: 'Mythique',
-}
-
 const RARITY_LABELS_EN: Record<RarityTier, string> = {
   common: 'Common',
   rare: 'Rare',
@@ -113,14 +105,10 @@ export function rarityStyle(tier: RarityTier | null): RarityStyle | null {
   return tier == null ? null : RARITY_STYLES[tier]
 }
 
-// preferEN accepte une locale courte ('fr'/'en') OU Intl ('fr-FR'/'en-US') —
+// preferEN accepte une locale courte ('en'/'en') OU Intl ('en-US'/'en-US') —
 // certains appelants (PassContentSummary) passent l'Intl locale.
-function preferEN(locale: string): boolean {
-  return locale.toLowerCase().startsWith('en')
-}
-
-export function rarityLabel(tier: RarityTier, locale: string = 'fr'): string {
-  return preferEN(locale) ? RARITY_LABELS_EN[tier] : RARITY_LABELS_FR[tier]
+export function rarityLabel(tier: RarityTier, _locale: string = 'en'): string {
+  return RARITY_LABELS_EN[tier]
 }
 
 /**
@@ -128,39 +116,6 @@ export function rarityLabel(tier: RarityTier, locale: string = 'fr'): string {
  * Ex: `ArmorCoating` → `Revêtement d'armure`, `WeaponCharm` → `Breloque`.
  * Renvoie le brut si non mappé (lecture acceptable comme fallback).
  */
-const ITEM_TYPE_LABELS_FR: Record<string, string> = {
-  ArmorCoating: "Revêtement d'armure",
-  ArmorHelmet: 'Casque',
-  ArmorHelmetAttachment: 'Accessoire de casque',
-  ArmorChestAttachment: 'Accessoire de torse',
-  ArmorLeftShoulderPad: 'Épaulette gauche',
-  ArmorRightShoulderPad: 'Épaulette droite',
-  ArmorKneePad: 'Genouillère',
-  ArmorHipAttachment: 'Accessoire de hanche',
-  ArmorVisor: 'Visière',
-  ArmorWristAttachment: 'Accessoire de poignet',
-  ArmorGlove: 'Gants',
-  ArmorMythicEffect: 'Effet mythique',
-  WeaponCoating: "Revêtement d'arme",
-  WeaponCharm: 'Breloque',
-  WeaponEmblem: "Emblème d'arme",
-  VehicleCoating: 'Revêtement de véhicule',
-  VehicleEmblem: 'Emblème de véhicule',
-  SpartanEmblem: 'Emblème Spartan',
-  SpartanBackdropImage: "Image d'arrière-plan",
-  SpartanActionPose: "Pose d'action",
-  SpartanVoice: 'Voix Spartan',
-  SpartanBody: 'Corps Spartan',
-  AiTheme: 'Thème IA',
-  AiModel: 'Modèle IA',
-  Currency: 'Monnaie',
-  XpBoost: 'Boost XP',
-  ChallengeSwap: 'Relance défi',
-}
-
-// Miroir EN (termes officiels Halo Infinite). Sans lui, les types d'items du
-// Battle Pass restaient en FR sous UI EN (« Revêtement d'armure » au lieu de
-// « Armor Coating »).
 const ITEM_TYPE_LABELS_EN: Record<string, string> = {
   ArmorCoating: 'Armor Coating',
   ArmorHelmet: 'Helmet',
@@ -218,12 +173,11 @@ export function isArmorItemType(raw?: string | null): boolean {
   return ARMOR_ITEM_TYPES.has(raw.trim())
 }
 
-export function itemTypeLabel(raw?: string | null, locale: string = 'fr'): string | null {
+export function itemTypeLabel(raw?: string | null, _locale: string = 'en'): string | null {
   if (!raw) return null
   const trimmed = raw.trim()
   if (!trimmed) return null
-  const map = preferEN(locale) ? ITEM_TYPE_LABELS_EN : ITEM_TYPE_LABELS_FR
-  if (map[trimmed]) return map[trimmed]
+  if (ITEM_TYPE_LABELS_EN[trimmed]) return ITEM_TYPE_LABELS_EN[trimmed]
   // Fallback : transformer PascalCase en mots espacés ("ArmorVisor" → "Armor visor").
   const spaced = trimmed.replace(/([a-z])([A-Z])/g, '$1 $2')
   return spaced.charAt(0).toUpperCase() + spaced.slice(1).toLowerCase()

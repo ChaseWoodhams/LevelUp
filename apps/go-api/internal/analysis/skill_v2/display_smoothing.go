@@ -97,21 +97,21 @@ func SmoothDisplayedOrdinal(prevOrd, targetOrd, experience int) int {
 	return prevOrd - 1
 }
 
-// FormatTierSubLabel retourne le libellé FR ("Or III", "Onyx", "Non classé")
+// FormatTierSubLabel retourne le libellé FR ("Or III", "Onyx", "Unranked")
 // pour un (tier, sub) déjà résolu — utilisé par le chemin lissé qui dispose
 // directement de la cible affichée, sans repasser par μ.
 func FormatTierSubLabel(tier TierBoundary, sub int) string {
 	if tier.Name == "" {
-		return "Non classé"
+		return "Unranked"
 	}
 	if sub == 0 || tier.SubTiers <= 1 {
-		return tier.NameFR
+		return tier.Name
 	}
 	r, ok := romanSubTier[sub]
 	if !ok {
-		return tier.NameFR
+		return tier.Name
 	}
-	return tier.NameFR + " " + r
+	return tier.Name + " " + r
 }
 
 // mapTierSubToLegacyRating mappe un (tier, sub) résolu vers le rating_value

@@ -42,7 +42,7 @@ function formatMetricValue(
   // NOM de palier à l'affichage. Un titre de rang carrière (déjà localisé côté back)
   // ou tout libellé sans palier connu est renvoyé inchangé par localizeTierLabel.
   if (display) {
-    const loc = text.intlLocale.toLowerCase().startsWith('en') ? 'en' : 'fr'
+    const loc = text.intlLocale.toLowerCase().startsWith('en') ? 'en' : 'en'
     return localizeTierLabel(display, loc) ?? display
   }
   if (typeof value !== 'number') return String(value)
@@ -218,11 +218,11 @@ function isSemanticToken(s: string): s is SemanticToken {
   return s.startsWith('narrative-') || s.startsWith('outcome-') || s.startsWith('perf-')
 }
 
-const ENCOUNTER_BADGE_TOOLTIPS: Record<string, { fr: string; en: string }> = {
-  'narrative.encounter.ally_plus': { fr: 'Allié récurrent : bon taux de victoire ensemble', en: 'Recurring ally: good win rate together' },
-  'narrative.encounter.tough_enemy': { fr: 'Dur à cuire : ratio morts/frags > 2 en ennemi', en: 'Tough nut: death/kill ratio > 2 as enemy' },
-  'narrative.encounter.coriace': { fr: 'Coriace : taux de victoire en ennemi ≤ 35 %', en: 'Tough opponent: win rate vs enemy ≤ 35 %' },
-  'narrative.encounter.ordinal': { fr: 'Total rencontres croisées (allié + ennemi)', en: 'Total cross encounters (ally + enemy)' },
+const ENCOUNTER_BADGE_TOOLTIPS: Record<string, { en: string }> = {
+  'narrative.encounter.ally_plus': { en: 'Recurring ally: good win rate together' },
+  'narrative.encounter.tough_enemy': { en: 'Tough nut: death/kill ratio > 2 as enemy' },
+  'narrative.encounter.coriace': { en: 'Tough opponent: win rate vs enemy ≤ 35 %' },
+  'narrative.encounter.ordinal': { en: 'Total cross encounters (ally + enemy)' },
 }
 
 function EncounterBadgesInline({ badges, locale }: { badges?: MatchEncounterBadge[]; locale: Locale }) {
@@ -234,7 +234,7 @@ function EncounterBadgesInline({ badges, locale }: { badges?: MatchEncounterBadg
         const ordinal = badge.detail && typeof badge.detail['ordinal'] === 'number' ? (badge.detail['ordinal'] as number) : undefined
         const label = ordinal !== undefined ? formatMessage(squadManifest, labelKey, locale, { ordinal }) : formatMessage(squadManifest, labelKey, locale)
         const colorVar = isSemanticToken(badge.color_token) ? tokenVar(badge.color_token as SemanticToken) : undefined
-        const tooltip = ENCOUNTER_BADGE_TOOLTIPS[badge.label_key]?.[locale]
+        const tooltip = ENCOUNTER_BADGE_TOOLTIPS[badge.label_key]?.en
         const badgeEl = <NarrativeBadge label={label} colorVar={colorVar} solid size="md" />
         return tooltip ? (
           <Tooltip key={i} content={tooltip}>{badgeEl}</Tooltip>

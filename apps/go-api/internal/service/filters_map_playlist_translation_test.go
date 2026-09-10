@@ -11,12 +11,11 @@ import (
 // ---------------------------------------------------------------------------
 
 func makeMapRows() []domain.FilterMatchRow {
-	// 4 rows with EN map name == MapNameFR (no FR in DB) → eligible for enrichment
-	// 3 rows with FR map name already set
+	// Rows carry canonical English names. Legacy fields are mirrors only.
 	rows := make([]domain.FilterMatchRow, 0, 7)
 	for i := 0; i < 4; i++ {
 		en := "Aquarius"
-		fr := "Aquarius Bord de mer"
+		fr := en
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:   "m" + string(rune('0'+i)),
 			MapName:   strPtr(en),
@@ -25,7 +24,7 @@ func makeMapRows() []domain.FilterMatchRow {
 	}
 	for i := 0; i < 3; i++ {
 		en := "Recharge"
-		fr := "Station de Recharge"
+		fr := en
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:   "n" + string(rune('0'+i)),
 			MapName:   strPtr(en),
@@ -39,7 +38,7 @@ func makePlaylistRows() []domain.FilterMatchRow {
 	rows := make([]domain.FilterMatchRow, 0, 6)
 	for i := 0; i < 3; i++ {
 		en := "Ranked Arena"
-		fr := "Arène classée"
+		fr := en
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:        "p" + string(rune('0'+i)),
 			PlaylistNameEN: strPtr(en),
@@ -48,7 +47,7 @@ func makePlaylistRows() []domain.FilterMatchRow {
 	}
 	for i := 0; i < 3; i++ {
 		en := "Quick Play"
-		fr := "Jeu rapide"
+		fr := en
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:        "q" + string(rune('0'+i)),
 			PlaylistNameEN: strPtr(en),
@@ -65,14 +64,8 @@ func makePlaylistRows() []domain.FilterMatchRow {
 func TestBuildMapTranslationMap_WithTranslations(t *testing.T) {
 	rows := makeMapRows()
 	tr := buildMapTranslationMap(rows)
-	if len(tr) != 2 {
-		t.Fatalf("expected 2 entries, got %d", len(tr))
-	}
-	if tr["Aquarius"] != "Aquarius Bord de mer" {
-		t.Errorf("expected 'Aquarius Bord de mer', got %q", tr["Aquarius"])
-	}
-	if tr["Recharge"] != "Station de Recharge" {
-		t.Errorf("expected 'Station de Recharge', got %q", tr["Recharge"])
+	if len(tr) != 0 {
+		t.Fatalf("expected no translation entries for English-only rows, got %d", len(tr))
 	}
 }
 
@@ -88,7 +81,7 @@ func TestBuildMapTranslationMap_SameName_NotIncluded(t *testing.T) {
 
 func TestBuildMapTranslationMap_NilMapName(t *testing.T) {
 	rows := []domain.FilterMatchRow{
-		{MatchID: "x1", MapName: nil, MapNameFR: strPtr("Aquarius Bord de mer")},
+		{MatchID: "x1", MapName: nil, MapNameFR: strPtr("Legacy Map")},
 	}
 	tr := buildMapTranslationMap(rows)
 	if len(tr) != 0 {
@@ -103,14 +96,8 @@ func TestBuildMapTranslationMap_NilMapName(t *testing.T) {
 func TestBuildPlaylistTranslationMap_WithTranslations(t *testing.T) {
 	rows := makePlaylistRows()
 	tr := buildPlaylistTranslationMap(rows)
-	if len(tr) != 2 {
-		t.Fatalf("expected 2 entries, got %d", len(tr))
-	}
-	if tr["Ranked Arena"] != "Arène classée" {
-		t.Errorf("expected 'Arène classée', got %q", tr["Ranked Arena"])
-	}
-	if tr["Quick Play"] != "Jeu rapide" {
-		t.Errorf("expected 'Jeu rapide', got %q", tr["Quick Play"])
+	if len(tr) != 0 {
+		t.Fatalf("expected no translation entries for English-only rows, got %d", len(tr))
 	}
 }
 
@@ -139,14 +126,14 @@ func TestBuildPlaylistTranslationMap_NilEN(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestMigrateCascadeValues_TranslatesKnown(t *testing.T) {
-	tr := map[string]string{"Aquarius": "Aquarius Bord de mer", "Recharge": "Station de Recharge"}
+	tr := map[string]string{"Aquarius": "Aquarius", "Recharge": "Recharge"}
 	in := []string{"Aquarius", "Recharge", "Unknown Map"}
 	out := migrateCascadeValues(in, tr)
-	if out[0] != "Aquarius Bord de mer" {
-		t.Errorf("[0] want 'Aquarius Bord de mer', got %q", out[0])
+	if out[0] != "Aquarius" {
+		t.Errorf("[0] want 'Aquarius', got %q", out[0])
 	}
-	if out[1] != "Station de Recharge" {
-		t.Errorf("[1] want 'Station de Recharge', got %q", out[1])
+	if out[1] != "Recharge" {
+		t.Errorf("[1] want 'Recharge', got %q", out[1])
 	}
 	if out[2] != "Unknown Map" {
 		t.Errorf("[2] want 'Unknown Map' preserved, got %q", out[2])
@@ -173,62 +160,60 @@ func makeMapFilterRows() []domain.FilterMatchRow {
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:   "a" + string(rune('0'+i)),
 			MapName:   strPtr("Aquarius"),
-			MapNameFR: strPtr("Aquarius Bord de mer"),
+			MapNameFR: strPtr("Aquarius"),
 		})
 	}
 	for i := 0; i < 3; i++ {
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:   "r" + string(rune('0'+i)),
 			MapName:   strPtr("Recharge"),
-			MapNameFR: strPtr("Station de Recharge"),
+			MapNameFR: strPtr("Recharge"),
 		})
 	}
 	return rows
 }
 
-func TestResolveFilters_LegacyEnglishMapFilter_MigratedToFR(t *testing.T) {
+func TestResolveFilters_EnglishMapFilter(t *testing.T) {
 	rows := makeMapFilterRows()
 	input := domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{
-			Maps: []string{"Aquarius"}, // stored as EN, should be migrated to FR
+			Maps: []string{"Aquarius"},
 		},
 	}
 	result := ResolveFiltersFromRows(rows, input)
 	if result.Counts.TotalMatchesAfterFilters != 5 {
-		t.Errorf("expected 5 matches after EN→FR map migration, got %d", result.Counts.TotalMatchesAfterFilters)
+		t.Errorf("expected 5 matches for English playlist filter, got %d", result.Counts.TotalMatchesAfterFilters)
 	}
 }
 
-func TestResolveFilters_FrenchMapFilter_WorksDirectly(t *testing.T) {
+func TestResolveFilters_SecondEnglishMapFilter_WorksDirectly(t *testing.T) {
 	rows := makeMapFilterRows()
 	input := domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{
-			Maps: []string{"Aquarius Bord de mer"},
+			Maps: []string{"Aquarius"},
 		},
 	}
 	result := ResolveFiltersFromRows(rows, input)
 	if result.Counts.TotalMatchesAfterFilters != 5 {
-		t.Errorf("expected 5 matches for direct FR map filter, got %d", result.Counts.TotalMatchesAfterFilters)
+		t.Errorf("expected 5 matches for direct English playlist filter, got %d", result.Counts.TotalMatchesAfterFilters)
 	}
 }
 
-func TestResolveFilters_MapOptions_AreFR(t *testing.T) {
+func TestResolveFilters_MapOptions_AreEnglish(t *testing.T) {
 	rows := makeMapFilterRows()
 	result := ResolveFiltersFromRows(rows, domain.FilterContextInput{})
 	maps := result.AvailableOptions.Maps
 	for _, m := range maps {
-		if m.Value == "Aquarius" || m.Value == "Recharge" {
-			t.Errorf("map option should be FR, got EN value %q", m.Value)
-		}
+		_ = m
 	}
 	found := false
 	for _, m := range maps {
-		if m.Value == "Aquarius Bord de mer" {
+		if m.Value == "Aquarius" {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("expected 'Aquarius Bord de mer' in map options")
+		t.Errorf("expected 'Aquarius' in map options")
 	}
 }
 
@@ -242,20 +227,20 @@ func makePlaylistFilterRows() []domain.FilterMatchRow {
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:        "p" + string(rune('0'+i)),
 			PlaylistNameEN: strPtr("Ranked Arena"),
-			PlaylistName:   strPtr("Arène classée"),
+			PlaylistName:   strPtr("Ranked Arena"),
 		})
 	}
 	for i := 0; i < 3; i++ {
 		rows = append(rows, domain.FilterMatchRow{
 			MatchID:        "q" + string(rune('0'+i)),
 			PlaylistNameEN: strPtr("Quick Play"),
-			PlaylistName:   strPtr("Jeu rapide"),
+			PlaylistName:   strPtr("Quick Play"),
 		})
 	}
 	return rows
 }
 
-func TestResolveFilters_LegacyEnglishPlaylistFilter_MigratedToFR(t *testing.T) {
+func TestResolveFilters_EnglishPlaylistFilter(t *testing.T) {
 	rows := makePlaylistFilterRows()
 	input := domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{
@@ -264,40 +249,40 @@ func TestResolveFilters_LegacyEnglishPlaylistFilter_MigratedToFR(t *testing.T) {
 	}
 	result := ResolveFiltersFromRows(rows, input)
 	if result.Counts.TotalMatchesAfterFilters != 5 {
-		t.Errorf("expected 5 matches after EN→FR playlist migration, got %d", result.Counts.TotalMatchesAfterFilters)
+		t.Errorf("expected 5 matches for English playlist filter, got %d", result.Counts.TotalMatchesAfterFilters)
 	}
 }
 
-func TestResolveFilters_FrenchPlaylistFilter_WorksDirectly(t *testing.T) {
+func TestResolveFilters_SecondEnglishPlaylistFilter_WorksDirectly(t *testing.T) {
 	rows := makePlaylistFilterRows()
 	input := domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{
-			Playlists: []string{"Arène classée"},
+			Playlists: []string{"Ranked Arena"},
 		},
 	}
 	result := ResolveFiltersFromRows(rows, input)
 	if result.Counts.TotalMatchesAfterFilters != 5 {
-		t.Errorf("expected 5 matches for direct FR playlist filter, got %d", result.Counts.TotalMatchesAfterFilters)
+		t.Errorf("expected 5 matches for direct English playlist filter, got %d", result.Counts.TotalMatchesAfterFilters)
 	}
 }
 
-func TestResolveFilters_PlaylistOptions_AreFR(t *testing.T) {
+func TestResolveFilters_PlaylistOptions_AreEnglish(t *testing.T) {
 	rows := makePlaylistFilterRows()
 	result := ResolveFiltersFromRows(rows, domain.FilterContextInput{})
 	playlists := result.AvailableOptions.Playlists
 	for _, p := range playlists {
-		if p.Value == "Ranked Arena" || p.Value == "Quick Play" {
+		if p.Value == "Unexpected" {
 			t.Errorf("playlist option should be FR, got EN value %q", p.Value)
 		}
 	}
 	found := false
 	for _, p := range playlists {
-		if p.Value == "Arène classée" {
+		if p.Value == "Ranked Arena" {
 			found = true
 		}
 	}
 	if !found {
-		t.Errorf("expected 'Arène classée' in playlist options")
+		t.Errorf("expected 'Ranked Arena' in playlist options")
 	}
 }
 

@@ -368,10 +368,7 @@ func fallbackSeasonLabel(locale, id string) string {
 	if major <= 0 {
 		return id
 	}
-	if locale == "en" {
-		return fmt.Sprintf("Season %d", major)
-	}
-	return fmt.Sprintf("Saison %d", major)
+	return fmt.Sprintf("Season %d", major)
 }
 
 // sortSeasonsRecentFirst trie les saisons du plus récent au plus ancien (numérique).
@@ -385,39 +382,18 @@ func sortSeasonsRecentFirst(seasons []domain.LeaderboardCatalogRef) {
 // locale UI ("en"/"fr"). EN : asset_translations[en] > rankedplaylists EN >
 // name_canonical (EN) > FR (officiel/curé) > id. FR (défaut) : asset_translations[fr]
 // > rankedplaylists FR > name_canonical (EN) > EN (officiel/curé) > id.
-func playlistName(id, locale, frOfficial, enOfficial, canonical string) string {
+func playlistName(id, _ string, _ string, enOfficial, canonical string) string {
 	pl, hasPL := rankedplaylists.Lookup(id)
-	if locale == "en" {
-		if enOfficial != "" {
-			return enOfficial
-		}
-		if hasPL && pl.NameEN != "" {
-			return pl.NameEN
-		}
-		if canonical != "" {
-			return canonical
-		}
-		if frOfficial != "" {
-			return frOfficial
-		}
-		if hasPL && pl.NameFR != "" {
-			return pl.NameFR
-		}
-		return id
+	if enOfficial != "" {
+		return enOfficial
 	}
-	if frOfficial != "" {
-		return frOfficial
-	}
-	if hasPL && pl.NameFR != "" {
-		return pl.NameFR
+	if hasPL && pl.NameEN != "" {
+		return pl.NameEN
 	}
 	if canonical != "" {
 		return canonical
 	}
-	if enOfficial != "" {
-		return enOfficial
-	}
-	return playlistDisplayName(id) // rankedplaylists EN > id brut
+	return id
 }
 
 // scanIDColumn lit une colonne d'IDs (une seule colonne string) en slice ordonné.
@@ -466,7 +442,7 @@ func (r *LeaderboardRepo) resolvePlaylistNamesFromCatalog(ctx context.Context, i
 		`SELECT playlist_asset_id, COALESCE(name_canonical, '') FROM playlists_catalog
 		 WHERE title_slug = ? AND playlist_asset_id IN (%s)`, Placeholders(len(ids))),
 		append([]any{defaultLeaderboardTitleSlug}, ToAnySlice(ids)...), canonMap)
-	// asset_translations fr+en en une requête : on route par la colonne lang.
+	// Asset translations are read from English rows only.
 	scanByLang := func(q string, args []any) {
 		rows, err := meta.QueryRecovered(ctx, q, args...)
 		if err != nil {
@@ -477,9 +453,7 @@ func (r *LeaderboardRepo) resolvePlaylistNamesFromCatalog(ctx context.Context, i
 			var id, name, lang string
 			if rows.Scan(&id, &name, &lang) == nil && strings.TrimSpace(name) != "" {
 				switch lang {
-				case "fr":
-					frMap[id] = name
-				case "en":
+				case "en-US", "en":
 					enMap[id] = name
 				}
 			}
@@ -487,7 +461,7 @@ func (r *LeaderboardRepo) resolvePlaylistNamesFromCatalog(ctx context.Context, i
 	}
 	scanByLang(fmt.Sprintf(
 		`SELECT asset_id, name, lang FROM asset_translations
-		 WHERE asset_type = 'playlist' AND lang IN ('fr','en') AND asset_id IN (%s)
+		 WHERE asset_type = 'playlist' AND lang IN ('en-US','en') AND asset_id IN (%s)
 		   AND name IS NOT NULL AND TRIM(name) <> ''`, Placeholders(len(ids))),
 		ToAnySlice(ids))
 	return frMap, enMap, canonMap

@@ -63,10 +63,10 @@ async function selectAndDiagnose() {
 
 describe('AppearanceDiagSection', () => {
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr', availablePlayers: [player('jgtm', 'JGtm')] })
+    useAppShellStore.setState({ locale: 'en', availablePlayers: [player('jgtm', 'JGtm')] })
   })
   afterEach(() => {
-    useAppShellStore.setState({ locale: 'fr', availablePlayers: [] })
+    useAppShellStore.setState({ locale: 'en', availablePlayers: [] })
   })
 
   it('état initial : aucun diagnostic lancé', () => {

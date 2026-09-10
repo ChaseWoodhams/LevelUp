@@ -113,10 +113,10 @@ type EngagementSnapshot struct {
 
 // SkillRatingSnapshot capture le tier LUSR + progression vers le suivant.
 type SkillRatingSnapshot struct {
-	TierName      string  `json:"tier_name"`    // "Diamond"
-	TierNameFR    string  `json:"tier_name_fr"` // "Diamant"
-	SubTier       int     `json:"sub_tier"`     // 1..6
-	Label         string  `json:"label"`        // "Diamond III"
+	TierName      string  `json:"tier_name"` // "Diamond"
+	TierNameFR    string  `json:"-"`         // "Diamant"
+	SubTier       int     `json:"sub_tier"`  // 1..6
+	Label         string  `json:"label"`     // "Diamond III"
 	Mu            float64 `json:"mu"`
 	Sigma         float64 `json:"sigma"`
 	NextTierLabel string  `json:"next_tier_label,omitempty"`
@@ -158,9 +158,9 @@ type SuggestedChallenge struct {
 	// Hydratés depuis le template prestige (V2 §3). Vides si template
 	// introuvable (ne devrait pas arriver — selectSuggestedChallenges les
 	// récupère depuis le même catalogue).
-	LabelFR       string `json:"label_fr,omitempty"`
+	LabelFR       string `json:"-"`
 	LabelEN       string `json:"label_en,omitempty"`
-	DescriptionFR string `json:"description_fr,omitempty"`
+	DescriptionFR string `json:"-"`
 	DescriptionEN string `json:"description_en,omitempty"`
 }
 

@@ -33,7 +33,6 @@ vi.mock('@/lib/api/client', () => ({
   // getApiTitleSlug) : le mock doit exposer ces exports sinon l'import du store échoue.
   getApiTitleSlug: () => 'halo_infinite',
   setApiTitleSlug: vi.fn(),
-  setApiLocale: vi.fn(),
 }))
 
 function wrapper({ children }: { children: ReactNode }) {

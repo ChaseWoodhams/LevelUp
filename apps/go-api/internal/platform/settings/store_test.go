@@ -113,8 +113,8 @@ func TestApply_UpdatesFields(t *testing.T) {
 		DiscordLang: &discordLang,
 	}
 	settings.Apply(cfg, req)
-	if cfg.Lang != "fr" {
-		t.Errorf("expected lang=fr, got %q", cfg.Lang)
+	if cfg.Lang != "en" {
+		t.Errorf("language updates should be ignored, got %q", cfg.Lang)
 	}
 	if cfg.DiscordLang != "en" {
 		t.Errorf("expected discord_lang=en, got %q", cfg.DiscordLang)
@@ -229,8 +229,8 @@ func TestToResponse_FieldsMapped(t *testing.T) {
 	cfg.Lang = "fr"
 	cfg.UserTimezone = "America/New_York"
 	resp := settings.ToResponse(cfg)
-	if resp.Lang != "fr" {
-		t.Errorf("Lang: expected fr, got %q", resp.Lang)
+	if resp.Lang != "en" {
+		t.Errorf("Lang: expected en, got %q", resp.Lang)
 	}
 	if resp.UserTimezone != "America/New_York" {
 		t.Errorf("UserTimezone: expected America/New_York, got %q", resp.UserTimezone)

@@ -7,9 +7,6 @@ package domain
 type AdminDataQualityCounts struct {
 	TitleSlug   string `json:"title_slug"`
 	GeneratedAt string `json:"generated_at"` // RFC3339
-	// Locale de traduction visée par le compteur untranslated_modes (défaut « fr » —
-	// paramètre ?locale=). Rend le libellé front honnête (« Modes sans traduction (fr) »).
-	Locale string `json:"locale"`
 
 	// Assets dont *_name == *_id dans match_registry (cible de l'action
 	// registry-names/backfill).
@@ -50,14 +47,11 @@ type AdminDataQualityIssue struct {
 // d'inconnus de ce kind (avant fenêtrage) — alimente la pagination serveur du
 // front (table longue des xuids orphelins).
 type AdminDataQualityIssues struct {
-	TitleSlug   string `json:"title_slug"`
-	GeneratedAt string `json:"generated_at"`
-	Kind        string `json:"kind"`
-	// Locale de traduction visée (défaut « fr », paramètre ?locale=) — pertinente
-	// pour untranslated_modes, échotée pour le libellé front honnête.
-	Locale string                  `json:"locale"`
-	Items  []AdminDataQualityIssue `json:"items"`
-	Total  int                     `json:"total"`
+	TitleSlug   string                  `json:"title_slug"`
+	GeneratedAt string                  `json:"generated_at"`
+	Kind        string                  `json:"kind"`
+	Items       []AdminDataQualityIssue `json:"items"`
+	Total       int                     `json:"total"`
 }
 
 // RegistryNamesBackfillRequest — corps de POST .../registry-names/backfill.
@@ -87,7 +81,7 @@ type RegistryNamesBackfillResult struct {
 // ModeTranslationRequest — corps de POST .../translations/mode.
 type ModeTranslationRequest struct {
 	ModeEN string `json:"mode_en"`
-	NameFR string `json:"name_fr"`
+	NameEN string `json:"name_en"`
 }
 
 // AssetTranslationRequest — corps de POST .../translations/asset. Au moins un
@@ -96,8 +90,7 @@ type ModeTranslationRequest struct {
 type AssetTranslationRequest struct {
 	AssetKind string `json:"asset_kind"` // playlist | map | pair | game_variant
 	AssetID   string `json:"asset_id"`
-	NameEN    string `json:"name_en,omitempty"`
-	NameFR    string `json:"name_fr,omitempty"`
+	NameEN    string `json:"name_en"`
 }
 
 // ResolveResult — réponse des actions de résolution metadata.

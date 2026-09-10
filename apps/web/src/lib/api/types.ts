@@ -461,7 +461,6 @@ export interface CareerSummary {
   is_max_rank: boolean
   recorded_at: string | null
   rank_image_url?: string | null
-  next_rank_name_fr?: string
   next_rank_name_en?: string
   next_rank_image_url?: string | null
 }
@@ -879,7 +878,6 @@ export type ExplorerTargetSampleStats = components['schemas']['ExplorerTargetSam
 /** Une arme du top armes (cible Explorer) : label localisé + kills. */
 export interface ExplorerWeaponKill {
   weapon_id: number
-  label_fr: string
   label_en: string
   kills: number
 }
@@ -1955,8 +1953,6 @@ export interface SessionPageRequest {
   session_label?: string | null
   compare_session_label?: string | null
   enable_compare?: boolean
-  /** Locale ("fr" | "en") pour la résolution FR/EN des cartes/modes/playlists. */
-  locale?: string
 }
 
 export type SessionPageResponse = components['schemas']['SessionPageResponse']
@@ -2445,7 +2441,6 @@ export interface AssetTranslationRequest {
   asset_kind: string // playlist | map | pair | game_variant
   asset_id: string
   name_en?: string
-  name_fr?: string
 }
 
 export type CatalogRefreshResult = components['schemas']['CatalogRefreshResult']

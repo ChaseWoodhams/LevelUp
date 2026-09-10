@@ -68,7 +68,7 @@ function buildRow(medals: PlayerMedalRow[]): MatchScoreboardRow {
 
 describe('PlayerDetailPanel — médailles (GH-5a)', () => {
   it('rend une médaille Infinite comme <img> à src non vide', () => {
-    renderWithProviders(<PlayerDetailPanel row={buildRow([INFINITE_MEDAL])} t={MATCH_VIEW_TEXT.fr} />)
+    renderWithProviders(<PlayerDetailPanel row={buildRow([INFINITE_MEDAL])} t={MATCH_VIEW_TEXT.en} />)
     const img = screen.getByAltText('Killing Spree') as HTMLImageElement
     expect(img.tagName).toBe('IMG')
     expect(img.getAttribute('src')).toBeTruthy()
@@ -78,7 +78,7 @@ describe('PlayerDetailPanel — médailles (GH-5a)', () => {
   it('rend une médaille Halo 5 (sprite) comme icône, pas un fallback texte', () => {
     // Sur le code cassé (img brut + image_url vide), cette médaille tombait sur le
     // fallback texte : aucun élément role=img n'existait → ce getByRole échoue.
-    renderWithProviders(<PlayerDetailPanel row={buildRow([H5_MEDAL])} t={MATCH_VIEW_TEXT.fr} />)
+    renderWithProviders(<PlayerDetailPanel row={buildRow([H5_MEDAL])} t={MATCH_VIEW_TEXT.en} />)
     const sprite = screen.getByRole('img', { name: 'Double Kill' })
     expect(sprite).toBeInTheDocument()
     // Le sprite est rendu via background-image (MedalIcon), pas un <img src>.

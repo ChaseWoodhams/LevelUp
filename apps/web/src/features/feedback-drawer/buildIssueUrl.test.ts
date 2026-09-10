@@ -14,7 +14,7 @@ const baseContext: FeedbackContext = {
     userAgent: 'Mozilla/5.0',
     viewportWidth: 1920,
     viewportHeight: 1080,
-    locale: 'fr',
+    locale: 'en',
     theme: 'dark',
     timestampIso: '2026-05-05T12:00:00Z',
     focusedElement: 'button.foo',

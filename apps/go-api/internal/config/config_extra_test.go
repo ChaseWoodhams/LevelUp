@@ -17,7 +17,7 @@ func TestLoad_DefaultValues(t *testing.T) {
 	// Effacer les variables d'environnement LevelUp pour ne pas polluer le test
 	for _, k := range []string{
 		"LEVELUP_REPO_ROOT", "LEVELUP_DEMO_MODE", "LEVELUP_API_HOST",
-		"LEVELUP_API_PORT", "LEVELUP_LANG", "LEVELUP_SESSION_SECRET",
+		"LEVELUP_API_PORT", "LEVELUP_SESSION_SECRET",
 		"LEVELUP_CORS_ORIGINS", "LEVELUP_DB_PROFILES", "LEVELUP_APP_SETTINGS",
 	} {
 		t.Setenv(k, "")
@@ -37,8 +37,8 @@ func TestLoad_DefaultValues(t *testing.T) {
 	if cfg.APIPort != 8000 {
 		t.Errorf("APIPort = %d, want 8000", cfg.APIPort)
 	}
-	if cfg.Lang != "fr" {
-		t.Errorf("Lang = %q, want fr", cfg.Lang)
+	if cfg.Lang != "en" {
+		t.Errorf("Lang = %q, want en", cfg.Lang)
 	}
 	if cfg.DemoMode {
 		t.Error("DemoMode should be false by default")
@@ -50,7 +50,6 @@ func TestLoad_WithEnvVars(t *testing.T) {
 	t.Setenv("LEVELUP_REPO_ROOT", dir)
 	t.Setenv("LEVELUP_API_HOST", "0.0.0.0")
 	t.Setenv("LEVELUP_API_PORT", "9090")
-	t.Setenv("LEVELUP_LANG", "en")
 	t.Setenv("LEVELUP_DEMO_MODE", "true")
 
 	cfg, err := Load()

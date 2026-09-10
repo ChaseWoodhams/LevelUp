@@ -18,7 +18,7 @@ const mockShellState = {
   currentPlayer: { player_slug: 'demo-player', gamertag: 'DemoPlayer' } as
     | { player_slug: string; gamertag: string }
     | null,
-  locale: 'fr' as 'fr' | 'en',
+  locale: 'en' as 'en' | 'en',
   currentTitleSlug: 'halo_infinite',
 }
 
@@ -125,7 +125,7 @@ describe('AscensionObjectivesTab — composition (couche Prestige seule)', () =>
       player_slug: 'demo-player',
       gamertag: 'DemoPlayer',
     }
-    mockShellState.locale = 'fr'
+    mockShellState.locale = 'en'
     mockArcs.current = []
     mockChallenges.current = []
     mockHistory.current = []

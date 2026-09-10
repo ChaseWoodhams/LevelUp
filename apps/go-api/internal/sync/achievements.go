@@ -1,10 +1,10 @@
 // Package sync — achievements.go : synchronisation des achievements Xbox.
 //
-// Flow :
-//  1. Deux appels API : GetPlayerAchievements("en-US") + GetPlayerAchievements("fr-FR")
-//  2. Fusion par achievement_id → champs bilingues
-//  3. Upsert dans metadata.xbox_achievement_definitions et player_achievements
-//  4. Pré-warming optionnel des images (fire-and-forget si resolver non nil)
+// Flow:
+//  1. Fetch the canonical English payload from Xbox.
+//  2. Normalize it by achievement_id.
+//  3. Upsert metadata.xbox_achievement_definitions and player_achievements.
+//  4. Optionally pre-warm images (fire-and-forget when a resolver is present).
 package sync
 
 import (
@@ -17,7 +17,8 @@ import (
 	"levelup/go-api/internal/assets"
 )
 
-// PlayerAchievement contient les données fusionnées (EN + FR) d'un achievement.
+// PlayerAchievement contains the canonical achievement data. Historical fields
+// ending in FR mirror the English values for database compatibility.
 type PlayerAchievement struct {
 	AchievementID   string
 	NameEN          string
@@ -39,8 +40,9 @@ type PlayerAchievement struct {
 	ServiceConfigID string
 }
 
-// SyncAchievements récupère les achievements du joueur en EN et FR,
-// fusionne les données bilingues, puis les écrit dans les deux DBs.
+// SyncAchievements fetches the player's English achievements and writes them
+// to both databases. Historical *_fr columns are populated with the same
+// English values so existing database readers remain coherent.
 // titleID est le slug LevelUp du titre (ex: "halo_infinite") — stocké dans
 // xbox_achievement_definitions pour permettre le filtrage multi-titres.
 // resolver peut être nil (le pré-warming des images est alors ignoré).
@@ -53,23 +55,14 @@ func SyncAchievements(
 	xuid string,
 	titleID string,
 ) error {
-	// Étape 1 : deux appels API (EN + FR).
+	// Étape 1 : fetch the canonical English payload.
 	slog.DebugContext(ctx, "achievements: récupération EN", "xuid", xuid)
 	enRaw, err := client.GetPlayerAchievements(ctx, xuid, "en-US")
 	if err != nil {
 		return fmt.Errorf("achievements: fetch EN: %w", err)
 	}
-	slog.DebugContext(ctx, "achievements: récupération FR", "xuid", xuid)
-	frRaw, err := client.GetPlayerAchievements(ctx, xuid, "fr-FR")
-	if err != nil {
-		return fmt.Errorf("achievements: fetch FR: %w", err)
-	}
-
-	// Étape 2 : fusion par achievement_id.
-
-	// Étape 3 : fusion par achievement_id.
-	merged := mergeAchievements(enRaw, frRaw)
-	slog.InfoContext(ctx, "achievements: fusion terminée", "xuid", xuid, "count", len(merged))
+	merged := mergeAchievements(enRaw, nil)
+	slog.InfoContext(ctx, "achievements: English payload loaded", "xuid", xuid, "count", len(merged))
 
 	// Étape 4 : upserts (UPDATE-then-INSERT, ART-safe). Pas de purge des périmés :
 	// le filtre SCID empêche toute nouvelle contamination cross-titre, et l'ancien
@@ -91,14 +84,10 @@ func SyncAchievements(
 	return nil
 }
 
-// mergeAchievements fusionne deux slices (EN + FR) en un slice bilingue.
-// Les doublons sont ignorés (EN fait foi pour les champs partagés, dont XboxTitleID).
-func mergeAchievements(en, fr []PlayerAchievementRaw) []PlayerAchievement {
-	frMap := make(map[string]PlayerAchievementRaw, len(fr))
-	for _, a := range fr {
-		frMap[a.ID] = a
-	}
-
+// mergeAchievements normalizes the English payload. The second parameter is
+// retained in the helper signature for compatibility with existing callers;
+// historical FR fields are populated from English below.
+func mergeAchievements(en, _ []PlayerAchievementRaw) []PlayerAchievement {
 	result := make([]PlayerAchievement, 0, len(en))
 	for _, a := range en {
 		pa := PlayerAchievement{
@@ -118,11 +107,11 @@ func mergeAchievements(en, fr []PlayerAchievementRaw) []PlayerAchievement {
 			XboxTitleID:     a.XboxTitleID,
 			ServiceConfigID: a.ServiceConfigID,
 		}
-		if f, ok := frMap[a.ID]; ok {
-			pa.NameFR = f.Name
-			pa.DescriptionFR = f.Description
-			pa.LockedDescFR = f.LockedDesc
-		}
+		// Legacy database columns are kept populated with English values so
+		// existing readers remain coherent while the public contract is English-only.
+		pa.NameFR = pa.NameEN
+		pa.DescriptionFR = pa.DescriptionEN
+		pa.LockedDescFR = pa.LockedDescEN
 		result = append(result, pa)
 	}
 	return result

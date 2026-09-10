@@ -36,7 +36,7 @@ function decodeCascade(href: string): { modes?: string[]; maps?: string[] } {
   return payload.c.cascade
 }
 
-const BASE = { t: getAscensionText('fr'), minMatchesForSignal: 5, playerSlug: 'demo', titleSlug: 'halo_infinite' }
+const BASE = { t: getAscensionText('en'), minMatchesForSignal: 5, playerSlug: 'demo', titleSlug: 'halo_infinite' }
 
 describe('PatternContextGrid — liens filter_key (F7)', () => {
   it('by_map : le lien encode filter_key (FR-first), pas le label localisé', () => {

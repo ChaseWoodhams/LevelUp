@@ -114,7 +114,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.getByText('Slayer sur Aquarius')).toBeInTheDocument()
@@ -160,7 +160,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     // Le fallback : nom de map (deux occurrences possibles via alt + texte)
@@ -179,7 +179,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     const badge = screen.getByText('Prolongation')
@@ -217,7 +217,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.queryByText('Prolongation')).toBeNull()
@@ -232,7 +232,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.getByText('Réactiver')).toBeInTheDocument()
@@ -253,7 +253,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.queryByText('Rang')).toBeNull()
@@ -268,7 +268,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     // Avant clic : un seul bouton "Exclure" (celui du header).
@@ -287,7 +287,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     fireEvent.click(screen.getByRole('button', { name: 'Exclure' }))
@@ -315,7 +315,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     const btn = screen.getByRole('button', { name: 'Exclure' })
@@ -335,7 +335,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     const btn = screen.getByRole('button', { name: 'Réactiver' })
@@ -351,7 +351,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.getByRole('button', { name: 'Retirer des favoris' })).toBeInTheDocument()
@@ -361,7 +361,7 @@ describe('MatchHeaderCard', () => {
 // LOT 1.2/1.3 — PAS DE LIEN VERS UNE PAGE VIDE. La route de rejeu répond 404 quand
 // aucun artefact n'a été construit ; le lien n'apparaît donc QUE sur `replay_available`.
 describe('MatchHeaderCard — lien vers le rejeu 2D', () => {
-  function renderHeader(header: MatchViewHeader, locale: 'fr' | 'en') {
+  function renderHeader(header: MatchViewHeader, locale: 'en' | 'en') {
     return renderWithQueryClient(
       <MatchHeaderCard
         header={header}
@@ -375,17 +375,17 @@ describe('MatchHeaderCard — lien vers le rejeu 2D', () => {
   }
 
   it("n'affiche AUCUN lien quand le match n'a pas d'artefact", () => {
-    renderHeader({ ...baseHeader, replay_available: false }, 'fr')
+    renderHeader({ ...baseHeader, replay_available: false }, 'en')
     expect(screen.queryByText('Rejeu 2D')).not.toBeInTheDocument()
   })
 
   it("n'affiche aucun lien quand le champ est absent (titre sans rejeu)", () => {
-    renderHeader(baseHeader, 'fr')
+    renderHeader(baseHeader, 'en')
     expect(screen.queryByText('Rejeu 2D')).not.toBeInTheDocument()
   })
 
   it('affiche le lien FR quand l’artefact existe', () => {
-    renderHeader({ ...baseHeader, replay_available: true }, 'fr')
+    renderHeader({ ...baseHeader, replay_available: true }, 'en')
     expect(screen.getByText('Rejeu 2D')).toBeInTheDocument()
   })
 
@@ -418,7 +418,7 @@ describe('MatchHeaderCard — barre de progression du rang', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     const base = screen.getByTestId('rank-progress-base')
@@ -445,7 +445,7 @@ describe('MatchHeaderCard — barre de progression du rang', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.getByTestId('rank-progress-base').style.width).toBe('0%')
@@ -467,7 +467,7 @@ describe('MatchHeaderCard — barre de progression du rang', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.queryByTestId('rank-progress-base')).toBeNull()
@@ -487,7 +487,7 @@ describe('MatchNavigationBar', () => {
 
   it('rendu fallback API : affiche compteur sans contextLabel ni bouton sortir', () => {
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     expect(screen.getByText('Match 2/4')).toBeInTheDocument()
     expect(screen.queryByText(/Sortir du contexte/)).toBeNull()
@@ -502,7 +502,7 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'history', matchIds: ['m1', 'p', 'n'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     expect(screen.getByText('Classée · 7 derniers jours')).toBeInTheDocument()
     expect(screen.getByText(/Sortir du contexte ↩/)).toBeInTheDocument()
@@ -517,7 +517,7 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'session', matchIds: ['next-id', 'm1', 'prev-id'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     fireEvent.click(screen.getByRole('button', { name: 'Match suivant' }))
     expect(navigateToMatchMock).toHaveBeenCalledWith(
@@ -535,7 +535,7 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'history', matchIds: ['m1', 'p', 'n'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     fireEvent.click(screen.getByText(/Sortir du contexte ↩/))
     expect(clearNavContextMock).toHaveBeenCalledWith('m1')
@@ -559,7 +559,7 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'home_recent', matchIds: ['m1'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     expect(screen.getByText('Matchs récents 12/47')).toBeInTheDocument()
     // Pas de fragment "·" suivi du label brut puisque le descriptor est intégré
@@ -576,7 +576,7 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'session', matchIds: ['m1'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     expect(screen.getByText('Matchs avec CoolMate 1/18')).toBeInTheDocument()
   })
@@ -591,7 +591,7 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'session', matchIds: ['m1'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     // On vérifie le préfixe + la date + le total — l'heure dépend de la TZ du runner
     expect(screen.getByText(/Matchs de la session du \d{2}\/\d{2}\/\d{2} à \d{2}:\d{2} 3\/9/)).toBeInTheDocument()

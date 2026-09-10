@@ -51,12 +51,11 @@ func fWithMap(m string) func(*domain.FilterMatchRow) {
 	return func(r *domain.FilterMatchRow) { r.MapName = strPtr(m) }
 }
 
-// fWithVariant renseigne le game_variant (EN + FR) SANS pair_name : reproduit le
-// modèle Halo 5 où le mode vient du game_variant (pair_id/pair_name NULL).
-func fWithVariant(en, fr string) func(*domain.FilterMatchRow) {
+// fWithVariant renseigne le game_variant SANS pair_name : reproduit le modèle
+// Halo 5 où le mode vient du game_variant (pair_id/pair_name NULL).
+func fWithVariant(en, _ string) func(*domain.FilterMatchRow) {
 	return func(r *domain.FilterMatchRow) {
 		r.GameVariantName = strPtr(en)
-		r.GameVariantNameFR = strPtr(fr)
 	}
 }
 
@@ -108,8 +107,8 @@ func TestBuildAvailableOptions_ExperienceType_OnlyUnrankedPresent(t *testing.T) 
 	if len(avail.ExperienceTypes) != 1 {
 		t.Fatalf("expected 1 experience type, got %d: %v", len(avail.ExperienceTypes), labelValues(avail.ExperienceTypes))
 	}
-	if avail.ExperienceTypes[0].Value != "PVP non classé" {
-		t.Errorf("expected 'PVP non classé', got %q", avail.ExperienceTypes[0].Value)
+	if avail.ExperienceTypes[0].Value != "Unranked PvP" {
+		t.Errorf("expected 'Unranked PvP', got %q", avail.ExperienceTypes[0].Value)
 	}
 }
 
@@ -123,8 +122,8 @@ func TestBuildAvailableOptions_ExperienceType_AllThreePresent(t *testing.T) {
 	if len(avail.ExperienceTypes) != 3 {
 		t.Fatalf("expected 3 experience types, got %d: %v", len(avail.ExperienceTypes), labelValues(avail.ExperienceTypes))
 	}
-	// Ordre canonique : "PVP non classé", "PVP classé", "PVE"
-	expected := []string{"PVP non classé", "PVP classé", "PVE"}
+	// Ordre canonique : "Unranked PvP", "Ranked PvP", "PVE"
+	expected := []string{"Unranked PvP", "Ranked PvP", "PVE"}
 	for i, want := range expected {
 		if avail.ExperienceTypes[i].Value != want {
 			t.Errorf("ExperienceTypes[%d]: got %q, want %q", i, avail.ExperienceTypes[i].Value, want)
@@ -137,8 +136,8 @@ func TestBuildAvailableOptions_ExperienceType_RankedOnly(t *testing.T) {
 		mkFilterRow("m1", fWithRanked(), fWithPlaylist("Ranked Arena"), fWithMode("Slayer")),
 	}
 	avail := buildAvailableOptions(rows, domain.CascadeFilter{})
-	if len(avail.ExperienceTypes) != 1 || avail.ExperienceTypes[0].Value != "PVP classé" {
-		t.Errorf("expected ['PVP classé'], got %v", labelValues(avail.ExperienceTypes))
+	if len(avail.ExperienceTypes) != 1 || avail.ExperienceTypes[0].Value != "Ranked PvP" {
+		t.Errorf("expected ['Ranked PvP'], got %v", labelValues(avail.ExperienceTypes))
 	}
 }
 
@@ -151,15 +150,15 @@ func TestBuildAvailableOptions_Playlist_FilteredByExperience(t *testing.T) {
 		mkFilterRow("m1", fWithPlaylist("Quick Play"), fWithMode("Slayer")),                   // unranked
 		mkFilterRow("m2", fWithRanked(), fWithPlaylist("Ranked Arena"), fWithMode("Oddball")), // ranked
 	}
-	// Filtre : seulement PVP classé
+	// Filtre : seulement Ranked PvP
 	avail := buildAvailableOptions(rows, domain.CascadeFilter{
-		ExperienceTypes: []string{"PVP classé"},
+		ExperienceTypes: []string{"Ranked PvP"},
 	})
 	if len(avail.Playlists) != 1 || avail.Playlists[0].Value != "Ranked Arena" {
 		t.Errorf("expected Playlists=['Ranked Arena'], got %v", labelValues(avail.Playlists))
 	}
 	if hasLabel(avail.Playlists, "Quick Play") {
-		t.Error("Quick Play should not appear when experience filter = PVP classé")
+		t.Error("Quick Play should not appear when experience filter = Ranked PvP")
 	}
 }
 
@@ -219,7 +218,7 @@ func TestBuildAvailableOptions_Mode_FilteredByExperienceAndPlaylist(t *testing.T
 		mkFilterRow("m3", fWithPlaylist("Quick Play"), fWithMode("CTF")), // unranked → excluded by exp filter
 	}
 	avail := buildAvailableOptions(rows, domain.CascadeFilter{
-		ExperienceTypes: []string{"PVP classé"},
+		ExperienceTypes: []string{"Ranked PvP"},
 		Playlists:       []string{"Ranked Arena"},
 	})
 	if len(avail.Modes) != 2 {
@@ -265,7 +264,7 @@ func TestBuildAvailableOptions_Map_FilteredByAllLevels(t *testing.T) {
 		mkFilterRow("m3", fWithPlaylist("Quick Play"), fWithMode("Slayer"), fWithMap("Streets")), // unranked
 	}
 	avail := buildAvailableOptions(rows, domain.CascadeFilter{
-		ExperienceTypes: []string{"PVP classé"},
+		ExperienceTypes: []string{"Ranked PvP"},
 		Playlists:       []string{"Ranked Arena"},
 		Modes:           []string{"Slayer"},
 	})
@@ -284,13 +283,13 @@ func TestBuildAvailableOptions_Zombie_ExperienceNotInData(t *testing.T) {
 		mkFilterRow("m1", fWithPlaylist("Quick Play"), fWithMode("Slayer"), fWithMap("Aquarius")),
 		mkFilterRow("m2", fWithPlaylist("Quick Play"), fWithMode("CTF"), fWithMap("Streets")),
 	}
-	// Utilisateur a sélectionné "PVP classé" (zombie — absent des données)
+	// Utilisateur a sélectionné "Ranked PvP" (zombie — absent des données)
 	avail := buildAvailableOptions(rows, domain.CascadeFilter{
-		ExperienceTypes: []string{"PVP classé"},
+		ExperienceTypes: []string{"Ranked PvP"},
 	})
-	// ExperienceTypes disponibles : seulement "PVP non classé" (ce qui est dans les données)
-	if len(avail.ExperienceTypes) != 1 || avail.ExperienceTypes[0].Value != "PVP non classé" {
-		t.Errorf("ExperienceTypes should only contain 'PVP non classé', got %v", labelValues(avail.ExperienceTypes))
+	// ExperienceTypes disponibles : seulement "Unranked PvP" (ce qui est dans les données)
+	if len(avail.ExperienceTypes) != 1 || avail.ExperienceTypes[0].Value != "Unranked PvP" {
+		t.Errorf("ExperienceTypes should only contain 'Unranked PvP', got %v", labelValues(avail.ExperienceTypes))
 	}
 	// Playlists, Modes, Maps vides car l'exp filter n'a rien retenu
 	if len(avail.Playlists) != 0 {
@@ -309,7 +308,7 @@ func TestResolveFilters_Zombie_ExperienceNotInData_CountZero(t *testing.T) {
 		mkFilterRow("m1", fWithPlaylist("Quick Play")),
 	}
 	res := ResolveFiltersFromRows(rows, domain.FilterContextInput{
-		Cascade: domain.CascadeFilter{ExperienceTypes: []string{"PVP classé"}},
+		Cascade: domain.CascadeFilter{ExperienceTypes: []string{"Ranked PvP"}},
 	})
 	if res.Counts.TotalMatchesAfterFilters != 0 {
 		t.Errorf("expected 0 matches (zombie experience), got %d", res.Counts.TotalMatchesAfterFilters)
@@ -451,7 +450,7 @@ func TestResolveFilters_FullCompatibleCascade_OnlyOneMatch(t *testing.T) {
 	}
 	res := ResolveFiltersFromRows(rows, domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{
-			ExperienceTypes: []string{"PVP non classé"},
+			ExperienceTypes: []string{"Unranked PvP"},
 			Playlists:       []string{"Quick Play"},
 			Modes:           []string{"Slayer"},
 			Maps:            []string{"Aquarius"},
@@ -472,7 +471,7 @@ func TestBuildAvailableOptions_FullCompatibleCascade_OptionsCorrect(t *testing.T
 		mkFilterRow("m3", fWithRanked(), fWithPlaylist("Ranked Arena"), fWithMode("Oddball"), fWithMap("Bazaar")),
 	}
 	avail := buildAvailableOptions(rows, domain.CascadeFilter{
-		ExperienceTypes: []string{"PVP non classé"},
+		ExperienceTypes: []string{"Unranked PvP"},
 		Playlists:       []string{"Quick Play"},
 		Modes:           []string{"Slayer"},
 	})
@@ -524,13 +523,13 @@ func TestResolveFilters_Session_ReducesExperienceTypes(t *testing.T) {
 	if res.Counts.TotalMatchesAfterFilters != 2 {
 		t.Errorf("TotalMatchesAfterFilters = %d, want 2 (session only)", res.Counts.TotalMatchesAfterFilters)
 	}
-	// ExperienceTypes disponibles : seulement "PVP non classé" (la session ne contient pas de ranked)
+	// ExperienceTypes disponibles : seulement "Unranked PvP" (la session ne contient pas de ranked)
 	if len(res.AvailableOptions.ExperienceTypes) != 1 {
 		t.Fatalf("expected 1 experience type in session, got %d: %v",
 			len(res.AvailableOptions.ExperienceTypes), labelValues(res.AvailableOptions.ExperienceTypes))
 	}
-	if res.AvailableOptions.ExperienceTypes[0].Value != "PVP non classé" {
-		t.Errorf("expected 'PVP non classé', got %q", res.AvailableOptions.ExperienceTypes[0].Value)
+	if res.AvailableOptions.ExperienceTypes[0].Value != "Unranked PvP" {
+		t.Errorf("expected 'Unranked PvP', got %q", res.AvailableOptions.ExperienceTypes[0].Value)
 	}
 }
 
@@ -551,24 +550,24 @@ func TestResolveFilters_Session_Zombie_ExperienceNotInSession(t *testing.T) {
 			return r
 		}(),
 	}
-	// Utilisateur a sélectionné "PVP classé" + session → combo zombie
+	// Utilisateur a sélectionné "Ranked PvP" + session → combo zombie
 	res := ResolveFiltersFromRows(rows, domain.FilterContextInput{
 		FilterMode: "sessions",
 		Sessions: domain.SessionsFilter{
 			PickedSessions: []string{session},
 		},
 		Cascade: domain.CascadeFilter{
-			ExperienceTypes: []string{"PVP classé"},
+			ExperienceTypes: []string{"Ranked PvP"},
 		},
 	})
-	// "PVP classé" n'est pas dans la session → zombie
-	if hasLabel(res.AvailableOptions.ExperienceTypes, "PVP classé") {
-		t.Error("'PVP classé' should not be in available experience types (not in session)")
+	// "Ranked PvP" n'est pas dans la session → zombie
+	if hasLabel(res.AvailableOptions.ExperienceTypes, "Ranked PvP") {
+		t.Error("'Ranked PvP' should not be in available experience types (not in session)")
 	}
 	if res.Counts.TotalMatchesAfterFilters != 0 {
 		t.Errorf("expected 0 matches (zombie exp + session), got %d", res.Counts.TotalMatchesAfterFilters)
 	}
-	// Playlists vides car le filtre exp ("PVP classé") ne match rien dans la session
+	// Playlists vides car le filtre exp ("Ranked PvP") ne match rien dans la session
 	if len(res.AvailableOptions.Playlists) != 0 {
 		t.Errorf("Playlists should be empty (zombie exp), got %v", labelValues(res.AvailableOptions.Playlists))
 	}
@@ -623,7 +622,7 @@ func TestBuildAvailableOptions_TwoExperienceTypes_ExcludesPvE(t *testing.T) {
 		mkFilterRow("m3", fWithFirefight(), fWithPlaylist("PvE Co-op"), fWithMode("Firefight")),
 	}
 	avail := buildAvailableOptions(rows, domain.CascadeFilter{
-		ExperienceTypes: []string{"PVP non classé", "PVP classé"},
+		ExperienceTypes: []string{"Unranked PvP", "Ranked PvP"},
 	})
 	// Playlists : Quick Play + Ranked Arena (PvE exclu)
 	if hasLabel(avail.Playlists, "PvE Co-op") {
@@ -642,7 +641,7 @@ func TestResolveFilters_TwoExperienceTypes_CorrectCount(t *testing.T) {
 	}
 	res := ResolveFiltersFromRows(rows, domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{
-			ExperienceTypes: []string{"PVP non classé", "PVP classé"},
+			ExperienceTypes: []string{"Unranked PvP", "Ranked PvP"},
 		},
 	})
 	// m1 + m2 correspondent (PvE exclu)
@@ -697,8 +696,8 @@ func TestBuildAvailableOptions_H5VariantMode_ModesFromVariant(t *testing.T) {
 	if len(avail.Modes) != 2 {
 		t.Fatalf("expected 2 modes from variant, got %d: %v", len(avail.Modes), labelValues(avail.Modes))
 	}
-	if !hasLabel(avail.Modes, "Assassin en équipe") || !hasLabel(avail.Modes, "Capture du drapeau") {
-		t.Errorf("expected FR variant modes, got %v", labelValues(avail.Modes))
+	if !hasLabel(avail.Modes, "Team Slayer") || !hasLabel(avail.Modes, "Capture the Flag") {
+		t.Errorf("expected English variant modes, got %v", labelValues(avail.Modes))
 	}
 }
 
@@ -711,7 +710,7 @@ func TestResolveFilters_H5VariantMode_CascadeMatchesRow(t *testing.T) {
 		mkFilterRow("h5b", fWithPlaylist("Team Arena"), fWithVariant("Capture the Flag", "Capture du drapeau"), fWithMap("Coliseum")),
 	}
 	res := ResolveFiltersFromRows(rows, domain.FilterContextInput{
-		Cascade: domain.CascadeFilter{Modes: []string{"Assassin en équipe"}},
+		Cascade: domain.CascadeFilter{Modes: []string{"Team Slayer"}},
 	})
 	if res.Counts.TotalMatchesBeforeFilters != 2 {
 		t.Errorf("TotalMatchesBeforeFilters = %d, want 2", res.Counts.TotalMatchesBeforeFilters)

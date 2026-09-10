@@ -1,7 +1,7 @@
 // Package sync — halo_skill_csr.go : CSR par playlist (endpoint skill
 // /hi/playlist/{id}/csrs). Mécanisme canonique Grunt (Skill.GetPlaylistCsr) /
 // SPNKr (skill.get_playlist_csr) : fonctionne pour n'importe quelle playlist et
-// n'importe quelle saison, renvoie "Non classé" si jamais jouée. Permet
+// n'importe quelle saison, renvoie "Unranked" si jamais jouée. Permet
 // d'afficher toutes les playlists classées sans dériver de l'historique.
 //
 // Extrait de halo_skill.go (règle 500 lignes/fichier). Les types partagés
@@ -37,7 +37,7 @@ type playlistCSRResponse struct {
 // GetPlaylistCsr récupère le CSR d'un joueur pour UNE playlist classée et une
 // saison donnée. Contrairement au player-level GetPlayerCSRs (qui ne renvoie que
 // les playlists ENGAGÉES), cet endpoint répond pour N'IMPORTE QUELLE playlist —
-// y compris "Non classé" si le joueur ne l'a jamais jouée.
+// y compris "Unranked" si le joueur ne l'a jamais jouée.
 //
 // Retourne (nil, nil) si l'API répond 404 ou ne renvoie pas de résultat pour le
 // xuid (joueur non classé sans entrée). PlaylistName/Queue/Input restent vides :

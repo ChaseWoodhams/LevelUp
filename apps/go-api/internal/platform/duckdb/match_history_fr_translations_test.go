@@ -5,7 +5,7 @@
 //
 // Couvre spécifiquement le cas où pair_name brut est vide en DB et
 // asset_translations[pair_id, fr-FR] retourne l'EN raw "Arena:CTF on X" — le
-// helper analysis.ResolvePairNameFR doit re-normaliser et re-lookup mode_name_tr.
+// helper analysis.ResolvePairName doit re-normaliser et re-lookup mode_name_tr.
 package duckdb
 
 import (

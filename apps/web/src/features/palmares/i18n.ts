@@ -203,8 +203,8 @@ export interface PalmaresText {
   }
 }
 
-export function normalizePalmaresLocale(locale?: string | null): Locale {
-  return locale === 'en' ? 'en' : 'fr'
+export function normalizePalmaresLocale(_locale?: string | null): Locale {
+  return 'en'
 }
 
 function t(loc: Locale, key: PalmaresManifestKey): string {

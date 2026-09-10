@@ -150,5 +150,5 @@ function emitToast(
 
 /** Hack typé : i18n.ts n'expose pas la locale, on la déduit du dict. */
 function currentLocale(t: ReturnType<typeof getNotificationsText>): Locale {
-  return t.dropdownEmpty.includes('caught up') ? 'en' : 'fr'
+  return t.dropdownEmpty.includes('caught up') ? 'en' : 'en'
 }

@@ -18,7 +18,7 @@
 //	levelup sync-full      (--gamertag X | --all) [--max-matches N] [--match-type T] [--rps N]
 //	levelup sync-achievements (--gamertag X | --all) [--dry-run]
 //	levelup add-title      --name "Nom du jeu" [--slug s] [--capabilities c1,c2] [--xbox-id X] [--steam-id S]
-//	levelup populate-assets [--types map,playlist] [--langs fr-FR] [--dry-run] [--force] [--title-id slug]
+//	levelup populate-assets [--types map,playlist] [--langs en-US] [--dry-run] [--force] [--title-id slug]
 //
 // Variables d'environnement : LEVELUP_REPO_ROOT (auto-detecte si absent).
 //

@@ -21,9 +21,9 @@ import type { Locale } from './date'
  * stable indépendant de la locale, utiliser `formatNumberFixed` à la place.
  *
  * @example
- *   formatNumber(12345.678, 'fr-FR', 1)   // "12 345,7"
+ *   formatNumber(12345.678, 'en-US', 1)   // "12 345,7"
  *   formatNumber(12345.678, 'en-US', 0)   // "12,346"
- *   formatNumber(null, 'fr-FR')           // "—"
+ *   formatNumber(null, 'en-US')           // "—"
  */
 export function formatNumber(
   value: number | null | undefined,
@@ -92,8 +92,8 @@ export function formatSignedFixed(
  * Format ratio sub-unitaire (KDA, KDR) avec 2 décimales locale-sensitive.
  *
  * @example
- *   formatRatio(2.345, 'fr-FR')   // "2,35"
- *   formatRatio(null, 'fr-FR')    // "—"
+ *   formatRatio(2.345, 'en-US')   // "2,35"
+ *   formatRatio(null, 'en-US')    // "—"
  */
 export function formatRatio(
   value: number | null | undefined,

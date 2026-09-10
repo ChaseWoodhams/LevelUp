@@ -167,7 +167,7 @@ type SkillRankInsert struct {
 	RatingValue     *float64 `json:"rating_value,omitempty"`
 	RatingDeviation *float64 `json:"rating_deviation,omitempty"`
 	Tier            *string  `json:"tier,omitempty"`
-	TierFR          *string  `json:"tier_fr,omitempty"`
+	TierFR          *string  `json:"-"`
 	SubTier         *int     `json:"sub_tier,omitempty"`
 	TierLabel       *string  `json:"tier_label,omitempty"`
 	RatingDelta     *float64 `json:"rating_delta,omitempty"`

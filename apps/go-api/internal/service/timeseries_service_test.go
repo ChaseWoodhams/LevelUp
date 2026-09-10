@@ -553,10 +553,10 @@ func TestFilterStatsMatchRows_PlaylistFRPreferred(t *testing.T) {
 func TestFilterStatsMatchRows_ModeGameVariantFallback(t *testing.T) {
 	now := time.Now()
 	rows := []legacymatch.StatsMatchRow{
-		{MatchID: "h5", StartTime: now, GameVariantNameFR: "Assassin"},                       // pair vide → variant
+		{MatchID: "h5", StartTime: now, GameVariantName: "Team Slayer"},                      // pair vide → variant
 		{MatchID: "inf", StartTime: now, PairName: "Strongholds", GameVariantName: "Slayer"}, // pair présent
 	}
-	f := domain.FilterContextInput{Cascade: domain.CascadeFilter{Modes: []string{"Assassin"}}}
+	f := domain.FilterContextInput{Cascade: domain.CascadeFilter{Modes: []string{"Team Slayer"}}}
 	out := filterStatsMatchRows(rows, f)
 	if len(out) != 1 || out[0].MatchID != "h5" {
 		t.Fatalf("mode variant fallback: attendu h5 uniquement, obtenu %+v", out)

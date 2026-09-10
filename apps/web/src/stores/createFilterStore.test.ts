@@ -35,7 +35,7 @@ describe('createFilterStore', () => {
     const name = nextName()
     const useStore = createFilterStore({ name })
     useStore.getState().setCascade({
-      experience_types: ['PVP classé'],
+      experience_types: ['Ranked PvP'],
       playlists: [],
       modes: [],
       maps: [],
@@ -43,7 +43,7 @@ describe('createFilterStore', () => {
     const stored = localStorage.getItem(name)
     expect(stored).not.toBeNull()
     const parsed = JSON.parse(stored!)
-    expect(parsed.state.filterContext.cascade.experience_types).toContain('PVP classé')
+    expect(parsed.state.filterContext.cascade.experience_types).toContain('Ranked PvP')
   })
 
   it('deux stores instanciés sont isolés (clés et state distincts)', () => {
@@ -54,7 +54,7 @@ describe('createFilterStore', () => {
 
     // Mutation isolée sur A
     storeA.getState().setCascade({
-      experience_types: ['PVP classé'],
+      experience_types: ['Ranked PvP'],
       playlists: [],
       modes: [],
       maps: [],
@@ -72,7 +72,7 @@ describe('createFilterStore', () => {
     // Les deux états sont indépendants
     const stateA = JSON.parse(localStorage.getItem(nameA)!).state
     const stateB = JSON.parse(localStorage.getItem(nameB)!).state
-    expect(stateA.filterContext.cascade.experience_types).toEqual(['PVP classé'])
+    expect(stateA.filterContext.cascade.experience_types).toEqual(['Ranked PvP'])
     expect(stateA.lastKnownLatestSessionId).toBeNull()
     expect(stateB.filterContext.cascade.experience_types).toEqual([])
     expect(stateB.lastKnownLatestSessionId).toBe('session-from-B')
@@ -103,7 +103,7 @@ describe('createFilterStore', () => {
     const storeB = createFilterStore({ name: nextName() })
 
     storeA.getState().setCascade({
-      experience_types: ['PVP classé'],
+      experience_types: ['Ranked PvP'],
       playlists: [],
       modes: [],
       maps: [],
@@ -128,7 +128,7 @@ describe('createFilterStore', () => {
 
     const before = window.location.search
     useStore.getState().setCascade({
-      experience_types: ['PVP classé'],
+      experience_types: ['Ranked PvP'],
       playlists: [],
       modes: [],
       maps: [],

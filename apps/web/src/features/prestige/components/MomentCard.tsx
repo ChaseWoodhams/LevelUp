@@ -9,7 +9,7 @@
 import { useAppShellStore } from '@/stores/appShellStore'
 import { intlLocale } from '@/lib/formatters'
 import type { Challenge } from '@/lib/prestige'
-import { TIER_COLORS, TIER_LABELS_FR } from '@/lib/prestige'
+import { TIER_COLORS, TIER_LABELS_EN } from '@/lib/prestige'
 import { useAssetLabel } from '@/lib/i18n/fieldMappings'
 import { getPrestigeText } from '../i18n'
 
@@ -39,7 +39,7 @@ export function MomentCard({
   const isMythic = tier === 'mythic'
   // Phase 4 plan finition multi-titres : libellé du tier via TOML, fallback dict.
   const tierLabelFromTOML = useAssetLabel('challenge_tier', tier)
-  const tierLabel = tierLabelFromTOML !== tier ? tierLabelFromTOML : TIER_LABELS_FR[tier]
+  const tierLabel = tierLabelFromTOML !== tier ? tierLabelFromTOML : TIER_LABELS_EN[tier]
 
   const delta =
     baselineValue > 0

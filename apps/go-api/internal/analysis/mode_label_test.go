@@ -70,11 +70,11 @@ func TestResolveModeUIWithVariant(t *testing.T) {
 		want                                             *string // nil => attendu nil
 	}{
 		{
-			name:        "pair FR prime sur tout",
+			name:        "pair English value wins",
 			pairName:    modePtr("Arena:Slayer"),
 			pairNameFR:  modePtr("Assassin"),
 			variantName: modePtr("CTF"), variantNameFR: modePtr("Capture du drapeau"),
-			want: modePtr("Assassin"),
+			want: modePtr("Slayer"),
 		},
 		{
 			name:     "pair EN si pas de FR",
@@ -88,10 +88,10 @@ func TestResolveModeUIWithVariant(t *testing.T) {
 			want:       modePtr("CTF"),
 		},
 		{
-			name:          "fallback variant FR quand pair absent",
+			name:          "fallback variant English when pair absent",
 			variantName:   modePtr("CTF"),
 			variantNameFR: modePtr("Capture du drapeau"),
-			want:          modePtr("Capture du drapeau"),
+			want:          modePtr("CTF"),
 		},
 		{
 			name:        "fallback variant EN quand pair et variant FR absents",

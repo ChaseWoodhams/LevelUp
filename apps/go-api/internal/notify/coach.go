@@ -41,10 +41,7 @@ type CoachEmbedInput struct {
 // BuildCoachEmbed construit le Rich Embed Discord d'un signal coach.
 // labels fournit le footer title-aware (nil → libellés Halo, byte-identique).
 func BuildCoachEmbed(in CoachEmbedInput, labels NotifyLabels) Embed {
-	lang := in.Lang
-	if lang == "" {
-		lang = "fr"
-	}
+	lang := "en"
 	embed := Embed{
 		Title:       T("discord_coach_title", lang),
 		Description: coachCategoryLabel(in.Category, lang),
@@ -138,14 +135,9 @@ func coachColor(severity string) int {
 // coachCategoryLabel humanise une catégorie coach (FR/EN). Fallback : la clé
 // brute si la catégorie n'est pas connue (dégradation propre, jamais de panic).
 func coachCategoryLabel(category, lang string) string {
-	if lang == "" {
-		lang = "fr"
-	}
+	lang = "en"
 	if m, ok := coachCategoryLabels[category]; ok {
 		if lbl, ok := m[lang]; ok && lbl != "" {
-			return lbl
-		}
-		if lbl := m["fr"]; lbl != "" {
 			return lbl
 		}
 	}
@@ -161,18 +153,18 @@ func coachCategoryLabel(category, lang string) string {
 // internal/notifications/external). Registre neutre et non-culpabilisant, aligné
 // sur l'esprit du coach (signaux positifs / à consolider).
 var coachCategoryLabels = map[string]map[string]string{
-	"personal_record":     {"fr": "Record personnel", "en": "Personal record"},
-	"record_near_miss":    {"fr": "Record en approche", "en": "Record within reach"},
-	"milestone_unlocked":  {"fr": "Palier débloqué", "en": "Milestone unlocked"},
-	"milestone_near_miss": {"fr": "Palier en approche", "en": "Milestone within reach"},
-	"lusr_tier_approach":  {"fr": "Approche d'un palier LUSR", "en": "LUSR tier approach"},
-	"streak_milestone":    {"fr": "Palier de série", "en": "Streak milestone"},
-	"comeback_welcome":    {"fr": "Retour de pause", "en": "Comeback"},
-	"threshold_crossed":   {"fr": "Palier franchi", "en": "Threshold crossed"},
-	"trend_consolidate":   {"fr": "Axe à consolider", "en": "Axis to consolidate"},
-	"pattern_strength":    {"fr": "Force détectée", "en": "Strength detected"},
-	"pattern_weakness":    {"fr": "Faiblesse détectée", "en": "Weakness detected"},
-	"pattern_behavior":    {"fr": "Profil de jeu", "en": "Play pattern"},
-	"pattern_lever":       {"fr": "Levier prioritaire", "en": "Priority lever"},
-	"combat_pattern":      {"fr": "Profil de combat", "en": "Combat profile"},
+	"personal_record":     {"en": "Personal record"},
+	"record_near_miss":    {"en": "Record within reach"},
+	"milestone_unlocked":  {"en": "Milestone unlocked"},
+	"milestone_near_miss": {"en": "Milestone within reach"},
+	"lusr_tier_approach":  {"en": "LUSR tier approach"},
+	"streak_milestone":    {"en": "Streak milestone"},
+	"comeback_welcome":    {"en": "Comeback"},
+	"threshold_crossed":   {"en": "Threshold crossed"},
+	"trend_consolidate":   {"en": "Axis to consolidate"},
+	"pattern_strength":    {"en": "Strength detected"},
+	"pattern_weakness":    {"en": "Weakness detected"},
+	"pattern_behavior":    {"en": "Play pattern"},
+	"pattern_lever":       {"en": "Priority lever"},
+	"combat_pattern":      {"en": "Combat profile"},
 }

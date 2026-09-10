@@ -43,8 +43,8 @@ func LoadTitleAssetDrawerData(ctx context.Context, metaDB *DB, slug string) (map
 	// est peuplé par cmd/h5-metadata-fetch (Accept-Language: fr-FR). La cascade locale
 	// finale (fr → name_fr sinon name_en) est faite côté front (AssetCard).
 	if rows, qerr := metaDB.Query(ctx,
-		`SELECT medal_name_id::VARCHAR, name_en, COALESCE(name_fr, ''),
-		        COALESCE(description_en, ''), COALESCE(description_fr, ''),
+		`SELECT medal_name_id::VARCHAR, name_en, COALESCE(name_en, ''),
+		        COALESCE(description_en, ''), COALESCE(description_en, ''),
 		        COALESCE(sprite_sheet_url, ''),
 		        COALESCE(sprite_left, 0), COALESCE(sprite_top, 0),
 		        COALESCE(sprite_width, 0), COALESCE(sprite_height, 0)
@@ -78,7 +78,7 @@ type TeamColorName struct {
 func LoadTeamColorNames(ctx context.Context, metaDB *DB) map[int]TeamColorName {
 	m := map[int]TeamColorName{}
 	if rows, qerr := metaDB.Query(ctx,
-		`SELECT team_id, COALESCE(name_en, ''), COALESCE(name_fr, ''), COALESCE(color, '') FROM team_colors`); qerr == nil {
+		`SELECT team_id, COALESCE(name_en, ''), COALESCE(name_en, ''), COALESCE(color, '') FROM team_colors`); qerr == nil {
 		for rows.Next() {
 			var id int
 			var en, fr, color string

@@ -9,37 +9,29 @@
 # ─── Sections principales ──────────────────────────────────────────────────
 
 [synthesis.section.overview]
-fr = "Vue d'ensemble"
 en = "Overview"
 
 # ─── Profil de combat ───────────────────────────────────────────────────────
 
 [synthesis.combat_profile.title]
-fr = "Profil de combat"
 en = "Combat profile"
 
 [synthesis.combat_profile.matches_analyzed]
-fr = "matchs analysés"
 en = "matches analysed"
 
 [synthesis.combat_profile.yield_resistance]
-fr = "Rendement / Résistance"
 en = "Yield / Resistance"
 
 [synthesis.combat_profile.incidents]
-fr = "Incidents"
 en = "Incidents"
 
 [synthesis.combat_profile.betrayals]
-fr = "trahisons"
 en = "betrayals"
 
 [synthesis.combat_profile.suicides]
-fr = "suicides"
 en = "suicides"
 
 [synthesis.combat_profile.perfect_kills]
-fr = "Frags parfaits"
 en = "Perfect kills"
 
 # Libellé « vol à la tire » PAR TITRE (le terme officiel diffère) : Halo Infinite =
@@ -47,281 +39,215 @@ en = "Perfect kills"
 # fait côté SynthesisPage via currentTitleSlug (précédent NavL2 — le gating slug== est
 # interdit côté Go, autorisé côté front pour un simple choix de libellé).
 [synthesis.combat_profile.hijacks_infinite]
-fr = "Dépositaire"
 en = "Hijacks"
 
 [synthesis.combat_profile.hijacks_h5]
-fr = "Vol à la tire"
 en = "Hijacks"
 
 [synthesis.section.top_stats]
-fr = "Meilleures stats"
 en = "Best stats"
 
 [synthesis.section.highlights]
-fr = "Meilleurs matchs"
 en = "Best matches"
 
 [synthesis.section.relations]
-fr = "Relations"
 en = "Relations"
 
 [synthesis.section.breakdown_map]
-fr = "Par carte"
 en = "By map"
 
 [synthesis.section.breakdown_mode]
-fr = "Par mode"
 en = "By mode"
 
 [synthesis.section.activity]
-fr = "Activité par jour et heure"
 en = "Activity by day and hour"
 
 [synthesis.section.comparison]
-fr = "Comparaison Solo / Escouade"
 en = "Solo / Squad comparison"
 
 [synthesis.section.activity_breakdown]
-fr = "Activité & répartition"
 en = "Activity & breakdown"
 
 # ─── KPIs Vue d'ensemble ───────────────────────────────────────────────────
 
 [synthesis.overview.victories]
-fr = "Victoires"
 en = "Wins"
 
 [synthesis.overview.losses]
-fr = "Défaites"
 en = "Losses"
 
 [synthesis.overview.win_rate]
-fr = "Taux de victoire"
 en = "Win rate"
 
 [synthesis.overview.matches_total]
-fr = "Matchs joués"
 en = "Matches played"
 
 # ─── Highlights ────────────────────────────────────────────────────────────
 
 [synthesis.highlights.best_matches]
-fr = "Meilleurs matchs"
 en = "Best matches"
 
 [synthesis.highlights.tough_matches]
-fr = "Matchs difficiles"
 en = "Tough matches"
 
 [synthesis.highlights.no_remarkable_week]
-fr = "Aucune semaine remarquable"
 en = "No remarkable week"
 
 # ─── Periode + filtres ─────────────────────────────────────────────────────
 
 [synthesis.period.label]
-fr = "Période"
 en = "Period"
 
 [synthesis.period.all]
-fr = "Tout"
 en = "All"
 
 [synthesis.filters.experience]
-fr = "Expérience"
 en = "Experience"
 
 [synthesis.filters.experience_all]
-fr = "Toutes"
 en = "All"
 
 [synthesis.filters.experience_ranked]
-fr = "Classé"
 en = "Ranked"
 
 [synthesis.filters.experience_unranked]
-fr = "Non classé"
 en = "Unranked"
 
 [synthesis.filters.playlists]
-fr = "Sélections"
 en = "Playlists"
 
 [synthesis.filters.modes]
-fr = "Modes"
 en = "Modes"
 
 [synthesis.filters.reset]
-fr = "Réinitialiser"
 en = "Reset"
 
 # ─── États transverses ─────────────────────────────────────────────────────
 
 [synthesis.empty.no_data]
-fr = "Aucune donnée disponible pour cette période"
 en = "No data available for this period"
 
 [synthesis.empty.activity_unavailable]
-fr = "Activité indisponible"
 en = "Activity unavailable"
 
 [synthesis.empty.activity_description]
-fr = "Aucune activité enregistrée sur la période sélectionnée."
 en = "No activity recorded for the selected period."
 
 [synthesis.empty.no_comparison]
-fr = "Pas assez de données pour une comparaison Solo / Escouade"
 en = "Not enough data for Solo / Squad comparison"
 
 [synthesis.errors.load_failed]
-fr = "Erreur lors du chargement de la synthèse"
 en = "Failed to load synthesis"
 
 [synthesis.errors.retry]
-fr = "Réessayer"
 en = "Retry"
 
 # ─── Scope bar ─────────────────────────────────────────────────────────────
 
 [synthesis.scope.matches_count]
-fr = "{n, plural, one {# match} other {# matchs}}"
 en = "{n, plural, one {# match} other {# matches}}"
 
 [synthesis.scope.solo_label]
-fr = "Solo"
 en = "Solo"
 
 [synthesis.scope.squad_label]
-fr = "Escouade"
 en = "Squad"
 
 # ─── Sections / titres charts (top hardcoded strings) ────────────────────
 
 [synthesis.highlights.section_title]
-fr = "Performances marquantes"
 en = "Highlight performances"
 
 [synthesis.highlights.no_remarkable_match]
-fr = "Aucun match remarquable"
 en = "No remarkable match"
 
 [synthesis.charts.kill_types_title]
-fr = "Répartition des frags"
 en = "Kill type distribution"
 
 [synthesis.charts.kill_type_other]
-fr = "Autres"
 en = "Other"
 
 [synthesis.charts.kill_type_assassination]
-fr = "Assassinat"
 en = "Assassination"
 
 [synthesis.charts.kill_type_ground_pound]
-fr = "Coup au sol"
 en = "Ground Pound"
 
 [synthesis.charts.kill_type_shoulder_bash]
-fr = "Charge spartane"
 en = "Shoulder Bash"
 
 [synthesis.charts.weapon_kills_title]
-fr = "Frags par arme"
 en = "Kills by weapon"
 
 [synthesis.charts.role_kills_title]
-fr = "Frags par type d'arme"
 en = "Kills by weapon role"
 
 [synthesis.charts.weapon_accuracy_title]
-fr = "Précision par arme"
 en = "Accuracy by weapon"
 
 [synthesis.charts.role_automatic]
-fr = "Automatique"
 en = "Automatic"
 
 [synthesis.charts.role_precision]
-fr = "Précision"
 en = "Precision"
 
 [synthesis.charts.role_sniper]
-fr = "Sniper"
 en = "Sniper"
 
 [synthesis.charts.role_shotgun]
-fr = "Fusil à pompe"
 en = "Shotgun"
 
 [synthesis.charts.role_sidearm]
-fr = "Arme de poing"
 en = "Sidearm"
 
 [synthesis.charts.role_power]
-fr = "Arme lourde"
 en = "Power weapon"
 
 [synthesis.charts.role_special]
-fr = "Spéciale"
 en = "Special"
 
 [synthesis.charts.role_melee]
-fr = "Mêlée"
 en = "Melee"
 
 [synthesis.charts.role_grenade]
-fr = "Grenade"
 en = "Grenade"
 
 # Rôles hors-arsenal H5 (frags non-combat, 2026-07-17) — véhicules, tourelles,
 # environnement, bucket d'attribution « Spartan » (non attribué), UGC (autres).
 [synthesis.charts.role_vehicle]
-fr = "Véhicule"
 en = "Vehicle"
 
 [synthesis.charts.role_turret]
-fr = "Tourelle"
 en = "Turret"
 
 [synthesis.charts.role_environmental]
-fr = "Environnement"
 en = "Environmental"
 
 [synthesis.charts.role_unattributed]
-fr = "Non attribué"
 en = "Unattributed"
 
 [synthesis.charts.role_other]
-fr = "Autres"
 en = "Other"
 
 [synthesis.coach.label]
-fr = "Coach"
 en = "Coach"
 
 [synthesis.coach.blind_spot_power]
-fr = "Tu n'exploites quasiment jamais les armes lourdes. En prendre le contrôle (lance-roquettes, sniper, empaleur…) fait souvent basculer le match — priorise-les quand elles apparaissent."
 en = "You almost never use power weapons. Taking control of them (rockets, sniper, skewer…) often decides the match — prioritise them when they spawn."
 
 [synthesis.coach.over_reliance]
-fr = "{pct}% de tes frags viennent d'une seule catégorie ({role}). Diversifier ton arsenal te rendra moins prévisible."
 en = "{pct}% of your kills come from a single category ({role}). Diversifying your arsenal will make you less predictable."
 
 [synthesis.kpi.win_streak_max]
-fr = "Victoires consécutives (max)"
 en = "Win streak (max)"
 
 [synthesis.kpi.loss_streak_max]
-fr = "Défaites consécutives (max)"
 en = "Loss streak (max)"
 
 [synthesis.kpi.killing_spree_max]
-fr = "Folie meurtrière (max)"
 en = "Killing spree (max)"
 
 [synthesis.kpi.raw_accuracy]
-fr = "Précision brute"
 en = "Raw accuracy"
 
 # Top match records (2026-05-27) — cartes cliquables ouvrant le match record.
@@ -329,92 +255,70 @@ en = "Raw accuracy"
 # titre de section synthesis.section.top_stats (« Meilleures stats »), donc retiré
 # des cartes pour qu'elles tiennent en largeur sur une seule ligne.
 [synthesis.kpi.top_kda]
-fr = "FDA"
 en = "KDA"
 
 [synthesis.kpi.top_perf]
-fr = "Performance"
 en = "Performance"
 
 [synthesis.kpi.top_accuracy]
-fr = "Précision"
 en = "Accuracy"
 
 [synthesis.kpi.top_damage]
-fr = "Dégâts"
 en = "Damage"
 
 [synthesis.kpi.top_headshots]
-fr = "Tirs à la tête"
 en = "Headshots"
 
 [synthesis.kpi.top_personal_score]
-fr = "Score perso"
 en = "Personal score"
 
 [synthesis.kpi.open_match]
-fr = "Ouvrir le match"
 en = "Open match"
 
 [synthesis.kpi.vehicles_destroyed]
-fr = "Véhicules détruits"
 en = "Vehicles destroyed"
 
 [synthesis.kpi.objectives_title]
-fr = "Objectifs"
 en = "Objectives"
 
 [synthesis.kpi.flag_captures]
-fr = "Captures de drapeau"
 en = "Flag captures"
 
 [synthesis.kpi.flag_returns]
-fr = "Retours de drapeau"
 en = "Flag returns"
 
 [synthesis.kpi.flag_steals]
-fr = "Vols de drapeau"
 en = "Flag steals"
 
 [synthesis.kpi.flag_carrier_time]
-fr = "Temps porteur (drapeau)"
 en = "Flag carrier time"
 
 [synthesis.kpi.zone_captures]
-fr = "Zones capturées"
 en = "Zones captured"
 
 [synthesis.kpi.zone_secures]
-fr = "Zones sécurisées"
 en = "Zones secured"
 
 [synthesis.kpi.zone_time]
-fr = "Temps en zone"
 en = "Time in zones"
 
 [synthesis.kpi.skull_grabs]
-fr = "Récupérations du crâne"
 en = "Skull grabs"
 
 [synthesis.kpi.skull_carrier_time]
-fr = "Temps porteur (crâne)"
 en = "Skull carrier time"
 
 [synthesis.empty.synthesis_unavailable]
-fr = "Synthèse indisponible"
 en = "Synthesis unavailable"
 
 [synthesis.charts.top_vs_total_per_week]
-fr = "Matchs Top vs Total par semaine"
 en = "Top vs Total matches per week"
 
 # Section "Relations de jeu" retirée le 2026-05-27 (cf. thought_log).
 
 # ─── Répartitions (breakdowns par carte / mode) — I2, 2026-07-05 ─────────────
 [synthesis.breakdown.by_map]
-fr = "Par carte"
 en = "By map"
 
 [synthesis.breakdown.by_mode]
-fr = "Par mode"
 en = "By mode"

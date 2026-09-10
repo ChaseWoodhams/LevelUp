@@ -131,7 +131,7 @@ type BootstrapResponse struct {
 	AvailablePlayers    []PlayerSummary      `json:"available_players"`
 	CurrentTitleSlug    string               `json:"current_title_slug" doc:"Sprint 44 : slug du titre courant de la session."`
 	AvailableTitles     []TitleSummary       `json:"available_titles" doc:"Sprint 44 : titres disponibles (title switcher) : active + coming_soon."`
-	Locale              string               `json:"locale" default:"fr"`
+	Locale              string               `json:"locale" default:"en"`
 	HintsVisibleDefault bool                 `json:"hints_visible_default" default:"true"`
 	FeatureFlags        FeatureFlags         `json:"feature_flags"`
 	Capabilities        CapabilityMap        `json:"capabilities"`

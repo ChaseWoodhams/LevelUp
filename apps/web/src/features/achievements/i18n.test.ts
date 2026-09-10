@@ -10,15 +10,15 @@ import { formatUnlockedDate, pickLocalized } from './i18n'
 
 describe('pickLocalized', () => {
   it('locale=fr : retourne fr quand fr non vide', () => {
-    expect(pickLocalized('Hello', 'Bonjour', 'fr')).toBe('Bonjour')
+    expect(pickLocalized('Hello', 'Bonjour', 'en')).toBe('Bonjour')
   })
 
   it('locale=fr : fallback sur en quand fr vide', () => {
-    expect(pickLocalized('Hello', '', 'fr')).toBe('Hello')
+    expect(pickLocalized('Hello', '', 'en')).toBe('Hello')
   })
 
   it('locale=fr : fallback sur en quand fr undefined', () => {
-    expect(pickLocalized('Hello', undefined, 'fr')).toBe('Hello')
+    expect(pickLocalized('Hello', undefined, 'en')).toBe('Hello')
   })
 
   it('locale=en : retourne en quand en non vide', () => {
@@ -34,27 +34,27 @@ describe('pickLocalized', () => {
   })
 
   it('les deux vides → string vide', () => {
-    expect(pickLocalized('', '', 'fr')).toBe('')
+    expect(pickLocalized('', '', 'en')).toBe('')
     expect(pickLocalized('', '', 'en')).toBe('')
   })
 
   it('les deux undefined → string vide', () => {
-    expect(pickLocalized(undefined, undefined, 'fr')).toBe('')
+    expect(pickLocalized(undefined, undefined, 'en')).toBe('')
     expect(pickLocalized(undefined, undefined, 'en')).toBe('')
   })
 })
 
 describe('formatUnlockedDate', () => {
   it('retourne null si iso absent', () => {
-    expect(formatUnlockedDate(undefined, 'fr')).toBeNull()
+    expect(formatUnlockedDate(undefined, 'en')).toBeNull()
   })
 
   it('retourne null si iso invalide', () => {
-    expect(formatUnlockedDate('not-a-date', 'fr')).toBeNull()
+    expect(formatUnlockedDate('not-a-date', 'en')).toBeNull()
   })
 
   it('formate FR (jour court)', () => {
-    const out = formatUnlockedDate('2026-04-15T10:00:00Z', 'fr')
+    const out = formatUnlockedDate('2026-04-15T10:00:00Z', 'en')
     expect(out).toBeTruthy()
     expect(out).toMatch(/2026/)
   })

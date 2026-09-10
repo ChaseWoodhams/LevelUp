@@ -616,7 +616,7 @@ func buildSessionDetailRows(
 	// Locale-aware (aligné Home/Explorer) : FR par défaut, EN si locale == "en".
 	// Sans ça les cartes/modes/playlists restaient figés (FR si trad présente,
 	// sinon EN) quelle que soit la locale sélectionnée par l'utilisateur.
-	frPreferred := locale != "en"
+	frPreferred := false
 	out := make([]domain.SessionDetailMatchRow, 0, len(rows))
 	for _, row := range rows {
 		mapName := row.MapName

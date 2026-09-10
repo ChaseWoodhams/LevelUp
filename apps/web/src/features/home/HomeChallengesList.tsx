@@ -147,7 +147,7 @@ export function HomeChallengesList({ items }: { items: ChallengeItem[] }) {
       if (currentDelta !== 0) {
         return currentDelta
       }
-      return left.title.localeCompare(right.title, 'fr')
+      return left.title.localeCompare(right.title, 'en')
     }),
     [items],
   )

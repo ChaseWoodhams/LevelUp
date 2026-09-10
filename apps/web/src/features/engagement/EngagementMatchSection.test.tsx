@@ -20,7 +20,7 @@ function baseResult(overrides: Partial<EngagementScoreResultAPI> = {}): Engageme
 
 describe('EngagementMatchSection buildSubtitle — calibration provisoire (F7 E5)', () => {
   it('appose la mention « calibration provisoire » quand calibration=provisional', () => {
-    const sub = buildSubtitle(baseResult({ calibration: 'provisional' }), 'fr')
+    const sub = buildSubtitle(baseResult({ calibration: 'provisional' }), 'en')
     expect(sub).toContain('calibration provisoire')
   })
 
@@ -30,19 +30,19 @@ describe('EngagementMatchSection buildSubtitle — calibration provisoire (F7 E5
   })
 
   it('ne montre AUCUNE mention quand calibration=validated', () => {
-    const sub = buildSubtitle(baseResult({ calibration: 'validated' }), 'fr')
+    const sub = buildSubtitle(baseResult({ calibration: 'validated' }), 'en')
     expect(sub).not.toContain('provisoire')
   })
 
   it('ne montre AUCUNE mention quand calibration absente (défaut validé)', () => {
-    const sub = buildSubtitle(baseResult(), 'fr')
+    const sub = buildSubtitle(baseResult(), 'en')
     expect(sub).not.toContain('provisoire')
   })
 
   it('mention affichée même en cold_start (calibration = axe distinct de l’attendu)', () => {
     const sub = buildSubtitle(
       baseResult({ expected_basis: 'cold_start', calibration: 'provisional' }),
-      'fr',
+      'en',
     )
     expect(sub).toContain('calibration provisoire')
   })

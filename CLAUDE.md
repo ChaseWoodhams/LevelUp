@@ -261,9 +261,9 @@ Référence complète des commandes : `docs/COMMANDS.md`. Déploiement : `docs/R
 
 ## Règles
 
-1. **Répondre en français.** UI : FR sans anglicismes (« série » pas « streak »,
-   « Taux de victoire » pas « WR ») ; toute string UI en FR **et** EN (`i18n.ts`,
-   parité par typage `Record<Locale, T>`).
+1. **Respond in English.** The product UI, operator output, and active
+   documentation are English-only. Keep `Locale` fixed to `en` and do not add
+   language selectors, locale branches, or paired translation fields.
 2. **Go/TS uniquement.** Pas de nouveau Python, pas de SQLite, pas de Pandas/Polars (morts
    avec la migration).
 3. **Logging Go** : `slog.InfoContext/ErrorContext(ctx, "...", "err", err)` structuré.
@@ -296,9 +296,9 @@ Référence complète des commandes : `docs/COMMANDS.md`. Déploiement : `docs/R
     jamais inline. **Routes** : file-based, ne jamais éditer `routeTree.gen.ts`.
 14. **Vérifier l'existant avant d'implémenter** : `internal/analysis/` + skill
     `go-features` + grep des exports. Beaucoup d'algos existent déjà.
-15. **docs/FR — politique** : guides majeurs (`FOUNDATIONS_GUIDE`, `COMMANDS`,
-    `SYNC_GUIDE`, `ARCHITECTURE_V6`) = bilingues, toute modif EN inclut la MAJ FR dans le
-    même PR. **ADRs et runbooks = EN-only** (pas de traduction à créer ni maintenir).
+15. **Documentation**: active docs, ADRs, runbooks, and contribution guidance
+   are English-only. Historical notes may retain provenance references, but
+   they must describe the active English-only documentation and runtime policy.
 16. **Git** : jamais `git stash` (commit WIP à la place) ; demander avant tout commit ;
     jamais travailler sur `main` ; ne pas changer de branche si un travail est en cours.
 

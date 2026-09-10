@@ -6,7 +6,7 @@
 # Convention : sections indexées par FieldKey canonique (cf. canonical/fields.go).
 # Une section absente = le titre ne supporte pas ce champ pour les surfaces produit.
 #
-# Champs obligatoires : labels.en, labels.fr, storage_unit, display_unit,
+# Champs obligatoires : labels.en, labels.en, storage_unit, display_unit,
 # format, display_order, group.
 # Champs optionnels : description (en+fr conjointement), icon.
 #
@@ -21,8 +21,8 @@ schema_version = 1
 # =============================================================================
 
 [fields.kills]
-labels        = { en = "Kills", fr = "Frags" }
-description   = { en = "Total kills in the match.", fr = "Total des frags dans le match." }
+labels        = { en = "Kills" }
+description   = { en = "Total kills in the match." }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -30,7 +30,7 @@ display_order = 10
 group         = "combat"
 
 [fields.deaths]
-labels        = { en = "Deaths", fr = "Morts" }
+labels        = { en = "Deaths" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -38,7 +38,7 @@ display_order = 20
 group         = "combat"
 
 [fields.assists]
-labels        = { en = "Assists", fr = "Assistances" }
+labels        = { en = "Assists" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -46,7 +46,7 @@ display_order = 30
 group         = "combat"
 
 [fields.headshot_kills]
-labels        = { en = "Headshots", fr = "Tirs à la tête" }
+labels        = { en = "Headshots" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -54,7 +54,7 @@ display_order = 40
 group         = "combat"
 
 [fields.melee_kills]
-labels        = { en = "Melee Kills", fr = "Corps à corps" }
+labels        = { en = "Melee Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -62,7 +62,7 @@ display_order = 50
 group         = "combat"
 
 [fields.grenade_kills]
-labels        = { en = "Grenade Kills", fr = "Éliminations à la grenade" }
+labels        = { en = "Grenade Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -70,7 +70,7 @@ display_order = 60
 group         = "combat"
 
 [fields.power_weapon_kills]
-labels        = { en = "Power Weapon Kills", fr = "Arme puissante" }
+labels        = { en = "Power Weapon Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -78,7 +78,7 @@ display_order = 70
 group         = "combat"
 
 [fields.damage_dealt]
-labels        = { en = "Damage Dealt", fr = "Dégâts infligés" }
+labels        = { en = "Damage Dealt" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -86,7 +86,7 @@ display_order = 80
 group         = "combat"
 
 [fields.damage_taken]
-labels        = { en = "Damage Taken", fr = "Dégâts subis" }
+labels        = { en = "Damage Taken" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -94,7 +94,7 @@ display_order = 90
 group         = "combat"
 
 [fields.shots_fired]
-labels        = { en = "Shots Fired", fr = "Tirs effectués" }
+labels        = { en = "Shots Fired" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -102,7 +102,7 @@ display_order = 100
 group         = "combat"
 
 [fields.shots_hit]
-labels        = { en = "Shots Hit", fr = "Tirs au but" }
+labels        = { en = "Shots Hit" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -110,8 +110,8 @@ display_order = 110
 group         = "combat"
 
 [fields.accuracy]
-labels        = { en = "Accuracy", fr = "Précision" }
-description   = { en = "Hit rate (shots hit / shots fired).", fr = "Taux de tirs au but (tirs au but / tirs effectués)." }
+labels        = { en = "Accuracy" }
+description   = { en = "Hit rate (shots hit / shots fired)." }
 storage_unit  = "ratio"
 display_unit  = "percent"
 format        = "percent_1"
@@ -119,8 +119,8 @@ display_order = 120
 group         = "combat"
 
 [fields.kdr]
-labels        = { en = "KDR", fr = "Ratio F/D" }
-description   = { en = "Kill/Death ratio.", fr = "Ratio Éliminations/Morts." }
+labels        = { en = "KDR" }
+description   = { en = "Kill/Death ratio." }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -128,8 +128,8 @@ display_order = 130
 group         = "combat"
 
 [fields.kda]
-labels        = { en = "KDA", fr = "FDA" }
-description   = { en = "Kills + Assists/2 - Deaths.", fr = "Éliminations + Assistances/2 - Morts." }
+labels        = { en = "KDA" }
+description   = { en = "Kills + Assists/2 - Deaths." }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -137,7 +137,7 @@ display_order = 140
 group         = "combat"
 
 [fields.max_killing_spree]
-labels        = { en = "Best Spree", fr = "Meilleure série" }
+labels        = { en = "Best Spree" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -149,7 +149,7 @@ group         = "combat"
 # =============================================================================
 
 [fields.match_id]
-labels        = { en = "Match ID", fr = "ID du match" }
+labels        = { en = "Match ID" }
 storage_unit  = ""
 display_unit  = ""
 format        = "string"
@@ -157,7 +157,7 @@ display_order = 5
 group         = "match"
 
 [fields.started_at_utc]
-labels        = { en = "Started At", fr = "Début" }
+labels        = { en = "Started At" }
 storage_unit  = ""
 display_unit  = ""
 format        = "datetime"
@@ -165,7 +165,7 @@ display_order = 10
 group         = "match"
 
 [fields.duration_seconds]
-labels        = { en = "Duration", fr = "Durée" }
+labels        = { en = "Duration" }
 storage_unit  = "seconds"
 display_unit  = "seconds"
 format        = "duration_hms"
@@ -173,7 +173,7 @@ display_order = 20
 group         = "match"
 
 [fields.is_ranked]
-labels        = { en = "Ranked", fr = "Classé" }
+labels        = { en = "Ranked" }
 storage_unit  = ""
 display_unit  = ""
 format        = "boolean"
@@ -181,7 +181,7 @@ display_order = 30
 group         = "match"
 
 [fields.is_pve]
-labels        = { en = "PvE", fr = "JcE" }
+labels        = { en = "PvE" }
 storage_unit  = ""
 display_unit  = ""
 format        = "boolean"
@@ -189,7 +189,7 @@ display_order = 40
 group         = "match"
 
 [fields.outcome]
-labels        = { en = "Outcome", fr = "Résultat" }
+labels        = { en = "Outcome" }
 storage_unit  = ""
 display_unit  = ""
 format        = "enum"
@@ -197,7 +197,7 @@ display_order = 50
 group         = "match"
 
 [fields.personal_score]
-labels        = { en = "Personal Score", fr = "Score personnel" }
+labels        = { en = "Personal Score" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -205,7 +205,7 @@ display_order = 60
 group         = "match"
 
 [fields.team_score]
-labels        = { en = "Team Score", fr = "Score d'équipe" }
+labels        = { en = "Team Score" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -213,7 +213,7 @@ display_order = 70
 group         = "match"
 
 [fields.rank_in_match]
-labels        = { en = "Rank in Match", fr = "Classement" }
+labels        = { en = "Rank in Match" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -225,7 +225,7 @@ group         = "match"
 # =============================================================================
 
 [fields.current_rank_id]
-labels        = { en = "Current Rank", fr = "Rang actuel" }
+labels        = { en = "Current Rank" }
 storage_unit  = ""
 display_unit  = ""
 format        = "string"
@@ -233,7 +233,7 @@ display_order = 10
 group         = "career"
 
 [fields.current_xp]
-labels        = { en = "Current XP", fr = "XP actuelle" }
+labels        = { en = "Current XP" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -241,7 +241,7 @@ display_order = 20
 group         = "career"
 
 [fields.xp_for_next_rank]
-labels        = { en = "XP for Next Rank", fr = "XP rang suivant" }
+labels        = { en = "XP for Next Rank" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -249,7 +249,7 @@ display_order = 30
 group         = "career"
 
 [fields.total_matches_played]
-labels        = { en = "Matches Played", fr = "Matchs joués" }
+labels        = { en = "Matches Played" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -257,7 +257,7 @@ display_order = 40
 group         = "career"
 
 [fields.total_kills_career]
-labels        = { en = "Career Kills", fr = "Éliminations totales" }
+labels        = { en = "Career Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -265,7 +265,7 @@ display_order = 50
 group         = "career"
 
 [fields.win_rate]
-labels        = { en = "Win Rate", fr = "Taux de victoire" }
+labels        = { en = "Win Rate" }
 storage_unit  = "ratio"
 display_unit  = "percent"
 format        = "percent_1"
@@ -275,7 +275,7 @@ group         = "career"
 # Compteur brut de victoires, distinct du taux (win_rate). Consommé par les
 # jalons (milestones/catalog.toml, metric = "wins").
 [fields.wins]
-labels        = { en = "Wins", fr = "Victoires" }
+labels        = { en = "Wins" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -287,7 +287,7 @@ group         = "career"
 # =============================================================================
 
 [fields.team_mmr]
-labels        = { en = "Team MMR", fr = "MMR équipe" }
+labels        = { en = "Team MMR" }
 storage_unit  = ""
 display_unit  = ""
 format        = "signed_int"
@@ -295,7 +295,7 @@ display_order = 10
 group         = "skill"
 
 [fields.enemy_mmr]
-labels        = { en = "Enemy MMR", fr = "MMR adverse" }
+labels        = { en = "Enemy MMR" }
 storage_unit  = ""
 display_unit  = ""
 format        = "signed_int"
@@ -303,7 +303,7 @@ display_order = 20
 group         = "skill"
 
 [fields.kills_expected]
-labels        = { en = "Expected Kills", fr = "Éliminations attendues" }
+labels        = { en = "Expected Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "kdr_2"
@@ -311,7 +311,7 @@ display_order = 30
 group         = "skill"
 
 [fields.deaths_expected]
-labels        = { en = "Expected Deaths", fr = "Morts attendues" }
+labels        = { en = "Expected Deaths" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "kdr_2"
@@ -319,8 +319,8 @@ display_order = 40
 group         = "skill"
 
 [fields.csr_value]
-labels        = { en = "CSR", fr = "CSR" }
-description   = { en = "Competitive Skill Rating.", fr = "Classement compétitif officiel." }
+labels        = { en = "CSR" }
+description   = { en = "Competitive Skill Rating." }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -328,8 +328,8 @@ display_order = 50
 group         = "skill"
 
 [fields.lusr_value]
-labels        = { en = "LUSR", fr = "LUSR" }
-description   = { en = "LevelUp Skill Rating (TrueSkill 2 derived).", fr = "Classement LevelUp dérivé de TrueSkill 2." }
+labels        = { en = "LUSR" }
+description   = { en = "LevelUp Skill Rating (TrueSkill 2 derived)." }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -341,7 +341,7 @@ group         = "skill"
 # =============================================================================
 
 [fields.waves_completed]
-labels        = { en = "Waves Completed", fr = "Vagues complétées" }
+labels        = { en = "Waves Completed" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -349,7 +349,7 @@ display_order = 10
 group         = "pve"
 
 [fields.bosses_killed]
-labels        = { en = "Bosses Killed", fr = "Boss tués" }
+labels        = { en = "Bosses Killed" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -357,7 +357,7 @@ display_order = 20
 group         = "pve"
 
 [fields.grunt_kills]
-labels        = { en = "Grunt Kills", fr = "Grognards tués" }
+labels        = { en = "Grunt Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -365,7 +365,7 @@ display_order = 30
 group         = "pve"
 
 [fields.elite_kills]
-labels        = { en = "Elite Kills", fr = "Élites tués" }
+labels        = { en = "Elite Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -373,7 +373,7 @@ display_order = 40
 group         = "pve"
 
 [fields.jackal_kills]
-labels        = { en = "Jackal Kills", fr = "Jackals tués" }
+labels        = { en = "Jackal Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -381,7 +381,7 @@ display_order = 50
 group         = "pve"
 
 [fields.brute_kills]
-labels        = { en = "Brute Kills", fr = "Brutes tuées" }
+labels        = { en = "Brute Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -389,7 +389,7 @@ display_order = 60
 group         = "pve"
 
 [fields.hunter_kills]
-labels        = { en = "Hunter Kills", fr = "Hunters tués" }
+labels        = { en = "Hunter Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -401,7 +401,7 @@ group         = "pve"
 # =============================================================================
 
 [fields.match_count]
-labels        = { en = "Matches", fr = "Matchs" }
+labels        = { en = "Matches" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -409,7 +409,7 @@ display_order = 10
 group         = "derived"
 
 [fields.ranked_match_count]
-labels        = { en = "Ranked Matches", fr = "Matchs classés" }
+labels        = { en = "Ranked Matches" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -417,7 +417,7 @@ display_order = 11
 group         = "derived"
 
 [fields.headshots_per_match]
-labels        = { en = "Headshots / match", fr = "Tirs à la tête / match" }
+labels        = { en = "Headshots / match" }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -425,7 +425,7 @@ display_order = 20
 group         = "derived"
 
 [fields.deaths_per_min]
-labels        = { en = "Deaths / min", fr = "Morts / min" }
+labels        = { en = "Deaths / min" }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -433,7 +433,7 @@ display_order = 30
 group         = "derived"
 
 [fields.assists_per_min]
-labels        = { en = "Assists / min", fr = "Assistances / min" }
+labels        = { en = "Assists / min" }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -441,7 +441,7 @@ display_order = 40
 group         = "derived"
 
 [fields.perfect_kills_per_match]
-labels        = { en = "Perfect kills / match", fr = "Frags parfaits / match" }
+labels        = { en = "Perfect kills / match" }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -449,7 +449,7 @@ display_order = 45
 group         = "derived"
 
 [fields.avg_max_killing_spree]
-labels        = { en = "Best Spree (avg)", fr = "Folie meurtrière max" }
+labels        = { en = "Best Spree (avg)" }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -457,7 +457,7 @@ display_order = 50
 group         = "derived"
 
 [fields.avg_damage_dealt]
-labels        = { en = "Damage Dealt / match", fr = "Dégâts infligés / match" }
+labels        = { en = "Damage Dealt / match" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -465,7 +465,7 @@ display_order = 60
 group         = "derived"
 
 [fields.avg_damage_taken]
-labels        = { en = "Damage Taken / match", fr = "Dégâts subis / match" }
+labels        = { en = "Damage Taken / match" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -473,8 +473,8 @@ display_order = 70
 group         = "derived"
 
 [fields.offensive_conversion]
-labels        = { en = "Efficiency", fr = "Rendement" }
-description   = { en = "225 × (kills + assists/3) / damage dealt — offensive combat yield.", fr = "225 × (frags + assists/3) / dégâts infligés — rendement offensif." }
+labels        = { en = "Efficiency" }
+description   = { en = "225 × (kills + assists/3) / damage dealt — offensive combat yield." }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -482,8 +482,8 @@ display_order = 71
 group         = "derived"
 
 [fields.defensive_resistance]
-labels        = { en = "Resistance", fr = "Résistance" }
-description   = { en = "damage taken / (225 × deaths) — defensive combat yield.", fr = "dégâts subis / (225 × morts) — résistance défensive." }
+labels        = { en = "Resistance" }
+description   = { en = "damage taken / (225 × deaths) — defensive combat yield." }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -491,7 +491,7 @@ display_order = 72
 group         = "derived"
 
 [fields.avg_life_seconds]
-labels        = { en = "Avg. Lifespan", fr = "Durée de vie moyenne" }
+labels        = { en = "Avg. Lifespan" }
 storage_unit  = "seconds"
 display_unit  = "seconds"
 format        = "seconds"
@@ -499,8 +499,8 @@ display_order = 80
 group         = "derived"
 
 [fields.kd_ratio]
-labels        = { en = "KDA", fr = "FDA" }
-description   = { en = "Kill/Death/Assist ratio average.", fr = "Ratio Éliminations/Morts/Assistances moyen." }
+labels        = { en = "KDA" }
+description   = { en = "Kill/Death/Assist ratio average." }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -508,7 +508,7 @@ display_order = 85
 group         = "derived"
 
 [fields.kills_per_min]
-labels        = { en = "Kills / min", fr = "Frags / min" }
+labels        = { en = "Kills / min" }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -516,7 +516,7 @@ display_order = 90
 group         = "derived"
 
 [fields.performance_score]
-labels        = { en = "Performance score", fr = "Score de performance" }
+labels        = { en = "Performance score" }
 storage_unit  = ""
 display_unit  = ""
 format        = "integer"
@@ -524,8 +524,8 @@ display_order = 95
 group         = "derived"
 
 [fields.engagement_score]
-labels        = { en = "Engagement score", fr = "Score d'engagement" }
-description   = { en = "Intra-match engagement (0-100 percentile of the player-vs-expected residual, lobby-anchored).", fr = "Engagement intra-match (percentile 0-100 de l'écart joueur-attendu, ancré lobby)." }
+labels        = { en = "Engagement score" }
+description   = { en = "Intra-match engagement (0-100 percentile of the player-vs-expected residual, lobby-anchored)." }
 storage_unit  = ""
 display_unit  = ""
 format        = "integer"
@@ -533,7 +533,7 @@ display_order = 96
 group         = "derived"
 
 [fields.time_played_seconds]
-labels        = { en = "Time played", fr = "Temps de jeu" }
+labels        = { en = "Time played" }
 storage_unit  = "seconds"
 display_unit  = "seconds"
 format        = "duration_hms"
@@ -544,7 +544,7 @@ group         = "derived"
 # par défaut (progression/records/extractors.go, qui l'émet sous la clé courte
 # historique "pspm" — résolution de l'alias côté front, lib/i18n/metricLabel.ts).
 [fields.personal_score_per_min]
-labels        = { en = "Personal score / min", fr = "Score perso / min" }
+labels        = { en = "Personal score / min" }
 storage_unit  = ""
 display_unit  = ""
 format        = "kdr_2"
@@ -558,7 +558,7 @@ group         = "derived"
 # =============================================================================
 
 [fields.accuracy_threshold_days]
-labels        = { en = "Consistent days", fr = "Jours réguliers" }
+labels        = { en = "Consistent days" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -566,7 +566,7 @@ display_order = 110
 group         = "derived"
 
 [fields.combat_precision_matches]
-labels        = { en = "Precision matches", fr = "Matchs de précision" }
+labels        = { en = "Precision matches" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -574,7 +574,7 @@ display_order = 120
 group         = "derived"
 
 [fields.combat_endurance_matches]
-labels        = { en = "Endurance matches", fr = "Matchs d'endurance" }
+labels        = { en = "Endurance matches" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -582,7 +582,7 @@ display_order = 130
 group         = "derived"
 
 [fields.combat_excellence_matches]
-labels        = { en = "Excellence matches", fr = "Matchs d'excellence" }
+labels        = { en = "Excellence matches" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"

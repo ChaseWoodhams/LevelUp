@@ -55,7 +55,7 @@ func (r *ServiceRegistry) RunRegistryNamesBackfill(ctx context.Context, titleSlu
 	res = domain.RegistryNamesBackfillResult{DryRun: dryRun}
 	if dryRun {
 		// Locale sans objet ici (seuls les compteurs RawUUID* sont lus) → défaut ops.
-		counts, cErr := r.DataQualityCounts(ctx, titleSlug, "")
+		counts, cErr := r.DataQualityCounts(ctx, titleSlug)
 		if cErr != nil {
 			return res, cErr
 		}
@@ -176,7 +176,7 @@ func lyingBitsToDomain(o ops.LyingBitsResetResult) domain.LyingBitsResetResult {
 
 // ResolveModeTranslation upserte mode_name_tr[fr] pour un mode (clé
 // normalisée via NormalizeModeLabel — idempotent si déjà normalisée).
-func (r *ServiceRegistry) ResolveModeTranslation(ctx context.Context, titleSlug, modeEN, nameFR string) (domain.ResolveResult, error) {
+func (r *ServiceRegistry) ResolveModeTranslation(ctx context.Context, titleSlug, modeEN, nameEN string) (domain.ResolveResult, error) {
 	out := domain.ResolveResult{}
 	normalized := analysis.NormalizeModeLabel(modeEN)
 	if normalized == "" {
@@ -188,7 +188,7 @@ func (r *ServiceRegistry) ResolveModeTranslation(ctx context.Context, titleSlug,
 	}
 	defer closeMeta()
 
-	action, err := ops.UpsertModeTranslation(ctx, metaDB.SQLDb(), normalized, "fr", nameFR)
+	action, err := ops.UpsertModeTranslation(ctx, metaDB.SQLDb(), normalized, "en", nameEN)
 	if err != nil {
 		return out, err
 	}
@@ -217,8 +217,8 @@ func (r *ServiceRegistry) ResolveAssetTranslation(ctx context.Context, titleSlug
 	if _, ok := validAssetKinds[req.AssetKind]; !ok {
 		return out, fmt.Errorf("asset_kind invalide %q (playlist|map|pair|game_variant)", req.AssetKind)
 	}
-	if req.NameEN == "" && req.NameFR == "" {
-		return out, fmt.Errorf("au moins un nom (name_en ou name_fr) est requis")
+	if req.NameEN == "" {
+		return out, fmt.Errorf("name_en is required")
 	}
 	metaDB, closeMeta, err := r.metadataRWHandle(titleSlug)
 	if err != nil {
@@ -230,9 +230,6 @@ func (r *ServiceRegistry) ResolveAssetTranslation(ctx context.Context, titleSlug
 	writes := []langName{}
 	if req.NameEN != "" {
 		writes = append(writes, langName{duckdb.LangCodeEN, req.NameEN})
-	}
-	if req.NameFR != "" {
-		writes = append(writes, langName{duckdb.LangCodeFR, req.NameFR})
 	}
 	for _, w := range writes {
 		action, err := ops.UpsertAssetTranslation(ctx, metaDB.SQLDb(), req.AssetKind, req.AssetID, w.lang, w.name)

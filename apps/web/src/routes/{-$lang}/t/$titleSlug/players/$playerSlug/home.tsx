@@ -19,7 +19,6 @@ export const Route = createFileRoute('/{-$lang}/t/$titleSlug/players/$playerSlug
       queryKey: queryKeys.home(
         params.playerSlug,
         useAppShellStore.getState().currentTitleSlug,
-        useAppShellStore.getState().locale,
       ),
       queryFn: () =>
         api.get<HomePageResponse>(`/players/${params.playerSlug}/pages/home`),

@@ -51,7 +51,7 @@ function setTitleCaps(caps: string[]) {
 }
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 afterEach(() => {

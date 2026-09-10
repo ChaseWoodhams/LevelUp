@@ -37,7 +37,6 @@ const H = vi.hoisted(() => {
     target_per_member: 7,
     created_by: 'alice',
     created_at: '2026-07-02T00:00:00Z',
-    label_fr: 'Briseur de couronnes',
     label_en: 'Crown breaker',
     expired: false,
     participants: [
@@ -101,7 +100,7 @@ function mockContext(selectedRows: TeammateRow[]) {
 }
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr', currentTitleSlug: 'halo_infinite' })
+  useAppShellStore.setState({ locale: 'en', currentTitleSlug: 'halo_infinite' })
   H.evaluateMutate.mockReset()
 })
 

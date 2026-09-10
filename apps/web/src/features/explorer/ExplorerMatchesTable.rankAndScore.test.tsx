@@ -168,7 +168,7 @@ describe('Colonne Score personnel', () => {
     // coupé sur 2 lignes, mais jamais tronqué (aucun mot perdu).
     const header = screen.getByLabelText('Sort by Personal score')
     expect(header.textContent?.replace(/\s+/g, '')).toContain('Personalscore')
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   it('trie sur la valeur numérique', () => {

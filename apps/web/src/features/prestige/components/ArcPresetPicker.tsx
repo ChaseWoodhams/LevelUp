@@ -23,18 +23,14 @@ export function ArcPresetPicker({ playerSlug, titleSlug, locale, onClose }: ArcP
   const presets = data?.presets ?? []
 
   const t = {
-    title: locale === 'en' ? 'Preset arcs' : 'Arcs preset',
-    close: locale === 'en' ? 'Close' : 'Fermer',
-    adopt: locale === 'en' ? 'Adopt' : 'Adopter',
-    adopting: locale === 'en' ? 'Adopting…' : 'Adoption…',
-    loading: locale === 'en' ? 'Loading presets…' : 'Chargement des presets…',
-    empty: locale === 'en' ? 'No preset available for this title.' : 'Aucun preset disponible pour ce titre.',
-    error:
-      locale === 'en'
-        ? 'The Prestige module is not enabled on this server.'
-        : "Le module Prestige n'est pas activé sur ce serveur.",
-    objectives: (n: number) =>
-      locale === 'en' ? `${n} objective${n > 1 ? 's' : ''}` : `${n} objectif${n > 1 ? 's' : ''}`,
+    title: "Preset arcs",
+    close: "Close",
+    adopt: "Adopt",
+    adopting: "Adopting…",
+    loading: "Loading presets…",
+    empty: "No preset available for this title.",
+    error: "The Prestige module is not enabled on this server.",
+    objectives: (n: number) => n + " objective" + (n > 1 ? "s" : ""),
   }
 
   const handleAdopt = (presetId: string) => {
@@ -88,12 +84,9 @@ interface PresetRowProps {
   onAdopt: () => void
 }
 
-function PresetRow({ preset, locale, adoptLabel, objectivesLabel, disabled, onAdopt }: PresetRowProps) {
-  const title = locale === 'en' ? preset.title_en || preset.title_fr : preset.title_fr || preset.title_en
-  const description =
-    locale === 'en'
-      ? preset.description_en || preset.description_fr
-      : preset.description_fr || preset.description_en
+function PresetRow({ preset, adoptLabel, objectivesLabel, disabled, onAdopt }: PresetRowProps) {
+  const title = preset.title_en
+  const description = preset.description_en
   return (
     <li className="flex items-start justify-between gap-3 rounded-md border border-border p-3">
       <div className="min-w-0 flex-1">

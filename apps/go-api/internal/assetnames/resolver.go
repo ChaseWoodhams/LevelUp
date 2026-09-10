@@ -22,10 +22,9 @@ import (
 	"strings"
 )
 
-// DefaultLangs : langues résolues par défaut. Seules fr-FR et en-US sont lues par
-// le read-path (cf. PreferredLangsForLocale → [fr-FR,fr,en-US,en]) ; les résoudre
-// suffit et borne le coût réseau hot-path.
-var DefaultLangs = []string{"fr-FR", "en-US"}
+// DefaultLangs is the only language fetched by the live asset resolver.
+// The read path is English-only, so ingestion writes the same canonical value.
+var DefaultLangs = []string{"en-US"}
 
 // defaultMaxAssets : cap dur d'assets résolus par appel (garde-fou cold-start :
 // 1er cycle après un déploiement où beaucoup d'assets sont neufs). Les assets

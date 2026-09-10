@@ -54,8 +54,8 @@ vi.mock('@/features/settings/queries', () => ({
 // availableTitles vide → useCapability (FeatureGate) fail-open : le bloc Médias est rendu.
 vi.mock('@/stores/appShellStore', () => ({
   useAppShellStore: (
-    selector: (s: { locale: 'fr' | 'en'; availableTitles: unknown[]; currentTitleSlug: string }) => unknown,
-  ) => selector({ locale: 'fr', availableTitles: [], currentTitleSlug: 'halo_infinite' }),
+    selector: (s: { locale: 'en' | 'en'; availableTitles: unknown[]; currentTitleSlug: string }) => unknown,
+  ) => selector({ locale: 'en', availableTitles: [], currentTitleSlug: 'halo_infinite' }),
 }))
 
 // Enfants de l'onglet Général mockés : on ne teste ici que la structure des rangées.

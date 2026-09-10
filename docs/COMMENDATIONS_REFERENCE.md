@@ -1,7 +1,4 @@
 # LevelUp Commendations — Full Reference
-
-French version: [FR/CITATIONS_REFERENCE.md](FR/CITATIONS_REFERENCE.md)
-
 This document is the **human-readable mirror** of the authoritative Go seed `internal/ops/seed_citation_data.go` (`defaultCitationMappings`). That function is the single source of truth — if this table and the seed ever disagree, the seed wins. The seed defines **98 commendations** (the `enabled = false` ones are listed but not computed): 88 from the original port + 10 objective-based commendations added in v7.2.1 (see "PvP — Game mode" below).
 
 > v7.2 note: `charge`, `got_you`, `stakeholder`, and `flag_carrier_hunter` used to be `award` type (matched against `personal_score_awards` event names). They now run on `objective_stat` (columns of `match_objective_stats_latest`), the same mechanism as the 10 commendations added in v7.2.1 — more reliable than the award feed. Any retouch to these tiers requires a `--citations-recompute-all` backfill (progression is recomputed from history).

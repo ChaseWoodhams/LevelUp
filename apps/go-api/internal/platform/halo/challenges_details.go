@@ -10,13 +10,11 @@ import (
 	"strings"
 
 	"levelup/go-api/internal/assets"
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 )
 
 // Codes de langue Waypoint utilisés pour l'i18n des challenges et BP.
 const (
-	langFR = "fr-FR"
 	langEN = "en-US"
 )
 
@@ -58,10 +56,7 @@ type challengeDefinitionRaw struct {
 func (p *HaloProvider) buildActiveChallengeItems(ctx context.Context, tokens *domain.HaloTokens, decks []challengeDeckRaw) []domain.ChallengeItem {
 	seen := make(map[string]struct{})
 	items := make([]domain.ChallengeItem, 0)
-	// Langue de résolution des titres/descriptions de défis = locale de requête
-	// (header X-LevelUp-Locale → ctxkeys ; défaut FR hors requête HTTP, ex. watcher).
-	// Auparavant figée FR → « les défis non plus » [traduits] sous UI EN.
-	lang := normalizeChallengeLang(ctxkeys.Locale(ctx))
+	lang := langEN
 
 	for _, deck := range decks {
 		for _, ch := range deck.ActiveChallenges {
@@ -265,25 +260,11 @@ func resolveChallengeLocalizedValue(data any, lang string) string {
 }
 
 func normalizeChallengeLang(lang string) string {
-	switch strings.ToLower(strings.TrimSpace(lang)) {
-	case "fr", "fr-fr":
-		return langFR
-	case "en", "en-us":
-		return langEN
-	default:
-		return langFR
-	}
+	return langEN
 }
 
 func challengeLanguageCandidates(lang string) []string {
-	if lang == langFR {
-		return []string{langFR, "fr"}
-	}
-	if lang == langEN {
-		return []string{langEN, "en-GB", "en"}
-	}
-	short := strings.Split(lang, "-")[0]
-	return []string{lang, short}
+	return []string{langEN, "en-GB", "en"}
 }
 
 //nolint:gocyclo // construction de candidats de badge : N branches d'heuristiques sur path/category/difficulty

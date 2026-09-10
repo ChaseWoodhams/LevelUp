@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import type { Template } from '@/lib/prestige'
 
-const mockShellState = { locale: 'fr' as 'fr' | 'en' }
+const mockShellState = { locale: 'en' as 'en' | 'en' }
 vi.mock('@/stores/appShellStore', () => ({
   useAppShellStore: <T,>(selector: (s: typeof mockShellState) => T) => selector(mockShellState),
 }))
@@ -42,7 +42,6 @@ function makeTemplate(over: Partial<Template>): Template {
     eval_type: 'threshold',
     mode_filter: 'universal',
     label_en: 'KDA challenge',
-    label_fr: 'Défi KDA',
     normal_target: 1,
     heroic_target: 1.5,
     legendary_target: 2,
@@ -56,7 +55,7 @@ function makeTemplate(over: Partial<Template>): Template {
 describe('CreateChallengeForm — cooldown UI', () => {
   beforeEach(() => {
     cleanup()
-    mockShellState.locale = 'fr'
+    mockShellState.locale = 'en'
     mockCreate.error = null
     mockSuggested.data = { templates: [] }
   })

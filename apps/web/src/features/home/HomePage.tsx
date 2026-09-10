@@ -195,7 +195,7 @@ export function HomePage() {
   const challengesCompleted = challenges?.completed ?? 0
   const challengesTotal = challenges?.total ?? 0
   const challengesCompletedLabel = challenges?.available
-    ? `${challengesCompleted} / ${challengesTotal} complétés`
+    ? `${challengesCompleted} / ${challengesTotal} completed`
     : null
   const numberLocale = intlLocale(locale)
   // Séquence d'outcomes : filtrer recent_matches par le session_label de la
@@ -297,7 +297,7 @@ export function HomePage() {
               {challengesCompletedLabel && (
                 <p data-testid="home-challenges-completed" className="shrink-0 text-sm text-foreground">
                   <strong className="text-primary">{challengesCompleted}</strong> / {challengesTotal}{' '}
-                  {locale === 'en' ? 'completed' : 'complétés'}
+                  {'completed'}
                 </p>
               )}
             </header>
@@ -441,7 +441,7 @@ export function HomePage() {
           <section className="flex flex-col gap-3">
             <header className="flex items-center gap-1.5">
               <h3 className="text-base font-semibold text-foreground">
-                {locale === 'en' ? 'Last session results' : 'Résultats de la dernière session'}
+                {'Last session results'}
               </h3>
             </header>
             <OutcomeSequenceTape

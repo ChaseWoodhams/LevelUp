@@ -60,8 +60,8 @@ func (r *FiltersRepo) applyAssetNamesFromMetadata(ctx context.Context, rows []do
 	defer cancel()
 
 	metaRepo := NewMetadataRepoFromDB(r.pdb.Metadata)
-	langsFR := PreferredLangsForLocale("fr")
-	langsEN := PreferredLangsForLocale("en")
+	langsFR := PreferredAssetLanguages()
+	langsEN := PreferredAssetLanguages()
 	res := resolvedAssetNames{
 		mapEN:      r.resolveAssetNamesBulkBestEffort(ctx2, metaRepo, "map", mapIDs, langsEN),
 		mapFR:      r.resolveAssetNamesBulkBestEffort(ctx2, metaRepo, "map", mapIDs, langsFR),
@@ -219,7 +219,7 @@ func countResolved(enMap, frMap map[string]string) int {
 }
 
 // applyModeFRTranslations enrichit PairNameFR dans les rows via la cascade
-// unifiée analysis.ResolvePairNameFR (mode_name_tr puis re-lookup via
+// unifiée analysis.ResolvePairName (mode_name_tr puis re-lookup via
 // asset_translations puis raw fallback).
 //
 // Source unique de vérité partagée avec home_repo et match_history. Sans le
@@ -238,7 +238,7 @@ func (r *FiltersRepo) applyModeFRTranslations(ctx context.Context, rows []domain
 	// Étape 1 : collecter les pair_id distincts ET les mode_en normalisés
 	// (depuis pair_name brut ET depuis l'asset name si déjà connu).
 	pairIDs := collectDistinctPairIDsForFilters(rows)
-	pairAssetNames := loadPairAssetNamesFR(ctx, r.pdb.Metadata, pairIDs)
+	pairAssetNames := loadPairAssetNames(ctx, r.pdb.Metadata, pairIDs)
 
 	uniqueEN := make(map[string]struct{}, 32)
 	for _, row := range rows {
@@ -261,7 +261,7 @@ func (r *FiltersRepo) applyModeFRTranslations(ctx context.Context, rows []domain
 	for en := range uniqueEN {
 		enNames = append(enNames, en)
 	}
-	modeFR := loadModeNamesFRForKeys(ctx, r.pdb.Metadata, enNames)
+	modeFR := loadModeNamesForKeys(ctx, r.pdb.Metadata, enNames)
 	if len(modeFR) == 0 && len(pairAssetNames) == 0 {
 		return
 	}
@@ -272,7 +272,7 @@ func (r *FiltersRepo) applyModeFRTranslations(ctx context.Context, rows []domain
 		if rows[i].PairID != nil {
 			assetName = pairAssetNames[*rows[i].PairID]
 		}
-		if fr := analysis.ResolvePairNameFR(
+		if fr := analysis.ResolvePairName(
 			derefString(rows[i].PairName),
 			derefString(rows[i].PairNameFR),
 			assetName,
@@ -411,7 +411,7 @@ func (r *FiltersRepo) loadAssetFRTranslations(
 	}
 	ph := Placeholders(len(ids))
 	q := fmt.Sprintf(
-		`SELECT asset_id, name FROM asset_translations WHERE asset_type = ? AND lang IN ('fr-FR', 'fr') AND asset_id IN (%s) ORDER BY asset_id, CASE WHEN lang = 'fr-FR' THEN 0 ELSE 1 END`,
+		`SELECT asset_id, name FROM asset_translations WHERE asset_type = ? AND lang IN ('en-US', 'en') AND asset_id IN (%s) ORDER BY asset_id, CASE WHEN lang = 'en-US' THEN 0 ELSE 1 END`,
 		ph,
 	)
 	args := make([]any, 0, len(ids)+1)

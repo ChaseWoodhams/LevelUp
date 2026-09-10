@@ -30,7 +30,7 @@ type CatalogEntry struct {
 	Metric    string  `json:"metric"`
 	Threshold float64 `json:"threshold"`
 	TitleEN   string  `json:"title_en"`
-	TitleFR   string  `json:"title_fr"`
+	TitleFR   string  `json:"-"`
 	Icon      string  `json:"icon,omitempty"`
 	// Condition est la description TECHNIQUE (formule) du milestone, non localisée
 	// (ex : "accuracy >= 0.50 on 30 distinct days"). Référence interne — n'est PLUS
@@ -38,7 +38,7 @@ type CatalogEntry struct {
 	Condition string `json:"condition,omitempty"`
 	// ConditionFR / ConditionEN : description lisible localisée servie à l'UI (A9).
 	// Vide si le milestone n'a pas de condition explicite → le front n'affiche rien.
-	ConditionFR string `json:"condition_fr,omitempty"`
+	ConditionFR string `json:"-"`
 	ConditionEN string `json:"condition_en,omitempty"`
 }
 

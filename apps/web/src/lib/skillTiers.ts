@@ -50,7 +50,6 @@ export function subTierRoman(n: number): string {
 export interface SkillTier {
   min: number
   max: number
-  fr: string
   en: string
   subTiers: number
 }
@@ -71,12 +70,12 @@ export interface SkillTierGrid {
 export const LUSR_TIER_GRID: SkillTierGrid = {
   subTierStyle: 'roman',
   tiers: [
-    { min: 1000, max: 1200, fr: 'Bronze',  en: 'Bronze',   subTiers: 6 },
-    { min: 1200, max: 1400, fr: 'Argent',  en: 'Silver',   subTiers: 3 },
-    { min: 1400, max: 1600, fr: 'Or',      en: 'Gold',     subTiers: 6 },
-    { min: 1600, max: 1800, fr: 'Platine', en: 'Platinum', subTiers: 2 },
-    { min: 1800, max: 2000, fr: 'Diamant', en: 'Diamond',  subTiers: 3 },
-    { min: 2000, max: 9999, fr: 'Onyx',    en: 'Onyx',     subTiers: 1 },
+    { min: 1000, max: 1200, en: 'Bronze',   subTiers: 6 },
+    { min: 1200, max: 1400, en: 'Silver',   subTiers: 3 },
+    { min: 1400, max: 1600, en: 'Gold',     subTiers: 6 },
+    { min: 1600, max: 1800, en: 'Platinum', subTiers: 2 },
+    { min: 1800, max: 2000, en: 'Diamond',  subTiers: 3 },
+    { min: 2000, max: 9999, en: 'Onyx',     subTiers: 1 },
   ],
 }
 
@@ -88,12 +87,12 @@ export const LUSR_TIER_GRID: SkillTierGrid = {
 export const CSR_TIER_GRID: SkillTierGrid = {
   subTierStyle: 'arabic',
   tiers: [
-    { min: 0,    max: 300,  fr: 'Bronze',  en: 'Bronze',   subTiers: 6 },
-    { min: 300,  max: 600,  fr: 'Argent',  en: 'Silver',   subTiers: 6 },
-    { min: 600,  max: 900,  fr: 'Or',      en: 'Gold',     subTiers: 6 },
-    { min: 900,  max: 1200, fr: 'Platine', en: 'Platinum', subTiers: 6 },
-    { min: 1200, max: 1500, fr: 'Diamant', en: 'Diamond',  subTiers: 6 },
-    { min: 1500, max: 9999, fr: 'Onyx',    en: 'Onyx',     subTiers: 1 },
+    { min: 0,    max: 300,  en: 'Bronze',   subTiers: 6 },
+    { min: 300,  max: 600,  en: 'Silver',   subTiers: 6 },
+    { min: 600,  max: 900,  en: 'Gold',     subTiers: 6 },
+    { min: 900,  max: 1200, en: 'Platinum', subTiers: 6 },
+    { min: 1200, max: 1500, en: 'Diamond',  subTiers: 6 },
+    { min: 1500, max: 9999, en: 'Onyx',     subTiers: 1 },
   ],
 }
 
@@ -151,7 +150,6 @@ export function subTierPosition(grid: SkillTierGrid, ratingValue: number): SubTi
 // (sentinelle « Placement », valeur brute, vide) est renvoyée inchangée.
 
 interface TierNamePair {
-  fr: string
   en: string
 }
 
@@ -161,11 +159,10 @@ interface TierNamePair {
 const TIER_NAME_BY_KEY: Record<string, TierNamePair> = (() => {
   const out: Record<string, TierNamePair> = {}
   for (const t of LUSR_TIER_GRID.tiers) {
-    const pair: TierNamePair = { fr: t.fr, en: t.en }
-    out[t.fr.toLowerCase()] = pair
+    const pair: TierNamePair = { en: t.en }
     out[t.en.toLowerCase()] = pair
   }
-  out['champion'] = { fr: 'Champion', en: 'Champion' }
+  out['champion'] = { en: 'Champion' }
   return out
 })()
 
@@ -175,10 +172,10 @@ const TIER_NAME_BY_KEY: Record<string, TierNamePair> = (() => {
  * canonique EN + sous-palier séparé (ex. colonne CSR de la carrière). Une entrée
  * inconnue (vide, palier hors grille) est renvoyée telle quelle.
  */
-export function localizeTierName(name: string, locale: Locale): string {
+export function localizeTierName(name: string, _locale: Locale): string {
   const pair = TIER_NAME_BY_KEY[name.trim().toLowerCase()]
   if (!pair) return name
-  return locale === 'en' ? pair.en : pair.fr
+  return pair.en
 }
 
 /**
@@ -190,7 +187,7 @@ export function localizeTierName(name: string, locale: Locale): string {
  */
 export function localizeTierLabel(
   label: string | null | undefined,
-  locale: Locale,
+  _locale: Locale,
 ): string | null | undefined {
   if (label == null || label.trim() === '') return label
   const trimmed = label.trim()
@@ -200,7 +197,7 @@ export function localizeTierLabel(
   const namePart = (m ? m[1] : trimmed).trim()
   const pair = TIER_NAME_BY_KEY[namePart.toLowerCase()]
   if (!pair) return label // nom inconnu → inchangé (placement, brut…)
-  const localized = locale === 'en' ? pair.en : pair.fr
+  const localized = pair.en
   return m ? `${localized} ${m[2]}` : localized
 }
 
@@ -217,7 +214,6 @@ export function localizeTierLabel(
 const TIER_ORDINAL_BY_KEY: Record<string, number> = (() => {
   const out: Record<string, number> = {}
   LUSR_TIER_GRID.tiers.forEach((t, i) => {
-    out[t.fr.toLowerCase()] = i
     out[t.en.toLowerCase()] = i
   })
   out['champion'] = LUSR_TIER_GRID.tiers.length

@@ -63,7 +63,7 @@ describe('TitleSwitcher (PMT-8 / MT-22)', () => {
     navigateMock.mockClear()
     applyActiveTitleMock.mockClear()
     applyActiveTitleMock.mockImplementation(() => Promise.resolve())
-    useAppShellStore.setState({ locale: 'fr', isTitleSwitching: false, currentPlayer: PLAYER, availablePlayers: [PLAYER] })
+    useAppShellStore.setState({ locale: 'en', isTitleSwitching: false, currentPlayer: PLAYER, availablePlayers: [PLAYER] })
   })
   afterEach(() => cleanup())
 

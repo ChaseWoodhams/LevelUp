@@ -100,7 +100,7 @@ export function CompareMirrorRow({
       <div
         style={{
           // Colonnes de valeur élargies (4.5rem) : les libellés texte « Rang
-          // carrière » / « CSR » (ex. "Diamant 3", "Non classé") tiennent sur une
+          // carrière » / « CSR » (ex. "Diamant 3", "Unranked") tiennent sur une
           // seule ligne et restent alignés comme les valeurs numériques.
           display: 'grid',
           gridTemplateColumns: '4.5rem 1fr 4.5rem 1fr 4.5rem',

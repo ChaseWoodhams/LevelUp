@@ -1,7 +1,4 @@
 # Sync Guide — LevelUp
-
-French version: [FR/SYNC_GUIDE.md](FR/SYNC_GUIDE.md)
-
 > How LevelUp keeps your Halo matches in sync. The backend is Go (`apps/go-api`); the front is React/Vite (`apps/web`). Sync is now **automatic** — there is no `python scripts/sync.py` anymore.
 
 ## Overview

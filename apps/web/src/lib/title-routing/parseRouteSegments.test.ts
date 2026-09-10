@@ -21,11 +21,8 @@ describe('parseRouteSegments', () => {
     })
   })
 
-  it('langue fr reconnue', () => {
-    expect(parseRouteSegments('/fr/t/halo_infinite/players/x')).toEqual({
-      lang: 'fr',
-      titleSlug: 'halo_infinite',
-    })
+  it('unknown language is rejected', () => {
+    expect(parseRouteSegments('/fr/t/halo_infinite/players/x')).toEqual({})
   })
 
   it('page joueur legacy sans segment → rien', () => {
@@ -81,8 +78,8 @@ describe('parseRouteSegments', () => {
 
 describe('withLangSegment (émission par défaut du segment, I10)', () => {
   it('injecte le segment devant un pathname title-scoped SANS langue', () => {
-    expect(withLangSegment('/t/halo_infinite/players/x/home', 'fr')).toBe(
-      '/fr/t/halo_infinite/players/x/home',
+    expect(withLangSegment('/t/halo_infinite/players/x/home', 'en')).toBe(
+      '/en/t/halo_infinite/players/x/home',
     )
     expect(withLangSegment('/t/halo_5/players/x/stats/timeseries', 'en')).toBe(
       '/en/t/halo_5/players/x/stats/timeseries',
@@ -90,20 +87,20 @@ describe('withLangSegment (émission par défaut du segment, I10)', () => {
   })
 
   it('IDEMPOTENTE : pathname portant déjà une langue → inchangé (pas de double préfixe)', () => {
-    expect(withLangSegment('/en/t/halo_5/players/x/home', 'fr')).toBe(
+    expect(withLangSegment('/en/t/halo_5/players/x/home', 'en')).toBe(
       '/en/t/halo_5/players/x/home',
     )
   })
 
   it('pathname sans segment de titre (page agnostique) → inchangé', () => {
-    expect(withLangSegment('/settings', 'fr')).toBe('/settings')
+    expect(withLangSegment('/settings', 'en')).toBe('/settings')
     expect(withLangSegment('/', 'en')).toBe('/')
   })
 
   it('ne touche PAS le ?search/#hash (l’appelant les re-concatène)', () => {
     // withLangSegment ne reçoit que le pathname ; search/hash restent hors de son ressort.
-    expect(withLangSegment('/t/halo_infinite/players/x/home', 'fr')).toBe(
-      '/fr/t/halo_infinite/players/x/home',
+    expect(withLangSegment('/t/halo_infinite/players/x/home', 'en')).toBe(
+      '/en/t/halo_infinite/players/x/home',
     )
   })
 })

@@ -63,8 +63,7 @@ Deux générateurs de fixtures démo :
   démarrer le backend → la sonde résout `demo-player` → les ~60 specs data-dépendantes
   s'exécutent. Détail : `apps/go-api/internal/ops/seed_demo_synthetic.go`.
 
-La démo force par défaut la locale UI **anglaise** (vitrine internationale) ; les specs E2E
-vérifiant l'UI française, la CI pinne `LEVELUP_DEMO_LOCALE=fr` au démarrage du backend.
+The demo runs with the English-only runtime.
 
 Politique de skip conservée : quand les fixtures sont absentes (ex. run local sans seed),
 les specs data-dépendantes appellent le garde [`_helpers/demoData.ts`](./_helpers/demoData.ts)
@@ -119,6 +118,6 @@ Certaines specs restent skippées avec un motif explicite (helpers de
 Le job `e2e-react` (`.github/workflows/ci.yml`) ne tourne **que sur pull_request** (coût +
 flakiness ; les tests auth exigent des identifiants absents en CI). Le job **seede la
 fixture synthétique** (`levelup seed-demo --synthetic`) AVANT de démarrer le backend
-(`LEVELUP_DEMO_MODE=true LEVELUP_DEMO_LOCALE=fr`) → les specs data-dépendantes s'exécutent
+(`LEVELUP_DEMO_MODE=true`) → les specs data-dépendantes s'exécutent
 réellement. Le front dev utilise le proxy Vite `/api/v1` (NE PAS définir `VITE_API_BASE_URL`,
 qui casserait le préfixe `/api/v1`).

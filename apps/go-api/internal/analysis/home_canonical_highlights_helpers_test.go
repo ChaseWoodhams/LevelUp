@@ -271,14 +271,14 @@ func TestSliceBestKillingSpreeCanonical_LocaleAware(t *testing.T) {
 	if gotFR == nil || gotEN == nil {
 		t.Fatalf("nil slide: fr=%v en=%v", gotFR, gotEN)
 	}
-	if !strings.Contains(gotFR.Detail, "Les rues") {
-		t.Errorf("FR Detail = %q, want to contain %q", gotFR.Detail, "Les rues")
+	if !strings.Contains(gotFR.Detail, "Streets") {
+		t.Errorf("English Detail = %q, want to contain %q", gotFR.Detail, "Streets")
 	}
 	if !strings.Contains(gotEN.Detail, "Streets") {
 		t.Errorf("EN Detail = %q, want to contain %q", gotEN.Detail, "Streets")
 	}
 	if strings.Contains(gotEN.Detail, "Les rues") {
-		t.Errorf("EN Detail = %q, must NOT contain FR label", gotEN.Detail)
+		t.Errorf("English Detail = %q, must not contain legacy label", gotEN.Detail)
 	}
 }
 
@@ -425,8 +425,8 @@ func TestSliceFavoriteMapCanonical_LocaleAware(t *testing.T) {
 		}
 	}
 	rows := []canonical.PlayerMatchRow{mkRow(), mkRow()}
-	if got := sliceFavoriteMapCanonical(rows, "fr"); got == nil || got.Value != "Bazar" {
-		t.Errorf("FR favorite map Value = %v, want Bazar", got)
+	if got := sliceFavoriteMapCanonical(rows, "fr"); got == nil || got.Value != "Bazaar" {
+		t.Errorf("English favorite map Value = %v, want Bazaar", got)
 	}
 	if got := sliceFavoriteMapCanonical(rows, "en"); got == nil || got.Value != "Bazaar" {
 		t.Errorf("EN favorite map Value = %v, want Bazaar", got)

@@ -17,7 +17,7 @@ export interface HomeSkillPeakCardProps {
   label: string
   peak: HomeSkillPeakSummary | null
   numberLocale: string
-  /** Locale UI ('fr'/'en') — localise le libellé de palier (tier_label baké). */
+  /** Locale UI ('en'/'en') — localise le libellé de palier (tier_label baké). */
   locale: Locale
   testIdPrefix: string
   state: 'value' | 'placement' | 'neutral' | 'absent'
@@ -93,11 +93,11 @@ export function HomeSkillPeakCard({
           ) : isPlacement || state === 'absent' ? (
             // Legacy path : backend antérieur à mai 2026 ne fournissait pas le
             // badge unranked dans le peak. Fallback sur l'image statique générique.
-            // État 'absent' (aucun historique) : même image unranked_0, label "Non classé".
+            // État 'absent' (aucun historique) : même image unranked_0, label "Unranked".
             <img
               data-testid={`${testIdPrefix}-unranked`}
               src={unrankedBadgeURL()}
-              alt={isPlacement ? 'En placement' : 'Non classé'}
+              alt={isPlacement ? 'En placement' : 'Unranked'}
               className="h-12 w-12 shrink-0 object-contain opacity-80"
               loading="lazy"
               decoding="async"

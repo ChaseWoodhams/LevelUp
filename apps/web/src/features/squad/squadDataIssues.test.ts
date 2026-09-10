@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 import { formatDataIssues } from './squadDataIssues'
 import { getSquadText } from './i18n'
 
-const fr = getSquadText('fr')
+const fr = getSquadText('en')
 const en = getSquadText('en')
 
 describe('formatDataIssues', () => {

@@ -47,7 +47,7 @@ describe('binPositionsToHeatmap', () => {
 
 describe('MatchPositionsHeatmap', () => {
   it('rend sans crash avec des positions (echarts mocké)', async () => {
-    render(<MatchPositionsHeatmap positions={sample} locale="fr" />)
+    render(<MatchPositionsHeatmap positions={sample} locale="en" />)
     expect(screen.getByText('Heatmap des positions')).toBeTruthy()
     // ChartCard lazy-load echarts-for-react via Suspense : le stub n'est monté
     // qu'après résolution du lazy import → assertion asynchrone.
@@ -55,7 +55,7 @@ describe('MatchPositionsHeatmap', () => {
   })
 
   it('affiche le filtre par équipe quand au moins une position a team != -1', () => {
-    render(<MatchPositionsHeatmap positions={sample} locale="fr" />)
+    render(<MatchPositionsHeatmap positions={sample} locale="en" />)
     expect(screen.getByText('Équipe A')).toBeTruthy()
     expect(screen.getByText('Équipe B')).toBeTruthy()
     expect(screen.getByText('Global')).toBeTruthy()
@@ -66,12 +66,12 @@ describe('MatchPositionsHeatmap', () => {
       { timeMs: 0, x: 1, y: 2, z: 0, team: -1 },
       { timeMs: 0, x: 3, y: 4, z: 0, team: -1 },
     ]
-    render(<MatchPositionsHeatmap positions={unknown} locale="fr" />)
+    render(<MatchPositionsHeatmap positions={unknown} locale="en" />)
     expect(screen.queryByText('Équipe A')).toBeNull()
   })
 
   it('se masque proprement (null) sans positions', () => {
-    const { container } = render(<MatchPositionsHeatmap positions={[]} locale="fr" />)
+    const { container } = render(<MatchPositionsHeatmap positions={[]} locale="en" />)
     expect(container.firstChild).toBeNull()
   })
 

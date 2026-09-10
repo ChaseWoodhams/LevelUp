@@ -1,7 +1,4 @@
 # FAQ — LevelUp
-
-French version: [FR/FAQ.md](FR/FAQ.md)
-
 > LevelUp is a Halo stats dashboard. Stack: a Go backend (`apps/go-api`) and a React/Vite frontend (`apps/web`). There is no Python anymore. For the full install walkthrough see [INSTALL.md](INSTALL.md); for sync details see [SYNC_GUIDE.md](SYNC_GUIDE.md).
 
 ## Install & prerequisites

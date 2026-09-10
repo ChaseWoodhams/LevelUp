@@ -43,7 +43,7 @@ func (reg *ServiceRegistry) serveIndexWithOG(w http.ResponseWriter, req *http.Re
 	origin := requestOrigin(req)
 	// ?lang= explicite (fr/en) prime sur l'Accept-Language du crawler (cf.
 	// ogmeta.LocaleFromParams) : le partageur peut figer la langue de l'apercu.
-	loc := ogmeta.LocaleFromParams(req.URL.Query().Get("lang"), req.Header.Get("Accept-Language"))
+	loc := ogmeta.LocaleEN
 	meta := ogmeta.DefaultMeta(origin, req.URL.Path, loc)
 
 	if reg != nil && reg.cfg != nil && reg.cfg.DemoMode && ogmeta.IsCrawler(req.Header.Get("User-Agent")) {

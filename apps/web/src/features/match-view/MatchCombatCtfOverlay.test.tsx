@@ -22,7 +22,7 @@ vi.mock('echarts-for-react', () => ({
   ),
 }))
 
-const t = MATCH_VIEW_TEXT.fr
+const t = MATCH_VIEW_TEXT.en
 
 function sbRow(partial: Partial<MatchScoreboardRow>): MatchScoreboardRow {
   return {

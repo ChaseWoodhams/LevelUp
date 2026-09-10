@@ -23,7 +23,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 describe('MediaPage', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 

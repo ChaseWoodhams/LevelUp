@@ -7,8 +7,8 @@
  * - MediaCard     → onglet « Données & Médias »
  *
  * Chaque carte partage les props TabProps (merged/handleChange/t/frozen) et le
- * plumbing settings de SettingsPage. L'exemption démo de la langue est conservée :
- * le Select langue n'est jamais figé, tout le reste l'est en mode démo.
+ * Settings cards share the TabProps plumbing from SettingsPage. Language is fixed
+ * to English.
  */
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,17 +32,6 @@ export function InterfaceCard({ merged, handleChange, t, frozen }: TabProps) {
         <CardTitle className="text-base">{t.interfaceTitle}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-1 divide-y divide-border/50">
-        <div className="flex items-center justify-between py-2">
-          <span className="text-sm text-foreground">{t.langLabel}</span>
-          <Select
-            value={merged.lang ?? 'fr'}
-            onChange={(e) => handleChange('lang', e.target.value)}
-            className="w-auto"
-          >
-            <option value="fr">{t.langFr}</option>
-            <option value="en">{t.langEn}</option>
-          </Select>
-        </div>
         <div className="flex items-center justify-between py-2">
           <span className="text-sm text-foreground">{t.timezoneLabel}</span>
           <Select

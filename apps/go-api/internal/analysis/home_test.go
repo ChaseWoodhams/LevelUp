@@ -82,8 +82,8 @@ func TestBuildSpartanIdentity_UsesRequestedLanguage(t *testing.T) {
 	if identityFR.CareerRank == nil {
 		t.Fatal("FR CareerRank: want non-nil")
 	}
-	if identityFR.CareerRank.RankTitle != "Caporal-chef" {
-		t.Fatalf("FR RankTitle: want Caporal-chef, got %q", identityFR.CareerRank.RankTitle)
+	if identityFR.CareerRank.RankTitle != "Lance Corporal" {
+		t.Fatalf("English RankTitle: want Lance Corporal, got %q", identityFR.CareerRank.RankTitle)
 	}
 	if identityFR.CareerRank.ProgressPct != 50.0 {
 		t.Fatalf("FR ProgressPct: want 50, got %.2f", identityFR.CareerRank.ProgressPct)

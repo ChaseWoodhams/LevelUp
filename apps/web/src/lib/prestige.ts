@@ -56,13 +56,6 @@ export const TIER_COLORS: Record<Tier, string> = {
   mythic: '#F59E0B',
 }
 
-export const TIER_LABELS_FR: Record<Tier, string> = {
-  normal: 'Normal',
-  heroic: 'Héroïque',
-  legendary: 'Légendaire',
-  mythic: 'Mythique',
-}
-
 export const TIER_LABELS_EN: Record<Tier, string> = {
   normal: 'Normal',
   heroic: 'Heroic',
@@ -136,9 +129,7 @@ export interface PresetArc {
   id: string
   title_slug: string
   title_en: string
-  title_fr: string
   description_en?: string
-  description_fr?: string
   schema_version: number
   updated_at: string
   /** Étapes hydratées par le backend (aperçu du picker). */
@@ -187,9 +178,7 @@ export interface Template {
   eval_type: EvalType
   mode_filter: string
   label_en: string
-  label_fr: string
   description_en?: string
-  description_fr?: string
   normal_target: number
   heroic_target: number
   legendary_target: number
@@ -233,7 +222,6 @@ export interface SquadChallengeParticipant {
  *  template, vides si défi sans template) + participants courants. Sur-ensemble
  *  strict de SquadChallenge (le backend aplatit le défi de base dans la vue). */
 export interface SquadChallengeView extends SquadChallenge {
-  label_fr?: string
   label_en?: string
   /** true si expires_at est dépassé (le défi reste listé mais non rejoignable). */
   expired: boolean

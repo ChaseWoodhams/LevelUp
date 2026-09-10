@@ -25,8 +25,8 @@ vi.mock('@/features/filters/queries', () => ({
       },
       available_options: {
         experience_types: [
-          { value: 'PVP classé', label: 'PVP classé', count: 10 },
-          { value: 'PVP non classé', label: 'PVP non classé', count: 20 },
+          { value: 'Ranked PvP', label: 'Ranked PvP', count: 10 },
+          { value: 'Unranked PvP', label: 'Unranked PvP', count: 20 },
         ],
         playlists: [{ value: 'Slayer Ranked', label: 'Slayer Ranked', count: 10 }],
         modes: [{ value: 'Slayer', label: 'Slayer', count: 30 }],
@@ -52,14 +52,14 @@ vi.mock('@/features/squad/useActiveSeason', () => ({
 
 // Mock appShellStore.locale pour MultiSelectFilter (qui consomme la locale).
 vi.mock('@/stores/appShellStore', () => ({
-  useAppShellStore: (selector: (s: { locale: string }) => unknown) => selector({ locale: 'fr' }),
+  useAppShellStore: (selector: (s: { locale: string }) => unknown) => selector({ locale: 'en' }),
 }))
 
 const LABELS: LocalFilterBarLabels = {
   experience: 'Expérience',
   experienceAll: 'Toutes',
   experienceRanked: 'Classé',
-  experienceUnranked: 'Non classé',
+  experienceUnranked: 'Unranked',
   playlists: 'Playlists',
   modes: 'Modes',
   reset: 'Réinitialiser',
@@ -121,10 +121,10 @@ describe('useLocalFilterBar', () => {
     })
 
     // Après clic : les 3 options sont rendues — leur accessible name concatène
-    // le label et le count (ex: "Toutes30", "Classé10", "Non classé20").
+    // le label et le count (ex: "Toutes30", "Classé10", "Unranked20").
     expect(screen.getByRole('button', { name: /^Toutes\d+$/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Classé\d+$/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^Non classé\d+$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Unranked\d+$/ })).toBeInTheDocument()
   })
 
   it('hasActiveFilters reflète l’état committed (false initial)', () => {

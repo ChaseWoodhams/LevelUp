@@ -68,7 +68,6 @@ export function HelpPage() {
       {activeTab === 'glossary' && <GlossaryTab text={text} />}
       {activeTab === 'release-notes' && (
         <ReleaseNotesTab
-          locale={locale}
           loadingMessage={text.releaseNotes.loading}
           errorMessage={text.releaseNotes.error}
         />

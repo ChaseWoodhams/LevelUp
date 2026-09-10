@@ -57,7 +57,7 @@ describe('buildSkillTierMarkArea', () => {
     ma.data.map(([a]) => (a as { name: string }).name)
 
   it('LUSR : labels en chiffres romains (Or III) dans le cadre', () => {
-    const labels = names(buildSkillTierMarkArea('fr', 1400, 1600, LUSR_TIER_GRID, tc))
+    const labels = names(buildSkillTierMarkArea('en', 1400, 1600, LUSR_TIER_GRID, tc))
     expect(labels).toContain('Or III')
     expect(labels).toContain('Or I')
   })
@@ -68,13 +68,13 @@ describe('buildSkillTierMarkArea', () => {
   })
 
   it('alterne le shading entre bandes voisines', () => {
-    const ma = buildSkillTierMarkArea('fr', 1400, 1600, LUSR_TIER_GRID, tc)
+    const ma = buildSkillTierMarkArea('en', 1400, 1600, LUSR_TIER_GRID, tc)
     const colors = ma.data.map(([a]) => (a as { itemStyle: { color: string } }).itemStyle.color)
     expect(colors[0]).not.toBe(colors[1])
   })
 
   it('Onyx : une bande sans numéro de sous-palier', () => {
-    const labels = names(buildSkillTierMarkArea('fr', 1900, 2200, LUSR_TIER_GRID, tc))
+    const labels = names(buildSkillTierMarkArea('en', 1900, 2200, LUSR_TIER_GRID, tc))
     expect(labels).toContain('Onyx')
   })
 })

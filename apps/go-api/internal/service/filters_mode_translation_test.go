@@ -23,7 +23,7 @@ func makeTranslatedRows() []domain.FilterMatchRow {
 			MapName:      strPtr("Aquarius"),
 			MapNameFR:    strPtr("Aquarius"),
 			PairName:     strPtr("Arena:Slayer"),
-			PairNameFR:   strPtr("Assassin"),
+			PairNameFR:   strPtr("Arena:Slayer"),
 			PlaylistName: strPtr("Ranked Arena"),
 		}
 	}
@@ -34,7 +34,7 @@ func makeTranslatedRows() []domain.FilterMatchRow {
 			MapName:      strPtr("Streets"),
 			MapNameFR:    strPtr("Streets"),
 			PairName:     strPtr("BTB:CTF"),
-			PairNameFR:   strPtr("Capture de drapeau"),
+			PairNameFR:   strPtr("BTB:CTF"),
 			PlaylistName: strPtr("Quick Play"),
 		}
 	}
@@ -100,30 +100,21 @@ func TestBuildModeTranslationMap_WithTranslations(t *testing.T) {
 	t.Parallel()
 	rows := makeTranslatedRows()
 	m := buildModeTranslationMap(rows)
-	cases := [][2]string{
-		{"Slayer", "Assassin"},
-		{"CTF", "Capture de drapeau"},
-	}
-	for _, c := range cases {
-		if m[c[0]] != c[1] {
-			t.Errorf("tr[%q] = %q, want %q", c[0], m[c[0]], c[1])
-		}
-	}
-	if len(m) != 2 {
-		t.Errorf("expected 2 entries, got %d: %v", len(m), m)
+	if len(m) != 0 {
+		t.Errorf("English-only rows should not produce a translation map: %v", m)
 	}
 }
 
 // ─── modeUI ───────────────────────────────────────────────────────────────────
 
-func TestModeUI_FrenchPairNameFR(t *testing.T) {
+func TestModeUI_EnglishPairName(t *testing.T) {
 	t.Parallel()
 	row := domain.FilterMatchRow{
 		PairName:   strPtr("Arena:Slayer"),
-		PairNameFR: strPtr("Assassin"),
+		PairNameFR: strPtr("Legacy Mode"),
 	}
-	if got := modeUI(row); got != "Assassin" {
-		t.Errorf("modeUI = %q, want Assassin", got)
+	if got := modeUI(row); got != "Slayer" {
+		t.Errorf("modeUI = %q, want Slayer", got)
 	}
 }
 
@@ -148,12 +139,12 @@ func TestResolveFilters_TranslatedModes_AvailableOptionsFR(t *testing.T) {
 	if len(modes) != 2 {
 		t.Fatalf("expected 2 mode options, got %d: %v", len(modes), modes)
 	}
-	// sorted: "Assassin" < "Capture de drapeau"
-	if modes[0].Label != "Assassin" || modes[0].Value != "Assassin" {
-		t.Errorf("modes[0] = %+v, want {Assassin Assassin}", modes[0])
+	// sorted: "CTF" < "Slayer"
+	if modes[0].Label != "CTF" || modes[0].Value != "CTF" {
+		t.Errorf("modes[0] = %+v, want {CTF CTF}", modes[0])
 	}
-	if modes[1].Label != "Capture de drapeau" || modes[1].Value != "Capture de drapeau" {
-		t.Errorf("modes[1] = %+v, want {Capture de drapeau Capture de drapeau}", modes[1])
+	if modes[1].Label != "Slayer" || modes[1].Value != "Slayer" {
+		t.Errorf("modes[1] = %+v, want {Slayer Slayer}", modes[1])
 	}
 }
 
@@ -169,9 +160,9 @@ func TestResolveFilters_TranslatedModes_CountIsCorrect(t *testing.T) {
 	}
 }
 
-func TestResolveFilters_LegacyEnglishModeFilter_MigratedToFR(t *testing.T) {
+func TestResolveFilters_EnglishModeFilter(t *testing.T) {
 	t.Parallel()
-	// User has old English "Slayer" stored — must be transparently migrated to "Assassin"
+	// English values filter directly.
 	input := domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{Modes: []string{"Slayer"}},
 	}
@@ -182,10 +173,10 @@ func TestResolveFilters_LegacyEnglishModeFilter_MigratedToFR(t *testing.T) {
 	}
 }
 
-func TestResolveFilters_FrenchModeFilter_WorksDirectly(t *testing.T) {
+func TestResolveFilters_SecondEnglishModeFilter(t *testing.T) {
 	t.Parallel()
 	input := domain.FilterContextInput{
-		Cascade: domain.CascadeFilter{Modes: []string{"Assassin"}},
+		Cascade: domain.CascadeFilter{Modes: []string{"Slayer"}},
 	}
 	result := ResolveFiltersFromRows(makeTranslatedRows(), input)
 
@@ -209,14 +200,14 @@ func TestResolveFilters_NoTranslation_EnglishFilterStillWorks(t *testing.T) {
 
 func TestResolveFilters_MultipleLegacyModes_AllMigrated(t *testing.T) {
 	t.Parallel()
-	// Both stored as English — both should be migrated and filtering should give all 10 rows
+	// Both stored as English — filtering should give all 10 rows.
 	input := domain.FilterContextInput{
 		Cascade: domain.CascadeFilter{Modes: []string{"Slayer", "CTF"}},
 	}
 	result := ResolveFiltersFromRows(makeTranslatedRows(), input)
 
 	if result.Counts.TotalMatchesAfterFilters != 10 {
-		t.Errorf("TotalMatchesAfterFilters = %d, want 10 (Slayer+CTF migrated to Assassin+Capture de drapeau)", result.Counts.TotalMatchesAfterFilters)
+		t.Errorf("TotalMatchesAfterFilters = %d, want 10", result.Counts.TotalMatchesAfterFilters)
 	}
 }
 

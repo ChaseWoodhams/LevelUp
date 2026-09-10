@@ -46,7 +46,7 @@ function match(over: Partial<ExplorerTargetRecentMatch> & { match_id: string }):
 
 describe('ExplorerCombatProfile', () => {
   it('ne rend rien si aucun match et aucun statut live à signaler', () => {
-    renderWithProviders(<ExplorerCombatProfile liveMatches={[]} localMatches={[]} locale="fr" t={t} />)
+    renderWithProviders(<ExplorerCombatProfile liveMatches={[]} localMatches={[]} locale="en" t={t} />)
     expect(screen.queryByTestId('explorer-combat-profile')).toBeNull()
   })
 
@@ -55,7 +55,7 @@ describe('ExplorerCombatProfile', () => {
   // rendu minimal titré + badge remplace l'absence silencieuse.
   it('rend un bloc titré + badge quand tout est vide mais le statut explique pourquoi', () => {
     renderWithProviders(
-      <ExplorerCombatProfile liveMatches={[]} localMatches={[]} locale="fr" t={t} combatLiveStatus="no_auth" />,
+      <ExplorerCombatProfile liveMatches={[]} localMatches={[]} locale="en" t={t} combatLiveStatus="no_auth" />,
     )
     expect(screen.getByTestId('explorer-combat-profile-status-only')).toBeInTheDocument()
     expect(screen.getByTestId('explorer-live-status-badge-no_auth')).toBeInTheDocument()
@@ -66,7 +66,7 @@ describe('ExplorerCombatProfile', () => {
   it('affiche le badge dans l\'en-tête quand live est vide mais local a des données', () => {
     const local = [match({ match_id: 'C1' })]
     renderWithProviders(
-      <ExplorerCombatProfile liveMatches={[]} localMatches={local} locale="fr" t={t} combatLiveStatus="failed" />,
+      <ExplorerCombatProfile liveMatches={[]} localMatches={local} locale="en" t={t} combatLiveStatus="failed" />,
     )
     expect(screen.getByTestId('explorer-combat-profile')).toBeInTheDocument()
     expect(screen.getByTestId('explorer-live-status-badge-failed')).toBeInTheDocument()
@@ -78,7 +78,7 @@ describe('ExplorerCombatProfile', () => {
       match({ match_id: 'm2', start_time: '2026-05-02T10:00:00Z', mode_ui: 'CTF', rank: undefined }),
       match({ match_id: 'm3', start_time: '2026-05-03T10:00:00Z', mode_ui: 'Slayer', rank: 2 }),
     ]
-    renderWithProviders(<ExplorerCombatProfile liveMatches={matches} localMatches={[]} locale="fr" t={t} />)
+    renderWithProviders(<ExplorerCombatProfile liveMatches={matches} localMatches={[]} locale="en" t={t} />)
 
     expect(screen.getByTestId('explorer-combat-profile')).toBeTruthy()
     // 5 ChartCard (G1..G5) rendus de façon synchrone (wrapper).
@@ -94,7 +94,7 @@ describe('ExplorerCombatProfile', () => {
       match({ match_id: 'm2', mode_ui: 'Slayer' }),
       match({ match_id: 'm3', mode_ui: 'CTF' }),
     ]
-    renderWithProviders(<ExplorerCombatProfile liveMatches={matches} localMatches={[]} locale="fr" t={t} />)
+    renderWithProviders(<ExplorerCombatProfile liveMatches={matches} localMatches={[]} locale="en" t={t} />)
 
     const stubs = await screen.findAllByTestId('echarts-stub')
     // Le donut sérialise une série pie dont les data portent les noms de modes.
@@ -108,7 +108,7 @@ describe('ExplorerCombatProfile', () => {
     const live = [match({ match_id: 'L1', mode_ui: 'Slayer' })]
     const local = [match({ match_id: 'C1', mode_ui: 'Behemoth' })]
     renderWithProviders(
-      <ExplorerCombatProfile liveMatches={live} localMatches={local} locale="fr" t={t} />,
+      <ExplorerCombatProfile liveMatches={live} localMatches={local} locale="en" t={t} />,
     )
 
     // Défaut = live → le donut modes contient le mode live ("Slayer"), pas le local.

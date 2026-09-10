@@ -171,7 +171,7 @@ describe('RootLayout — titre d’onglet locale-aware (I18)', () => {
       authMode: 'none',
       firstLaunch: false,
       setupRequired: false,
-      locale: 'fr',
+      locale: 'en',
     })
   })
 

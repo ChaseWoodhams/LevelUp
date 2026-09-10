@@ -19,11 +19,11 @@ import { resolvePageTitle } from './pageTitle'
 import { routeTemplateSuffix } from './title-routing'
 import type { Locale } from './i18n/locale'
 
-const LOCALES: readonly Locale[] = ['fr', 'en']
+const LOCALES: readonly Locale[] = ['en', 'en']
 
 describe('resolvePageTitle (URLs title-scoped)', () => {
   it('override par suffixe joueur (forme courte /t/)', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/jgtm/stats/timeseries', 'fr')).toBe(
+    expect(resolvePageTitle('/t/halo_infinite/players/jgtm/stats/timeseries', 'en')).toBe(
       'LevelUp - Séries temporelles',
     )
     expect(resolvePageTitle('/t/halo_infinite/players/jgtm/stats/timeseries', 'en')).toBe(
@@ -36,30 +36,30 @@ describe('resolvePageTitle (URLs title-scoped)', () => {
   })
 
   it('titre dérivé d’un item de nav (accueil)', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/home', 'fr')).toBe('LevelUp - Accueil')
+    expect(resolvePageTitle('/t/halo_infinite/players/x/home', 'en')).toBe('LevelUp - Accueil')
     expect(resolvePageTitle('/t/halo_infinite/players/x/home', 'en')).toBe('LevelUp - Home')
   })
 
   it('page de match', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/matches/abc-123', 'fr')).toBe('LevelUp - Match')
+    expect(resolvePageTitle('/t/halo_infinite/players/x/matches/abc-123', 'en')).toBe('LevelUp - Match')
   })
 
   it('racine joueur nue → Accueil', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x', 'fr')).toBe('LevelUp - Accueil')
+    expect(resolvePageTitle('/t/halo_infinite/players/x', 'en')).toBe('LevelUp - Accueil')
     expect(resolvePageTitle('/t/halo_infinite/players/x', 'en')).toBe('LevelUp - Home')
   })
 
   it('page statique (agnostique)', () => {
-    expect(resolvePageTitle('/settings', 'fr')).toBe('LevelUp - Paramètres')
+    expect(resolvePageTitle('/settings', 'en')).toBe('LevelUp - Paramètres')
     expect(resolvePageTitle('/settings', 'en')).toBe('LevelUp - Settings')
-    expect(resolvePageTitle('/', 'fr')).toBe('LevelUp - Accueil')
+    expect(resolvePageTitle('/', 'en')).toBe('LevelUp - Accueil')
     expect(resolvePageTitle('/', 'en')).toBe('LevelUp - Home')
   })
 
   it('suffixe/pathname inconnu → LevelUp (fallback conservé)', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/zzz-inconnu', 'fr')).toBe('LevelUp')
     expect(resolvePageTitle('/t/halo_infinite/players/x/zzz-inconnu', 'en')).toBe('LevelUp')
-    expect(resolvePageTitle('/zzz-static-inconnu', 'fr')).toBe('LevelUp')
+    expect(resolvePageTitle('/t/halo_infinite/players/x/zzz-inconnu', 'en')).toBe('LevelUp')
+    expect(resolvePageTitle('/zzz-static-inconnu', 'en')).toBe('LevelUp')
   })
 
   it('nuance Citations (moteur dérivé Infinite) vs Commendations (natif H5)', () => {
@@ -67,28 +67,28 @@ describe('resolvePageTitle (URLs title-scoped)', () => {
     // diverge selon la ROUTE (/career/citations vs /career/commendations), jamais selon
     // le titre effectivement actif — même logique que l'ex-effet local de
     // UnifiedCitationsPage, désormais supprimé.
-    expect(resolvePageTitle('/t/halo_infinite/players/x/career/citations', 'fr')).toBe('LevelUp - Citations')
     expect(resolvePageTitle('/t/halo_infinite/players/x/career/citations', 'en')).toBe('LevelUp - Citations')
-    expect(resolvePageTitle('/t/halo_5/players/x/career/commendations', 'fr')).toBe('LevelUp - Citations')
+    expect(resolvePageTitle('/t/halo_infinite/players/x/career/citations', 'en')).toBe('LevelUp - Citations')
+    expect(resolvePageTitle('/t/halo_5/players/x/career/commendations', 'en')).toBe('LevelUp - Citations')
     expect(resolvePageTitle('/t/halo_5/players/x/career/commendations', 'en')).toBe('LevelUp - Commendations')
   })
 
   it('trous comblés (I18) : /career/medals et /squad/dynamique', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/career/medals', 'fr')).toBe('LevelUp - Médailles')
+    expect(resolvePageTitle('/t/halo_infinite/players/x/career/medals', 'en')).toBe('LevelUp - Médailles')
     expect(resolvePageTitle('/t/halo_infinite/players/x/career/medals', 'en')).toBe('LevelUp - Medals')
-    expect(resolvePageTitle('/t/halo_infinite/players/x/squad/dynamique', 'fr')).toBe('LevelUp - Dynamique')
+    expect(resolvePageTitle('/t/halo_infinite/players/x/squad/dynamique', 'en')).toBe('LevelUp - Dynamique')
     expect(resolvePageTitle('/t/halo_infinite/players/x/squad/dynamique', 'en')).toBe('LevelUp - Dynamics')
   })
 
   it('trous comblés (I18) : sous-onglets Administration (ex-pattern `/admin` ancré, ne matchait aucun enfant)', () => {
-    expect(resolvePageTitle('/admin/management', 'fr')).toBe('LevelUp - Administration — Gestion')
+    expect(resolvePageTitle('/admin/management', 'en')).toBe('LevelUp - Administration — Gestion')
     expect(resolvePageTitle('/admin/management', 'en')).toBe('LevelUp - Administration — Management')
     expect(resolvePageTitle('/admin/system', 'en')).toBe('LevelUp - Administration — System')
   })
 
   it('changement de locale seul (sans navigation) fait varier le titre pour un même pathname', () => {
     const pathname = '/t/halo_infinite/players/x/career/season-pass'
-    expect(resolvePageTitle(pathname, 'fr')).not.toBe(resolvePageTitle(pathname, 'en'))
+    expect(resolvePageTitle(pathname, 'en')).not.toBe(resolvePageTitle(pathname, 'en'))
   })
 })
 

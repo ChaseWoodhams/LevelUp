@@ -3,7 +3,7 @@
  *
  * Invariants couverts :
  *   - Halo Infinite : les 4 groupes connus (arena_slayer/arena_objectif/btb/chaos)
- *     sont TOUJOURS rendus dans l'ordre déclaré, « Non classé » inclus (byte-identique).
+ *     sont TOUJOURS rendus dans l'ordre déclaré, « Unranked » inclus (byte-identique).
  *   - Halo 5 : aucun groupe connu déclaré → on rend UNIQUEMENT le groupe présent
  *     dans les checkpoints (`h5_arena`), avec son libellé i18n « Arène ».
  */
@@ -67,13 +67,13 @@ function checkpoint(group: string): CareerLusrSection['checkpoints'][number] {
 
 describe('CareerRankingBlock — colonne LUSR title-aware', () => {
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
     vi.mocked(useCareerCSRs).mockReturnValue({ data: undefined } as ReturnType<typeof useCareerCSRs>)
   })
 
-  it('Halo Infinite : rend les 4 groupes connus dans l\'ordre, « Non classé » inclus', () => {
+  it('Halo Infinite : rend les 4 groupes connus dans l\'ordre, « Unranked » inclus', () => {
     useAppShellStore.setState({ availableTitles: [HINF], currentTitleSlug: 'halo_infinite' })
-    // Donnée partielle : seul arena_slayer a un checkpoint ; les 3 autres → « Non classé ».
+    // Donnée partielle : seul arena_slayer a un checkpoint ; les 3 autres → « Unranked ».
     const lusr: CareerLusrSection = {
       current_rating: null,
       current_tier_label: null,
@@ -88,8 +88,8 @@ describe('CareerRankingBlock — colonne LUSR title-aware', () => {
     expect(screen.getByText('Social · Objectif')).toBeInTheDocument()
     expect(screen.getByText('Grande Équipe')).toBeInTheDocument()
     expect(screen.getByText('Chaos')).toBeInTheDocument()
-    // 3 groupes non classés (FR « Non classé »).
-    expect(screen.getAllByText('Non classé')).toHaveLength(3)
+    // 3 groupes non classés (FR « Unranked »).
+    expect(screen.getAllByText('Unranked')).toHaveLength(3)
     // Pas de ligne h5 en HINF.
     expect(screen.queryByText('Arène')).not.toBeInTheDocument()
   })
@@ -107,11 +107,11 @@ describe('CareerRankingBlock — colonne LUSR title-aware', () => {
 
     // La ligne h5_arena s'affiche avec son libellé i18n.
     expect(screen.getByText('Arène')).toBeInTheDocument()
-    // Aucun groupe HINF figé n'est rendu (pas de « Non classé » HINF parasite).
+    // Aucun groupe HINF figé n'est rendu (pas de « Unranked » HINF parasite).
     expect(screen.queryByText('Social · Assassin')).not.toBeInTheDocument()
     expect(screen.queryByText('Grande Équipe')).not.toBeInTheDocument()
     expect(screen.queryByText('Chaos')).not.toBeInTheDocument()
-    expect(screen.queryByText('Non classé')).not.toBeInTheDocument()
+    expect(screen.queryByText('Unranked')).not.toBeInTheDocument()
   })
 
   it('CSR : flèche de tendance ▲ quand la valeur progresse vs la saison précédente', () => {

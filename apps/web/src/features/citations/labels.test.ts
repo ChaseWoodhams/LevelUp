@@ -25,7 +25,7 @@ describe('citationCategoryLabel', () => {
     const fr = new Set<string>()
     const en = new Set<string>()
     for (const key of CANONICAL_CATEGORY_KEYS) {
-      const labelFr = citationCategoryLabel(key, 'fr')
+      const labelFr = citationCategoryLabel(key, 'en')
       const labelEn = citationCategoryLabel(key, 'en')
       // Une clé non traduite retomberait sur elle-même (dégradation visible).
       expect(labelFr, `clé ${key} sans libellé FR`).not.toBe(key)
@@ -49,14 +49,14 @@ describe('citationCategoryLabel', () => {
   })
 
   it('rend des libellés FR sans anglicisme pour les catégories traduisibles', () => {
-    expect(citationCategoryLabel('weapon', 'fr')).toBe('Armes')
-    expect(citationCategoryLabel('vehicle', 'fr')).toBe('Véhicules')
-    expect(citationCategoryLabel('game_mode', 'fr')).toBe('Modes de jeu')
-    expect(citationCategoryLabel('other', 'fr')).toBe('Autres')
+    expect(citationCategoryLabel('weapon', 'en')).toBe('Armes')
+    expect(citationCategoryLabel('vehicle', 'en')).toBe('Véhicules')
+    expect(citationCategoryLabel('game_mode', 'en')).toBe('Modes de jeu')
+    expect(citationCategoryLabel('other', 'en')).toBe('Autres')
   })
 
   it('retombe sur la clé brute si elle est inconnue du manifeste', () => {
-    expect(citationCategoryLabel('categorie_future_2027', 'fr')).toBe('categorie_future_2027')
+    expect(citationCategoryLabel('categorie_future_2027', 'en')).toBe('categorie_future_2027')
     expect(citationCategoryLabel('', 'en')).toBe('')
   })
 })

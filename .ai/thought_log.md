@@ -61280,3 +61280,32 @@ these 5 issues. After the change, gofmt 1.26.1 and 1.27 both report nothing on t
 `go vet` plus `go test -count=1` pass on both packages.
 
 **Next step**: push and let CI rule on PR #27.
+
+
+---
+
+## [2026-09-10] English-only conversion committed on its own branch
+
+**Status**: In progress (draft PR; the gates do not pass yet).
+
+**Context**: the implementation of `.ai/AUDIT_ENGLISH_ONLY_2026-09-06.md` sat uncommitted in the
+study branch's working copy, mixed with study work that has since been committed separately.
+
+**Technical decision**: commit it on `chore/english-only`, stacked on the study branch, together
+with fixes for damage the conversion itself did. It swapped `fr` and `en` inside words in both
+directions. 58 occurrences of 37 garbled tokens are restored (`useRframeGroup`, `handleRframe`,
+`dfrominator`, the user-visible label `Rframe`, ...), found by listing every token of the diff that
+is absent from the base commit while its swapped form exists there. The CSS grid units `3en`/`1en`
+are back to `fr`. The `apps/study` tests move to the English strings (the language-toggle test
+leaves with the toggle), and its `locale.ts` copy is re-synced with the `apps/web` origin.
+
+**Results**: `go vet ./...` and `go test ./...` pass; `apps/web` typecheck passes; `apps/study` passes
+417/417. Failing: `apps/web` lint (41 errors: 40 unused `_locale`-style parameters, one hardcoded
+JSX string in `SettingsPage.tsx`); `apps/web` vitest (494 failed, 3028 passed, 14 skipped, mostly
+French string assertions); Go integration (the `platform/duckdb` test build reads a removed `.fr`
+field, two `halo5` commendation tests expect French names, and the `prestige` template repo test
+fails; the run was stopped at `platform/session`, so later packages are unmeasured).
+
+**Next step**: remove the unused locale parameters together with their call sites, move the web
+tests to English, fix the three integration failures, bump the origin SHA of the five `apps/study`
+copies this commit changes, then take the PR out of draft.

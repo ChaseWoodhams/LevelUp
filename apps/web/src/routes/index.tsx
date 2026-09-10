@@ -2,7 +2,7 @@
  * Route index — redirige vers la page d'accueil du joueur actif.
  */
 import { createFileRoute, Navigate } from '@tanstack/react-router'
-import { useLangParam, useTitleSlug } from '@/lib/title-routing'
+import { useTitleSlug } from '@/lib/title-routing'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { resolveIndexRedirect } from '@/components/shell/shellNavigation'
 import { formatMessage } from '@/lib/i18n/format'
@@ -20,7 +20,7 @@ function IndexPage() {
   const isBootstrapped = useAppShellStore((s) => s.isBootstrapped)
   const locale = useAppShellStore((s) => s.locale)
   const titleSlug = useTitleSlug()
-  const lang = useLangParam()
+  const lang = 'en' as const
   const t = (key: CommonManifestKey) => formatMessage(commonManifest, key, locale)
 
   const redirect = resolveIndexRedirect({

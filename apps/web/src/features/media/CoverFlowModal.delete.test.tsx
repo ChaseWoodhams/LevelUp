@@ -39,10 +39,10 @@ function makeItem(overrides: Partial<MediaItemRow> = {}): MediaItemRow {
 const OWN_ITEM = makeItem()
 const FOREIGN_ITEM = makeItem({ owner_gamertag: 'Chocoboflor', file_path: '/media/autre.mp4' })
 
-function setStore(state: { locale?: 'fr' | 'en'; isAdmin?: boolean }) {
+function setStore(state: { locale?: 'en' | 'en'; isAdmin?: boolean }) {
   act(() => {
     useAppShellStore.setState({
-      locale: state.locale ?? 'fr',
+      locale: state.locale ?? 'en',
       isAdmin: state.isAdmin ?? false,
     })
   })
@@ -50,7 +50,7 @@ function setStore(state: { locale?: 'fr' | 'en'; isAdmin?: boolean }) {
 
 describe('CoverFlowModal — suppression définitive', () => {
   afterEach(() => {
-    setStore({ locale: 'fr', isAdmin: false })
+    setStore({ locale: 'en', isAdmin: false })
   })
 
   it('affiche l\'action de suppression au propriétaire du média', () => {

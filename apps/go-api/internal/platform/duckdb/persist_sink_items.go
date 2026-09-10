@@ -43,7 +43,7 @@ type itemDefRaw struct {
 // itemDefLocalizedText extrait le texte localisé depuis un champ Halo polymorphe.
 // GameCMS retourne soit une string, soit {"value":"…","status":"Resolved"}, soit
 // {"translations":{"fr-FR":"…","en-US":"…"}}.
-func itemDefLocalizedText(v any, preferLang string) string {
+func itemDefLocalizedText(v any, _ string) string {
 	if v == nil {
 		return ""
 	}
@@ -52,7 +52,7 @@ func itemDefLocalizedText(v any, preferLang string) string {
 		return strings.TrimSpace(typed)
 	case map[string]any:
 		if trans, ok := typed["translations"].(map[string]any); ok {
-			for _, lang := range []string{preferLang, LangCodeFR, LangCodeEN, "en"} {
+			for _, lang := range []string{LangCodeEN, "en"} {
 				if s, ok := trans[lang].(string); ok && strings.TrimSpace(s) != "" {
 					return strings.TrimSpace(s)
 				}
@@ -154,18 +154,11 @@ func (s *PersistSink) upsertItemTranslations(
 		description string
 	}
 
-	entries := []langEntry{
-		{
-			lang:        LangCodeFR,
-			title:       itemDefLocalizedText(cd.Title, LangCodeFR),
-			description: itemDefLocalizedText(cd.Description, LangCodeFR),
-		},
-		{
-			lang:        LangCodeEN,
-			title:       itemDefLocalizedText(cd.Title, LangCodeEN),
-			description: itemDefLocalizedText(cd.Description, LangCodeEN),
-		},
-	}
+	entries := []langEntry{{
+		lang:        LangCodeEN,
+		title:       itemDefLocalizedText(cd.Title, LangCodeEN),
+		description: itemDefLocalizedText(cd.Description, LangCodeEN),
+	}}
 
 	for _, e := range entries {
 		if e.title == "" && e.description == "" {

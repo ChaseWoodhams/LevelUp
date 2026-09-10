@@ -18,13 +18,6 @@ import type {
 
 // Offensif (conversion dégâts→kill) — du plus dispersé au plus létal.
 const COMBAT_STYLE_OFFENSIVE_LABELS: Record<ManifestLocale, Record<CombatStyleOffensive, string>> = {
-  fr: {
-    disperse: 'Dispersé',
-    irregulier: 'Irrégulier',
-    equilibre: 'Équilibré',
-    precis: 'Précis',
-    chirurgical: 'Chirurgical',
-  },
   en: {
     disperse: 'Scattered',
     irregulier: 'Irregular',
@@ -36,13 +29,6 @@ const COMBAT_STYLE_OFFENSIVE_LABELS: Record<ManifestLocale, Record<CombatStyleOf
 
 // Défensif (survie) — du plus fragile au plus encaissant.
 const COMBAT_STYLE_DEFENSIVE_LABELS: Record<ManifestLocale, Record<CombatStyleDefensive, string>> = {
-  fr: {
-    fragile: 'Fragile',
-    expose: 'Exposé',
-    solide: 'Solide',
-    resistant: 'Résistant',
-    inebranlable: 'Inébranlable',
-  },
   en: {
     fragile: 'Fragile',
     expose: 'Exposed',
@@ -54,13 +40,6 @@ const COMBAT_STYLE_DEFENSIVE_LABELS: Record<ManifestLocale, Record<CombatStyleDe
 
 // Activité (engagement absolu = pace joueur / pace lobby) — du passif à l'agressif.
 const COMBAT_STYLE_ACTIVITY_LABELS: Record<ManifestLocale, Record<CombatStyleActivity, string>> = {
-  fr: {
-    passif: 'Passif',
-    discret: 'Discret',
-    mesure: 'Mesuré',
-    actif: 'Actif',
-    agressif: 'Agressif',
-  },
   en: {
     passif: 'Passive',
     discret: 'Discreet',

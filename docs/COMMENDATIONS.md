@@ -1,7 +1,4 @@
 # Commendations — Architecture & Guide
-
-French version: [FR/CITATIONS.md](FR/CITATIONS.md)
-
 LevelUp implements a **DuckDB-first commendations system** (called "citations" in the French docs and in the code). The whole pipeline is Go: a seed table of rules, a stateless compute engine, and a sync-time backfill.
 
 > Stack note: the legacy Python implementation (`src/analysis/citations/`, `scripts/populate_citation_mappings.py`) has been removed. Everything below runs in the Go backend (`apps/go-api`).

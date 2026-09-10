@@ -32,12 +32,12 @@ function fmtNumber(value: number, locale: string, fractionDigits = 2): string {
 }
 
 /** formatPlaytime convertit des secondes en "Xj Yh" / "Yh Zm" / "Zm" (FR/EN). */
-function formatPlaytime(seconds: number, locale: string): string {
+function formatPlaytime(seconds: number, _locale: string): string {
   const totalMin = Math.floor(seconds / 60)
   const days = Math.floor(totalMin / 1440)
   const hours = Math.floor((totalMin % 1440) / 60)
   const mins = totalMin % 60
-  const dUnit = locale === 'en' ? 'd' : 'j'
+  const dUnit = 'd'
   if (days > 0) return `${days}${dUnit} ${hours}h`
   if (hours > 0) return `${hours}h ${mins}m`
   return `${mins}m`

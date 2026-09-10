@@ -53,41 +53,24 @@ function DetailSection({ title, children }: { title: string; children: ReactNode
  * Traduit un code stable de partial_reason en impact end-user concret.
  * Décrit ce que l'utilisateur ne peut PAS voir, pas la raison technique.
  */
-function translatePartialReason(code: string, locale: string): string {
-  const isEN = locale === 'en'
-  switch (code) {
+function translatePartialReason(code: string, _locale: string): string {
+    switch (code) {
     case 'scoreboard_empty':
-      return isEN
-        ? 'Scoreboard and individual player stats are unavailable'
-        : "Le tableau des scores et les stats individuelles sont indisponibles"
+      return 'Scoreboard and individual player stats are unavailable'
     case 'events_empty':
-      return isEN
-        ? 'Combat charts cannot be displayed — Cadence, Dominance and Frag diff are empty'
-        : "Les graphes de combat sont vides — Cadence, Dominance et Frags différentiel ne peuvent pas être tracés"
+      return 'Combat charts cannot be displayed — Cadence, Dominance and Frag diff are empty'
     case 'player_stats_empty':
-      return isEN
-        ? 'Some personal stats are missing — datas may be incomplete'
-        : "Certaines statistiques personnelles sont absentes — les données peuvent être incomplètes"
+      return 'Some personal stats are missing — datas may be incomplete'
     case 'medals_empty':
-      return isEN
-        ? 'Medals and commendations are unavailable'
-        : "Les médailles et citations ne sont pas disponibles"
+      return 'Medals and commendations are unavailable'
     case 'combat_narrative_unavailable':
-      return isEN
-        ? 'Combat charts (Cadence, Dominance, Frag diff) are not available for this match'
-        : "Les graphes de combat (Cadence, Dominance, Frags différentiel) ne sont pas disponibles pour ce match"
+      return 'Combat charts (Cadence, Dominance, Frag diff) are not available for this match'
     case 'citations_unavailable':
-      return isEN
-        ? 'Citations are not available for this match'
-        : "Les citations ne sont pas disponibles pour ce match"
+      return 'Citations are not available for this match'
     case 'media_unavailable':
-      return isEN
-        ? 'Media (captures, clips) are not available for this match'
-        : "Les médias (captures, clips) ne sont pas disponibles pour ce match"
+      return 'Media (captures, clips) are not available for this match'
     case 'accuracy_damage_taken_native_unavailable':
-      return isEN
-        ? 'Accuracy and damage taken are not provided for this match'
-        : "La précision et les dégâts subis ne sont pas fournis pour ce match"
+      return 'Accuracy and damage taken are not provided for this match'
     default:
       return code
   }
@@ -123,12 +106,11 @@ export function MatchViewPage() {
   const { data: settings } = useSettings()
   const friendGamertags = settings?.friend_gamertags ?? []
   const locale = useAppShellStore((s) => s.locale)
-  const t = MATCH_VIEW_TEXT[locale === 'en' ? 'en' : 'fr']
+  const t = MATCH_VIEW_TEXT['en']
 
   if (isPending) return null
 
-  const isEN = locale === 'en'
-  const goHome = () => {
+    const goHome = () => {
     navigate({ to: '/{-$lang}/t/$titleSlug/players/$playerSlug/home', params: { playerSlug } }).catch(() => {})
   }
   const goMatches = () => {
@@ -147,16 +129,14 @@ export function MatchViewPage() {
     if (code === 'match_not_participant') {
       return (
         <PageUnavailable
-          title={isEN ? 'Match unavailable' : 'Match indisponible'}
+          title={'Match unavailable'}
           description={
-            isEN
-              ? "You didn't take part in this match, so it can't be shown here."
-              : "Tu n'as pas participé à ce match, il ne peut donc pas être affiché ici."
+            "You didn't take part in this match, so it can't be shown here."
           }
           actions={[
-            { label: isEN ? 'Home' : 'Accueil', onClick: goHome, variant: 'default' },
-            { label: isEN ? 'Back' : 'Précédent', onClick: goBack },
-            { label: isEN ? 'My matches' : 'Mes matchs', onClick: goMatches },
+            { label: 'Home', onClick: goHome, variant: 'default' },
+            { label: 'Back', onClick: goBack },
+            { label: 'My matches', onClick: goMatches },
           ]}
         />
       )
@@ -164,13 +144,11 @@ export function MatchViewPage() {
     if (code === 'player_forbidden') {
       return (
         <PageUnavailable
-          title={isEN ? 'Access denied' : 'Accès non autorisé'}
+          title={'Access denied'}
           description={
-            isEN
-              ? 'This player is not associated with your account.'
-              : "Ce joueur n'est pas associé à ton compte."
+            'This player is not associated with your account.'
           }
-          actions={[{ label: isEN ? 'Home' : 'Accueil', onClick: goHome, variant: 'default' }]}
+          actions={[{ label: 'Home', onClick: goHome, variant: 'default' }]}
         />
       )
     }
@@ -185,9 +163,9 @@ export function MatchViewPage() {
           title={t.notSyncedTitle}
           description={t.notSyncedDescription}
           actions={[
-            { label: isEN ? 'Home' : 'Accueil', onClick: goHome, variant: 'default' },
-            { label: isEN ? 'Back' : 'Précédent', onClick: goBack },
-            { label: isEN ? 'My matches' : 'Mes matchs', onClick: goMatches },
+            { label: 'Home', onClick: goHome, variant: 'default' },
+            { label: 'Back', onClick: goBack },
+            { label: 'My matches', onClick: goMatches },
           ]}
         />
       )
@@ -196,8 +174,8 @@ export function MatchViewPage() {
     // permettre à l'utilisateur de continuer à naviguer entre les matchs.
     return (
       <div className="flex flex-col">
-        <MatchBreadcrumb playerSlug={playerSlug} matchLabel={t.mapUnknown} locale={locale === 'en' ? 'en' : 'fr'} />
-        <MatchNavigationBar playerSlug={playerSlug} matchId={matchId} locale={locale === 'en' ? 'en' : 'fr'} />
+        <MatchBreadcrumb playerSlug={playerSlug} matchLabel={t.mapUnknown} locale={'en'} />
+        <MatchNavigationBar playerSlug={playerSlug} matchId={matchId} locale={'en'} />
         <div className="p-6">
           <Card>
             <CardContent className="py-8 text-center">
@@ -247,7 +225,7 @@ export function MatchViewPage() {
 
   return (
     <div className="flex flex-col">
-      <MatchBreadcrumb playerSlug={playerSlug} matchLabel={breadcrumbLabel} locale={locale === 'en' ? 'en' : 'fr'} />
+      <MatchBreadcrumb playerSlug={playerSlug} matchLabel={breadcrumbLabel} locale={'en'} />
 
       {/* Sprint 54-B : avertissement privacy */}
       {data.privacy_warning && (
@@ -391,7 +369,7 @@ export function MatchViewPage() {
                     items={media_tab.media_items ?? []}
                     playerSlug={playerSlug}
                     matchId={matchId}
-                    locale={locale === 'en' ? 'en' : 'fr'}
+                    locale={'en'}
                   />
                 </div>
               </div>
@@ -437,7 +415,7 @@ export function MatchViewPage() {
                   sans film, ou match non backfillé (503). */}
               <MatchPositionsHeatmap
                 positions={matchPositions}
-                locale={locale === 'en' ? 'en' : 'fr'}
+                locale={'en'}
               />
 
               {/* Engagement — remonté ici (avant Frags différentiel cumulé).
@@ -499,7 +477,7 @@ export function MatchViewPage() {
             <DetailSection title={t.sectionEncounters}>
               <MatchEncountersTable
                 rows={team_tab.encounters ?? []}
-                locale={locale === 'en' ? 'en' : 'fr'}
+                locale={'en'}
                 hideCardWrapper
               />
             </DetailSection>

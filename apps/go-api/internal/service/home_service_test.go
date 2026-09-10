@@ -256,7 +256,7 @@ func TestHomeService_GetHomePage_MediaGraceful(t *testing.T) {
 	}
 	svc := withHomeMock(NewHomeService(repo), repo)
 
-	resp, err := svc.GetHomePage(context.Background(), "GT", "fr")
+	resp, err := svc.GetHomePage(context.Background(), "GT", "en")
 	if err != nil {
 		t.Fatalf("expected graceful degradation on media error, got: %v", err)
 	}
@@ -281,20 +281,6 @@ func TestHomeService_GetHomePage_RespectsLocale(t *testing.T) {
 		}},
 	}
 	svc := withHomeMock(NewHomeService(repo), repo)
-
-	respFR, err := svc.GetHomePage(context.Background(), "GT", "fr")
-	if err != nil {
-		t.Fatalf("unexpected FR error: %v", err)
-	}
-	if got := *respFR.RecentMatches[0].ModeUI; got != "Slayer en Ã©quipe" {
-		t.Fatalf("FR ModeUI = %q, want %q", got, "Slayer en Ã©quipe")
-	}
-	if got := *respFR.RecentMatches[0].PlaylistUI; got != "Partie rapide" {
-		t.Fatalf("FR PlaylistUI = %q, want %q", got, "Partie rapide")
-	}
-	if got := respFR.RecentMatches[0].OutcomeLabel; got != "Victoire" {
-		t.Fatalf("FR OutcomeLabel = %q, want %q", got, "Victoire")
-	}
 
 	respEN, err := svc.GetHomePage(context.Background(), "GT", "en")
 	if err != nil {
@@ -329,8 +315,8 @@ func TestHomeService_GetHomePage_IncludesSpartanIdentity(t *testing.T) {
 	// Rang 26 ajouté pour que 25 ne soit pas le dernier rang du catalog (sinon
 	// buildHomeCareerRank le déduirait comme rang max → ProgressPct=100).
 	ranks := mappings.NewRankCatalog("halo_infinite", []mappings.RankEntry{
-		{ID: 25, Title: map[string]string{"en": "Lance Corporal", "fr": "Caporal-chef"}},
-		{ID: 26, Title: map[string]string{"en": "Corporal", "fr": "Caporal"}},
+		{ID: 25, Title: map[string]string{"en": "Lance Corporal"}},
+		{ID: 26, Title: map[string]string{"en": "Corporal"}},
 	})
 	fields, ferr := mappings.LoadFieldsFromBytes("test.toml", []byte(`
 [meta]
@@ -338,7 +324,7 @@ title_slug     = "halo_infinite"
 schema_version = 1
 
 [fields.kills]
-labels        = { en = "Kills", fr = "Ã‰liminations" }
+labels        = { en = "Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -351,7 +337,7 @@ group         = "combat"
 	semantic := halo_infinite.NewSemanticAdapter(fields, ranks, nil, nil)
 	svc := withHomeMock(NewHomeService(repo).WithSemanticAdapter(semantic), repo)
 
-	resp, err := svc.GetHomePage(context.Background(), "GT", "fr")
+	resp, err := svc.GetHomePage(context.Background(), "GT", "en")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -373,8 +359,8 @@ group         = "combat"
 	if resp.SpartanIdentity.CareerRank == nil {
 		t.Fatal("expected career_rank")
 	}
-	if got := resp.SpartanIdentity.CareerRank.RankTitle; got != "Caporal-chef" {
-		t.Fatalf("rank_title = %q, want Caporal-chef", got)
+	if got := resp.SpartanIdentity.CareerRank.RankTitle; got != "Lance Corporal" {
+		t.Fatalf("rank_title = %q, want Lance Corporal", got)
 	}
 	if resp.SpartanIdentity.CareerRank.RankImageURL == nil || *resp.SpartanIdentity.CareerRank.RankImageURL != "https://example.test/rank.png" {
 		t.Fatalf("rank_image_url = %#v, want https://example.test/rank.png", resp.SpartanIdentity.CareerRank.RankImageURL)

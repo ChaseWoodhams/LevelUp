@@ -7,7 +7,6 @@ import {
   heatmapCellsToSeries,
   distributionBucketsToSeries,
   correlationPointsToSeries,
-  DOW_LABELS_FR,
   DOW_LABELS_EN,
 } from './seriesAdapters'
 import type {
@@ -60,7 +59,7 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries(cells, {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     const dps = series[0].datapoints
     expect(dps[0].y).toBe('Lun')
@@ -82,7 +81,7 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries(cells, {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     expect(series[0].datapoints[0].x).toBe('09')
     expect(series[0].datapoints[1].x).toBe('22')
@@ -92,7 +91,7 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries(cells, {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     expect(series[0].datapoints[0].value).toBe(3)
     expect(series[0].datapoints[0].detail).toEqual({ avg_kd: 1.4 })
@@ -102,7 +101,7 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries([], {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     expect(series).toHaveLength(1)
     expect(series[0].datapoints).toEqual([])
@@ -111,7 +110,7 @@ describe('heatmapCellsToSeries', () => {
   it('retombe sur le numéro brut si dow hors plage', () => {
     const series = heatmapCellsToSeries(
       [{ day_of_week: 99, hour: 0, count: 1, avg_kd: 0 }],
-      { key: 'k', name: 'n', dowLabels: DOW_LABELS_FR },
+      { key: 'k', name: 'n', dowLabels: DOW_LABELS_EN },
     )
     expect(series[0].datapoints[0].y).toBe('99')
   })

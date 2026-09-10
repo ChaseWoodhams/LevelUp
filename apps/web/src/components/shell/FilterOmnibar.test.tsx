@@ -43,7 +43,7 @@ function buildResolved(): FilterContextResolved {
   return {
     effective: DEFAULT_EFFECTIVE,
     available_options: {
-      experience_types: [{ label: 'PVP non classé', value: 'PVP non classé', count: 8 }],
+      experience_types: [{ label: 'Unranked PvP', value: 'Unranked PvP', count: 8 }],
       playlists: [{ label: 'Arène classée', value: 'Arène classée', count: 8 }],
       modes: [{ label: 'Slayer', value: 'Slayer', count: 8 }],
       maps: [{ label: 'Recharge', value: 'Recharge', count: 8 }],
@@ -70,9 +70,9 @@ function buildResolved(): FilterContextResolved {
 describe('FilterOmnibar', () => {
   beforeEach(() => {
     // Locale pinnée : les libellés (Filtres, périodes, « N matchs », Analyser)
-    // sont désormais résolus via le manifest i18n (GH-4) — on fige 'fr' pour que
+    // sont désormais résolus via le manifest i18n (GH-4) — on fige 'en' pour que
     // les assertions FR ci-dessous soient explicites, pas dépendantes du défaut.
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
     useGlobalFilterStore.getState().resetFilters()
     useGlobalFilterStore.getState().setResolvedContext(buildResolved())
   })

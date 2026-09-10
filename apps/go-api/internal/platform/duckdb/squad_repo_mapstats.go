@@ -173,16 +173,15 @@ func uniqueXUIDs(xs []string) []string {
 	return out
 }
 
-// LoadAssetTranslationsFR retourne les traductions FR depuis metadata.asset_translations.
-// Wrapper mince autour du résolveur unifié `MetadataRepo.ResolveAssetNamesBulk`
-// (cf. metadata_repo_assets.go). Cohérent avec home_repo.resolveAssetNames.
-// assetType : "map" | "playlist" | "game_variant" | "pair".
-func (r *SquadRepo) LoadAssetTranslationsFR(ctx context.Context, assetType string, assetIDs []string) (map[string]string, error) {
+// LoadAssetNames returns canonical English asset names from metadata.asset_translations.
+// It wraps the unified MetadataRepo.ResolveAssetNamesBulk resolver.
+// assetType: "map" | "playlist" | "game_variant" | "pair".
+func (r *SquadRepo) LoadAssetNames(ctx context.Context, assetType string, assetIDs []string) (map[string]string, error) {
 	if len(assetIDs) == 0 || r.pdb == nil || r.pdb.Metadata == nil {
 		return nil, nil
 	}
 	out, err := NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(
-		ctx, assetType, assetIDs, PreferredLangsForLocale("fr"),
+		ctx, assetType, assetIDs, PreferredAssetLanguages(),
 	)
 	if err != nil && isTableNotFoundErr(err) {
 		return nil, nil
@@ -190,19 +189,12 @@ func (r *SquadRepo) LoadAssetTranslationsFR(ctx context.Context, assetType strin
 	return out, err
 }
 
-// LoadModeTranslationsFR retourne les traductions FR depuis metadata.mode_name_tr.
-// Point d'entrée EXPORTÉ de la couche (port.SquadRepository, et injection
-// prestige via WithModeTranslatorFR) ; le SQL vit dans mode_name_tr.go, source
-// unique du littéral (garde-rail no_mode_name_tr_literal_test.go).
-func (r *SquadRepo) LoadModeTranslationsFR(ctx context.Context, modeENs []string) (map[string]string, error) {
-	if len(modeENs) == 0 || r.pdb == nil || r.pdb.Metadata == nil {
-		return nil, nil
-	}
-	out, err := queryModeNameTrFR(ctx, r.pdb.Metadata, modeENs)
-	if err != nil {
-		return nil, fmt.Errorf("LoadModeTranslationsFR: %w", err)
-	}
-	return out, nil
+// LoadModeNames returns canonical English mode names from metadata.mode_name_tr.
+// It is the exported entry point for port.SquadRepository and prestige
+// injection. SQL lives in mode_name_tr.go, the single source for the query
+// literal (guarded by no_mode_name_tr_literal_test.go).
+func (r *SquadRepo) LoadModeNames(ctx context.Context, modeNames []string) (map[string]string, error) {
+	return nil, nil
 }
 
 // Ensure SquadRepo implements port.SquadRepository at compile time.

@@ -34,7 +34,7 @@ vi.mock('./charts/squadIntensityProfileChart', () => ({
   intensityAxisLabels: () => ({ start: 'Début', mid: 'Milieu', end: 'Fin', rangeSuffix: 'du match' }),
 }))
 
-const T = getSquadText('fr')
+const T = getSquadText('en')
 
 /** N manches concentrées sur la phase 0 (exploitables). */
 function rows(n: number): Array<{ phases: number[] }> {

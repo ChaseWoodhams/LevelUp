@@ -27,7 +27,6 @@ export interface CoachProposal {
   strength: number
   origin: ProposalOrigin
   reason_key_en?: string
-  reason_key_fr?: string
   reason_params?: string // JSON-encoded
   status: ProposalStatus
   created_at: string

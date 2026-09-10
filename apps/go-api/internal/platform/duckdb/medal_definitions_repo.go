@@ -1,9 +1,10 @@
+// Package duckdb provides metadata repositories for the English-only API.
+
 package duckdb
 
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"levelup/go-api/internal/port"
@@ -12,10 +13,7 @@ import (
 // Codes BCP-47 utilisés dans les tables de traductions DuckDB
 // (medal_translations, asset_translations, mode_translations). Externalisés
 // pour goconst (chacun apparaît à >10 endroits dans les repos).
-const (
-	LangCodeFR = "fr-FR"
-	LangCodeEN = "en-US"
-)
+const LangCodeEN = "en-US"
 
 // MedalDefinitionsRepo implémente port.MedalDefinitionsRepository.
 // Requête sur pdb.Metadata (medal_definitions + medal_translations).
@@ -28,28 +26,10 @@ func NewMedalDefinitionsRepo(pdb *PlayerDB) *MedalDefinitionsRepo {
 	return &MedalDefinitionsRepo{pdb: pdb}
 }
 
-// medalLangCode mappe la locale applicative ("fr", "en") vers le code
-// utilisé dans medal_translations. Fallback "en-US".
-func medalLangCode(locale string) string {
-	switch strings.ToLower(strings.TrimSpace(locale)) {
-	case "fr", "fr-fr", "fr_fr":
-		return LangCodeFR
-	default:
-		return LangCodeEN
-	}
-}
-
-// LookupByIDs résout les labels et descriptions localisés pour les IDs donnés.
-// Chaîne de priorité locale-aware (source unique : medalLabelDescCoalesceSQL) :
-//   - locale FR : mt_loc.name → md.name_fr → mt_en.name → md.name_en
-//     (description : md.description_fr → mt_loc.description → md.description_en) ;
-//   - locale EN : mt_loc.name → mt_en.name → md.name_en (jamais les colonnes FR).
-//
-// Retourne une map vide si la metadata DB est absente.
 func (r *MedalDefinitionsRepo) LookupByIDs(
 	ctx context.Context,
 	ids []int64,
-	locale string,
+	_ string,
 ) (map[int64]port.MedalDefinitionRow, error) {
 	result := make(map[int64]port.MedalDefinitionRow, len(ids))
 	if len(ids) == 0 || r.pdb == nil || r.pdb.Metadata == nil {
@@ -62,7 +42,7 @@ func (r *MedalDefinitionsRepo) LookupByIDs(
 	// Source unique de la chaîne label/description (locale-aware) : helper partagé
 	// medal_label_resolve.go. Corrige le COALESCE divergent qui omettait md.name_fr /
 	// md.description_fr (médailles non traduites sur Escouade/Explorer).
-	labelExpr, descExpr := medalLabelDescCoalesceSQL(locale)
+	labelExpr, descExpr := medalLabelDescCoalesceSQL()
 	q, args, ok := buildLookupQuery(
 		`SELECT md.medal_name_id,
 		        `+labelExpr+` AS label,
@@ -71,7 +51,7 @@ func (r *MedalDefinitionsRepo) LookupByIDs(
 		        COALESCE(NULLIF(TRIM(md.medal_type),''), '') AS medal_type,
 		        COALESCE(md.personal_score, 0) AS personal_score
 		 FROM medal_definitions md
-		 `+medalTranslationJoinsSQL(locale)+`
+			 `+medalTranslationJoinsSQL()+`
 		 WHERE md.medal_name_id IN (%s)`,
 		ids,
 	)

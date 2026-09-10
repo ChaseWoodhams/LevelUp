@@ -75,7 +75,7 @@ func writeSmokeTOML(t *testing.T) string {
 // qui le distingue du 404 de routeur (route absente, aucun handler atteint).
 func assertFieldMappingsRouteMounted(t *testing.T, router http.Handler) {
 	t.Helper()
-	req := httptest.NewRequestWithContext(t.Context(), "GET", "/api/v1/titles/halo_infinite/field-mappings?locale=fr", nil)
+	req := httptest.NewRequestWithContext(t.Context(), "GET", "/api/v1/titles/halo_infinite/field-mappings", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 

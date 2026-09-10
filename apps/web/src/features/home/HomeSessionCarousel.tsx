@@ -66,7 +66,7 @@ function formatSessionDate(startedAt: string | null, locale: ManifestLocale): st
       ? { day: 'numeric', month: 'short', year: 'numeric' }
       : { day: 'numeric', month: 'short' }
   const loc = intlLocale(locale)
-  const sep = locale === 'en' ? ' at ' : ' à '
+  const sep = ' at '
   return (
     d.toLocaleDateString(loc, dateOpts) +
     sep +
@@ -291,7 +291,7 @@ export function HomeSessionCarousel({
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {formatSessionDate(session.started_at, locale)}
                 {session.ended_at
-                  ? ` · ${th('home.sessions.duration_prefix')}${locale === 'en' ? ': ' : ' : '}${formatSessionDuration(session.started_at, session.ended_at)}`
+                  ? ` · ${th('home.sessions.duration_prefix')}: ${formatSessionDuration(session.started_at, session.ended_at)}`
                   : null}
               </p>
             )}

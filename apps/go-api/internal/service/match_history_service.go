@@ -48,8 +48,8 @@ const (
 	scopeUnranked      = "unranked"
 	scopeSolo          = "solo"
 	scopeSquad         = "squad"
-	expTypePVPRanked   = "PVP classé"
-	expTypePVPUnranked = "PVP non classé"
+	expTypePVPRanked   = "Ranked PvP"
+	expTypePVPUnranked = "Unranked PvP"
 	expTypePVE         = "PVE"
 )
 

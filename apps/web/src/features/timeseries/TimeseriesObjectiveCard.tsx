@@ -25,7 +25,7 @@ export function TimeseriesObjectiveCard({ stats, locale }: Props) {
   if (!hasObjectiveStats || !stats) return null
 
   const t = (key: TimeseriesManifestKey) => formatMessage(timeseriesManifest, key, locale)
-  const numLoc = locale === 'en' ? 'en-US' : 'fr-FR'
+  const numLoc = 'en-US'
   const num = (v: number) => v.toLocaleString(numLoc)
 
   const cards: { label: string; value: string }[] = []

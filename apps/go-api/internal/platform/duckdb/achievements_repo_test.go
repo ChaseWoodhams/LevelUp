@@ -141,9 +141,9 @@ func TestMetadataRepo_GetAchievementDefinitions_Populated(t *testing.T) {
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`
 
 	if _, err := db.Exec(ctx, insert,
-		"ach_full", "Full Name EN", "Nom Complet FR",
-		"Description EN", "Description FR",
-		"Locked EN", "Verrouillé FR",
+		"ach_full", "Full Name EN", "Full Name EN",
+		"Description EN", "Description EN",
+		"Locked EN", "Locked EN",
 		50, "https://example.com/full.png", false,
 		"Rare", 12.5, "halo_infinite",
 	); err != nil {
@@ -172,13 +172,13 @@ func TestMetadataRepo_GetAchievementDefinitions_Populated(t *testing.T) {
 	}
 	// ach_full : tous les champs peuplés
 	full := rows[0]
-	if full.NameEN != "Full Name EN" || full.NameFR != "Nom Complet FR" {
+	if full.NameEN != "Full Name EN" || full.NameFR != "Full Name EN" {
 		t.Errorf("ach_full noms bilingues incorrects")
 	}
-	if full.DescriptionEN != "Description EN" || full.DescriptionFR != "Description FR" {
+	if full.DescriptionEN != "Description EN" || full.DescriptionFR != "Description EN" {
 		t.Errorf("ach_full descriptions incorrectes")
 	}
-	if full.LockedDescEN != "Locked EN" || full.LockedDescFR != "Verrouillé FR" {
+	if full.LockedDescEN != "Locked EN" || full.LockedDescFR != "Locked EN" {
 		t.Errorf("ach_full locked desc incorrects")
 	}
 	if full.Gamerscore != 50 || full.ImageURL != "https://example.com/full.png" {
@@ -192,7 +192,7 @@ func TestMetadataRepo_GetAchievementDefinitions_Populated(t *testing.T) {
 	}
 	// ach_min : nullables → strings vides, percent à 0
 	min := rows[1]
-	if min.NameEN != "Min EN" || min.NameFR != "" {
+	if min.NameEN != "Min EN" || min.NameFR != "Min EN" {
 		t.Errorf("ach_min name incorrect: %q, %q", min.NameEN, min.NameFR)
 	}
 	if min.DescriptionEN != "" || min.DescriptionFR != "" {

@@ -57,7 +57,7 @@ func NewLabelCatalog(
 		if !ok {
 			continue
 		}
-		weapons[family] = WeaponLabel{En: name.En, Fr: name.Fr, Fx: effects[key]}
+		weapons[family] = WeaponLabel{En: name.En, Fx: effects[key]}
 	}
 	return LabelCatalog{Weapons: weapons, Grenades: grenades, Abilities: abilities}
 }

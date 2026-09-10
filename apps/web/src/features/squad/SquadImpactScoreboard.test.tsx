@@ -9,7 +9,7 @@ import type { SquadImpactMatrix } from '@/lib/api/types'
 import { SquadImpactScoreboard } from './SquadImpactScoreboard'
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 afterEach(() => {

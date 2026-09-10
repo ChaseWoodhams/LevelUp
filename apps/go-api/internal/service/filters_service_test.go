@@ -69,14 +69,14 @@ func TestFiltersService_Resolve_ExperienceLabelsLocaleAware(t *testing.T) {
 	}
 	svc := NewFiltersService(repo)
 
-	// VALUE FR canonique → LABEL EN attendu.
+	// English-only values and labels share the same contract.
 	wantEN := map[string]string{
 		expTypePVPUnranked: "Unranked PvP",
 		expTypePVPRanked:   "Ranked PvP",
-		expTypePVE:         "PvE",
+		expTypePVE:         "PVE",
 	}
 
-	// Locale EN : Label localisé, Value FR.
+	// The locale context does not change the English-only response.
 	respEN, err := svc.Resolve(ctxkeys.WithLocale(context.Background(), "en"), domain.FilterContextInput{FilterMode: "period"})
 	if err != nil {
 		t.Fatalf("resolve EN: %v", err)
@@ -86,22 +86,22 @@ func TestFiltersService_Resolve_ExperienceLabelsLocaleAware(t *testing.T) {
 		t.Fatalf("EN: %d options d'expérience, want 3", len(optsEN))
 	}
 	for _, o := range optsEN {
-		if _, isFRValue := wantEN[o.Value]; !isFRValue {
-			t.Errorf("EN: Value %q n'est pas une VALUE FR canonique (la Value NE doit PAS être localisée)", o.Value)
+		if _, isKnown := wantEN[o.Value]; !isKnown {
+			t.Errorf("EN: Value %q is not an experience value", o.Value)
 		}
 		if o.Label != wantEN[o.Value] {
 			t.Errorf("EN: Value %q → Label %q, want %q", o.Value, o.Label, wantEN[o.Value])
 		}
 	}
 
-	// Locale FR (défaut) : Label == Value (FR) dans les deux champs.
+	// Historical locale inputs still resolve to the English contract.
 	respFR, err := svc.Resolve(ctxkeys.WithLocale(context.Background(), "fr"), domain.FilterContextInput{FilterMode: "period"})
 	if err != nil {
 		t.Fatalf("resolve FR: %v", err)
 	}
 	for _, o := range respFR.AvailableOptions.ExperienceTypes {
 		if o.Label != o.Value {
-			t.Errorf("FR: Label %q != Value %q (attendu identique sous locale FR)", o.Label, o.Value)
+			t.Errorf("legacy locale: Label %q != Value %q", o.Label, o.Value)
 		}
 	}
 

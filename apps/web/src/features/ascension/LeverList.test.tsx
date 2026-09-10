@@ -33,7 +33,7 @@ const MAP_GUID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
 
 describe('LeverList — composition i18n des phrases (F3)', () => {
   it('by_map : rend le nom de carte résolu (context_label), jamais le GUID [FR]', () => {
-    const t = getAscensionText('fr')
+    const t = getAscensionText('en')
     render(
       <LeverList
         t={t}
@@ -57,7 +57,7 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
   })
 
   it('by_mode : interpole le libellé de mode (déjà lisible) [FR/EN]', () => {
-    render(<LeverList t={getAscensionText('fr')} levers={[lever({ axis: 'mode_selection', context_key: 'CTF' })]} />)
+    render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'mode_selection', context_key: 'CTF' })]} />)
     expect(screen.getByText('Améliore ton taux de victoire en CTF')).toBeInTheDocument()
     cleanup()
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'mode_selection', context_key: 'CTF' })]} />)
@@ -65,9 +65,9 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
   })
 
   it('by_squad : mappe with_friends → escouade / squad selon la locale', () => {
-    render(<LeverList t={getAscensionText('fr')} levers={[lever({ axis: 'squad_play', context_key: 'with_friends' })]} />)
+    render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'squad_play', context_key: 'with_friends' })]} />)
     expect(screen.getByText(/Améliore ton taux de victoire en/)).toHaveTextContent(
-      getAscensionText('fr').squadVsSoloSquad,
+      getAscensionText('en').squadVsSoloSquad,
     )
     cleanup()
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'squad_play', context_key: 'solo' })]} />)
@@ -77,7 +77,7 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
   })
 
   it('axe comportemental (accuracy) : phrase fixe sans contexte [FR/EN]', () => {
-    render(<LeverList t={getAscensionText('fr')} levers={[lever({ axis: 'accuracy' })]} />)
+    render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'accuracy' })]} />)
     expect(screen.getByText('Améliore ta précision')).toBeInTheDocument()
     cleanup()
     render(<LeverList t={getAscensionText('en')} levers={[lever({ axis: 'accuracy' })]} />)
@@ -85,7 +85,7 @@ describe('LeverList — composition i18n des phrases (F3)', () => {
   })
 
   it('axe sans gabarit : repli sur le libellé d’axe, jamais la clé brute', () => {
-    const t = getAscensionText('fr')
+    const t = getAscensionText('en')
     render(<LeverList t={t} levers={[lever({ axis: 'csr_ranked' })]} />)
     // Repli : le libellé d'axe sert de phrase (title + sous-titre) — jamais « csr_ranked ».
     expect(screen.getAllByText(t.leverAxis.csr_ranked).length).toBeGreaterThan(0)

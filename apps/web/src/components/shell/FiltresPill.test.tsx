@@ -31,8 +31,8 @@ import type { FiltresPillProps } from './FilterOmnibar'
 function makeAvailable(overrides: Partial<FiltresPillProps['available']> = {}): FiltresPillProps['available'] {
   return {
     experience_types: [
-      { label: 'PVP non classé', value: 'PVP non classé', count: 1 },
-      { label: 'PVP classé', value: 'PVP classé', count: 1 },
+      { label: 'Unranked PvP', value: 'Unranked PvP', count: 1 },
+      { label: 'Ranked PvP', value: 'Ranked PvP', count: 1 },
     ],
     playlists: [
       { label: 'Quick Play', value: 'Quick Play', count: 1 },
@@ -81,7 +81,7 @@ function buildResolved(availOverrides: Partial<FilterContextResolved['available_
   return {
     effective: DEFAULT_EFFECTIVE,
     available_options: {
-      experience_types: [{ label: 'PVP non classé', value: 'PVP non classé', count: 1 }],
+      experience_types: [{ label: 'Unranked PvP', value: 'Unranked PvP', count: 1 }],
       playlists: [{ label: 'Quick Play', value: 'Quick Play', count: 1 }],
       modes: [{ label: 'Slayer', value: 'Slayer', count: 1 }],
       maps: [{ label: 'Aquarius', value: 'Aquarius', count: 1 }],
@@ -97,10 +97,10 @@ function buildResolved(availOverrides: Partial<FilterContextResolved['available_
 
 describe('FiltresPill — zombie detection', () => {
   // Locale pinnée : le libellé « Filtres » et le tooltip d'incompatibilité sont
-  // résolus via le manifest i18n (GH-4) — on fige 'fr' pour rendre les assertions
+  // résolus via le manifest i18n (GH-4) — on fige 'en' pour rendre les assertions
   // FR explicites.
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   // ── 1. Aucun zombie ──────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ describe('FiltresPill — zombie detection', () => {
   it('pas de banner incompatibilité quand toutes les sélections sont dans les options disponibles', () => {
     renderPill({
       cascade: {
-        experience_types: ['PVP non classé'],
+        experience_types: ['Unranked PvP'],
         playlists: ['Quick Play'],
         modes: ['Slayer'],
         maps: ['Aquarius'],
@@ -120,7 +120,7 @@ describe('FiltresPill — zombie detection', () => {
 
   it('pill Filtres affichée sans classe destructive si pas de zombie', () => {
     const { container } = renderPill({
-      cascade: { experience_types: ['PVP non classé'], playlists: [], modes: [], maps: [] },
+      cascade: { experience_types: ['Unranked PvP'], playlists: [], modes: [], maps: [] },
       cascadeCount: 1,
     })
     const btn = container.querySelector('button[aria-haspopup="dialog"]')
@@ -131,8 +131,8 @@ describe('FiltresPill — zombie detection', () => {
 
   it('zombie experience : type sélectionné absent des options → banner + strikethrough', () => {
     renderPill({
-      available: makeAvailable({ experience_types: [{ label: 'PVP non classé', value: 'PVP non classé', count: 1 }] }),
-      cascade: { experience_types: ['PVP classé'], playlists: [], modes: [], maps: [] },
+      available: makeAvailable({ experience_types: [{ label: 'Unranked PvP', value: 'Unranked PvP', count: 1 }] }),
+      cascade: { experience_types: ['Ranked PvP'], playlists: [], modes: [], maps: [] },
       cascadeCount: 1,
     })
     expect(screen.getByText(/1 filtre incompatible/i)).toBeInTheDocument()
@@ -142,11 +142,11 @@ describe('FiltresPill — zombie detection', () => {
 
   it('zombie experience : les options disponibles restent affichées normalement', () => {
     renderPill({
-      available: makeAvailable({ experience_types: [{ label: 'PVP non classé', value: 'PVP non classé', count: 1 }] }),
-      cascade: { experience_types: ['PVP classé'], playlists: [], modes: [], maps: [] },
+      available: makeAvailable({ experience_types: [{ label: 'Unranked PvP', value: 'Unranked PvP', count: 1 }] }),
+      cascade: { experience_types: ['Ranked PvP'], playlists: [], modes: [], maps: [] },
       cascadeCount: 1,
     })
-    const pvpCheckbox = screen.getByRole('checkbox', { name: /PVP non classé/i })
+    const pvpCheckbox = screen.getByRole('checkbox', { name: /Unranked PvP/i })
     expect(pvpCheckbox).toBeInTheDocument()
     expect(pvpCheckbox).not.toBeChecked()
   })
@@ -214,12 +214,12 @@ describe('FiltresPill — zombie detection', () => {
   it('plusieurs zombies sur 3 dimensions → compteur = 3', () => {
     renderPill({
       available: makeAvailable({
-        experience_types: [{ label: 'PVP non classé', value: 'PVP non classé', count: 1 }],
+        experience_types: [{ label: 'Unranked PvP', value: 'Unranked PvP', count: 1 }],
         playlists: [{ label: 'Quick Play', value: 'Quick Play', count: 1 }],
         modes: [],
       }),
       cascade: {
-        experience_types: ['PVP classé'],  // zombie
+        experience_types: ['Ranked PvP'],  // zombie
         playlists: ['Ranked Arena'],        // zombie
         modes: ['Slayer'],                  // zombie (modes vides)
         maps: [],

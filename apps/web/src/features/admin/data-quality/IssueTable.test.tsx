@@ -33,12 +33,12 @@ function issue(exampleMatchIDs: string[]): AdminDataQualityIssue {
 }
 
 afterEach(() => {
-  useAppShellStore.setState({ currentPlayer: null, availablePlayers: [], locale: 'fr' })
+  useAppShellStore.setState({ currentPlayer: null, availablePlayers: [], locale: 'en' })
 })
 
 describe('IssueTable — colonne Exemples (C7b)', () => {
   it('rend jusqu\'à 3 liens de match cliquables (nouvel onglet, href player-scopé)', () => {
-    useAppShellStore.setState({ currentPlayer: player('JGtm'), availablePlayers: [], locale: 'fr' })
+    useAppShellStore.setState({ currentPlayer: player('JGtm'), availablePlayers: [], locale: 'en' })
     render(
       <IssueTable
         issues={[issue(['m-1', 'm-2', 'm-3', 'm-4'])]}
@@ -54,19 +54,19 @@ describe('IssueTable — colonne Exemples (C7b)', () => {
   })
 
   it('utilise le premier profil disponible si aucun joueur courant', () => {
-    useAppShellStore.setState({ currentPlayer: null, availablePlayers: [player('Alt')], locale: 'fr' })
+    useAppShellStore.setState({ currentPlayer: null, availablePlayers: [player('Alt')], locale: 'en' })
     render(<IssueTable issues={[issue(['m-9'])]} columns={columns} matchLinkTitleSlug="halo_5" />)
     expect(screen.getByRole('link')).toHaveAttribute('href', '/t/halo_5/players/Alt/matches/m-9')
   })
 
   it('dégrade en texte simple (non cliquable) sans joueur cible', () => {
-    useAppShellStore.setState({ currentPlayer: null, availablePlayers: [], locale: 'fr' })
+    useAppShellStore.setState({ currentPlayer: null, availablePlayers: [], locale: 'en' })
     render(<IssueTable issues={[issue(['m-1'])]} columns={columns} matchLinkTitleSlug="halo_5" />)
     expect(screen.queryByRole('link')).toBeNull()
   })
 
   it('omet la colonne Exemples sans matchLinkTitleSlug', () => {
-    useAppShellStore.setState({ currentPlayer: player('JGtm'), availablePlayers: [], locale: 'fr' })
+    useAppShellStore.setState({ currentPlayer: player('JGtm'), availablePlayers: [], locale: 'en' })
     render(<IssueTable issues={[issue(['m-1'])]} columns={columns} />)
     expect(screen.queryByRole('link')).toBeNull()
   })

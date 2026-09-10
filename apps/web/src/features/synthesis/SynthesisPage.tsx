@@ -608,12 +608,12 @@ export function SynthesisPage() {
 
   const experienceCounts = useMemo(() => {
     const opts = available?.experience_types ?? []
-    // Mappe les counts "PVP classé"/"PVP non classé"/"PVE" du backend vers le
+    // Mappe les counts "Ranked PvP"/"Unranked PvP"/"PVE" du backend vers le
     // format {value: 'all'|'ranked'|'unranked', count} du dropdown.
     //
     // 'Toutes' agrège TOUS les counts (ranked + unranked + PVE) — sinon un
     // joueur 100% Firefight verrait 'Toutes' à 0 alors qu'il a bien des matchs.
-    // 'Classé' / 'Non classé' restent stricts (PVP uniquement).
+    // 'Classé' / 'Unranked' restent stricts (PVP uniquement).
     let ranked = 0
     let unranked = 0
     let total = 0

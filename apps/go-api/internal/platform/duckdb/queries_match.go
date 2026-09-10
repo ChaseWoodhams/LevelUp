@@ -140,7 +140,7 @@ SELECT
     r.playlist_id,
     r.team_0_score,
     r.team_1_score,
-    COALESCE(r.pair_name_fr, r.pair_name) AS pair_name_fr,
+    r.pair_name AS pair_name_en,
     r.pair_id,
     r.game_variant_id,
     -- T0 offset (Match Timeline T0, Phase 3) : countdown pré-match en ms.
@@ -392,7 +392,7 @@ SELECT
     ` + StartTimeCanonicalSQL("r") + ` AS start_time,
     COALESCE(r.map_name, '')          AS map_ui,
     r.pair_name                       AS pair_name,
-    r.pair_name_fr                    AS pair_name_fr,
+    r.pair_name                       AS pair_name_en,
     COALESCE(mp.outcome, 0)           AS outcome,
     mp.rank                           AS rank,
     COALESCE(mp.kills, 0)             AS kills,

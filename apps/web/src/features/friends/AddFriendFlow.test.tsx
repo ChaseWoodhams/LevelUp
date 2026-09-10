@@ -12,8 +12,8 @@ import { AddFriendModal } from './AddFriendFlow'
 import { server } from '@/test/setup'
 
 const SETTINGS_BASE = {
-  lang: 'fr',
-  discord_lang: 'fr',
+  lang: 'en',
+  discord_lang: 'en',
   user_timezone: 'UTC',
   normalize_mode_labels: true,
   show_records: true,
@@ -67,14 +67,14 @@ function renderWithClient(
 describe('AddFriendModal — UI', () => {
   it('ne se monte pas quand open=false', () => {
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={false} onClose={vi.fn()} locale="fr" />,
+      <AddFriendModal gamertag="Alice" open={false} onClose={vi.fn()} locale="en" />,
     )
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
   it('affiche le titre avec le gamertag fourni', () => {
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={true} onClose={vi.fn()} locale="fr" />,
+      <AddFriendModal gamertag="Alice" open={true} onClose={vi.fn()} locale="en" />,
     )
     expect(screen.getByText(/Ajouter Alice comme ami/i)).toBeTruthy()
   })
@@ -82,7 +82,7 @@ describe('AddFriendModal — UI', () => {
   it('appelle onClose au clic sur Annuler', () => {
     const onClose = vi.fn()
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} locale="fr" />,
+      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} locale="en" />,
     )
     fireEvent.click(screen.getByText(/Annuler/i))
     expect(onClose).toHaveBeenCalled()
@@ -91,7 +91,7 @@ describe('AddFriendModal — UI', () => {
   it('appelle onClose au clic sur le backdrop', () => {
     const onClose = vi.fn()
     renderWithClient(
-      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} locale="fr" />,
+      <AddFriendModal gamertag="Alice" open={true} onClose={onClose} locale="en" />,
     )
     const dialog = screen.getByRole('dialog')
     fireEvent.click(dialog)
@@ -123,7 +123,7 @@ describe('AddFriendModal — soumission', () => {
         gamertag="Charlie"
         open={true}
         onClose={onClose}
-        locale="fr"
+        locale="en"
         onSuccess={onSuccess}
       />,
       [], // friends initiaux vides
@@ -151,7 +151,7 @@ describe('AddFriendModal — soumission', () => {
         gamertag="Alice"
         open={true}
         onClose={onClose}
-        locale="fr"
+        locale="en"
         onSuccess={onSuccess}
       />,
       ['alice'], // déjà dans la liste (case-insensitive)

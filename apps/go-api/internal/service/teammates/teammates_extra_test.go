@@ -250,8 +250,8 @@ func TestExtractSynthesisSessionLabels_PureRankedSession(t *testing.T) {
 	}
 	got := extractSynthesisSessionLabels(matches)
 	e := got.Squad[0]
-	if len(e.Experiences) != 1 || e.Experiences[0] != "PVP classé" {
-		t.Errorf("expected [PVP classé], got %v", e.Experiences)
+	if len(e.Experiences) != 1 || e.Experiences[0] != "Ranked PvP" {
+		t.Errorf("expected [Ranked PvP], got %v", e.Experiences)
 	}
 }
 
@@ -274,7 +274,7 @@ func TestFilterSynthesisByCascade_ExperienceFilter(t *testing.T) {
 		{MatchID: "m2", IsRanked: false, IsFirefight: false},
 		{MatchID: "m3", IsRanked: false, IsFirefight: true},
 	}
-	got := filterSynthesisByCascade(matches, domain.CascadeFilter{ExperienceTypes: []string{"PVP classé"}})
+	got := filterSynthesisByCascade(matches, domain.CascadeFilter{ExperienceTypes: []string{"Ranked PvP"}})
 	if len(got) != 1 || got[0].MatchID != "m1" {
 		t.Errorf("expected only m1 (ranked), got %v", got)
 	}

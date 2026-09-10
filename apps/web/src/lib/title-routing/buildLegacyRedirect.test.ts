@@ -23,7 +23,7 @@ interface Case {
   search?: string
   hash?: string
   active?: string
-  lang?: 'fr' | 'en'
+  lang?: 'en' | 'en'
   expected: string | null
 }
 
@@ -88,12 +88,12 @@ const CASES: Case[] = [
   { name: 'legacy palmares sur halo_5', pathname: '/players/jgtm/palmares', active: 'halo_5', expected: '/t/halo_5/players/jgtm/community' },
 
   // --- Émission du segment de langue au premier hop (I10) -----------------
-  { name: 'lang fr émis → /fr/t/…', pathname: '/players/jgtm/home', lang: 'fr', expected: '/fr/t/halo_infinite/players/jgtm/home' },
+  { name: 'lang fr émis → /en/t/…', pathname: '/players/jgtm/home', lang: 'en', expected: '/en/t/halo_infinite/players/jgtm/home' },
   { name: 'lang en émis → /en/t/…', pathname: '/players/jgtm/home', lang: 'en', expected: '/en/t/halo_infinite/players/jgtm/home' },
   { name: 'lang + remap interne (objectifs) → /en/t/…/ascension/objectifs', pathname: '/players/jgtm/objectifs', lang: 'en', expected: '/en/t/halo_infinite/players/jgtm/ascension/objectifs' },
-  { name: 'lang + activeSlug halo_5', pathname: '/players/jgtm/home', lang: 'fr', active: 'halo_5', expected: '/fr/t/halo_5/players/jgtm/home' },
-  { name: 'lang + ?f= + #hash préservés byte-exact', pathname: '/players/jgtm/stats/timeseries', search: '?f=abc123', hash: '#top', lang: 'fr', expected: '/fr/t/halo_infinite/players/jgtm/stats/timeseries?f=abc123#top' },
-  { name: 'lang + joueur seul → /fr/t/…/home', pathname: '/players/jgtm', lang: 'fr', expected: '/fr/t/halo_infinite/players/jgtm/home' },
+  { name: 'lang + activeSlug halo_5', pathname: '/players/jgtm/home', lang: 'en', active: 'halo_5', expected: '/en/t/halo_5/players/jgtm/home' },
+  { name: 'lang + ?f= + #hash préservés byte-exact', pathname: '/players/jgtm/stats/timeseries', search: '?f=abc123', hash: '#top', lang: 'en', expected: '/en/t/halo_infinite/players/jgtm/stats/timeseries?f=abc123#top' },
+  { name: 'lang + joueur seul → /en/t/…/home', pathname: '/players/jgtm', lang: 'en', expected: '/en/t/halo_infinite/players/jgtm/home' },
 
   // --- null : hors périmètre legacy ---------------------------------------
   { name: 'bare /players → null', pathname: '/players', expected: null },

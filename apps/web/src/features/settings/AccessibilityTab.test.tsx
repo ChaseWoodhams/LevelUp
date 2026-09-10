@@ -26,7 +26,7 @@ const T_STUB = {
   teamColorDefault: 'Défaut',
 } as Parameters<typeof AccessibilityTab>[0]['t']
 
-const LOCALE = 'fr' as const
+const LOCALE = 'en' as const
 
 beforeEach(() => {
   useSettingsDraftStore.setState((s) => ({

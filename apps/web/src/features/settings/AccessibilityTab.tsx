@@ -115,7 +115,6 @@ function OutlineColorPicker({
   value,
   defaultLabel,
   onChange,
-  locale,
 }: {
   label: string
   value: string | null
@@ -124,11 +123,7 @@ function OutlineColorPicker({
   locale: Locale
 }) {
   const selected = HALO_OUTLINE_COLORS.find((c) => c.id === value)
-  const selectedName = selected
-    ? locale === 'fr'
-      ? selected.nameFr
-      : selected.nameEn
-    : null
+  const selectedName = selected?.nameEn ?? null
 
   return (
     <div className="space-y-2">
@@ -156,7 +151,7 @@ function OutlineColorPicker({
         </button>
 
         {HALO_OUTLINE_COLORS.map((color) => {
-          const name = locale === 'fr' ? color.nameFr : color.nameEn
+          const name = color.nameEn
           const isSelected = value === color.id
           return (
             <button

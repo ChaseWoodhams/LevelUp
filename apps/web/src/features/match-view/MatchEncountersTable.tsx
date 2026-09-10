@@ -70,23 +70,11 @@ function isSemanticToken(s: string): s is SemanticToken {
   return s.startsWith('narrative-') || s.startsWith('outcome-') || s.startsWith('perf-')
 }
 
-const ENCOUNTER_BADGE_TOOLTIPS: Record<string, { fr: string; en: string }> = {
-  'narrative.encounter.ally_plus': {
-    fr: 'Allié récurrent : bon taux de victoire ensemble',
-    en: 'Recurring ally: good win rate together',
-  },
-  'narrative.encounter.tough_enemy': {
-    fr: 'Dur à cuire : ratio frags/morts contre lui défavorable',
-    en: 'Tough nut: unfavorable frags/deaths ratio against him',
-  },
-  'narrative.encounter.coriace': {
-    fr: 'Coriace : faible taux de victoire face à ce joueur',
-    en: 'Tough opponent: low win rate against him',
-  },
-  'narrative.encounter.ordinal': {
-    fr: 'Total rencontres croisées (allié + ennemi)',
-    en: 'Total cross encounters (ally + enemy)',
-  },
+const ENCOUNTER_BADGE_TOOLTIPS: Record<string, string> = {
+  'narrative.encounter.ally_plus': 'Recurring ally: good win rate together',
+  'narrative.encounter.tough_enemy': 'Tough nut: unfavorable kills/deaths ratio against him',
+  'narrative.encounter.coriace': 'Tough opponent: low win rate against him',
+  'narrative.encounter.ordinal': 'Total cross encounters (ally + enemy)',
 }
 
 // Badges produits par le backend match-view (narrative.ComputeEncounterBadges) —
@@ -120,7 +108,7 @@ function EncounterBadgesInline({
         const colorVar = isSemanticToken(badge.color_token)
           ? tokenVar(badge.color_token as SemanticToken)
           : undefined
-        const tooltip = ENCOUNTER_BADGE_TOOLTIPS[badge.label_key]?.[locale]
+        const tooltip = ENCOUNTER_BADGE_TOOLTIPS[badge.label_key]
         const badgeEl = <NarrativeBadge label={label} colorVar={colorVar} solid size="sm" />
         return tooltip ? (
           <Tooltip key={i} content={tooltip}>
@@ -182,26 +170,6 @@ function EncounterTh({ header, idx }: { header: Header<MatchEncounterRow, unknow
 // SplitBar / AllyEnemySplitBar / KDSplitBar : extraits vers
 // features/_shared/EncounterSplitBars.tsx (dédup #6 — cf. import ci-dessus).
 
-function formatRelativeFR(iso: string): string {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return '—'
-  const diffMs = Date.now() - date.getTime()
-  const minutes = Math.round(diffMs / 60_000)
-  if (minutes < 1) return "à l'instant"
-  if (minutes < 60) return `il y a ${minutes} min`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return hours <= 1 ? 'il y a 1 h' : `il y a ${hours} h`
-  const days = Math.round(hours / 24)
-  if (days === 1) return 'hier'
-  if (days < 7) return `il y a ${days} j`
-  const weeks = Math.round(days / 7)
-  if (weeks < 5) return weeks <= 1 ? 'il y a 1 sem.' : `il y a ${weeks} sem.`
-  const months = Math.round(days / 30)
-  if (months < 12) return months <= 1 ? 'il y a 1 mois' : `il y a ${months} mois`
-  const years = Math.round(days / 365)
-  return years <= 1 ? 'il y a 1 an' : `il y a ${years} ans`
-}
-
 function formatRelativeEN(iso: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return '—'
@@ -222,57 +190,32 @@ function formatRelativeEN(iso: string): string {
   return years <= 1 ? '1 y ago' : `${years} y ago`
 }
 
-export function MatchEncountersTable({ rows, locale = 'fr', onPlayerClick, hideCardWrapper = false }: Props) {
+export function MatchEncountersTable({ rows, locale = 'en', onPlayerClick, hideCardWrapper = false }: Props) {
   const { playerSlug } = useParams({ strict: false }) as { playerSlug?: string }
   const navigate = useNavigate()
   const titleSlug = useTitleSlug()
-  const formatRelative = locale === 'en' ? formatRelativeEN : formatRelativeFR
+  const formatRelative = formatRelativeEN
 
-  const labels = useMemo(
-    () =>
-      locale === 'en'
-        ? {
-            title: 'Encounter history (match players)',
-            empty: 'No prior encounters with these players.',
-            player: 'Player',
-            badgesInfo: 'What each pill means:',
-            role: 'Role',
-            roleAlly: 'ally',
-            roleEnemy: 'enemy',
-            encounters: 'Encounters',
-            encountersTooltip: 'Matches played with this player, split into ally and enemy.',
-            wrAlly: 'WR as ally',
-            wrAllyTooltip: 'Win rate in matches where this player was an ally.',
-            wrEnemy: 'WR as enemy',
-            wrEnemyTooltip: 'Win rate in matches where this player was an opponent.',
-            kdCross: 'K/D',
-            kdCrossTooltip: 'Kills dealt and deaths suffered in these direct duels.',
-            ratio: 'Ratio',
-            ratioTooltip: 'Kill/Death ratio: kills dealt ÷ deaths suffered across all shared matches',
-            lastSeen: 'Last seen',
-          }
-        : {
-            title: 'Historique des rencontres',
-            empty: 'Aucune rencontre antérieure avec ces joueurs.',
-            player: 'Joueur',
-            badgesInfo: 'Ce que signifie chaque pastille :',
-            role: 'Rôle',
-            roleAlly: 'allié',
-            roleEnemy: 'ennemi',
-            encounters: 'Rencontres',
-            encountersTooltip: 'Nombre de matchs joués avec ce joueur, répartis en allié et adversaire.',
-            wrAlly: 'Taux de victoire allié',
-            wrAllyTooltip: 'Taux de victoire des matchs où ce joueur était allié.',
-            wrEnemy: 'Taux de victoire ennemi',
-            wrEnemyTooltip: 'Taux de victoire des matchs où ce joueur était adversaire.',
-            kdCross: 'F/D',
-            kdCrossTooltip: 'Frags infligés et morts subies dans ces duels directs.',
-            ratio: 'Ratio',
-            ratioTooltip: 'Ratio frags/morts : frags infligés ÷ morts subies sur l’ensemble des matchs communs',
-            lastSeen: 'Vu pour la dernière fois',
-          },
-    [locale],
-  )
+  const labels = {
+    title: 'Encounter history (match players)',
+    empty: 'No prior encounters with these players.',
+    player: 'Player',
+    badgesInfo: 'What each pill means:',
+    role: 'Role',
+    roleAlly: 'ally',
+    roleEnemy: 'enemy',
+    encounters: 'Encounters',
+    encountersTooltip: 'Matches played with this player, split into ally and enemy.',
+    wrAlly: 'WR as ally',
+    wrAllyTooltip: 'Win rate in matches where this player was an ally.',
+    wrEnemy: 'WR as enemy',
+    wrEnemyTooltip: 'Win rate in matches where this player was an opponent.',
+    kdCross: 'K/D',
+    kdCrossTooltip: 'Kills dealt and deaths suffered in these direct duels.',
+    ratio: 'Ratio',
+    ratioTooltip: 'Kill/Death ratio: kills dealt ? deaths suffered across all shared matches',
+    lastSeen: 'Last seen',
+  }
 
   function goToExplorer(gamertag: string) {
     if (onPlayerClick) {

@@ -90,7 +90,7 @@ async function renderAndCapture(): Promise<OptionLike> {
       events={EVENTS}
       scoreboard={SCOREBOARD}
       meXUID="me"
-      t={MATCH_VIEW_TEXT.fr}
+      t={MATCH_VIEW_TEXT.en}
     />,
   )
   await waitFor(() => expect(captured.option).not.toBeNull())

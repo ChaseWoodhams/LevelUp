@@ -15,19 +15,19 @@ import {
 
 describe('lib/narrative/overtime', () => {
   it('libellé localisé FR / EN', () => {
-    expect(overtimeLabel('fr')).toBe('Prolongation')
+    expect(overtimeLabel('en')).toBe('Prolongation')
     expect(overtimeLabel('en')).toBe('Overtime')
   })
 
   it('tooltip : dépassement formaté en M:SS', () => {
-    expect(overtimeTooltip('fr', 43)).toBe('Prolongation : +0:43')
-    expect(overtimeTooltip('fr', 270)).toBe('Prolongation : +4:30')
+    expect(overtimeTooltip('en', 43)).toBe('Prolongation : +0:43')
+    expect(overtimeTooltip('en', 270)).toBe('Prolongation : +4:30')
     expect(overtimeTooltip('en', 54)).toBe('Overtime: +0:54')
   })
 
   it('tooltip : sans dépassement exploitable → libellé seul', () => {
-    expect(overtimeTooltip('fr', 0)).toBe('Prolongation')
-    expect(overtimeTooltip('fr', null)).toBe('Prolongation')
+    expect(overtimeTooltip('en', 0)).toBe('Prolongation')
+    expect(overtimeTooltip('en', null)).toBe('Prolongation')
     expect(overtimeTooltip('en', undefined)).toBe('Overtime')
   })
 
@@ -35,7 +35,7 @@ describe('lib/narrative/overtime', () => {
     for (const key of [OVERTIME_LABEL_KEY, OVERTIME_TOOLTIP_KEY]) {
       const entry = matchViewManifest[key]
       expect(entry, `clé absente du manifeste : ${key}`).toBeDefined()
-      expect(entry.fr.length).toBeGreaterThan(0)
+      expect(entry.en.length).toBeGreaterThan(0)
       expect(entry.en.length).toBeGreaterThan(0)
     }
   })

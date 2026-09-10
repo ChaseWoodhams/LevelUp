@@ -45,7 +45,7 @@ describe('MedalsView', () => {
         { key: 'other', label: 'Autres', categories: [category('skill', 'Talent', 'Perfection')] },
       ],
     }
-    render(<MedalsView vm={vm} locale="fr" emptyTitle="vide" emptyDescription="rien" />)
+    render(<MedalsView vm={vm} locale="en" emptyTitle="vide" emptyDescription="rien" />)
     expect(screen.getByText('Classiques')).toBeTruthy()
     expect(screen.getByText('Autres')).toBeTruthy()
     expect(screen.getByText('Série')).toBeTruthy()
@@ -58,7 +58,7 @@ describe('MedalsView', () => {
     render(
       <MedalsView
         vm={{ superSections: [] }}
-        locale="fr"
+        locale="en"
         emptyTitle="Aucune médaille à afficher"
         emptyDescription="Aucune médaille ne correspond au filtre sélectionné."
       />,

@@ -37,7 +37,7 @@ function renderPage(groups: Group[] = [GROUP]) {
 
 beforeEach(() => {
   // Owner = alice-x → boutons propriétaire visibles.
-  useAppShellStore.setState({ locale: 'fr', linkedHaloIdentity: { xuid: 'alice-x', gamertag: 'Alice' } })
+  useAppShellStore.setState({ locale: 'en', linkedHaloIdentity: { xuid: 'alice-x', gamertag: 'Alice' } })
 })
 
 describe('GroupsPage — rendu', () => {

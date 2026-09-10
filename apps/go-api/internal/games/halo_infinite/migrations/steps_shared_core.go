@@ -411,7 +411,7 @@ func sharedCoreSteps() []migration.Migration {
 		{
 			Name:        "add_mv_player_matches_pair_id",
 			TargetDB:    migration.TargetShared,
-			Description: "Recréation mv_player_matches avec pair_id (clé asset_translations) pour le helper analysis.ResolvePairNameFR (cf. thought_log 2026-05-09)",
+			Description: "Recréation mv_player_matches avec pair_id (clé asset_translations) pour le helper analysis.ResolvePairName (cf. thought_log 2026-05-09)",
 			ApplySchema: migration.ApplyMvPlayerMatchesView,
 		},
 		{

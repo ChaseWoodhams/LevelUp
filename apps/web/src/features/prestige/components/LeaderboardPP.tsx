@@ -13,7 +13,7 @@
  * imposé (total_pp DESC). À rouvrir quand le backend sera branché.
  */
 import type { Tier } from '@/lib/prestige'
-import { TIER_COLORS, TIER_LABELS_FR } from '@/lib/prestige'
+import { TIER_COLORS, TIER_LABELS_EN } from '@/lib/prestige'
 import { useAssetLabel } from '@/lib/i18n/fieldMappings'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { formatMessage, type ManifestLocale } from '@/lib/i18n/format'
@@ -138,7 +138,7 @@ function Row({ entry, rank, locale }: { entry: LeaderboardEntry; rank: number; l
   // Phase 4 plan finition multi-titres : libellé du tier via TOML, fallback dict.
   const tierLabelFromTOML = useAssetLabel('challenge_tier', entry.last_tier ?? '')
   const tierLabel = entry.last_tier
-    ? (tierLabelFromTOML !== entry.last_tier ? tierLabelFromTOML : TIER_LABELS_FR[entry.last_tier])
+    ? (tierLabelFromTOML !== entry.last_tier ? tierLabelFromTOML : TIER_LABELS_EN[entry.last_tier])
     : ''
   return (
     <tr className="border-b border-border last:border-0 hover:bg-accent/40">

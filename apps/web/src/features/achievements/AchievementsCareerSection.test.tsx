@@ -12,8 +12,8 @@ import type { AchievementsPageResponse } from '@/lib/api/types'
 
 // Mock du store locale (par défaut FR)
 vi.mock('@/stores/appShellStore', () => ({
-  useAppShellStore: (selector: (s: { locale: 'fr' | 'en' }) => unknown) =>
-    selector({ locale: 'fr' }),
+  useAppShellStore: (selector: (s: { locale: 'en' | 'en' }) => unknown) =>
+    selector({ locale: 'en' }),
 }))
 
 // Mock du hook
@@ -88,9 +88,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a1',
             name_en: 'First Blood',
-            name_fr: 'Premier sang',
             description_en: '',
-            description_fr: '',
             gamerscore: 10,
             is_secret: false,
             unlocked: true,
@@ -98,9 +96,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a2',
             name_en: 'Sharpshooter',
-            name_fr: 'Tireur d\'élite',
             description_en: '',
-            description_fr: '',
             gamerscore: 25,
             is_secret: false,
             unlocked: false,
@@ -113,7 +109,7 @@ describe('AchievementsCareerSection', () => {
     expect(screen.getByText('42 / 100')).toBeInTheDocument()
     expect(screen.getByText('800 / 2000 G')).toBeInTheDocument()
     expect(screen.getByText('42.0 %')).toBeInTheDocument()
-    // Cards : noms FR (locale mock = 'fr')
+    // Cards : noms FR (locale mock = 'en')
     expect(screen.getByText('Premier sang')).toBeInTheDocument()
     expect(screen.getByText('Tireur d\'élite')).toBeInTheDocument()
   })
@@ -125,9 +121,7 @@ describe('AchievementsCareerSection', () => {
     const items = Array.from({ length: 50 }, (_, i) => ({
       achievement_id: `a${i}`,
       name_en: `Ach ${i}`,
-      name_fr: `Succès ${i}`,
       description_en: '',
-      description_fr: '',
       gamerscore: i,
       is_secret: false,
       unlocked: false,
@@ -163,9 +157,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a1',
             name_en: 'Clocking In',
-            name_fr: 'Pointage',
             description_en: '',
-            description_fr: '',
             gamerscore: 10,
             is_secret: false,
             unlocked: false,
@@ -174,9 +166,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a2',
             name_en: 'Zeta',
-            name_fr: 'Zêta',
             description_en: '',
-            description_fr: '',
             gamerscore: 20,
             is_secret: false,
             unlocked: false,
@@ -185,9 +175,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a3',
             name_en: 'Get the Popcorn',
-            name_fr: 'Sortez le pop-corn',
             description_en: '',
-            description_fr: '',
             gamerscore: 30,
             is_secret: false,
             unlocked: false,
@@ -228,9 +216,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a1',
             name_en: 'No Category',
-            name_fr: 'Sans catégorie',
             description_en: '',
-            description_fr: '',
             gamerscore: 10,
             is_secret: false,
             unlocked: false,

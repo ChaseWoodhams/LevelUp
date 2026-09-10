@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"levelup/go-api/internal/analysis"
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 )
 
@@ -237,12 +236,12 @@ func (r *MediaRepo) LoadMatchCandidatesForMedia(ctx context.Context, filePath st
 			r.match_id,
 			`+StartTimeCanonicalSQL("r")+` AS start_utc,
 			COALESCE(r.end_time_utc,   r.end_time   AT TIME ZONE 'UTC') AS end_utc,
-			COALESCE(r.map_name_fr, r.map_name) AS map_name,
+			r.map_name AS map_name,
 			COALESCE(r.map_id, '') AS map_id,
 			-- GH3-4 : base EN-first pour la normalisation du mode (mode_name_tr est
 			-- keyé mode_en) ; la traduction FR est appliquée conditionnellement.
-			COALESCE(r.pair_name, r.pair_name_fr) AS pair_name,
-			COALESCE(r.playlist_name_fr, r.playlist_name) AS playlist_name,
+			COALESCE(r.pair_name, '') AS pair_name,
+			r.playlist_name AS playlist_name,
 			COALESCE(r.playlist_name, '') AS playlist_name_en,
 			COALESCE(r.playlist_id, '') AS playlist_id,
 			mp.outcome,
@@ -266,13 +265,10 @@ func (r *MediaRepo) LoadMatchCandidatesForMedia(ctx context.Context, filePath st
 
 	// GH3-4 : locale de requête (défaut "fr"). Sous EN, les libellés mode/playlist/map
 	// des suggestions suivent la locale (jamais de FR résiduel).
-	locale := ctxkeys.Locale(ctx)
-	isEN := strings.HasPrefix(strings.ToLower(strings.TrimSpace(locale)), "en")
 
 	matchIDs := []string{}
 	mapIDByMatch := map[string]string{}
 	mapIDSet := map[string]struct{}{}
-	modeEnSet := map[string]struct{}{}
 	playlistIDByMatch := map[string]string{}
 	playlistIDSet := map[string]struct{}{}
 	// playlist_name EN brut (match_registry.playlist_name) par match — base EN pour
@@ -334,7 +330,6 @@ func (r *MediaRepo) LoadMatchCandidatesForMedia(ctx context.Context, filePath st
 			// (NormalizeModeLabel) vs mode_category.go (InferModeCategoryFromPairName).
 			if en := analysis.NormalizeModeLabel(pairName.String); en != "" {
 				c.ModeName = &en
-				modeEnSet[en] = struct{}{}
 			}
 		}
 		if playlistName.Valid {
@@ -354,29 +349,6 @@ func (r *MediaRepo) LoadMatchCandidatesForMedia(ctx context.Context, filePath st
 		c.IsCurrent = currentMatchID.Valid && currentMatchID.String == c.MatchID
 		resp.Candidates = append(resp.Candidates, c)
 		matchIDs = append(matchIDs, c.MatchID)
-	}
-
-	// Traduction FR des modes (ex: "Slayer" â†’ "Assassin") via mode_name_tr.
-	// Si pair_name_fr Ã©tait dÃ©jÃ  rempli en DB, on le prÃ©serve quand mÃªme
-	// puisqu'on substitue uniquement si une traduction existe.
-	// GH3-4 : la traduction FR (mode_name_tr) n'est appliquée QUE sous FR. Sous EN,
-	// ModeName reste le sous-mode EN canonique (NormalizeModeLabel sur base EN-first).
-	if len(modeEnSet) > 0 && !isEN {
-		enList := make([]string, 0, len(modeEnSet))
-		for en := range modeEnSet {
-			enList = append(enList, en)
-		}
-		translations := r.loadModeNameTranslations(ctx, enList)
-		for i := range resp.Candidates {
-			if resp.Candidates[i].ModeName == nil {
-				continue
-			}
-			// ModeName est dÃ©jÃ  le sous-mode EN canonique (cf. boucle ci-dessus) â†’
-			// lookup direct, pas besoin de re-normaliser.
-			if fr, ok := translations[*resp.Candidates[i].ModeName]; ok && fr != "" {
-				resp.Candidates[i].ModeName = &fr
-			}
-		}
 	}
 
 	// Résolution map (nom + image) via maps_catalog (name_canonical TOUJOURS peuplé)
@@ -401,8 +373,8 @@ func (r *MediaRepo) LoadMatchCandidatesForMedia(ctx context.Context, filePath st
 			cat := catNames[mid]
 			// GH3-4 : nom affiché résolu par locale (EN = name_canonical, FR =
 			// asset_translations) via le helper partagé ; jamais l'UUID brut.
-			if resolved := resolvePlaylistNameForLocale(locale, cat.fr, cat.en); resolved != "" {
-				resp.Candidates[i].MapName = &resolved
+			if cat.en != "" {
+				resp.Candidates[i].MapName = &cat.en
 			} else if resp.Candidates[i].MapName != nil && looksLikeAssetID(*resp.Candidates[i].MapName) {
 				resp.Candidates[i].MapName = nil
 			}
@@ -442,16 +414,15 @@ func (r *MediaRepo) LoadMatchCandidatesForMedia(ctx context.Context, filePath st
 		}
 		for i := range resp.Candidates {
 			pid := playlistIDByMatch[resp.Candidates[i].MatchID]
-			frName := ""
-			if pid != "" {
-				frName = playlistTr[pid]
-			}
-			if frName == "" && resp.Candidates[i].PlaylistName != nil {
-				frName = *resp.Candidates[i].PlaylistName // COALESCE FR-first du scan
-			}
 			enName := playlistNameENByMatch[resp.Candidates[i].MatchID]
-			if resolved := resolvePlaylistNameForLocale(locale, frName, enName); resolved != "" {
-				resp.Candidates[i].PlaylistName = &resolved
+			if enName == "" && pid != "" {
+				enName = playlistTr[pid]
+			}
+			if enName == "" && resp.Candidates[i].PlaylistName != nil {
+				enName = *resp.Candidates[i].PlaylistName
+			}
+			if enName != "" {
+				resp.Candidates[i].PlaylistName = &enName
 			}
 		}
 	}

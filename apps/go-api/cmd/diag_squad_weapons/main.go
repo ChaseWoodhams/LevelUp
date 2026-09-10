@@ -123,7 +123,7 @@ func main() {
 	for id := range uniq {
 		var name sql.NullString
 		err := metaDB.QueryRowContext(context.Background(),
-			fmt.Sprintf("SELECT name_fr FROM meta.weapon_labels WHERE weapon_id = %d", id)).Scan(&name)
+			fmt.Sprintf("SELECT name_en FROM meta.weapon_labels WHERE weapon_id = %d", id)).Scan(&name)
 		if err == sql.ErrNoRows {
 			unresolved = append(unresolved, id)
 			continue
@@ -192,7 +192,7 @@ func main() {
 	fmt.Println("\n=== Top 30 weapons globaux (squad+main) avec kills + label ===")
 	topRows, _ := metaDB.QueryContext(context.Background(), `
 		SELECT effective_weapon_id, SUM(1) AS kills,
-		       (SELECT name_fr FROM meta.weapon_labels wl WHERE wl.weapon_id = effective_weapon_id) AS label
+		       (SELECT name_en FROM meta.weapon_labels wl WHERE wl.weapon_id = effective_weapon_id) AS label
 		FROM shared.v_weapon_kills
 		WHERE effective_weapon_id NOT IN (0,1,2)
 		GROUP BY effective_weapon_id

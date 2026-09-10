@@ -37,7 +37,7 @@ const ITEM_C = makeItem({ basename: 'C.mp4', file_path: '/media/C.mp4', map_name
 describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -105,7 +105,7 @@ describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
 describe('CoverFlowModal — stabilité de l\'item courant', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -379,7 +379,7 @@ describe('CoverFlowModal — stabilité de l\'item courant', () => {
 describe('CoverFlowModal — icône "ouvrir le match" header', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -479,7 +479,7 @@ describe('CoverFlowModal — icône "ouvrir le match" header', () => {
 describe('CoverFlowModal — bouton autoChain', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -538,7 +538,7 @@ describe('CoverFlowModal — enchaînement automatique effectif', () => {
   afterEach(() => {
     vi.useRealTimers()
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 

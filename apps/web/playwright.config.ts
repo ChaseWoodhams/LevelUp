@@ -23,7 +23,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'off',
     // Pas de JS disabled — l'app est 100% JS
-    locale: 'fr-FR',
+    locale: 'en-US',
     // Origin header requis pour passer le middleware CSRF de l'API Go
     extraHTTPHeaders: {
       Origin: 'http://localhost:5173',

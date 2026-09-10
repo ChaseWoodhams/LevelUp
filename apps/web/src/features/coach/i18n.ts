@@ -33,32 +33,7 @@ export interface CoachStrings {
   dismissError: string
 }
 
-export const coachStringsFR: CoachStrings = {
-  proposalsTitle: 'Suggestions du coach',
-  proposalsEmpty: 'Aucune suggestion pour le moment. Reviens après quelques matchs.',
-  proposalsOptInHint:
-    "Active 'Coach proactif' dans les paramètres pour recevoir des suggestions d'objectifs et d'arcs Prestige calibrés sur les tendances récentes.",
-  proposalsLoadError: 'Impossible de charger les suggestions.',
-
-  accept: 'Accepter',
-  dismiss: 'Ignorer',
-  accepting: 'Création...',
-  dismissing: 'Suppression...',
-
-  origin: 'Origine',
-  originCatalog: 'Catalogue',
-  originSynthesized: 'Synthétisé',
-  strength: 'Force du signal',
-  signal: 'Signal',
-  kindChallenge: 'Défi',
-  kindArc: 'Arc',
-  suggestedTier: 'Palier suggéré',
-
-  acceptedSuccess: 'Suggestion acceptée — défi créé dans Prestige.',
-  dismissedSuccess: 'Suggestion ignorée.',
-  acceptError: "Erreur lors de l'acceptation.",
-  dismissError: "Erreur lors de l'ignoration.",
-}
+/* The product has one runtime language. */
 
 export const coachStringsEN: CoachStrings = {
   proposalsTitle: 'Coach suggestions',
@@ -87,6 +62,6 @@ export const coachStringsEN: CoachStrings = {
   dismissError: 'Error while dismissing.',
 }
 
-export function getCoachStrings(locale: Locale): CoachStrings {
-  return locale === 'fr' ? coachStringsFR : coachStringsEN
+export function getCoachStrings(_locale: Locale): CoachStrings {
+  return coachStringsEN
 }

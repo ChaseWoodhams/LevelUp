@@ -15,9 +15,7 @@ import { AssetCard } from './AssetCard'
 const MEDAL: AssetMeta = {
   id: '1',
   name_en: 'Double Kill',
-  name_fr: 'Double élimination',
   description: 'Kill 2 enemies within 4 seconds.',
-  description_fr: 'Éliminez 2 ennemis en moins de 4 secondes.',
   image_url: '/static/medals/halo_infinite/1.png',
 } as AssetMeta
 

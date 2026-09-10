@@ -93,10 +93,10 @@ describe('subTierPosition', () => {
 
 describe('localizeTierName', () => {
   it('EN → FR (Gold → Or, Platinum → Platine)', () => {
-    expect(localizeTierName('Gold', 'fr')).toBe('Or')
-    expect(localizeTierName('Platinum', 'fr')).toBe('Platine')
-    expect(localizeTierName('Silver', 'fr')).toBe('Argent')
-    expect(localizeTierName('Diamond', 'fr')).toBe('Diamant')
+    expect(localizeTierName('Gold', 'en')).toBe('Or')
+    expect(localizeTierName('Platinum', 'en')).toBe('Platine')
+    expect(localizeTierName('Silver', 'en')).toBe('Argent')
+    expect(localizeTierName('Diamond', 'en')).toBe('Diamant')
   })
   it('FR → EN (Or → Gold, Platine → Platinum)', () => {
     expect(localizeTierName('Or', 'en')).toBe('Gold')
@@ -104,8 +104,8 @@ describe('localizeTierName', () => {
   })
   it('invariants de locale (Bronze, Onyx, Champion)', () => {
     expect(localizeTierName('Bronze', 'en')).toBe('Bronze')
-    expect(localizeTierName('Onyx', 'fr')).toBe('Onyx')
-    expect(localizeTierName('Champion', 'fr')).toBe('Champion')
+    expect(localizeTierName('Onyx', 'en')).toBe('Onyx')
+    expect(localizeTierName('Champion', 'en')).toBe('Champion')
   })
   it('nom inconnu → renvoyé tel quel', () => {
     expect(localizeTierName('Placement', 'en')).toBe('Placement')
@@ -120,23 +120,23 @@ describe('localizeTierLabel', () => {
     expect(localizeTierLabel('Diamant III', 'en')).toBe('Diamond III')
   })
   it('libellé H5 EN baké sous UI FR (« Platinum » → « Platine », arabe préservé)', () => {
-    expect(localizeTierLabel('Platinum', 'fr')).toBe('Platine')
-    expect(localizeTierLabel('Platinum 4', 'fr')).toBe('Platine 4')
-    expect(localizeTierLabel('Gold 3', 'fr')).toBe('Or 3')
+    expect(localizeTierLabel('Platinum', 'en')).toBe('Platine')
+    expect(localizeTierLabel('Platinum 4', 'en')).toBe('Platine 4')
+    expect(localizeTierLabel('Gold 3', 'en')).toBe('Or 3')
   })
   it('Onyx (invariant) + suffixe valeur préservé', () => {
     expect(localizeTierLabel('Onyx', 'en')).toBe('Onyx')
-    expect(localizeTierLabel('Onyx 1500', 'fr')).toBe('Onyx 1500')
+    expect(localizeTierLabel('Onyx 1500', 'en')).toBe('Onyx 1500')
   })
   it('même locale : identité (« Or IV » sous UI FR reste « Or IV »)', () => {
-    expect(localizeTierLabel('Or IV', 'fr')).toBe('Or IV')
+    expect(localizeTierLabel('Or IV', 'en')).toBe('Or IV')
     expect(localizeTierLabel('Gold IV', 'en')).toBe('Gold IV')
   })
   it('sentinelles / null / vide → inchangés', () => {
     expect(localizeTierLabel('Placement', 'en')).toBe('Placement')
     expect(localizeTierLabel('Placement (2 restants)', 'en')).toBe('Placement (2 restants)')
     expect(localizeTierLabel(null, 'en')).toBeNull()
-    expect(localizeTierLabel(undefined, 'fr')).toBeUndefined()
+    expect(localizeTierLabel(undefined, 'en')).toBeUndefined()
     expect(localizeTierLabel('', 'en')).toBe('')
   })
 })
@@ -180,16 +180,16 @@ describe('skillTierSortValue (tri colonne Rang)', () => {
 
 describe('composeTierLabel', () => {
   it('nom localisé + sous-palier romain (Diamant III / Gold IV)', () => {
-    expect(composeTierLabel('Diamond', 3, 'fr')).toBe('Diamant III')
+    expect(composeTierLabel('Diamond', 3, 'en')).toBe('Diamant III')
     expect(composeTierLabel('Gold', 4, 'en')).toBe('Gold IV')
-    expect(composeTierLabel('Platinum', 1, 'fr')).toBe('Platine I')
+    expect(composeTierLabel('Platinum', 1, 'en')).toBe('Platine I')
   })
   it('Onyx (palier ouvert) → nom seul, quel que soit le sous-palier', () => {
-    expect(composeTierLabel('Onyx', 0, 'fr')).toBe('Onyx')
+    expect(composeTierLabel('Onyx', 0, 'en')).toBe('Onyx')
     expect(composeTierLabel('Onyx', 3, 'en')).toBe('Onyx')
   })
   it('sous-palier hors 1..6 (0 ou >6) → nom seul', () => {
-    expect(composeTierLabel('Diamond', 0, 'fr')).toBe('Diamant')
+    expect(composeTierLabel('Diamond', 0, 'en')).toBe('Diamant')
     expect(composeTierLabel('Gold', 7, 'en')).toBe('Gold')
   })
 })

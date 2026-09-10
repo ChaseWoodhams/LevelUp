@@ -148,7 +148,7 @@ func enrichRow(r domain.MatchHistoryRawRow, mapWR map[string][2]int, fmts rowFor
 	// ex. Halo 5). Sans ce repli, mode_ui resterait vide sur la liste Explorer/
 	// Historique pour H5. Convention centralisée — cf. analysis.ResolveModeUIWithVariant.
 	modeUI := analysis.ResolveModeUIWithVariant(r.PairName, r.PairNameFR, r.GameVariantName, r.GameVariantNameFR)
-	mapU := coalesceStr(r.MapNameFR, r.MapName)
+	mapU := derefStr(r.MapName)
 	playlist := fmts.playlistLabelFor(coalesceStr(r.PlaylistName))
 
 	var startTime time.Time

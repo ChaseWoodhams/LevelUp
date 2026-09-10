@@ -105,13 +105,13 @@ func (r *MediaRepo) loadMediaMatchRegistry(
 			match_id,
 			COALESCE(map_id, ''),
 			COALESCE(map_name, ''),
-			COALESCE(map_name_fr, ''),
+			COALESCE(map_name, ''),
 			COALESCE(pair_name, ''),
-			COALESCE(pair_name_fr, ''),
+			COALESCE(pair_name, ''),
 			COALESCE(game_variant_id, ''),
 			COALESCE(playlist_id, ''),
 			COALESCE(playlist_name, ''),
-			COALESCE(playlist_name_fr, ''),
+			COALESCE(playlist_name, ''),
 			start_time, start_time_utc,
 			end_time, end_time_utc
 		FROM match_registry
@@ -185,7 +185,7 @@ func (r *MediaRepo) resolveMediaRegistryNameFallbacks(ctx context.Context, rows 
 		return
 	}
 	meta := NewMetadataRepoFromDB(r.pdb.Metadata)
-	langs := PreferredLangsForLocale("fr")
+	langs := PreferredAssetLanguages()
 
 	// map : nom FR ← asset_translations type "map" par map_id.
 	r.applyMediaNameFallback(ctx, meta, langs, rows, assetTypeMap, mediaNameAccessor{

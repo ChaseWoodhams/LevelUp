@@ -89,7 +89,7 @@ type RemoteServiceRecord struct {
 // utilisée notamment par le profil Explorer (top_weapons).
 type WeaponHighlight struct {
 	WeaponID int64  `json:"weapon_id"`
-	LabelFR  string `json:"label_fr"`
+	LabelFR  string `json:"-"`
 	LabelEN  string `json:"label_en"`
 	Kills    int    `json:"kills"`
 }

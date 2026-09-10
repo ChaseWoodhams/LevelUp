@@ -12,19 +12,19 @@ const haloOutcomesTOML = `
 title_slug = "halo_infinite"
 schema_version = 1
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 color_token = "outcome.positive"
 raw_code = 2
 [outcomes.loss]
-labels = { en = "Loss", fr = "Défaite" }
+labels = { en = "Loss" }
 color_token = "outcome.negative"
 raw_code = 3
 [outcomes.tie]
-labels = { en = "Tie", fr = "Égalité" }
+labels = { en = "Tie" }
 color_token = "outcome.neutral"
 raw_code = 1
 [outcomes.dnf]
-labels = { en = "DNF", fr = "Non terminé" }
+labels = { en = "DNF" }
 color_token = "outcome.neutral"
 raw_code = 4
 `
@@ -69,11 +69,11 @@ func TestOutcomeRawCode_SyntheticRoutesDifferently(t *testing.T) {
 title_slug = "synthetic_title_b"
 schema_version = 1
 [outcomes.win]
-labels = { en = "W", fr = "V" }
+labels = { en = "W" }
 color_token = "outcome.positive"
 raw_code = 7
 [outcomes.loss]
-labels = { en = "L", fr = "D" }
+labels = { en = "L" }
 color_token = "outcome.negative"
 raw_code = 9
 `
@@ -99,11 +99,11 @@ func TestOutcomeRawCode_DuplicateRejected(t *testing.T) {
 title_slug = "x"
 schema_version = 1
 [outcomes.win]
-labels = { en = "W", fr = "V" }
+labels = { en = "W" }
 color_token = "outcome.positive"
 raw_code = 5
 [outcomes.loss]
-labels = { en = "L", fr = "D" }
+labels = { en = "L" }
 color_token = "outcome.negative"
 raw_code = 5
 `
@@ -128,7 +128,7 @@ func TestOutcomeRawCode_NilAndAbsentDegrade(t *testing.T) {
 title_slug = "x"
 schema_version = 1
 [outcomes.win]
-labels = { en = "W", fr = "V" }
+labels = { en = "W" }
 color_token = "outcome.positive"
 `
 	set, err := LoadOutcomesFromBytes("nocode.toml", []byte(noCode))

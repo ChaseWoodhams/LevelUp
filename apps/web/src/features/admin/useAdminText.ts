@@ -35,8 +35,7 @@ export function useDateLocale(): string {
   return intlLocale(locale)
 }
 
-/** Locale courte ('fr' | 'en') pour les helpers purs (format.ts). */
+/** Locale courte ('en' | 'en') pour les helpers purs (format.ts). */
 export function useAdminLocale(): Locale {
-  const locale = useAppShellStore((s) => s.locale)
-  return locale === 'fr' ? 'fr' : 'en'
+	return 'en'
 }

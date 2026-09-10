@@ -11,7 +11,7 @@ title_slug     = "test_title"
 schema_version = 1
 
 [fields.kills]
-labels        = { en = "Kills", fr = "Éliminations" }
+labels        = { en = "Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -63,7 +63,7 @@ title_slug = "x"
 schema_version = 1
 
 [fields.not_a_real_field]
-labels = { en = "X", fr = "X" }
+labels = { en = "X" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
@@ -73,21 +73,21 @@ group = "combat"
 			errContains: "absent du canonique central",
 		},
 		{
-			name: "missing labels.fr",
+			name: "missing labels.en",
 			toml: `
 [meta]
 title_slug = "x"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills" }
+			labels = { fr = "Éliminations" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
 display_order = 1
 group = "combat"
 `,
-			errContains: "labels.fr manquant",
+			errContains: "labels.en manquant",
 		},
 		{
 			name: "unknown format",
@@ -97,7 +97,7 @@ title_slug = "x"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
+labels = { en = "Kills" }
 storage_unit = "count"
 display_unit = "count"
 format = "fancy_format"
@@ -114,7 +114,7 @@ title_slug = "x"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
+labels = { en = "Kills" }
 storage_unit = "lightyears"
 display_unit = "count"
 format = "integer"
@@ -131,7 +131,7 @@ title_slug = "x"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
+labels = { en = "Kills" }
 storage_unit = "seconds"
 display_unit = "count"
 format = "integer"
@@ -148,7 +148,7 @@ title_slug = "x"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
+labels = { en = "Kills" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
@@ -156,7 +156,7 @@ display_order = 10
 group = "combat"
 
 [fields.deaths]
-labels = { en = "Deaths", fr = "Morts" }
+labels = { en = "Deaths" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
@@ -164,24 +164,6 @@ display_order = 10
 group = "combat"
 `,
 			errContains: "collisionne",
-		},
-		{
-			name: "description partial (only EN)",
-			toml: `
-[meta]
-title_slug = "x"
-schema_version = 1
-
-[fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
-description = { en = "Total kills." }
-storage_unit = "count"
-display_unit = "count"
-format = "integer"
-display_order = 1
-group = "combat"
-`,
-			errContains: "description.en et description.fr",
 		},
 	}
 
@@ -216,7 +198,7 @@ func TestFieldMappingLabelFallback(t *testing.T) {
 		wantLabel    string
 		wantFallback bool
 	}{
-		{"fr", "Éliminations", false},
+		{"en", "Kills", false},
 		{"en", "Kills", false},
 		{"xx", "Kills", true}, // fallback EN
 		{"", "Kills", true},   // fallback EN
@@ -245,8 +227,8 @@ title_slug = "x"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
-description = { en = "Total kills.", fr = "Total éliminations." }
+labels = { en = "Kills" }
+description = { en = "Total kills." }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
@@ -260,9 +242,9 @@ group = "combat"
 	m, _ := set.Get("kills")
 
 	// Description FR connue.
-	desc, fb := m.Description("fr")
-	if desc != "Total éliminations." || fb {
-		t.Errorf("Description FR = (%q, %v)", desc, fb)
+	desc, fb := m.Description("en")
+	if desc != "Total kills." || fb {
+		t.Errorf("Description EN = (%q, %v)", desc, fb)
 	}
 
 	// Locale inconnue → fallback EN.
@@ -277,7 +259,7 @@ func TestFieldMappingDescription_NoDescription(t *testing.T) {
 	// minimalValidTOML n'a pas de description.
 	set, _ := LoadFieldsFromBytes("x.toml", []byte(minimalValidTOML))
 	m, _ := set.Get("kills")
-	desc, fb := m.Description("fr")
+	desc, fb := m.Description("en")
 	if desc != "" {
 		t.Errorf("Description sans config = %q, want vide", desc)
 	}
@@ -325,7 +307,7 @@ title_slug = "x"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
+labels = { en = "Kills" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
@@ -333,7 +315,7 @@ display_order = 30
 group = "combat"
 
 [fields.deaths]
-labels = { en = "Deaths", fr = "Morts" }
+labels = { en = "Deaths" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
@@ -341,7 +323,7 @@ display_order = 10
 group = "combat"
 
 [fields.assists]
-labels = { en = "Assists", fr = "Assistances" }
+labels = { en = "Assists" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"

@@ -28,25 +28,21 @@ import { useAppShellStore } from '@/stores/appShellStore'
 vi.mock('@/lib/api/client', () => ({
   api: { get: vi.fn() },
   setApiTitleSlug: vi.fn(),
-  setApiLocale: vi.fn(),
   getApiTitleSlug: () => 'halo_infinite',
 }))
 
 describe('fieldMappingsQueryKey', () => {
   it('produit une clé hiérarchique (slug, locale)', () => {
-    expect(fieldMappingsQueryKey('halo_infinite', 'fr')).toEqual([
+    expect(fieldMappingsQueryKey('halo_infinite')).toEqual([
       'field-mappings',
       'halo_infinite',
-      'fr',
     ])
   })
 
-  it('encode le couple (slug, locale) sans collision', () => {
-    const a = fieldMappingsQueryKey('halo_infinite', 'fr')
-    const b = fieldMappingsQueryKey('halo_infinite', 'en')
-    const c = fieldMappingsQueryKey('synthetic_b', 'fr')
+  it('encode le slug sans collision', () => {
+    const a = fieldMappingsQueryKey('halo_infinite')
+    const b = fieldMappingsQueryKey('synthetic_b')
     expect(a).not.toEqual(b)
-    expect(a).not.toEqual(c)
   })
 })
 
@@ -91,10 +87,10 @@ describe('FieldMappingsResponse fallback chains', () => {
   const sample: FieldMappingsResponse = {
     title_slug: 'halo_infinite',
     schema_version: 1,
-    locale: 'fr',
+    locale: 'en',
     fields: {
       kills: {
-        label: 'Frags',
+        label: 'Kills',
         storage_unit: 'count',
         display_unit: 'count',
         format: 'integer',
@@ -105,7 +101,7 @@ describe('FieldMappingsResponse fallback chains', () => {
   }
 
   it('retourne le label localisé pour une key connue', () => {
-    expect(sample.fields['kills']?.label).toBe('Frags')
+    expect(sample.fields['kills']?.label).toBe('Kills')
   })
 
   it('retourne undefined pour une key absente (caller fallback sur key)', () => {
@@ -116,7 +112,7 @@ describe('FieldMappingsResponse fallback chains', () => {
     const empty: FieldMappingsResponse = {
       title_slug: 'halo_infinite',
       schema_version: 0,
-      locale: 'fr',
+      locale: 'en',
       fields: {},
     }
     expect(empty.fields['kills']?.label).toBeUndefined()
@@ -128,27 +124,27 @@ describe('FieldMappingsResponse — assets et outcomes (Phase 3 plan finition)',
     const sample: FieldMappingsResponse = {
       title_slug: 'halo_infinite',
       schema_version: 1,
-      locale: 'fr',
+      locale: 'en',
       fields: {},
       assets: {
         mode: {
-          Ranked: { label: 'Classé', display_order: 50 },
+          Ranked: { label: 'Ranked', display_order: 50 },
           Firefight: {
-            label: 'Baptême du feu',
+            label: 'Firefight',
             color_token: 'mode.firefight',
             display_order: 60,
           },
         },
         challenge_tier: {
           heroic: {
-            label: 'Héroïque',
+            label: 'Heroic',
             color_token: 'challenge.heroic',
             display_order: 20,
           },
         },
       },
     }
-    expect(sample.assets?.mode?.Ranked?.label).toBe('Classé')
+    expect(sample.assets?.mode?.Ranked?.label).toBe('Ranked')
     expect(sample.assets?.challenge_tier?.heroic?.color_token).toBe('challenge.heroic')
   })
 
@@ -156,7 +152,7 @@ describe('FieldMappingsResponse — assets et outcomes (Phase 3 plan finition)',
     const sample: FieldMappingsResponse = {
       title_slug: 'halo_infinite',
       schema_version: 1,
-      locale: 'fr',
+      locale: 'en',
       fields: {},
       assets: { mode: {} },
     }
@@ -168,16 +164,16 @@ describe('FieldMappingsResponse — assets et outcomes (Phase 3 plan finition)',
     const sample: FieldMappingsResponse = {
       title_slug: 'halo_infinite',
       schema_version: 1,
-      locale: 'fr',
+      locale: 'en',
       fields: {},
       outcomes: {
-        win: { label: 'Victoire', color_token: 'outcome.positive' },
-        loss: { label: 'Défaite', color_token: 'outcome.negative' },
-        tie: { label: 'Égalité', color_token: 'outcome.neutral' },
-        dnf: { label: 'Abandon', color_token: 'outcome.neutral' },
+        win: { label: 'Win', color_token: 'outcome.positive' },
+        loss: { label: 'Defeat', color_token: 'outcome.negative' },
+        tie: { label: 'Tie', color_token: 'outcome.neutral' },
+        dnf: { label: 'DNF', color_token: 'outcome.neutral' },
       },
     }
-    expect(sample.outcomes?.win?.label).toBe('Victoire')
+    expect(sample.outcomes?.win?.label).toBe('Win')
     expect(sample.outcomes?.dnf?.color_token).toBe('outcome.neutral')
   })
 
@@ -185,7 +181,7 @@ describe('FieldMappingsResponse — assets et outcomes (Phase 3 plan finition)',
     const sample: FieldMappingsResponse = {
       title_slug: 'halo_infinite',
       schema_version: 1,
-      locale: 'fr',
+      locale: 'en',
       fields: {},
     }
     expect(sample.assets).toBeUndefined()
@@ -197,7 +193,7 @@ describe('useFieldMappings — gate isBootstrapped (G8, anti double-fetch boot)'
   const emptyResponse: FieldMappingsResponse = {
     title_slug: 'halo_infinite',
     schema_version: 1,
-    locale: 'fr',
+    locale: 'en',
     fields: {},
   }
 
@@ -224,7 +220,7 @@ describe('useFieldMappings — gate isBootstrapped (G8, anti double-fetch boot)'
     useAppShellStore.setState({
       isBootstrapped: true,
       currentTitleSlug: 'halo_infinite',
-      locale: 'fr',
+      locale: 'en',
     })
     const apiGet = vi.mocked(api.get)
     apiGet.mockResolvedValueOnce(emptyResponse)
@@ -234,7 +230,7 @@ describe('useFieldMappings — gate isBootstrapped (G8, anti double-fetch boot)'
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(apiGet).toHaveBeenCalledTimes(1)
     expect(apiGet).toHaveBeenCalledWith(
-      '/titles/halo_infinite/field-mappings?locale=fr',
+      '/titles/halo_infinite/field-mappings',
     )
   })
 
@@ -242,7 +238,7 @@ describe('useFieldMappings — gate isBootstrapped (G8, anti double-fetch boot)'
     useAppShellStore.setState({
       isBootstrapped: false,
       currentTitleSlug: 'halo_infinite',
-      locale: 'fr',
+      locale: 'en',
     })
     const apiGet = vi.mocked(api.get)
     apiGet.mockResolvedValueOnce(emptyResponse)
@@ -259,7 +255,7 @@ describe('useFieldMappings — gate isBootstrapped (G8, anti double-fetch boot)'
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(apiGet).toHaveBeenCalledTimes(1)
     expect(apiGet).toHaveBeenCalledWith(
-      '/titles/halo_infinite/field-mappings?locale=en',
+      '/titles/halo_infinite/field-mappings',
     )
   })
 })

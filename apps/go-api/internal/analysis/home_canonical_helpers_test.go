@@ -286,11 +286,11 @@ func TestDominantNameFromRows_Empty(t *testing.T) {
 func TestDominantNameFromRows_SingleEntry(t *testing.T) {
 	t.Parallel()
 	rows := []canonical.PlayerMatchRow{{}}
-	got := dominantNameFromRows(rows, "fr", func(r canonical.PlayerMatchRow) (string, string) {
+	got := dominantNameFromRows(rows, "en", func(r canonical.PlayerMatchRow) (string, string) {
 		return "Slayer", "Massacre"
 	})
-	if got == nil || *got != "Massacre" {
-		t.Errorf("dominantNameFromRows(fr): got %v, want Massacre", got)
+	if got == nil || *got != "Slayer" {
+		t.Errorf("dominantNameFromRows(en): got %v, want Slayer", got)
 	}
 }
 
@@ -309,7 +309,7 @@ func TestDominantNameFromRows_MajorityWins(t *testing.T) {
 	t.Parallel()
 	rows := make([]canonical.PlayerMatchRow, 5)
 	i := 0
-	got := dominantNameFromRows(rows, "fr", func(r canonical.PlayerMatchRow) (string, string) {
+	got := dominantNameFromRows(rows, "en", func(r canonical.PlayerMatchRow) (string, string) {
 		i++
 		// 3x Slayer, 2x CTF.
 		if i <= 3 {
@@ -317,8 +317,8 @@ func TestDominantNameFromRows_MajorityWins(t *testing.T) {
 		}
 		return "CTF", "Drapeau"
 	})
-	if got == nil || *got != "Massacre" {
-		t.Errorf("dominantNameFromRows majority: got %v, want Massacre (3x vs 2x)", got)
+	if got == nil || *got != "Slayer" {
+		t.Errorf("dominantNameFromRows majority: got %v, want Slayer (3x vs 2x)", got)
 	}
 }
 
@@ -326,7 +326,7 @@ func TestDominantNameFromRows_TieAlphabetical(t *testing.T) {
 	t.Parallel()
 	rows := make([]canonical.PlayerMatchRow, 2)
 	i := 0
-	got := dominantNameFromRows(rows, "fr", func(r canonical.PlayerMatchRow) (string, string) {
+	got := dominantNameFromRows(rows, "en", func(r canonical.PlayerMatchRow) (string, string) {
 		i++
 		// 1x Slayer (key="Slayer"), 1x CTF (key="CTF") — égalité, CTF < Slayer
 		// → CTF gagne.
@@ -335,8 +335,8 @@ func TestDominantNameFromRows_TieAlphabetical(t *testing.T) {
 		}
 		return "CTF", "Drapeau"
 	})
-	if got == nil || *got != "Drapeau" {
-		t.Errorf("dominantNameFromRows tie: got %v, want Drapeau (alphabetical key tie-break)", got)
+	if got == nil || *got != "CTF" {
+		t.Errorf("dominantNameFromRows tie: got %v, want CTF (alphabetical key tie-break)", got)
 	}
 }
 
@@ -344,22 +344,22 @@ func TestDominantNameFromRows_SkipsEmpty(t *testing.T) {
 	t.Parallel()
 	rows := make([]canonical.PlayerMatchRow, 3)
 	i := 0
-	got := dominantNameFromRows(rows, "fr", func(r canonical.PlayerMatchRow) (string, string) {
+	got := dominantNameFromRows(rows, "en", func(r canonical.PlayerMatchRow) (string, string) {
 		i++
 		if i == 1 {
 			return "", "" // ignoré
 		}
 		return "Slayer", "Massacre"
 	})
-	if got == nil || *got != "Massacre" {
-		t.Errorf("dominantNameFromRows skipping empty: got %v, want Massacre", got)
+	if got == nil || *got != "Slayer" {
+		t.Errorf("dominantNameFromRows skipping empty: got %v, want Slayer", got)
 	}
 }
 
 func TestDominantNameFromRows_AllEmpty(t *testing.T) {
 	t.Parallel()
 	rows := make([]canonical.PlayerMatchRow, 3)
-	got := dominantNameFromRows(rows, "fr", func(r canonical.PlayerMatchRow) (string, string) {
+	got := dominantNameFromRows(rows, "en", func(r canonical.PlayerMatchRow) (string, string) {
 		return "", ""
 	})
 	if got != nil {
@@ -374,7 +374,7 @@ func TestDominantNameFromRows_KeyFromFROnly(t *testing.T) {
 	got := dominantNameFromRows(rows, "fr", func(r canonical.PlayerMatchRow) (string, string) {
 		return "", "Massacre"
 	})
-	if got == nil || *got != "Massacre" {
-		t.Errorf("dominantNameFromRows fr only: got %v, want Massacre", got)
+	if got != nil {
+		t.Errorf("dominantNameFromRows legacy-only: got %v, want nil", got)
 	}
 }

@@ -208,12 +208,11 @@ func parseShotEffects(path string, rows map[string]string) (map[string]string, e
 // bilingual valide qu'un libelle porte bien ses deux langues.
 func bilingual(path, what string, e bilingualEntry) (BilingualLabel, error) {
 	en := strings.TrimSpace(e.En)
-	fr := strings.TrimSpace(e.Fr)
 	if en == "" {
 		return BilingualLabel{}, fmt.Errorf("%s: %s sans en (nom EN obligatoire)", path, what)
 	}
-	if fr == "" {
-		return BilingualLabel{}, fmt.Errorf("%s: %s sans fr (mettre le EN si aucun FR officiel)", path, what)
+	if strings.TrimSpace(e.Fr) != "" {
+		return BilingualLabel{}, fmt.Errorf("%s: %s contains the removed fr field; use en only", path, what)
 	}
-	return BilingualLabel{En: en, Fr: fr}, nil
+	return BilingualLabel{En: en, Fr: en}, nil
 }

@@ -49,7 +49,7 @@ export interface SessionBriefingProps {
 }
 
 function normalizeLocale(input: string | undefined): Locale {
-  return input === 'en' ? 'en' : 'fr'
+  return input === 'en' ? 'en' : 'en'
 }
 
 export function SessionBriefing({ kpis, squad }: SessionBriefingProps) {

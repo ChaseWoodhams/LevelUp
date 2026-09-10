@@ -22,7 +22,7 @@ var captureNames = []string{
 	"object-shield-vitality-component",
 	"player-respawn-timer-component",
 	"game-engine-round-timer-component",
-	"managed-player-team-designator-component",
+	compManagedPlayerTeamDesignator,
 }
 
 // consumeByNameCapturing consomme un composant comme consumeByName, et rend en plus sa
@@ -39,7 +39,7 @@ func consumeByNameCapturing(br *BitReader, name string, typeIndex, level uint32)
 		return noVariant, nil, decodePlayerRespawnTimer(br), true
 	case "game-engine-round-timer-component": // ti=0 i5
 		return noVariant, nil, decodeGameEngineRoundTimer(br), true
-	case "managed-player-team-designator-component": // ti=9 i0
+	case compManagedPlayerTeamDesignator: // ti=9 i0
 		return noVariant, nil, decodeManagedPlayerTeamDesignator(br), true
 	}
 	variant, dead, ported = consumeByName(br, name, typeIndex, level)

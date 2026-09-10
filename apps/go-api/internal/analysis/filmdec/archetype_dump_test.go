@@ -1,9 +1,9 @@
 package filmdec
 
 import (
-	"sort"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )

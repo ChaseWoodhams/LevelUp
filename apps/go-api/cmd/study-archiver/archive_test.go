@@ -25,7 +25,7 @@ func sampleRecord() (matchRecord, []participantRecord) {
 	played := time.Date(2026, 5, 19, 20, 15, 0, 0, time.UTC)
 	built := time.Date(2026, 9, 3, 12, 0, 0, 0, time.UTC)
 	dur := int64(553000)
-	return matchRecord{
+	m := matchRecord{
 		MatchID: testMatchID, ShortID: "000d5950",
 		PlayedAt: &played, MapName: "Cliffhanger", MapModule: "olympus",
 		Mode: "Slayer", Playlist: "Ranked Arena", DurationMS: &dur,
@@ -33,12 +33,14 @@ func sampleRecord() (matchRecord, []participantRecord) {
 		ArtifactPath: "data/cache/replays/halo_infinite/000d5950.json",
 		BuiltAt:      &built, DecoderRev: "abc1234",
 		Tracks: 8, Points: 4200, Shots: 519, NamedLives: 90, TotalLives: 105,
-	}, []participantRecord{
+	}
+	ps := []participantRecord{
 		{XUID: "1", Gamertag: "JGtm", Team: intPtr(0), Outcome: intPtr(2),
 			Kills: intPtr(15), Deaths: intPtr(9), Assists: intPtr(4)},
 		{XUID: "2", Gamertag: "Rival", Team: intPtr(1), Outcome: intPtr(3),
 			Kills: intPtr(9), Deaths: intPtr(15), Assists: intPtr(2)},
 	}
+	return m, ps
 }
 
 func TestArchive_RecordsMatchAndRoster(t *testing.T) {

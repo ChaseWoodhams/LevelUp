@@ -68,9 +68,9 @@ type slotFamilies struct {
 // biped des keyframes pour les loadouts) : c'est ce qui fait du croisement un témoignage et
 // non une tautologie.
 type weaponWitness struct {
-	shotsByIndex map[int][]weaponShot    // index de film -> tirs, triés par instant
+	shotsByIndex map[int][]weaponShot      // index de film -> tirs, triés par instant
 	loadBySlot   map[uint32][]slotFamilies // slot -> loadouts, triés par instant
-	indexOf      map[uint64]int          // xuid -> index de film
+	indexOf      map[uint64]int            // xuid -> index de film
 }
 
 // newWeaponWitness indexe les deux lectures. Rend nil si l'une manque : un témoin sans

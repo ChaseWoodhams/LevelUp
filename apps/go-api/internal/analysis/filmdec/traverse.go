@@ -447,7 +447,7 @@ func consumeByName(br *BitReader, name string, typeIndex uint32, level uint32) (
 			}
 		}
 		return variant, nil, true
-	case "managed-player-team-designator-component": // ti=9 i0 (FUN_140f581e8) — R(4)
+	case compManagedPlayerTeamDesignator: // ti=9 i0 (FUN_140f581e8) — R(4)
 		br.ReadBits(4)
 		return variant, nil, true
 	case "game-engine-current-state-component": // ti=0 i2 (FUN_14116d1d0) — R(3)

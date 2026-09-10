@@ -70,7 +70,7 @@ func TestTeamDesignatorWidthSweep(t *testing.T) {
 			var team uint8
 			var got bool
 			compProbeHook = func(_ uint32, name string, payload any, _ bool) {
-				if name != "managed-player-team-designator-component" {
+				if name != compManagedPlayerTeamDesignator {
 					return
 				}
 				if td, ok := payload.(TeamDesignator); ok {

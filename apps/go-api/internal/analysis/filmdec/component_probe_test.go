@@ -33,7 +33,7 @@ import (
 
 // probeShortlist : les composants dont la capture changerait quelque chose au rejeu.
 var probeShortlist = []struct{ name, buys string }{
-	{"managed-player-team-designator-component", "equipe par joueur (Track.Team vaut -1 aujourd'hui)"},
+	{compManagedPlayerTeamDesignator, "equipe par joueur (Track.Team vaut -1 aujourd'hui)"},
 	{"player-respawn-timer-component", "mort/reapparition par joueur, sans fenetre de 150 ms"},
 	{"object-dead-state-component", "etat mort par objet"},
 	{"player-lives-remaining-component", "vies restantes par joueur"},

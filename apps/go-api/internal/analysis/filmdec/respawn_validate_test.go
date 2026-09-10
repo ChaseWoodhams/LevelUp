@@ -1,7 +1,6 @@
 package filmdec
 
 import (
-
 	"os"
 	"sort"
 	"testing"
@@ -39,7 +38,6 @@ func TestRespawnPrefixValidate(t *testing.T) {
 	type acc struct {
 		samples, active int
 		t0min, t0max    int
-		names           int
 	}
 	sc := make([]*acc, maxW+1)
 	for i := range sc {

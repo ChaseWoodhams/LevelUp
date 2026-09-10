@@ -61257,3 +61257,26 @@ Windows.
 
 **Next step**: the English-only conversion goes to its own branch and a draft PR; it does not pass
 its gates yet.
+
+
+---
+
+## [2026-09-10] Study branch: Go lint ratchet clean under the go.mod toolchain
+
+**Status**: Complete.
+
+**Technical decision**: CI lints with the Go version pinned in `go.mod` (1.26.1), while local Go
+1.27's gofmt accepts files that 1.26.1 rejects. That is why PR #27's `Go Lint` job was red on
+`cmd/study-archiver/archive_test.go` although gofmt passed locally. The file returned two composite
+literals from one multi-line `return`, a construct the two versions indent differently; it now
+builds both first and returns the variables, a form both versions accept. Three more files take
+1.26.1's formatting, which 1.27 also accepts. `managed-player-team-designator-component`, cited in
+five places, becomes `compManagedPlayerTeamDesignator` beside the package's other component
+constants (goconst), and an unused field leaves `TestRespawnPrefixValidate`.
+
+**Results**: `golangci-lint v2.12.2 --new-from-rev=<merge-base>` on the previous commit's tree found
+these 5 issues. After the change, gofmt 1.26.1 and 1.27 both report nothing on the nine files,
+`golangci-lint` reports 0 issues on `internal/analysis/filmdec` and `cmd/study-archiver`, and
+`go vet` plus `go test -count=1` pass on both packages.
+
+**Next step**: push and let CI rule on PR #27.

@@ -316,7 +316,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Action admin — upsert asset_translations (en-US et/ou en-US) pour un asset playlist/map/pair/game_variant (résolution effective des UUID inconnus) (auth admin requis) */
+        /** Action admin — upsert asset_translations (en-US et/ou fr-FR) pour un asset playlist/map/pair/game_variant (résolution effective des UUID inconnus) (auth admin requis) */
         post: operations["postAdminActionAssetTranslation"];
         delete?: never;
         options?: never;
@@ -333,7 +333,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Action admin — upsert mode_name_tr[en] pour un mode normalisé (résout un mode non traduit, effet immédiat) (auth admin requis) */
+        /** Action admin — upsert mode_name_tr[fr] pour un mode normalisé (résout un mode non traduit, effet immédiat) (auth admin requis) */
         post: operations["postAdminActionModeTranslation"];
         delete?: never;
         options?: never;
@@ -1374,7 +1374,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Release notes derived from git log */
+        /** Notes de release dérivées du git log */
         get: operations["getReleaseNotes"];
         put?: never;
         post?: never;
@@ -3406,7 +3406,7 @@ export interface paths {
          *     N'expose jamais le contenu complet de session.
          *
          *     **Invariants :**
-         *     - `locale` ∈ {en} si fourni
+         *     - `locale` ∈ {fr, en} si fourni
          *     - `player_slug` doit référencer un slug existant
          *     - Retourne 404 si le slug est inconnu
          */
@@ -3804,12 +3804,15 @@ export interface components {
             /** Format: int64 */
             current_progress?: number;
             description_en: string;
+            description_fr: string;
             /** Format: int64 */
             gamerscore: number;
             image_url?: string;
             is_secret: boolean;
             locked_desc_en?: string;
+            locked_desc_fr?: string;
             name_en: string;
+            name_fr: string;
             rarity_category?: string;
             /** Format: double */
             rarity_percent?: number;
@@ -3875,6 +3878,7 @@ export interface components {
         };
         AdminDataQualityCounts: {
             generated_at: string;
+            locale: string;
             /** Format: int64 */
             lying_bits_events: number;
             /** Format: int64 */
@@ -3911,6 +3915,7 @@ export interface components {
             generated_at: string;
             items: components["schemas"]["AdminDataQualityIssue"][] | null;
             kind: string;
+            locale: string;
             title_slug: string;
             /** Format: int64 */
             total: number;
@@ -4226,9 +4231,11 @@ export interface components {
         };
         AssetMeta: {
             description?: string;
+            description_fr?: string;
             id: string;
             image_url: string;
             name_en: string;
+            name_fr: string;
             /** Format: int64 */
             sprite_height?: number;
             /** Format: int64 */
@@ -4379,7 +4386,7 @@ export interface components {
             instance_locked: boolean;
             is_admin: boolean;
             linked_halo_identity?: components["schemas"]["HaloIdentitySummary"] | null;
-            /** @default en */
+            /** @default fr */
             locale: string;
             oauth_code_flow_enabled: boolean;
             /** @description Sprint 54-B : informations de confidentialité des matchs du joueur actif. */
@@ -4608,6 +4615,7 @@ export interface components {
             is_max_rank: boolean;
             next_rank_image_url?: string;
             next_rank_name_en?: string;
+            next_rank_name_fr?: string;
             /** Format: double */
             progress_pct: number;
             rank_image_url?: string;
@@ -5564,7 +5572,7 @@ export interface components {
             enemy_mmr?: number;
             /** Format: double */
             expected_win_prob?: number;
-            /** @default Unranked */
+            /** @default Non classé */
             experience_type_label: string;
             /** @description Un coéquipier était un bot. Exposé sur les best_matches de la carrière (les LOSS avec bot sont exclus côté backend). */
             had_bot_teammate?: boolean;
@@ -5983,6 +5991,7 @@ export interface components {
             /** Format: int64 */
             current_rank: number;
             max_rank_name_en?: string;
+            max_rank_name_fr?: string;
             /** Format: double */
             percentage: number;
             /** Format: int64 */
@@ -6329,6 +6338,7 @@ export interface components {
         };
         Label: {
             en: string;
+            fr: string;
         };
         LabelValue: {
             /** Format: int64 */
@@ -7564,6 +7574,7 @@ export interface components {
         };
         MilestoneDTO: {
             condition_en?: string;
+            condition_fr?: string;
             earned: boolean;
             /** Format: date-time */
             earned_at?: string;
@@ -7573,6 +7584,7 @@ export interface components {
             /** Format: double */
             threshold: number;
             title_en: string;
+            title_fr: string;
         };
         MilestonesResponse: {
             items: components["schemas"]["MilestoneDTO"][] | null;
@@ -8368,6 +8380,7 @@ export interface components {
             origin: string;
             radar_axis?: string;
             reason_key_en?: string;
+            reason_key_fr?: string;
             reason_params?: string;
             /** Format: date-time */
             resolved_at?: string;
@@ -8880,7 +8893,7 @@ export interface components {
         SessionContextRequest: {
             hints_visible?: boolean | null;
             /** @enum {string|null} */
-            locale?: "en" | null;
+            locale?: "fr" | "en" | null;
             player_slug?: string | null;
             title_slug?: string | null;
         };
@@ -9089,7 +9102,7 @@ export interface components {
         SettingsResponse: {
             career_top_exclude_btb?: boolean;
             /** @enum {string} */
-            discord_lang?: "en";
+            discord_lang?: "fr" | "en";
             discord_notifications_enabled?: boolean;
             discord_notify_backfill?: boolean;
             discord_notify_new_version?: boolean;
@@ -9097,7 +9110,7 @@ export interface components {
             discord_webhook_url_present?: boolean;
             friend_gamertags?: string[];
             /** @enum {string} */
-            lang: "en";
+            lang: "fr" | "en";
             media_captures_base_dir?: string;
             /** @description Supprimer le fichier source (.mkv/.avi…) après un transcodage HLS réussi. GET renvoie la valeur effective résolue (env > réglage > défaut prod). PATCH persiste le réglage (omis = auto). */
             media_delete_source_after_transcode?: boolean;
@@ -9154,6 +9167,7 @@ export interface components {
             /** Format: int64 */
             sub_tier: number;
             tier_name: string;
+            tier_name_fr: string;
         };
         SkillSnapshot: {
             /** Format: double */
@@ -9677,10 +9691,12 @@ export interface components {
         SuggestedChallenge: {
             arc_id?: string;
             description_en?: string;
+            description_fr?: string;
             /** Format: int64 */
             historical_streak: number;
             is_arc_step: boolean;
             label_en?: string;
+            label_fr?: string;
             target_tier: string;
             template_id: string;
         };
@@ -10039,6 +10055,7 @@ export interface components {
                     picked_squad_session_label?: string | null;
                 };
             };
+            locale?: string;
             picked_solo_session_labels?: string[];
             picked_squad_session_labels?: string[];
             selected_gamertags?: string[];
@@ -10048,12 +10065,14 @@ export interface components {
             /** Format: date-time */
             cooldown_ends_at?: string;
             description_en?: string;
+            description_fr?: string;
             eval_type: string;
             /** Format: double */
             heroic_target: number;
             id: string;
             is_long_term: boolean;
             label_en: string;
+            label_fr: string;
             /** Format: double */
             legendary_target: number;
             lusr_components?: string[] | null;
@@ -10158,6 +10177,7 @@ export interface components {
             /** Format: double */
             kills_expected?: number;
             map_name?: string;
+            map_name_fr?: string;
             match_id: string;
             /** Format: int64 */
             max_killing_spree?: number;
@@ -10409,11 +10429,13 @@ export interface components {
             /** Format: int64 */
             kills: number;
             label_en: string;
+            label_fr: string;
             /** Format: int64 */
             weapon_id: number;
         };
         WeaponLabel: {
             en: string;
+            fr: string;
             fx?: string;
         };
         WinLossPoint: {
@@ -11502,7 +11524,11 @@ export interface operations {
     };
     getAdminMonitoringDataQuality: {
         parameters: {
-            query?: never;
+            query?: {
+                title?: string;
+                /** @description Locale cible du compteur untranslated_modes (défaut fr). */
+                locale?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -11535,6 +11561,8 @@ export interface operations {
             query: {
                 title?: string;
                 kind: "raw_uuids" | "untranslated_modes" | "orphan_playlists" | "orphan_xuids";
+                /** @description Locale cible des modes sans traduction (défaut fr). */
+                locale?: string;
                 limit?: string;
                 /** @description Décalage de pagination serveur (défaut 0, rétrocompatible). */
                 offset?: string;
@@ -13268,7 +13296,9 @@ export interface operations {
     };
     getReleaseNotes: {
         parameters: {
-            query?: never;
+            query?: {
+                lang?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -15725,6 +15755,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: {
+                "X-LevelUp-Locale"?: string;
                 "If-None-Match"?: string;
             };
             path: {
@@ -18003,9 +18034,15 @@ export interface operations {
     };
     getTitleFieldMappings: {
         parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
+            query?: {
+                locale?: "fr" | "en";
+            };
+            header?: {
+                "If-None-Match"?: string;
+            };
+            path: {
+                slug: string;
+            };
             cookie?: never;
         };
         requestBody?: never;

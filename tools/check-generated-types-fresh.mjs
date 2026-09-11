@@ -17,12 +17,14 @@
  * compare octet à octet. Rejouer le générateur — plutôt que ré-analyser le YAML — rend
  * la comparaison insensible au formatage et fidèle par construction.
  *
- * Usage      : node tools/check-generated-types-fresh.mjs
+ * Usage      : node tools/check-generated-types-fresh.mjs [apps/web|apps/study]
  * Exit code  : 0 = à jour · 1 = drift (ou générateur absent / en échec)
- * Réparation : cd apps/web && npm run generate-types
+ * Réparation : cd <app> && npm run generate-types
  *
- * Appelé par : `make openapi-check` (gate manuelle du contrat) ET
- * `apps/web/src/lib/api/generated-types-fresh.guard.test.ts` (CI, job Frontend).
+ * Appelé par : `make openapi-check` (gate manuelle du contrat), le garde-rail
+ * `apps/web/src/lib/api/generated-types-fresh.guard.test.ts` (CI, job Frontend) et son
+ * homologue dans `apps/study` — qui génère ses types depuis LE MÊME contrat, d'où le
+ * paramètre plutôt qu'une seconde copie de ce script.
  */
 
 import { execFileSync } from 'node:child_process'
@@ -33,21 +35,31 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
-const WEB_DIR = join(REPO_ROOT, 'apps/web')
 const OPENAPI_YAML = join(REPO_ROOT, 'apps/go-api/api/openapi.yaml')
-const GENERATED_TS = join(WEB_DIR, 'src/lib/api/generated.ts')
-// Entrée JS du CLI (et non node_modules/.bin/…) : invocable par `node` sur les trois
-// plateformes, sans dépendre du shim shell/cmd.
-const CLI = join(WEB_DIR, 'node_modules/openapi-typescript/bin/cli.js')
 
-const FIX_HINT = 'Réparation : cd apps/web && npm run generate-types'
+// Application vérifiée par défaut. Le paramètre existe depuis que `apps/study` génère
+// ses types depuis LE MÊME contrat : une seconde app, pas une seconde implémentation —
+// dupliquer ce script aurait laissé les deux vérifications diverger.
+const DEFAULT_APP_DIR = 'apps/web'
 
 /**
- * Retourne null si generated.ts est à jour, sinon le message d'erreur expliquant
- * le drift (ou l'impossibilité de conclure). Aucun effet de bord process : le
+ * Retourne null si le `generated.ts` de `appDir` est à jour, sinon le message d'erreur
+ * expliquant le drift (ou l'impossibilité de conclure). Aucun effet de bord process : le
  * caller décide (exit code côté CLI, assertion côté test).
+ *
+ * `appDir` est un chemin RELATIF à la racine du dépôt (`apps/web`, `apps/study`) : chaque
+ * app a ses propres `node_modules`, donc son propre CLI openapi-typescript, et c'est bien
+ * celui-là qu'il faut rejouer — une version différente produirait un diff qui ne dit rien
+ * du contrat.
  */
-export function checkGeneratedTypesFresh() {
+export function checkGeneratedTypesFresh(appDir = DEFAULT_APP_DIR) {
+  const APP_DIR = join(REPO_ROOT, appDir)
+  const GENERATED_TS = join(APP_DIR, 'src/lib/api/generated.ts')
+  // Entrée JS du CLI (et non node_modules/.bin/…) : invocable par `node` sur les trois
+  // plateformes, sans dépendre du shim shell/cmd.
+  const CLI = join(APP_DIR, 'node_modules/openapi-typescript/bin/cli.js')
+  const FIX_HINT = `Réparation : cd ${appDir} && npm run generate-types`
+
   for (const [label, path] of [
     ['contrat OpenAPI', OPENAPI_YAML],
     ['types générés', GENERATED_TS],
@@ -61,7 +73,7 @@ export function checkGeneratedTypesFresh() {
   try {
     try {
       execFileSync(process.execPath, [CLI, OPENAPI_YAML, '-o', candidate], {
-        cwd: WEB_DIR,
+        cwd: APP_DIR,
         stdio: 'pipe',
       })
     } catch (err) {
@@ -79,7 +91,7 @@ export function checkGeneratedTypesFresh() {
     let i = 0
     while (i < exp.length && i < act.length && exp[i] === act[i]) i++
     return (
-      'DRIFT — generated.ts ne correspond pas à openapi.yaml.\n' +
+      `DRIFT — ${appDir}/src/lib/api/generated.ts ne correspond pas à openapi.yaml.\n` +
       `  Première divergence ligne ${i + 1} :\n` +
       `    committé : ${JSON.stringify(act[i] ?? '<fin de fichier>')}\n` +
       `    attendu  : ${JSON.stringify(exp[i] ?? '<fin de fichier>')}\n` +
@@ -91,8 +103,9 @@ export function checkGeneratedTypesFresh() {
 }
 
 // Exécution directe (make openapi-check) : import en tant que module = pas d'effet.
+// Argument optionnel : le dossier de l'app à vérifier (défaut apps/web).
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
-  const problem = checkGeneratedTypesFresh()
+  const problem = checkGeneratedTypesFresh(process.argv[2] || DEFAULT_APP_DIR)
   if (problem) {
     console.error(`[generated-types] ${problem}`)
     process.exit(1)

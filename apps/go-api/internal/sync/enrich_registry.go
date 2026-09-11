@@ -62,7 +62,7 @@ func EnrichRegistryFromMetadata(ctx context.Context, metadataDB *sql.DB, row *Ma
 		if !needsRegistryNameOverride(*f.namePtr, assetID) {
 			continue
 		}
-		canonical, err := lookupAssetCanonicalEN(ctx, metadataDB, f.assetType, assetID)
+		canonical, err := LookupAssetCanonicalEN(ctx, metadataDB, f.assetType, assetID)
 		if err != nil {
 			slog.WarnContext(ctx, "EnrichRegistryFromMetadata: lookup failed",
 				"asset_type", f.assetType, "asset_id", assetID, "err", err)
@@ -143,11 +143,16 @@ func needsRegistryNameOverride(name *string, assetID string) bool {
 	return strings.EqualFold(trimmed, assetID)
 }
 
-// lookupAssetCanonicalEN charge le nom canonique en-US depuis
+// LookupAssetCanonicalEN charge le nom canonique en-US depuis
 // metadata.asset_translations pour un (asset_type, asset_id) donné.
 // Retourne "" si absent — utile pour distinguer "pas de traduction" de
 // "erreur DB".
-func lookupAssetCanonicalEN(ctx context.Context, db *sql.DB, assetType, assetID string) (string, error) {
+//
+// Exporté pour cmd/study-archiver (mapresolve.go) : un match dont l'API n'a jamais
+// retourné de nom retombe sur son asset_id brut (cf. ExtractRegistry), et c'est
+// EXACTEMENT ce que cette fonction sait résoudre — study-archiver n'a pas besoin
+// d'un MatchRegistryRow entier pour ça, seulement du même lookup ponctuel.
+func LookupAssetCanonicalEN(ctx context.Context, db *sql.DB, assetType, assetID string) (string, error) {
 	var name sql.NullString
 	err := db.QueryRowContext(ctx, `
 		SELECT name FROM asset_translations

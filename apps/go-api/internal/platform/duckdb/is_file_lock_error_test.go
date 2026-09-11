@@ -30,6 +30,7 @@ func TestIsFileLockError(t *testing.T) {
 		{"linux_could_not_set_lock", errors.New("IO Error: Could not set lock on file"), true},
 		{"conflicting_lock", errors.New("Conflicting lock is held in /proc/..."), true},
 		{"different_configuration", errors.New("database is already opened with a different configuration than existing connections"), true},
+		{"windows_process_in_use", errors.New("IO Error: Cannot open file: The process cannot access the file because it is being used by another process"), true},
 		{"not_found_is_not_a_lock", errors.New(`IO Error: Cannot open file "x.duckdb": No such file or directory`), false},
 		{"unrelated", errors.New("Catalog Error: Table with name foo does not exist"), false},
 	}

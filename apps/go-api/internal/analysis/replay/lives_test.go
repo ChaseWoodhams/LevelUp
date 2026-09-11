@@ -59,8 +59,8 @@ func TestNameLivesByDeathsJoinsOnEnd(t *testing.T) {
 	if n != 2 {
 		t.Fatalf("attendu 2 morts appariables, obtenu %d (decalage %d)", n, off)
 	}
-	if got := nameLivesByDeaths(lives, deaths, off); got != 2 {
-		t.Fatalf("attendu 2 vies nommees, obtenu %d", got)
+	if r := nameLivesByDeaths(lives, deaths, off, nil); r.named != 2 || r.ambiguous != 0 {
+		t.Fatalf("attendu 2 vies nommees et 0 ambigue, obtenu %d et %d", r.named, r.ambiguous)
 	}
 	byslot := map[uint32]uint64{}
 	for _, l := range lives {
@@ -71,36 +71,104 @@ func TestNameLivesByDeathsJoinsOnEnd(t *testing.T) {
 	}
 }
 
-func TestNameLivesByDeathsIsDeterministic(t *testing.T) {
-	// Deux vies qui finissent au MÊME instant : l'appariement doit être reproductible.
-	// Sans départage explicite, l'ordre d'itération d'une map rendrait le résultat
-	// instable d'une exécution à l'autre — un rejeu différent à chaque construction.
-	build := func() (uint64, uint64) {
+func TestNameLivesByDeathsRefusesTiedExchange(t *testing.T) {
+	// LE CAS REEL, AUX DISTANCES MESUREES. Deux vies (512 finit a 8709648 ms, 517 a 8709682)
+	// et deux morts (A a 8709636, B a 8709602). Aucune distance n est a egalite : 12, 46, 46,
+	// 80. Le glouton prend le 12, ce qui force le 80 — total 92 ; l appariement croise coute
+	// 46 + 46 = 92, le MEME total. C est la geometrie des reapparitions (que ce paquet ne
+	// connait pas) qui dit que le croise etait le bon : chaque identite s etait posee sur le
+	// camp d en face. A somme egale, aucune des deux ne doit etre nommee.
+	base := int64(8_709_000)
+	tr := tracksOf(
+		posAt(512, uint64(base-5_000)*1000, 0, 0, 0), posAt(512, uint64(base+648)*1000, 0, 0, 0),
+		posAt(517, uint64(base-5_000)*1000, 0, 0, 0), posAt(517, uint64(base+682)*1000, 0, 0, 0),
+	)
+	lives := buildLifeSpans(tr)
+	deaths := []Death{{XUID: 111, TimeMS: base + 636}, {XUID: 222, TimeMS: base + 602}}
+	r := nameLivesByDeaths(lives, deaths, 0, nil)
+	named, ambiguous := r.named, r.ambiguous
+	if named != 0 || ambiguous != 2 {
+		t.Fatalf("un echange a somme egale ne doit rien nommer, obtenu %d nommee(s) et %d ambigue(s)",
+			named, ambiguous)
+	}
+	for _, l := range lives {
+		if l.xuid != 0 {
+			t.Errorf("la vie du slot %d porte une identite alors que l horloge ne la designe pas", l.slot)
+		}
+	}
+}
+
+func TestNameLivesByDeathsRefusesGenuineTies(t *testing.T) {
+	// Deux vies qui finissent au MÊME instant, envers deux morts elles-mêmes au même
+	// instant : chaque vie a, envers chaque mort, un delta identique. Rien dans l'horloge
+	// ne dit laquelle des deux une mort nomme — trancher par un départage arbitraire (l'un
+	// des deux camps observé sur un match réel) poserait une identité sur le mauvais
+	// joueur. Aucune des deux ne doit être nommée, et cela de façon reproductible : un
+	// refus qui dépendrait de l'ordre d'itération d'une map serait lui-même un pari.
+	build := func() (uint64, uint64, int) {
 		tr := tracksOf(
 			posAt(512, 1_000_000, 0, 0, 0), posAt(512, 5_000_000, 0, 0, 0),
 			posAt(513, 1_000_000, 0, 0, 0), posAt(513, 5_000_000, 0, 0, 0),
 		)
 		lives := buildLifeSpans(tr)
 		deaths := []Death{{XUID: 111, TimeMS: 5_000}, {XUID: 222, TimeMS: 5_000}}
-		nameLivesByDeaths(lives, deaths, 0)
+		ambiguous := nameLivesByDeaths(lives, deaths, 0, nil).ambiguous
 		m := map[uint32]uint64{}
 		for _, l := range lives {
 			m[l.slot] = l.xuid
 		}
-		return m[512], m[513]
+		return m[512], m[513], ambiguous
 	}
-	a1, b1 := build()
+	a1, b1, amb1 := build()
+	if a1 != 0 || b1 != 0 {
+		t.Fatalf("un ecart a egalite parfaite ne doit nommer ni l'une ni l'autre vie, obtenu (%d,%d)", a1, b1)
+	}
+	if amb1 != 2 {
+		t.Fatalf("les deux vies doivent etre comptees ambigues, obtenu %d", amb1)
+	}
 	for i := 0; i < 20; i++ {
-		if a2, b2 := build(); a2 != a1 || b2 != b1 {
-			t.Fatalf("appariement non deterministe : (%d,%d) puis (%d,%d)", a1, b1, a2, b2)
+		if a2, b2, amb2 := build(); a2 != a1 || b2 != b1 || amb2 != amb1 {
+			t.Fatalf("refus non deterministe : (%d,%d,%d) puis (%d,%d,%d)", a1, b1, amb1, a2, b2, amb2)
 		}
+	}
+}
+
+func TestNameLivesByDeathsTieDoesNotBlockUnrelatedLife(t *testing.T) {
+	// Le refus d'une paire ambigue ne doit pas coûter une vie qui n'a rien à voir avec
+	// elle : deux vies à égalité parfaite (512, 513, mort à 5 s) plus une troisième, sans
+	// lien de temps avec les deux premières (514, mort à 20 s). Cette dernière doit rester
+	// nommée : le refus est scopé au palier de delta où l'ambiguïté existe, pas au match
+	// entier.
+	tr := tracksOf(
+		posAt(512, 1_000_000, 0, 0, 0), posAt(512, 5_000_000, 0, 0, 0),
+		posAt(513, 1_000_000, 0, 0, 0), posAt(513, 5_000_000, 0, 0, 0),
+		posAt(514, 1_000_000, 0, 0, 0), posAt(514, 20_000_000, 0, 0, 0),
+	)
+	lives := buildLifeSpans(tr)
+	deaths := []Death{{XUID: 111, TimeMS: 5_000}, {XUID: 222, TimeMS: 5_000}, {XUID: 333, TimeMS: 20_000}}
+	r := nameLivesByDeaths(lives, deaths, 0, nil)
+	named, ambiguous := r.named, r.ambiguous
+	if named != 1 || ambiguous != 2 {
+		t.Fatalf("attendu 1 vie nommee et 2 ambigues, obtenu %d et %d", named, ambiguous)
+	}
+	byslot := map[uint32]uint64{}
+	for _, l := range lives {
+		byslot[l.slot] = l.xuid
+	}
+	if byslot[514] != 333 {
+		t.Errorf("la vie sans ambiguite doit rester nommee, obtenu %+v", byslot)
+	}
+	if byslot[512] != 0 || byslot[513] != 0 {
+		t.Errorf("les vies ambigues ne doivent porter aucune identite, obtenu %+v", byslot)
 	}
 }
 
 func TestOwnersFromLivesRefusesToPickOnCollision(t *testing.T) {
 	// Un slot dont deux vies portent des identités différentes est une contradiction : la
 	// table slot -> joueur ne peut pas la représenter. On exige qu'elle soit COMPTÉE et que
-	// le slot ne soit PAS publié — trancher au hasard placerait des tirs sur un innocent.
+	// le slot ne soit PAS publié DU TOUT — garder la premiere lecture serait un departage par
+	// ordre de parcours, et `verdictOfBridge` declare deja le pont non publiable des la
+	// premiere collision : publier quand meme une identite contredirait ce verdict.
 	lives := []lifeSpan{
 		{slot: 512, from: 0, to: 1_000_000, xuid: 111},
 		{slot: 512, from: 10_000_000, to: 11_000_000, xuid: 222},
@@ -109,16 +177,13 @@ func TestOwnersFromLivesRefusesToPickOnCollision(t *testing.T) {
 	if collisions != 1 {
 		t.Errorf("attendu 1 collision comptee, obtenu %d", collisions)
 	}
-	if _, published := owners[512]; !published {
-		t.Errorf("la premiere lecture doit rester ; seule la contradictoire est ecartee")
+	if _, published := owners[512]; published {
+		t.Errorf("un slot contradictoire ne doit publier AUCUNE identite, obtenu index %d", owners[512])
 	}
-	if owners[512] != 0 {
-		t.Errorf("le slot doit garder la premiere identite lue, obtenu index %d", owners[512])
-	}
-	// Les deux tables sortent du meme parcours : elles doivent designer LE MEME joueur, sans
-	// quoi un client nommerait une trace autrement que le rattachement de ses evenements.
-	if byXUID[512] != 111 {
-		t.Errorf("la table d'identites doit suivre la table d'index, obtenu xuid %d", byXUID[512])
+	// Les deux tables sortent du meme parcours : elles doivent se taire ENSEMBLE, sans quoi un
+	// client nommerait une trace que le rattachement de ses evenements ne connait pas.
+	if _, published := byXUID[512]; published {
+		t.Errorf("la table d'identites doit se taire avec celle des index, obtenu xuid %d", byXUID[512])
 	}
 }
 
@@ -163,9 +228,12 @@ func TestBuildOwnersPublishesNothingWithoutDeaths(t *testing.T) {
 	// du repli voté. Ce test est le garde-fou de cette décision : si un jour une seconde
 	// source réapparaît « pour améliorer la couverture », il tombera. Un rejeu muet se voit ;
 	// un rejeu qui pose des tirs sur le mauvais joueur ne se voit pas.
+	// Les deux vies finissent à des instants DIFFERENTS (2 s et 10 s) : un slot qui finirait
+	// au même instant que 512 introduirait une ambiguïté que ce test n'a pas pour objet — cf.
+	// TestNameLivesByDeathsRefusesGenuineTies pour celle-là.
 	tr := tracksOf(posAt(512, 1_000_000, 0, 0, 90), posAt(512, 2_000_000, 0, 0, 90),
-		posAt(513, 1_000_000, 5, 5, 270), posAt(513, 2_000_000, 5, 5, 270))
-	rep := buildOwners(tr, nil, PlayerIndexTable{ByXUID: map[uint64]int{111: 4}, Readings: 26})
+		posAt(513, 1_000_000, 5, 5, 270), posAt(513, 10_000_000, 5, 5, 270))
+	rep := buildOwners(tr, nil, PlayerIndexTable{ByXUID: map[uint64]int{111: 4}, Readings: 26}, nil, nil)
 	if len(rep.Owner) != 0 {
 		t.Errorf("sans morts, AUCUN slot ne doit etre attribue : %+v", rep.Owner)
 	}
@@ -175,13 +243,13 @@ func TestBuildOwnersPublishesNothingWithoutDeaths(t *testing.T) {
 
 	// SANS TABLE D'INDEX non plus, rien n'est publié : le pont a DEUX maillons lus, et il lui
 	// faut les deux.
-	if rep3 := buildOwners(tr, []Death{{XUID: 111, TimeMS: 2_000}}, PlayerIndexTable{}); len(rep3.Owner) != 0 {
+	if rep3 := buildOwners(tr, []Death{{XUID: 111, TimeMS: 2_000}}, PlayerIndexTable{}, nil, nil); len(rep3.Owner) != 0 {
 		t.Errorf("sans table d'index, AUCUN slot ne doit etre attribue : %+v", rep3.Owner)
 	}
 
 	// Avec les deux maillons, la lecture nomme le slot.
 	deaths := []Death{{XUID: 111, TimeMS: 2_000}}
-	rep2 := buildOwners(tr, deaths, PlayerIndexTable{ByXUID: map[uint64]int{111: 4}, Readings: 26})
+	rep2 := buildOwners(tr, deaths, PlayerIndexTable{ByXUID: map[uint64]int{111: 4}, Readings: 26}, nil, nil)
 	if rep2.DeathsNamed == 0 {
 		t.Fatalf("attendu au moins une vie nommee, obtenu %d", rep2.DeathsNamed)
 	}

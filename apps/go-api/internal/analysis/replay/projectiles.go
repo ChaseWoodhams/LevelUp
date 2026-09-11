@@ -1,6 +1,7 @@
 package replay
 
 import (
+	"math"
 	"sort"
 
 	"levelup/go-api/internal/analysis/filmdec"
@@ -35,15 +36,38 @@ type Projectile struct {
 	Rest bool `json:"rest,omitempty"`
 }
 
+// projectileMaxStepM borne le déplacement d'un projectile entre deux points de la grille
+// (100 ms). Au-delà, ce n'est plus une lecture : c'est un artefact de déquantification.
+//
+// LE DÉFAUT MESURÉ, ET POURQUOI CE GARDE-FOU EXISTE. Sur les quatre films Streets archivés,
+// 27 à 35 % des trajectoires portent au moins un pas impossible, et la signature est nette :
+// le saut vaut EXACTEMENT l'étendue Y de la carte (52,88 m pour `sgh_streets`, dont les bornes
+// de quantification sont Y ∈ [-23,018 ; 29,867]), l'autre axe ne bougeant pas d'un centimètre —
+// par exemple (14,37 ; -23,00) -> (14,97 ; 29,84) en un seul pas de 100 ms, soit 528 m/s.
+// Jamais sur X, toujours sur Y : le quantum Y repasse d'un bord à l'autre. La cause est en
+// amont, dans la déquantification (`filmdec`), et n'est pas corrigée ici ; ce qui est corrigé
+// ici est la PUBLICATION d'une position fausse, qui faisait tracer au client une ligne droite
+// en travers de toute la carte.
+//
+// 10 m par pas, soit 100 m/s, laisse passer tout projectile du jeu (une grenade tient sous
+// 20 m/s, une roquette sous 30) et ne coupe que l'impossible.
+const projectileMaxStepM = 10
+
 // buildProjectiles projette les trajectoires décodées sur la grille de frames du rejeu.
 //
 // DÉCIMATION : le film réplique à ~60 Hz, la grille du rejeu est à 10 Hz. On garde UN point
 // par frame — le premier — plutôt que de moyenner : un projectile suit une parabole, et
 // moyenner deux positions distantes de 100 ms couperait le sommet de l'arc.
-func buildProjectiles(tracks []filmdec.ProjectileTrack, origin, step uint64) []Projectile {
+//
+// LE VOL S'ARRÊTE AU PREMIER PAS IMPOSSIBLE, il n'est pas recousu : après un repli du quantum,
+// la suite du vol est du mauvais côté de la carte, et rien ne dit où il est réellement passé.
+// C'est la même règle que celle qui gouverne la fin d'un vol : on publie ce qui est lu, et on
+// s'arrête là où le film cesse d'être lisible.
+func buildProjectiles(tracks []filmdec.ProjectileTrack, origin, step uint64) ([]Projectile, int) {
 	if len(tracks) == 0 {
-		return nil
+		return nil, 0
 	}
+	truncated := 0
 	out := make([]Projectile, 0, len(tracks))
 	for _, tr := range tracks {
 		if len(tr.Pts) < 3 || tr.Pts[0].TimestampUS < origin {
@@ -52,6 +76,7 @@ func buildProjectiles(tracks []filmdec.ProjectileTrack, origin, step uint64) []P
 		t0 := int((tr.Pts[0].TimestampUS - origin) / step)
 		var pts [][3]float32
 		last := -1
+		cut := false
 		for _, p := range tr.Pts {
 			if p.TimestampUS < origin {
 				continue
@@ -60,13 +85,25 @@ func buildProjectiles(tracks []filmdec.ProjectileTrack, origin, step uint64) []P
 			if f == last {
 				continue // un seul point par frame de la grille
 			}
+			if n := len(pts); n > 0 {
+				dx, dy := float64(round2(p.X)-pts[n-1][1]), float64(round2(p.Y)-pts[n-1][2])
+				if math.Hypot(dx, dy) > projectileMaxStepM {
+					cut = true
+					break
+				}
+			}
 			last = f
 			pts = append(pts, [3]float32{float32(f - t0), round2(p.X), round2(p.Y)})
+		}
+		if cut {
+			truncated++
 		}
 		if len(pts) < 2 { // une trajectoire d'un seul point de grille ne se dessine pas
 			continue
 		}
-		out = append(out, Projectile{T0: t0, P: pts, Rest: tr.Pts[len(tr.Pts)-1].AtRest})
+		// `Rest` CERTIFIE une fin de vol : un vol coupé n'a pas la sienne, et le dire
+		// serait affirmer qu'on a vu le projectile s'immobiliser là.
+		out = append(out, Projectile{T0: t0, P: pts, Rest: !cut && tr.Pts[len(tr.Pts)-1].AtRest})
 	}
 	// Tri TOTAL : T0 est un index de frame de la grille 10 Hz, donc les ex æquo sont la règle,
 	// pas l'exception. Départager par la première position publiée puis par la longueur rend
@@ -85,5 +122,5 @@ func buildProjectiles(tracks []filmdec.ProjectileTrack, origin, step uint64) []P
 			return len(a.P) < len(b.P)
 		}
 	})
-	return out
+	return out, truncated
 }

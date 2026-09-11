@@ -25,6 +25,7 @@ eggs/
 lib/
 lib64/
 !apps/web/src/lib/
+!apps/study/src/lib/
 parts/
 sdist/
 var/
@@ -102,6 +103,9 @@ nul
 app_settings.json
 app_settings.json.bak
 db_profiles.json
+# Liste des joueurs suivis par cmd/study-archiver watch (ticket #8) : elle nomme des
+# personnes réelles. L'exemple committé (watchlist.example.toml) suffit à la recréer.
+watchlist.toml
 data/xuid_aliases.json
 GT-XUID.txt
 # Checkpoint runtime du backfill world (resolved_xuids + listes done/failed) — état local
@@ -116,6 +120,10 @@ data/cache/*
 # 272 appels Halo upstream à chaque déploiement (cf. populate-career-rank-images CLI).
 !data/cache/career-rank-image/
 data/sync_cache/
+# Données de l'outil d'étude (cmd/study-archiver, ticket #6) : base d'archive,
+# rasters et images de carte. État LOCAL — la base grossit avec chaque match
+# archivé et porte des données de joueurs. Rien ici n'est versionné.
+data/study/
 data/backup_legacy/
 # État runtime admin par-instance (journal d'actions, snapshot post-sync) — état local
 data/global/admin_state/

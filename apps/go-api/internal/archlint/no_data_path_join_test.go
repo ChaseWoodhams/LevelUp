@@ -22,8 +22,16 @@ import (
 )
 
 var dataPathJoinAllowlist = map[string]bool{
-	// PathResolver = LA source des chemins data.
+	// PathResolver = LA source des chemins data. Il vit désormais dans PLUSIEURS
+	// fichiers : `registry.go` a dépassé le seuil de 500 L du dépôt (846 L), donc les
+	// nouvelles familles de chemins sortent dans leur propre fichier plutôt que de
+	// grossir une dette gelée (règle 5). Ce sont les mêmes méthodes sur le même type —
+	// l'intention du ratchet (les chemins physiques ne se composent QUE dans le
+	// resolver) est intacte ; seul le nombre de fichiers qui le portent a changé.
+	// Ajouter ici tout nouveau fichier de PathResolver, et RIEN d'autre.
 	"internal/domain/title/registry.go": true,
+	// study_paths.go (2026-09-03, ticket #4) : racine `data/study/` de l'outil d'étude.
+	"internal/domain/title/study_paths.go": true,
 	// Config : défauts du data-root (amont du resolver, bootstrap).
 	"internal/config/config.go":          true,
 	"internal/config/config_settings.go": true,

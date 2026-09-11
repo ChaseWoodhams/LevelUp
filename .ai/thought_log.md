@@ -1,3 +1,1198 @@
+﻿## [2026-09-05] apps/study: #18's browser gets real final scores and a complete archive read — Complete
+
+**Context**: a follow-up pass on #18, done directly against #16/#17/#18's own commit while a
+rate-limited session was down. The prior pass had labelled the browser's numeric column "kills
+by team" because the archive stored no final score at the time — this pass adds one.
+
+**THE SCORE COMES FROM THE REPO'S OWN CANONICAL EXTRACTION, NOT A NEW READING OF THE PAYLOAD.**
+`sync.ExtractRegistry` already produces `Team0Score`/`Team1Score` for the warehouse from the same
+match-stats payload the archiver already reads (`cmd/study-archiver/facts.go`'s own header: "the
+repo's own extraction, not a copy of it" — re-deriving it here would let the archive disagree
+with the warehouse about the same match). The archiver's schema grows two nullable columns via
+`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`, applied on every open; an archive from before this
+change reads back with both null rather than needing a migration step, and `study-server` reads
+the same way — `matchColumns` checks `information_schema.columns` once per request and selects
+`NULL, NULL` on an old shape rather than upgrading a database it only has read access to (CLAUDE.md's
+mono-process DuckDB rule: a reader must never write).
+
+**THE BROWSER NOW READS THE WHOLE ARCHIVE, IN PAGES, NOT JUST THE FIRST THOUSAND ROWS.** The
+previous pass took the server's page ceiling as a hard cutoff and said so in the screen; this one
+loops `GET /matches?limit=1000&offset=N` until every row is in hand, so a filter or a sort is
+never silently scoped to whichever page loaded first. The new failure mode that pagination
+introduces — the archive changing between two page reads — gets its own screen state (`changed`)
+rather than a silent skip or a duplicate: a total that moves between requests, or an intermediate
+page that comes back empty while rows are still expected, both refuse the load and ask for a
+reload. Offset pagination is explicitly not a snapshot, and the tests exercise exactly the race
+that would otherwise drop or double a row.
+
+**THE ROW LINK NOW USES THE FULL MATCH ID, NOT THE SHORT ONE.** Two archived matches can share an
+eight-character short-id prefix — `study-server`'s own collision test proves the lookup resolves
+it deterministically — and a table listing many matches is exactly where that collision becomes
+reachable in practice rather than theoretical. Linking by the full id sidesteps it entirely rather
+than trusting the lookup's tie-break to pick the right one every time.
+
+**Results**: `apps/study` — 28 files, 397 tests green (up from 391), typecheck clean. `go test
+./cmd/study-server/... ./cmd/study-archiver/...` green, including a legacy-schema round trip
+(scores written, columns dropped, archive still readable) and a fetch-one test that asserts the
+recorded score is the match's real score and not a sum of kills.
+
+---
+
+## [2026-09-05] apps/study: drawing layers, the floor fallback chain, and the archive browser — Complete
+
+**Context**: issues #16, #17 and #18 of epic #2, in that order. #16 makes the map readable as a
+fight rather than eight dots; #17 puts a legible floor under every match, not only the two maps
+with reconstructed structure; #18 is how a match is found in the first place.
+
+**THE COPIED LAYERS COULD NOT BE ASKED FOR EITHER OF THE TWO THINGS #16 IS ABOUT, so this app
+drew them itself and turned the copies off at the call site.** `replayMarkers.drawTracksLayer`
+strokes one flat polyline per life: it says where somebody has been and refuses to say in which
+direction, and no prop of that layer changes it. `drawProjectilesLayer` paints every flight in
+one ink, because the projectile archetype the decoder reads carries no player at all. Both files
+are byte-identical copies of `apps/web` and not editable from here, so the trail and the arc are
+now `features/viewer/studyDraw.ts`'s, and the copied trail is switched off by handing that layer
+a trailing window of zero (`paintReplay.COPIED_TRAIL_OFF` — `trailAt(points, frame, 0)` spans no
+samples). That is a single named constant applied at one place, not a fork of the file, and
+`features/replay/README.md` now records which copied behaviours are bypassed and why.
+
+**THE GRENADE ARC'S THROWER IS THE UPSTREAM DECODER'S OWN WITNESS, NOT A HEURISTIC INVENTED
+HERE.** `internal/analysis/replay/projectiles.go` records the measurement it was built on: 65 of
+70 known throws see a trajectory born within 200 ms, against 11 to 13 for the same throws shifted
+as a block. So `grenadeArcs.ts` pairs a flight to a throw on coincidence of time AND place, and
+refuses in both directions that matter — a flight matching no throw keeps the neutral ink, and so
+does one matching two different slots, because picking the closer would be inventing a tie-break
+the film does not contain.
+
+**THE FLOOR'S REAL FALLBACK ORDER WAS NOT WHAT THE TICKET ASSUMED, AND CHECKING IT WAS THE
+TICKET'S OWN FIRST REQUIREMENT.** `mapFloor.ts` has no chain in it whatsoever: it rasterises BSP
+surfaces into an altitude grid and knows nothing about having none. The chain was spread across
+two other files — `useReplayPainter` built a grid only when `doc.structure.length > 0`, and
+`paintReplay.paintGround` drew the Forge props when there was no pre-painted floor and nothing at
+all otherwise. The real order was therefore: reconstructed floor -> Forge props -> an empty
+background, and a match on a map with neither was watched over a blank rectangle. It is now
+structure -> calibrated image -> metric grid, decided in one place
+(`useFloorImage.ts`) and named in another against the same two facts (`mapCalibration.floorSourceOf`),
+so the line under the map cannot disagree with the picture. The props kept the job they were
+actually good at and lost the one they were not: they are drawn ON TOP of the last two fallbacks,
+and not over a reconstructed floor, where they would be noise on better data.
+
+**CALIBRATION IS MANUAL AND NOTHING DERIVES A SCALE FROM A MATCH.** A replay's bounds are the
+area those particular players covered, so fitting an image to them would stretch the same map
+differently in every match — a floor that misstates every distance read off it, silently, on
+every match. So an entry is an image plus the world coordinates of its corners, hand-measured off
+the grid, and an uncalibrated map falls through to that grid rather than to a guess.
+`mapImages.config.ts` ships EMPTY and carries the procedure: it is a typed module rather than a
+JSON file because JSON cannot hold the instructions an operator needs, and because a mistyped
+`maxY` in JSON is a calibration that is silently ignored — indistinguishable from a map nobody
+has calibrated.
+
+**THE MAP CANNOT COME FROM THE ARTIFACT, WHICH IS WHY THE SERVER GREW A FOURTH ROUTE.** A replay
+document carries its match id, its title slug and its bounds, and no map at all — so a viewer
+holding one cannot say which map to look a calibration up for. `GET /matches/{match_id}` serves
+the archive's own row, and the client treats its failure DIFFERENTLY from the roster's, on
+purpose: a missing roster would make the viewer claim eight players have no team, while a missing
+summary only costs the floor its image and the line then says "grid", which is true. So the
+roster fails the screen and the summary degrades, with the failure reported rather than
+swallowed.
+
+**THE BROWSER FILTERS LOCALLY, AND THAT IS ONE IMPLEMENTATION OF EACH RULE RATHER THAN TWO.**
+The server can filter — it has since #12, with tested rules about half-open date ranges and about
+NULL coverage never satisfying a floor — and the browser deliberately does not ask it to. One
+read brings back up to the server's own ceiling of a thousand rows; filtering and sorting are
+pure functions over those (`browserLogic.ts`), tested against fixture rows with no network
+anywhere near. Two reasons beyond the instant response: writing the same rules a second time in
+TypeScript would be the "two truths" anti-pattern with a filter that quietly disagrees with its
+own SQL, and every keystroke that hit the server would borrow the archive file that the hourly
+capture needs in order to write. Past a thousand rows nothing is silently truncated — `total`
+comes back with the page, and the screen says how many the archive holds and how many are being
+filtered.
+
+**COVERAGE IS THE COLUMN THE BROWSER EXISTS FOR, AND "UNKNOWN" IS NOT ZERO.** It is shown before
+a match is opened because that is the point — it separates a match worth studying from one whose
+data is too thin, and learning it after opening one is learning it too late. An artifact that
+reported no lives at all has no coverage figure: there was nothing to attach anything to. It
+renders as the word, never as 0 %, and no floor admits it — including a floor of zero. The
+server's SQL takes the same position through three-valued logic; the client's is that position
+written out.
+
+**THE "SCORE" COLUMN IS NOT A SCORE AND SAYS SO.** The archive records each player's kills,
+deaths and assists and Halo's raw outcome code, and no final score anywhere. A score column
+filled with a kill total would read as the scoreboard on every mode where the two differ, which
+is every objective mode there is — so the column is labelled "kills by team" / « frags par
+équipe » and carries the reason on hover.
+
+**Results**: `apps/study` typecheck clean, 28 test files / 391 tests green (up from 23 / 306),
+production bundle builds. `go test ./cmd/study-server/` green, including new coverage for the
+fourth route and for the page's rosters coming back per match rather than smeared across them.
+`useReplayPainter.ts` reached 490 of the 500-line ceiling when the chain landed and was split:
+the floor's two hooks moved to `useFloorImage.ts`, which is a cohesive unit rather than an
+arithmetic one — where the ground comes from and how it is painted once, against the clock and
+the frame that stayed behind.
+
+**Next**: epic #3 (heat maps and aggregation), whose first ticket (#19) is the pure occupancy
+raster. No map is calibrated yet: `mapImages.config.ts` is empty by design, and the first
+calibration is a manual measurement somebody has to make against the new grid.
+
+---
+
+## [2026-09-05] apps/study: live archived matches, team colouring, and a driveable timeline — Complete
+
+**Context**: issues #13, #14 and #15 of epic #2, in that order because each is the ground the
+next stands on. #13 puts a real artifact on screen (route, fetch boundary, schema-version
+guard); #14 colours it by team on both surfaces; #15 gives the reader a way to drive it.
+
+**THE COPIED CANVAS HAD TO BE FORKED, AND IT WAS DELETED RATHER THAN LEFT BESIDE ITS
+REPLACEMENT.** `ReplayCanvas.tsx` came across from `apps/web` verbatim in #11 and could not
+serve #14 or #15: it derives one colour per TRACK from the chart-series palette (so a player is
+repainted at every respawn — the exact opposite of #14's "stable across all lives"), and it owns
+its own playback position (so #15's stepping, jumps and keyboard have nothing to act on). Neither
+is reachable through its props, and `apps/web/**` is out of bounds from here, so the fork was the
+only door. What followed from that is the part worth recording: the copy became UNUSED, and an
+unused module with green tests is the first anti-pattern in this repository's own list. It was
+deleted, along with `lib/accessibility/plotlyColorscale.ts` (its only reader here) and the eight
+`--ac-chart-series-*` values in `tokens.css`. The replacement carries a DERIVED-FROM header
+naming the origin path and SHA — the same diffing handle, without claiming to be a byte copy —
+and `features/replay/README.md` records what left and why.
+
+**THE SCHEMA GUARD IS READ FROM THE GO SOURCE, NOT FROM THE TICKET.** `replay.SchemaVersion` is 2
+today. The ticket said to re-read it at implementation time; a number copied at that moment is
+right for one day, so `schemaVersion.guard.test.ts` reads `const SchemaVersion` out of
+`internal/analysis/replay/document.go` and fails when the builder moves. The refusal itself is
+STRUCTURAL: `parseReplayPayload` rules on the version BEFORE normalising, so a document of an
+unrecognised version never reaches the nullability frontier and no layer can be drawn from fields
+that may no longer mean what their names say. The web app deliberately has no such guard (its
+contract test says so in as many words) and it is right not to: producer and consumer ship
+together there. An archive holds artifacts built by several versions of the builder, which is
+what makes the two situations different.
+
+**EVERY FAILURE HAS A NAME, because they send the reader to five different places.** An unknown
+identifier (`match_not_found`) is a typo or an uncaptured match; a missing artifact
+(`replay_not_available`) is a `rebuild`; a busy archive (`archive_busy`) is a wait and is painted
+`info`, not as a fault; an unreachable server is a process to start; an unreadable version is a
+format that moved. `loadArchivedMatch` returns one tagged union and the screen is a switch over
+it. The same code read two ways is the one subtlety: `replay_not_available` on the ARTIFACT is an
+empty state, on the ROSTER it fails the screen — an empty scoreboard would put every player in
+the ungrouped bucket, which is precisely how this viewer says "the archive has no row for this
+person". A transport failure must not be able to make that claim.
+
+**NO RETRY LOOP, ON PURPOSE.** Two of those failures would spin forever under a naive policy (a
+match that will never have an artifact; a capture that will finish on its own schedule). The
+screens carry a button instead. That is also why no query library was added: the one behaviour
+that would have justified the dependency is a requirement in the negative here.
+
+**TEAM COLOUR IS JOINED ON XUID AND THE TWO SURFACES CANNOT DRIFT.** The map's group index comes
+from the same `buildPlayers` + `groupByTeam` pair the roster panel uses, so "the same player, the
+same colour" holds by construction. The token list, however, exists twice — the panel's copy is
+private to a file copied verbatim — so `teamColors.guard.test.ts` reads it back out of
+`ReplayTeams.tsx` and compares. Two copies is what the rules allow; the guard is what the rules
+ask for at the second. A life the film never named is drawn in the neutral ink, never in a team's
+colour: painting it would add a player to a team on screen who is not on one in the data.
+
+**THE SHOOTER OF A LINGERING SHOT IS RESOLVED WITH A BOUNDED LOOK BACK.** `drawShotsLayer` asks
+for a slot's colour at the CURRENT frame, and a shot stays up 1.4 s after it was fired. Without
+the look back, every trade kill lost its colour — the shooter had died inside the window, so no
+life held the slot any more and the mark fell to the neutral fallback. `xuidOfSlotAt` therefore
+takes the lingering window and, failing a live owner, returns the most recent one to have ended
+inside it. The window is far shorter than a respawn (~8 s measured), so the life it finds is the
+one that fired.
+
+**THE FRAME LIVES IN TWO PLACES AND THE NONCE IS WHAT KEEPS THEM HONEST.** The canvas advances at
+screen cadence and publishes back every 150 ms — re-rendering eight player cards sixty times a
+second would spend the animation budget on a number that barely changes. So a COMMANDED position
+carries a nonce and the canvas snaps to it; a published one does not. Comparing frames instead
+would be wrong in both directions: a seek to the frame we are already on would be ignored, and a
+report would drag the clock backwards on every render. The visible consequence, documented rather
+than hidden: a step or a jump issued mid-playback starts from a position up to 150 ms old — which
+is why both pause first, after which every step is exact.
+
+**WHAT THE REVIEW CAUGHT, and it was the refactor rather than the feature.** Splitting the
+canvas into a painter, a hook and a component to respect the 80-line rule introduced a defect
+that nothing in the suite could see: `useReplayScene` returned a bare object literal, so it had
+a new identity on every render, so `draw` did, so all three effects keyed on `draw` fired every
+render — the 45 000-cell floor re-rasterised, and the animation frame torn down and re-requested,
+which also DROPS the elapsed time between the two and makes playback run slow by an amount that
+varies with how often React happens to render. The screen looked identical. The fix is a
+`useMemo`; the lesson is that the guarantee was resting on an identity nobody was checking, so
+`useReplayPainter.test.tsx` now asserts the call counts. Writing that test immediately found a
+SECOND instance of the same coupling: `useFloorImage` took `draw` as a dependency, so every
+layer toggle re-rasterised the floor too. It now depends on the three things the floor is made
+of, and the ordering that lets it stop calling `draw` is documented at the call site.
+
+**Three more, all of them the same shape — a rule stated in prose and not asserted:**
+
+- **`?.` on arrays the frontier had already filled.** #13 asks in as many words that no null
+  guard leak into rendering code, and six had, copied in from the origin canvas along with the
+  drawing. They are not redundant: they are a false claim that the array might be null here, and
+  the next reader either believes it and adds a seventh or checks and wastes the trip.
+  `normalized.guard.test.ts` reads the filled-field list out of the normaliser itself.
+- **The keyboard took keys it had no business taking.** `isTypingTarget` reported the scrubber
+  as a text field — it is an `<input>` — so every shortcut died for as long as a reader had
+  touched the slider, `Space` included; and claiming `Space` unconditionally made every button
+  in the transport row unreachable from the keyboard while it held the focus. `focusOwnsKey` now
+  yields only what the focused element actually uses: a text field everything, the scrubber its
+  arrows, a button its `Space` and `Enter`.
+- **`h-7 px-2 text-xs`, eight times.** Centralised into `components/ui/controls.tsx` with a
+  guard-rail, because the rule does not stop at "centralise" and this repository's own worked
+  example is a predicate that went from 8 copies to 36 AFTER being centralised.
+
+**And one claim in a comment was simply false**: `FOCUSABLE_PLAYERS` said a ninth player "is
+reachable by clicking their card". The roster panel is a verbatim copy with no click handler, so
+they are not reachable at all. The comment now says so, and the transport row grew a focus
+picker — the digits 1-8 as buttons carrying their player's name — because the digit mapping was
+otherwise invisible, and a shortcut nobody can see is a shortcut nobody uses.
+
+**`.ai/project_map.md` was deliberately NOT updated.** Its own header declares it frozen and no
+longer authoritative, and CLAUDE.md's rule about updating it is older than that header. Adding a
+live entry to a document that says it is dead would make both less trustworthy; this log is the
+maintained record.
+
+**Results**: 306 tests green (23 files, up from 204/12), `tsc -b` clean, production build clean.
+Four new guards: the schema version against the Go source, the team tokens against the roster
+panel, the nullability frontier against re-checking, and the compact control against a ninth
+hand-written copy.
+The dev server proxies `/study` to `127.0.0.1:8100` rather than the page reaching that origin —
+`study-server` publishes no CORS headers on purpose, and it serves other people's films.
+
+**Verified on pieces, and one thing was NOT**: there is no `data/study/archive.duckdb` on this
+machine, so nothing was opened end to end against a captured film. What was checked: the dev
+server serves, `/study/*` proxies (502 with no server behind it, which is the "server not
+running" screen), and `#/sample` draws the hand-written artifact through the very same viewer —
+which is why that route exists rather than being a test fixture only.
+
+**Next**: #16 (drawing layers) and #17 (floor fallback chain) now have a canvas they can be built
+into; #18 (archive browser) replaces the landing screen's identifier field with the real table.
+
+## [2026-09-04] apps/study: the scaffold, and the modules that came across with it — Complete
+
+**Context**: issue #11, the foundation of the study viewer (epic #2). A new Vite/React/TS app
+that boots and draws a replay artifact on canvas, using the rendering and logic modules that
+already work in `apps/web`'s match replay. Tracer bullet: a real artifact on a real canvas in a
+new app, before any of it is wired to live data.
+
+**COPIED, NOT IMPORTED — AND THE FILE LIST WAS VERIFIED, NOT ASSUMED.** There is no workspace
+in this repository wiring cross-app imports, and `apps/web/**` is out of bounds from here, so
+adding exports there to make a live import work is not available either. The epic named ten
+files; the directory holds twenty-two. Reading the import graph rather than the spec added
+three the spec had missed and that nothing would run without: `replayMarkers.ts` (the whole
+player layer — trails, aim cone, spawn and death marks), `canvasInk.ts` (the layout inks
+`ReplayCanvas` reads for the floor edge) and `ReplayCoverage.tsx` (the banner that is
+`coverageLogic`'s only consumer). Seven test files came with them. Twenty-one files in
+`features/replay/`, plus seven shared modules under their ORIGINAL paths — `lib/accessibility/`,
+`lib/i18n/locale.ts`, `components/ui/button.tsx` — which is what lets every copied import line
+stay byte-identical to its origin. Each file carries its origin path and the commit it was
+copied at; `git diff <sha> HEAD -- <origin>` is then the handle for spotting drift.
+
+**`queries.ts` did NOT come across**, and that is the one deliberate omission: it is the web
+app's fetch layer (its API client, its query keys, its app shell store). The viewer's own
+fetch layer is #13's work, against `study-server`, not a copy of a path that does not exist here.
+
+**THE TYPES ARE GENERATED, NOT TRANSCRIBED.** The replay modules read `@/lib/api/types`, whose
+own header says in so many words that keeping a hand-written second copy of the contract is
+giving yourself two truths that diverge at the first field added on the Go side. Hand-copying
+the eighteen `Replay*` shapes into this app would have been exactly that — and it would have
+gutted `replayContract.test.ts`, whose entire purpose is to check the nullability frontier
+against the CONTRACT. So `apps/study` runs the same `openapi-typescript` command against the
+same `apps/go-api/api/openapi.yaml`, and its `types.ts` is a small extract holding the aliases
+and `MatchScoreboardRow` verbatim. The scoreboard row is the hand-written one on purpose: the
+generated schema types its counters as `number | undefined` where the frontend type says
+`number | null`, and the copied `rosterLogic.test.ts` fixtures would not compile against it.
+
+**Colours: the CSS fallback IS the palette here.** The copied components read two systems — the
+design-system layout variables (`--border`, `--card`, `--muted-foreground`, read as Tailwind
+utilities and directly by `canvasInk`) and the `--ac-*` semantic tokens. The web app overwrites
+the second from the accessibility settings at runtime; this app has no palette picker, so
+`styles/tokens.css` carries the values the copied modules actually read. One is not in the web
+app's CSS at all: `--ac-compare-c`, which only ever arrives there through `applyPalette()`. It
+is the third team colour, and the third group — a player the archive has no participants row
+for — is an ordinary case when you are watching somebody else's match, so leaving it unset
+would have painted that group with a var that resolves to nothing.
+
+**The fixture is shaped like the real artifact, and says so.** Same contract type, same
+`schemaVersion` (2, re-read from `document.go` rather than trusted from the spec), same nullable
+arrays — so it crosses `normalizeReplayDocument` exactly as a fetched one will, and swapping it
+for a fetch is a one-line change. It is written to exercise layers, not to resemble a match:
+a floor with real relief, eight lives over five players, a player who dies for good (respawn
+must read as a gap, never a guessed delay), an unmatched xuid the film names and the scoreboard
+does not, shots with and without a readable heading, one weapon whose `fx` is outside the drawn
+families, an ability index outside the label table, and a coverage block whose rejects sum
+exactly to `available`.
+
+**Verified**: `tsc -b` clean; `vitest run` 12 files, 204 tests, all passing — the seven copied
+test files pass unchanged in the new location; `vite build` produces a bundle; `npm run dev`
+serves on 5174 and returns the document. Drawing is proved without a browser: jsdom hands the
+canvas no 2D context, so `App.test.tsx` can only show the element mounts. `replayFixture.test.ts`
+therefore drives the layers against a recording context and asserts work is emitted — floor
+fills and strokes, an aim cone (which only draws off a heading the film replicated), shots
+inside the hold window and none outside it, a grenade and its projectile.
+
+**THE REVIEW PASS FOUND THE SAME THING TWICE, AND IT WAS RIGHT.** Both axes landed on the same
+structural gap: every rule this app is supposed to follow was written in prose and enforced by
+nothing. `tools/lint-no-hardcoded-colors.mjs` hardcodes `apps/web/src`;
+`check-generated-types-fresh.mjs` and `lint-contract-ratchet.mjs` pin `apps/web`; the CI
+frontend job runs `working-directory: apps/web`. So "the copies stay byte-identical", "no hex
+literal", "generated.ts derives from the contract" were all conventions — and this repository
+has a documented opinion about a convention without a guard-rail (rule 6: it re-diverges).
+Three guards now assert them inside this app's own suite: `copies.guard.test.ts`,
+`colors.guard.test.ts`, and a `generated-types-fresh.guard.test.ts` calling the SHARED script,
+which took an app-directory parameter (defaulted to `apps/web`, so the existing caller and
+`make openapi-check` are untouched) rather than being copied a second time.
+
+**The copy guard caught a real bug on its first run, and it is the kind nothing else would
+have caught.** `--ac-divergent-neutral` had been taken from the `--ac-*` block in
+`globals.css` — `#60A5FA`. The palette says `#8A9099`, and its comment says why: the blue
+"read as a positive value and competed with the player colours". The CSS block is only a
+FALLBACK the web app overwrites at runtime from the palette, so nothing there fails when the
+two disagree — and they have. This app has no palette pass, so what is written in `tokens.css`
+IS the palette, and that token is the MAP FLOOR. The viewer would have shipped a blue floor,
+silently, matching nothing. Fixed to the palette value, both origins now named in the header,
+and the values checked against the palette rather than trusted.
+
+**Four smaller ones from the same pass**: the `<title>` was FR-only and `lang="fr-FR"` was
+frozen while the screen offers a locale toggle — both now follow the chosen language, and the
+static title is the brand alone so the pre-hydration flash is not in a language the reader did
+not pick. `App.test.tsx` was asserting coverage arithmetic, which is a property of the FIXTURE,
+not of `App` — moved beside the fixture's other invariants. And the extract header on
+`lib/api/types.ts` claimed nothing in it was rewritten, without disclosing the one thing that
+matters: `MatchScoreboardRow` is the origin's HAND-WRITTEN interface and it disagrees with the
+contract schema of the same name (`number | undefined` vs `number | null`, no `average_life`).
+It is copied that way on purpose — the copied `rosterLogic` fixtures are written against it,
+and the study server publishes participants in that shape to fit them — but it is the one
+declaration in the file where a Go contract change will not arrive on its own, and the header
+says so now.
+
+**One repo-level trap found on the way**: `.gitignore` has a bare `lib/` with a single
+exception, `!apps/web/src/lib/`. Every file under `apps/study/src/lib/` was invisible to git —
+eight copied modules, silently. Exception added.
+
+**Deliberately NOT done, and it is the one real gap left**: nothing in
+`.github/workflows/ci.yml` or the `Makefile` runs this app. Its 204 tests — the three new
+guards included — pass locally and in no gate. The guards exist and are correct; nobody is
+made to run them. The epic already names this ("this fork's own lint config won't reach a new
+app unless separately wired in"); it is out of #11's acceptance, and adding a job to the shared
+pipeline is a change to the gate that this issue did not ask for. Worth its own ticket, and it
+should land before the viewer carries anything real — a guard that runs nowhere is a guard
+whose first failure is discovered by a person, not by CI.
+
+**Next**: #13 (fetch layer against `study-server`) and #18, both of which this unblocks.
+
+---
+
+## [2026-09-04] study-server: the fix for the lock bug had a worse bug in it — Complete
+
+**Context**: the re-review of `a088a8f95`. Eight prior findings were confirmed addressed. The
+re-review then found that the FIX had introduced a defect worse than the one it repaired, and
+it was right.
+
+**PER-REQUEST OPEN/CLOSE IS NOT CONCURRENCY-SAFE, AND `OpenReadForQuery` SAYS SO IN ITS OWN
+DOCSTRING.** It consults the process-wide cache first, and `LookupCachedDB` is documented —
+in French, three lines above the function this code had been calling all day — as
+"un emprunt NON-POSSÉDANT ... le caller ne doit pas appeler `Close()` sur le `*DB` retourné".
+So the first in-flight request opens and OWNS the handle; every overlapping request gets a
+borrowed handle and a no-op release. When the owner finishes and closes, it closes the
+`*sql.DB` out from under everyone still using it.
+
+Reproduced before fixing anything: **111 of 320 concurrent borrows** failed with
+`sql: database is closed`, and eight parallel HTTP clients produced **180 responses of 500**.
+The startup-open design this had replaced did not have that failure. Two review rounds, two
+opposite bugs, both in the same twenty lines — the first held the file too long, the second
+released it out from under itself.
+
+**The reference count belongs where the borrows are.** `archiveSource` now owns one: the
+handle opens on the first in-flight request and is released when the last one finishes, under a
+mutex, with an idempotent `Close` so a double release cannot drop the count twice. Requests
+share one handle while they overlap — DuckDB reads concurrently on a pool, which is the point of
+having one — and the file is free between bursts, which is what the archiver needs. Verified
+live where it had failed: 8 parallel clients × 30 requests, **240 of 240 at 200**, zero server
+errors, and a second process then took the archive read-write with the server still up.
+
+**The name was doing work the test wasn't.** `TestArchiverCanStillWrite_WhileThisServerReads`
+opened, read, closed, and only THEN started the writer — nothing read while the archiver wrote,
+so the name claimed an overlap the test never created, and by construction it could not have
+caught the bug above. Renamed `TestArchiverCanWriteBetweenRequests`, which is the property that
+is actually true and actually tested. The honest statement is in the file header now: while a
+request is in flight the archiver waits, exactly as this server waits during a capture. What
+makes the trade work is duration, not priority — milliseconds against minutes.
+
+**A fourth copy of a helper, in the commit that added a duplication guard-rail.** `isLocked`
+was hand-written from the DuckDB error text; `ddb.IsFileLockError` is exported from the package
+`archive.go` already imports, and the hand-rolled version was missing two of its signatures
+("Conflicting lock is held", "different configuration"). Deleted, replaced by the canonical
+call. The irony is recorded in the code comment so the next reader sees the trap rather than
+just the fix.
+
+**Three smaller ones from the same pass**: a caller that disconnects mid-request produced
+`ctx.Canceled`, which fell through to a logged ERROR and a 500 `archive_error` — now a 499
+`client_gone` logged at debug, because nothing is wrong when somebody closes a tab. The 503
+carries `Retry-After: 5`, the same envelope as the app's own `handlers.errDBBusy`, so a client
+that backs off from one backs off from the other. And `lookup` took a SQL fragment as a
+parameter — safe, both call sites constant, but it put a caller-supplied string into query text
+ten lines from filter.go's promise that nothing from outside reaches the SQL; a boolean keeps
+the promise literal.
+
+**What was overclaimed, and is now not.** The previous commit's comments said the server "holds
+the archive for the milliseconds of a query and gives it straight back", and the db-schema
+skill cited `Close()`'s refcount contract as the safety argument — while the borrowers this
+design creates are exactly the ones that never take a refcount. Both corrected. The live check
+in that commit message ("a second process took the archive read-write while the server was up
+and serving") was true but weaker than it sounded: the server was idle between requests. It is
+re-verified properly here, after a 240-request burst.
+
+**And one thing this session tried to verify live and could not.** The 503-while-held path was
+checked by hand twice; both attempts hit a sequencing artifact (the holder process had already
+exited, or `go test -v` buffered its readiness line), and both returned 200 for the right
+reason. It is covered by `TestRoutes_BusyArchiveIs503`, which does the handshake over the
+child's stdout pipe and passes against a real second process. Recorded as tested, not as
+hand-verified.
+
+**Open, and belonging to #12 rather than to a comment**: the acceptance criterion reads "opened
+read-only, **so serving while an archive run is writing is safe**". The code now proves the
+second half is impossible while the archiver holds the archive for its whole pass, and answers
+503 instead. That is a renegotiation of the criterion and should be said on the ticket.
+
+**Results**: `cmd/study-server` 40 tests green including `-race`, `golangci-lint` 0 issues,
+`go test ./...` clean across the module.
+
+**Next**: #11, the `apps/study` scaffold. Two candidate tickets fall out of this one: narrowing
+the archiver's whole-pass hold on the archive, and a note on the ticket about the criterion.
+
+---
+
+## [2026-09-04] study-server: the review findings, and the one that was a real bug — Complete
+
+**Context**: the two-axis review of #12. Eight findings across Standards and Spec. Most were
+small; one was a defect that would have cost films, and finding it required doubting a comment
+this session had itself written with confidence.
+
+**THE COMMENT WAS WRONG, AND THE TEST THAT "PROVED" IT WAS TESTING THE WRONG PROCESS.**
+`archive.go` claimed that "across processes OpenReadForQuery opens READ_ONLY beside the
+archiver's writer", and `TestOpenArchive_WhileAWriterHoldsIt` appeared to confirm it. But that
+test stood the writer up IN THE SAME PROCESS, where `OpenReadForQuery` borrows the cached
+read-write handle — the one arrangement that never occurs in production, since `watch` is a
+separate invocation from the OS scheduler. The spec reviewer caught the gap. Re-executing the
+test binary as a genuine second process settled it in thirty seconds:
+
+    IO Error: Cannot open file "archive.duckdb": The process cannot access the file
+    because it is being used by another process.
+
+DuckDB is single-instance-per-file across processes — `docs/RUNBOOK_OPS_DUCKDB_CLI_TOOLS.md`
+says so, and this session had read that file earlier without connecting it. The claim was
+inherited from `study-archiver/status.go`'s own header, which carries the same error; both are
+corrected now.
+
+**AND IT BIT IN THE DIRECTION THAT MATTERED MOST.** The reviewer flagged "a server started
+mid-capture exits 1", which is annoying. The measurement found the other half: a study server
+left running **took the archive and stopped the next hourly capture from writing at all**. This
+tool exists to beat an expiry clock. A browsing aid that silently blocked the archiver would
+have cost films, and films do not come back — the worst possible failure for this epic, from
+the most innocuous-looking line in the change.
+
+**The fix is structural, not a retry.** The server holds the archive's ADDRESS, never a handle:
+`newArchiveSource` locates it with a `Stat` and nothing more, and each request borrows the file
+through `withArchive` and gives it straight back (`Close` at refCount 0 really does close the
+`sql.DB`). The server's lock windows are milliseconds, which the hourly pass wins essentially
+always. What remains is honest and stated in the file header: the archiver holds the archive for
+its WHOLE pass, so during a capture this server cannot read — that degrades to a retryable
+`503 archive_busy`, not a 500 and not a hang. Narrowing the archiver's own hold is the real
+fix and belongs to the archiver.
+
+**Two cross-process tests now stand where a comment used to.**
+`TestArchiverCanStillWrite_WhileThisServerReads` FAILED against the first design and is the
+guard-rail; `TestServerStartsWhileACaptureRuns` and `TestRequestDuringACaptureIsBusyNotBroken`
+cover the rest. Verified against the real binary too: a second process took the archive
+read-write while the live server was up and had already served requests.
+
+**`omitempty` made a key VANISH where the consumer expected `null`.** `team_side`, `kills`,
+`deaths` and `assists` carried it, so a player the match stats named no team for lost the key
+entirely — and `apps/web/src/lib/api/types.ts` declares those as `T | null`, a value it models,
+where a missing key is not. The fixture hid it: every player in it had a team. There is now a
+player who has none, and the assertion is on nulls rather than on key count alone.
+
+**Where the review's reasoning did not survive checking.** The spec axis argued the payload
+"must be assignable to `MatchScoreboardRow`, or the copied type must be forked". Full
+assignability was never available: that type declares some twenty non-optional fields (`rank`,
+`score`, `accuracy`, `damage_dealt`, `shots_fired`, …) and the archive stores six. The ticket
+asks for six by name, and what must work unchanged is the LOGIC, not the type. Publishing
+fifteen nulls to satisfy a compiler would be inventing a scoreboard. The concrete defect inside
+the argument was real and is fixed; the conclusion was not adopted, and the file says why.
+
+**The roster does not depend on the artifact.** `/participants` required a built match, which
+was an accident of sharing one lookup with `/replay`. Participants come from the MATCH STATS —
+the film carries no team information at all — so a match whose map had no quant bounds still
+has eight players, their teams and their K/D/A, correctly recorded. Split into
+`lookupBuiltMatch` (replay) and `lookupRecordedMatch` (roster).
+
+**A collision nobody would have seen until it mattered.** `lookupMatch` took one row with no
+ordering, and `short_id` is the first 8 characters of a match id, not a key. Two matches can
+share one, and the same URL would then have served a different replay on different days. An
+exact full-id hit now wins outright; among short-id hits, the lowest id, every time.
+
+**Standards, all small**: client-facing refusals in `filter.go` were English while the 404s ten
+lines away were French — one endpoint, two languages (rule 1); two `slog` calls in `main.go`
+dropped their context (rule 3); `docs/COMMANDS.md` had no study section at all, so both
+binaries are now documented there, FR and EN (rule 15). The `t%d` `team_side` literal is the
+second copy of the app's and cannot be centralised while `internal/service` is out of bounds —
+so it gets what rule 6 asks for at the second copy: `TestTeamSideEncodingMatchesTheApp` reads
+the app's source and fails on any drift, plus a test proving that guard is not vacuous.
+
+**Kept, and argued rather than removed**: `limit`/`offset`/`total`, the extra summary columns,
+the `replay_not_available` code, `--title`, graceful shutdown. The spec axis listed them as
+scope, correctly — none was asked for. An unbounded list endpoint hands back the whole archive
+on a typo, and a browser needs columns to identify a row by. They stay, named as deliberate.
+
+**Results**: `cmd/study-server` 37 tests green, `cmd/study-archiver` green, `go test ./...`
+across the module clean, `golangci-lint` 0 issues, largest file 328 lines. Live run re-verified:
+nulls published, the unbuilt match's roster served while its replay still 404s, French
+refusals, thirty rapid requests all 200 with an open and a release each.
+
+**Next**: #11, the `apps/study` scaffold. It should also carry a note that the archiver's
+whole-pass hold is what makes the server unavailable mid-capture — a candidate ticket of its own.
+
+---
+
+## [2026-09-04] study-server: matches, replay and participants (ticket #12) — Complete
+
+**Context**: the first ticket of epic #2. The archive of epic #1 is full of matches; nothing
+could read it. The app's own replay route cannot: it resolves a service per `player_slug` and
+joins the roster against the scoreboard of a player declared in `db_profiles.json`, and the
+archive is deliberately full of OTHER PEOPLE'S matches. Three read-only endpoints on
+`cmd/study-server`, over the archive the archiver writes.
+
+**THE ARTIFACT'S PATH IS RESOLVED, NOT READ OUT OF THE ARCHIVE.** `matches.artifact_path`
+holds the ABSOLUTE path of the machine that built the file — a record of what happened, not
+an address. Restore an archive beside a repository at another location and every one of those
+paths is wrong. The address comes from `PathResolver.ReplayArtifactPath`, the same call the
+archiver used to write it, so the two agree by construction; the column survives only as the
+"was this built" flag. That resolution is also where the short-film-ID rule lives, which is
+the whole reason the ticket asked for Go rather than a second implementation in Node.
+
+**And the path is built from a `short_id` READ OFF A ROW, never from the URL.** Not a
+sanitising step — a shape. `lookupMatch` resolves the request's identifier against the
+database first, so an identifier that names no archived match never reaches the filesystem at
+all, and the 404 the ticket asks for and the closure of the traversal question are the same
+line of code. `TestReplayRoute_PathComesFromTheArchive` states it: an artifact sitting in the
+cache for a match the archive does not hold is unreachable.
+
+**The bytes are passed through, not decoded and re-encoded.** A round trip through
+`replay.ReplayDocument` silently DROPS anything the struct does not model — an artifact from a
+newer decoder would arrive at the viewer quietly shorn of its new fields, which is exactly
+what the client's schema-version guard (#13) exists to catch, and it cannot catch what the
+server already discarded. Huma writes a `[]byte` body straight to the wire, so this also skips
+a reflect-walk float sanitisation over megabytes of trajectories per request.
+
+**Coverage is `named_lives / total_lives`, and `total_lives = 0` is UNKNOWN, not zero.** There
+is no coverage column; the ratio is computed, once, in a `CASE` that yields NULL when there
+were no lives (`coverageRatio`, shared by the SELECT and the WHERE so a filter can never
+disagree with the number shown). SQL's three-valued logic then does the rest: `NULL >= 0.8` is
+unknown, so a match whose coverage cannot be computed never satisfies a floor, whatever the
+floor is. The unit is a fraction of 1 (ADR 0006): `min_coverage=0.85`, and 85 is refused
+rather than clamped, because it is far likelier to be a percentage than an intent.
+
+**A bare date is a DAY, not an instant.** `to=2026-05-19` becomes the following midnight and
+the range is half-open, which is what makes `from=D&to=D` mean the whole of day D — read as a
+plain instant it would have meant the empty span at the start of it, and the most natural
+thing anyone types would have returned nothing. Half-open also lets two consecutive ranges
+tile a month without a match landing in both.
+
+**The participants payload is a SUBSET of `MatchScoreboardRow`, and the two fields it omits
+are the two it cannot answer honestly.** `xuid`, `gamertag`, `team_side` ("t{N}", the app's own
+encoding, which `rosterLogic.ts` groups on), `kills`, `deaths`, `assists` — exactly what the
+copied roster logic reads. NOT `is_me`: studying an archive is always looking at a match from
+outside it, and `false` for everyone would be a claim rather than an omission. NOT
+`outcome_label`: turning Halo's raw outcome code into words is the TitleSemanticAdapter's job
+against a versioned TOML, and rule 1 forbids an FR/EN label written into Go.
+
+**The binding is the boundary.** The listener is on the loopback by default rather than
+carrying a local-only middleware like the app's replay route: that guard exists because the
+app's route hangs off a server listening for the whole machine. Here one rule beats a rule
+plus a guard that can disagree with it. Same reasoning for CORS — the study app will reach
+this through Vite's dev proxy, as `apps/web` already reaches the Go API.
+
+**The test fixture EXECUTES the archiver's own DDL rather than copying it.** This server owns
+no part of the archive's shape. A fixture with its own `CREATE TABLE` would be a second
+declaration whose failure is the quiet kind: the archiver renames a column, the server breaks
+in production, and every test stays green against the schema the fixture still remembers. So
+`helpers_test.go` lifts the `archiveSchema` const out of `cmd/study-archiver/archive.go`. One
+schema, and a rename that breaks this server breaks these tests in the same commit.
+
+**A gap found while re-reading, not by a test.** Every 5xx went through `humacore.NewError`,
+which replaces the message with a generic "internal error" so nothing internal leaks — and
+this binary carries none of the app's HTTP logging middleware, so the cause existed NOWHERE.
+A swallowed error (rule 3, anti-pattern 10) on the one path where the operator has nothing
+else to go on. `serverError` now logs before returning.
+
+**Results**: `cmd/study-server` green — 26 tests (the filter's rules with no database at all;
+the list's ordering, its five filters and its paging against a temp archive; coverage present,
+absent and as a floor; both forms of the identifier; the roster's shape and its six keys; the
+artifact read verbatim, resolved from the short form, and missing; every route including the
+two distinct 404s; the wiring from a repo root on disk). `go test ./...` across the module:
+136 packages, 0 failures. `golangci-lint` 0 issues, gofmt clean, largest file 219 lines,
+largest function under 60.
+
+**Verified by running it**, not only by testing it: the built binary served a seeded archive
+over HTTP — `/matches` with filters, `/matches/000d5950/participants`, the artifact with
+`Content-Type: application/json` and its exact byte length, a 404 carrying `match_not_found`
+and a 400 carrying `invalid_filter`.
+
+**Beyond the ticket, deliberately**: `limit`/`offset`/`total` on the list. Nothing in the
+criteria asks for paging, but a list endpoint with no ceiling hands back the whole archive on
+a typo; the default is 200, the cap 1000, and a limit past the cap is REFUSED rather than
+clamped — silently returning fewer rows than asked reads, at the other end, like "that is all
+there is", the one answer a browsing tool must never give by accident.
+
+**Not done here, and not this ticket's**: `apps/study` itself (#11 and after) — including the
+Vite dev proxy this server assumes. The review agents for this change died on an account rate
+limit; the review above is the author's own second pass.
+
+**Next**: #11, the `apps/study` scaffold with the copied replay modules.
+
+---
+
+## [2026-09-03] watch / status / rebuild (tickets #8, #9, #10) — the archiver runs itself — Complete
+
+**Context**: the last three tickets of epic #1, all unblocked once #7 landed. Together they
+turn `fetch-one` into a tool that runs unattended and stays useful: `watch` captures films
+before they expire, `status` says whether it is still working, `rebuild` re-assembles
+artifacts long after every CDN link is dead.
+
+**THE CONTRADICTION BETWEEN #7 AND #8, DECIDED AND WRITTEN DOWN ON THE TICKET.** #8 asked
+that "matches already marked expired or failed are not retried"; #7 delivered "a failed
+match remains eligible for a later rebuild once its chunks are on disk". They reconcile by
+putting the skip in the DISCOVERY filter rather than in the archiving path: `watch` declines
+to enqueue a `failed` match, because re-running a decoder known to be broken against the
+same bytes every hour is waste that would drown the log the run is judged by — while
+`fetch-one` and `rebuild` stay willing, because those are deliberate acts taken when
+something has changed. `failed` therefore means "waiting on a decoder fix, and a human
+decides when one has landed", not "abandoned". Both tickets' criteria survive intact; the
+reasoning is a comment on #8 so the next reader does not re-litigate it.
+
+**The 4v4 filter is the ROSTER SHAPE, not a playlist name.** Two teams of four is what
+"4v4 Arena" MEANS, it is what the heat maps of epic #3 aggregate over, and it survives
+every rename Halo has done between seasons. A playlist-name test would also have put a
+hard-coded, localised label in Go, which CLAUDE.md rule 1 forbids — the rule and the
+correct engineering agree here.
+
+**The history endpoint demands `xuid(N)`, and this is the one thing in the tool that needs
+an Xbox Live token rather than a Halo one.** Passing a textual gamertag does NOT 404: the
+API returns a stale frozen response (documented on `GetMatchHistory` from Grunt + SPNKr +
+prod experience), which is the worst possible failure shape for an unattended job — it
+looks like data. Resolution goes through the repo's own canonical chain
+(`ResolveMSAccessTokenStoreFirst` -> `AcquireXSTSForRTA` -> `XboxProfileResolver`), memoised
+by `CachedHeaderProvider`, built LAZILY: a watchlist whose players are all resolved — the
+steady state of an hourly job — makes no Xbox call at all, and the resolution is recorded
+in the `watchlist` table so it happens once ever.
+
+**A pass never aborts on one failure.** Not a player's, not a match's. The whole run exists
+to beat an expiry clock, and the films of everybody else are expiring while it would be
+giving up. Failures are counted and reported in the exit code.
+
+**`status` reports failed and expired as SEPARATE numbers.** Summing them into "errors"
+would hide the only distinction that decides what to do next. A rendering bug caught by
+actually looking at the output: "downloaded" counts every successfully archived match too,
+so printing it as "downloaded but unbuilt" showed a backlog of four where there was one.
+Now counted as `film_state = 'downloaded' AND artifact_path IS NULL`.
+
+**`rebuild` makes no network call, and that is a hard property.** On the day the decoder is
+fixed, every match worth rebuilding has a CDN link that died months ago; a rebuild that
+could quietly re-download would collect 404s and report failures that say nothing about the
+decoder. So it takes no client and needs no credential (`newOfflineDeps`), and a match whose
+chunks are gone fails with a message that says exactly that rather than reaching for the
+network. `status` is offline for the same reason and gets it for free.
+
+**A trap #6 documented and this ticket nearly walked into.** `archive.recorded` is a PARTIAL
+reader by design — it selects only what the idempotency check needs — so handing its result
+back to `recordMatch` blanks mode, playlist, played-at and source_gamertag. A rebuild has no
+fresh reading of the match stats and nothing new to say about who played, so it writes
+through `updateBuild()`, which touches only what the build produced and leaves the roster
+alone. The file header of #6 warned about exactly this; reading it was cheaper than the bug.
+
+**Results**: `cmd/study-archiver` green — 22 tests added across the three tickets (a pass
+archives the unseen 4v4s from both histories and skips the rest; a second pass re-processes
+nothing and re-resolves nothing, asserted on stats/history/build call counts; expired and
+failed are never retried by the loop; an unsupported map still is; a player failure and a
+match failure each leave the pass running; the shape filter; watchlist loading, dedup and
+its three refusals; the report's counts, its empty state and its long-tail summary; the
+rebuild's six cases, every one wired with a NIL Halo client so any reach for the network
+would panic). `golangci-lint` 0 issues, gofmt clean, every file under 500 lines.
+
+**THE REVIEW ROUND, AND SIX THINGS IT CHANGED.** Two defects, two acceptance criteria that
+were satisfied only in the easy case, one standards breach, and one silent data-loss window.
+
+1. **`rebuild` could clear a terminal `expired` verdict.** `updateBuild` wrote
+   `filmStateOf(out)` unconditionally, so rebuilding an `expired` match whose map is still
+   absent from the quant-bounds catalogue produced `downloaded`/`unsupported_map` — the
+   match became retryable again, and once the chunk cache was pruned the hourly loop would
+   go back to a link known to be dead. Now `stateAfterRebuild`: only an ARTIFACT settles a
+   match, so a rebuild that produced none carries the prior terminal state AND its reason
+   forward (a row saying `expired` with reason `unsupported_map` would contradict itself).
+2. **An UPDATE on a PRIMARY KEY column.** `rememberWatched` rewrote `gamertag` to normalise
+   a re-typed capitalisation — a cosmetic gain bought with an index removal-and-reinsert on
+   a VARCHAR key, which is the #23046 path `no_art_patterns_test.go` records as having
+   crashed a database DESPITE a single writer. The same trap #6 avoided in `writeMatchRow`,
+   walked into two files later. The column is no longer touched.
+3. **"Archived counts by tracked player" was counting the DISCOVERER.** `source_gamertag`
+   records whose pass found the match, and the loop skips a match already archived before
+   writing anything — so two tracked players who scrim each other would show as 50 and 0
+   forever, the second sitting in the roster of every one of those fifty games. Counted
+   from `participants` now, joined on xuid where resolved and gamertag otherwise.
+4. **A player whose token chain is broken never reached the watchlist table**, because the
+   row was only written after a SUCCESSFUL resolution. `status` would then print "no player
+   followed yet" while five names failed every hour — precisely the "the job stopped
+   working" case the report exists to surface. The row is now written before the attempt.
+5. **One history page, no catch-up.** 25 matches is about a day of heavy play, which makes
+   an hourly pass overlap itself many times over — until the passes stop. A weekend the
+   scheduler missed, a player who then plays thirty games, and everything past the first
+   page expires unseen with a healthy `last_checked` to show for it. The pass now walks
+   pages while they still carry unseen matches, bounded at four. The steady state still
+   costs one call, asserted.
+6. **The 4v4 filter dropped real 4v4s.** A quitter and their backfill make NINE entries in
+   the stats payload, and `len(roster) != 8` threw the match away — permanently, since the
+   film expires while the tool decides it was not interested. Halo marks the quitter
+   did-not-finish (outcome 4, the encoding the `participants` DDL already documents), so
+   the four per side who played it out are countable. A quitter who is NOT replaced still
+   leaves a 4v3, which is correctly declined.
+
+Also: `watch` now applies the same artifact-on-disk test as `fetch-one` (it trusted the
+recorded path, so a deleted artifact was invisible to the loop but rebuilt by fetch-one),
+and `rebuild` no longer advertises `--xuid/--gamertag/--rps` on the one command documented
+as needing no credential. Every fix carries a test, and the paging one was verified to fail
+against a single-page implementation before being kept.
+
+**Judged and NOT changed**: `markChecked` stamps `last_checked` even when every match in
+that player's pass failed to archive — the stamp means "the history was read", which is
+true, and it is the history read that `status` is reporting the freshness of. Non-4v4
+matches still leave no row and are re-examined while they sit in the history window; giving
+them one would put matches the archive is not for into every count #9 reports.
+
+**Next step**: epic #1 is complete. Spec 2 (`apps/study`, tickets #11-#18) reads this
+archive — through `OpenReadForQuery`, never a forced read-only handle.
+
+## [2026-09-03] Expired vs failed films (ticket #7) — the archiver stops chasing dead links — Complete
+
+**Context**: fork issue #7, "1.4 Expired and failed film state handling", unblocked by #6
+on the same branch. #6 recorded four film states; this ticket turns them into a retry
+policy. It exists for the unattended hourly run of #8 — the one place where a silent retry
+loop against a link that will never come back would go unnoticed.
+
+**The bug the ticket names was real, and it was in the CLIENT, not in the archiver.** The
+archiver's `filmAPI` documents `GetFilmChunks` as reporting `found=false` on 404/410, and
+`downloadFilm` was written against that promise. The client only keeps it for the
+MANIFEST: `fetchFilmManifest` maps 404/410 to `(nil, false, nil)`, but the parallel BLOB
+downloads inside `fetchFilmChunks` hand the 404 back as an ordinary error. Halo serves the
+two from different places on different schedules — the spectate endpoint from its own
+store, the chunks from pre-signed CDN blobs — so the COMMONEST shape of expiry (the
+manifest still answers, the blobs are gone) reached the archiver as "transport failure",
+which is exactly the reading that records nothing and retries forever. Not a hypothesis:
+`GetHighlightEventsChunk` had already hit it and worked around it locally with
+`isNotFoundErr`, with a comment saying so.
+
+**Fixed by naming the verdict, not by changing the shared path.** `haloclient` now exports
+`IsFilmGoneErr` — 404/410 is permanent, everything else (5xx, timeouts, dropped
+connections) is transient — and `downloadFilm` records `expired` on the first, returns an
+error on the second. Deliberately NOT changed: `fetchFilmChunks` still returns the blob
+404 as an error rather than as `found=false`. `sync/killcollector` reads the same call, and
+converting a blob 404 into "this match has no film" there is a sync-pipeline behaviour
+change this ticket has no mandate for. **Recorded as a finding**: killcollector today
+treats an expired blob as a retryable error too, and would benefit from the same verdict —
+in a ticket allowed to touch the sync pipeline.
+
+**Expired is the ONLY terminal state, and that asymmetry IS the ticket.** `filmstate.go`
+now owns the life cycle (type, constants, `filmStateOf`, `terminal()`), and the policy is
+one line of code and twenty of why: `expired` stops every later run; `failed` and a
+`downloaded` match with no artifact do not. The two failures mean opposite things — an
+expired film is gone whatever anyone does next, while a failed one is a decoder problem
+whose raw material is still on disk, and a catalogue update or a decoder fix is exactly
+what rescues it. #6 keyed idempotency on the ARTIFACT alone, which was right then and
+wrong now: an expired match has no artifact, so it was re-downloaded on every pass. The
+short-circuit now asks two questions, and `outcome.AlreadyArchived` became `Settled`
+because "already archived" is false of a match that was never archived and never will be.
+
+**A decoder that ERRORS is now recorded, which reverses a #6 decision.** #6 recorded only
+skips, and a build error left no row — the same treatment as a transport failure. But the
+chunks are on disk and the inputs are fixed: the next run decodes the same bytes into the
+same failure, and the run after that too. It is now recorded as `failed` with its own
+reason (`build_failed`, distinct from `no_tracks_decoded` — a decoder that crashed and one
+that read nothing are different bugs to chase), and the error is STILL returned, so a
+decoder regression never passes for an ordinary archiving outcome. The row does not
+suppress a retry: `failed` is explicitly not terminal.
+
+**And the disk is not the decoder.** `buildArtifact` fails two ways — the decoder refuses
+the film, or the disk refuses the artifact — and recording the second as `failed` would
+blame the decoder for a full disk, leaving a match reported as needing a fix it does not
+need. The decoder's own failure is wrapped in a `decodeFailure`; only that one is
+recorded. A wrapper rather than a boolean so the distinction survives being passed around
+and `errors.Is` still reaches the decoder's sentinels.
+
+**The claim cannot be proved by rows, so the tests do not try.** "Never re-attempted" is a
+claim about NOT fetching: a tool that re-downloaded the whole film every hour and rewrote
+the same verdict would leave exactly one row and pass any row assertion. The fake Halo
+server therefore counts manifest, blob and stats calls, and the expiry test asserts all
+three are unchanged by the second pass. Two old tests were removed rather than adapted:
+both used a build error as a STAND-IN for a transport failure, which this ticket makes
+false — the transient cases are now driven through the server's own failure modes (429 on
+the stats call, 503 on the blobs).
+
+**Results**: `cmd/study-archiver` green — tests added for: expiry recorded and never
+retried (asserted on manifest/blob/stats CALL COUNTS), transient blob 503 leaves no row and
+recovers, transient stats 429 leaves no row, build failure recorded as `failed` and still
+returned, artifact-write failure NOT recorded, both flavours of `failed` rebuilt FROM DISK
+with the CDN answering 404/410, a dead CDN not overwriting a captured film, unsupported map
+still retried, plus the state-mapping table, the terminal-state invariant and
+`IsFilmGoneErr`'s own table. `internal/sync/haloclient`, `internal/sync` and
+`internal/archlint` green; full `go test ./...` green. `golangci-lint` reports 0 issues on
+both changed packages (the 2 goconst hits in `halo_client_career.go` are pre-existing and
+untouched). Every file under 500 lines, every function well under 80.
+
+**A toolchain footnote worth writing down, because it wasted a diagnosis.** `go test ./...`
+first came back with 5 build failures, all downstream of `internal/ooz` — the repo's only
+C++ package (`kraken.cpp`, `-static-libstdc++`) — reporting nothing but
+`cgo.exe: exit status 2`, a message that names no cause. `CC=/c/msys64/ucrt64/bin/gcc.exe`
+alone is NOT enough for it: cgo also needs a `CXX`, and pointing at the compilers by
+absolute path still fails. What works is putting `/c/msys64/ucrt64/bin` on PATH and
+setting `CC=gcc CXX=g++`, so the driver finds its own sibling tools. CLAUDE.md's CGO note
+(added by #6) gives the absolute-path form, which covers every C package in the repo and
+fails on the one C++ one.
+
+**THE REVIEW CAUGHT A BUG THAT WOULD HAVE DEFEATED THE TICKET'S OWN ACCEPTANCE CRITERION,
+and it is worth recording in full because the first implementation looked complete and
+passed every test written for it.** `fetchOne` re-downloaded the film on every pass — the
+archiver never wires `WithLocalFilmCache`, so the chunks under `FilmChunksDir` were read
+only by the decoder, never as a download source. So a match recorded `failed` and retried
+after a decoder fix went back to the CDN. Months later that link is dead, the pass collects
+a 404, and `recordOutcome` rewrites `film_state` unconditionally: `failed` → `expired`,
+which the new terminal check then makes permanent. The match with its film intact ON DISK
+would have been buried forever, by the very feature meant to protect it. The first version
+of `TestFetchOne_FailedMatchesStayRebuildable` passed only because the fake server was
+still serving the film on the second pass.
+
+**Fixed at the cause, not with a guard.** `downloadFilm` now rebuilds from the chunk cache
+when the recorded state says the film was captured (`filmCaptured()` — `downloaded` or
+`failed`, both written only after `writeFilmChunks` returned clean) and the chunks are
+still on disk. No CDN request, so no 404, so no decay — rather than a special case
+forbidding the `failed → expired` transition, which would have left the pointless
+re-download in place. If the cache HAS been emptied, the re-fetch happens and a 404 then
+records `expired` correctly: neither copy of the bytes exists any more. Both new tests were
+verified to FAIL against the previous implementation before the fix landed.
+
+**Review findings judged and not acted on, with reasons.** (1) A 403 on a blob — an expired
+SAS signature — is not treated as terminal. 403 is also what a stale token returns, and
+retrying a refusable auth error is the safe side of that coin; nothing observed in this
+repo says Halo's film blobs are SAS-signed at all. Left transient, flagged here. (2) The
+partial-expiry race is real: one blob 404 and another 503 in flight, and which error the
+errgroup returns is nondeterministic. It converges — a false "transient" retries and the
+404 wins once the 503 clears, whereas a false `expired` would be permanent — so the
+asymmetry is deliberate, and now documented on the predicate. (3) `IsFilmGoneErr` was pure
+substring matching on `err.Error()`, deciding a permanent state from prose. It now reads
+the TYPED status first (`*HTTPError`, the manifest path); the blob path keeps the textual
+fallback, because typing `downloadBlob`'s error would route blob 429/503/401 into
+`PooledHaloClient.notifyPoolOnError` and change pool cooldown behaviour across the sync
+pipeline — out of this ticket's mandate. **Recorded as a finding.** The predicate now has
+its own table test covering both halves.
+
+**Next step**: #8 (watch loop), which is the run this policy was written for: it assembles
+its own `deps` and archives many matches per pass, so the expiry short-circuit has to live
+in `fetchOne` — where it now is — rather than in a caller.
+
+## [2026-09-03] Archive database (ticket #6) — the archiver remembers what it captured — Complete
+
+**Context**: fork issue #6, "1.3 Archive database: match and participant recording",
+unblocked by #5 on this branch. `data/study/archive.duckdb` (the path #4 reserved) now
+records every match the archiver touches, plus its roster, so the tool can answer "do I
+already have this?" and Spec 2 can browse the archive.
+
+**A prerequisite had to be fixed first, and it was blocking the whole repo, not just this
+ticket.** Any package importing DuckDB refused to LINK on this machine. The prebuilt
+static library shipped by `duckdb-go-bindings` is built against **UCRT**;
+`C:\msys64\mingw64` is the MSVCRT toolchain, and the linker failed on symbols that name
+nothing in this repo (`__stdio_common_vsnprintf_s`, `__emutls_v._ZSt11__once_call`) — the
+kind of error that sends you looking for the defect in your own code. `CLAUDE.md` said
+only "CGO : gcc msys64", which points at exactly the toolchain that does not work.
+Fixed with `CC=/c/msys64/ucrt64/bin/gcc.exe`, verified (`cmd/levelup` links,
+`go test ./internal/platform/duckdb/...` passes), and written into CLAUDE.md in its own
+commit. Before this, only `CGO_ENABLED=0` packages were testable locally — silently
+excluding `persist`, `sync`, `platform/duckdb` and every `cmd/` that opens a database.
+
+**Reuse the repo's own extraction, and accept the dependency that comes with it.**
+`sync.ExtractRegistry` and `sync.ExtractParticipants` are exported and already read this
+payload for the warehouse. Re-deriving map / playlist / duration / xuid / team / outcome /
+K-D-A here would have been a second implementation of well-tested code, and worse than
+duplication: it would let the archive DISAGREE with the warehouse about the same match —
+two numbers for one match and nothing to say which is right. The cost is real and named in
+`facts.go`: importing `internal/sync` pulls its whole tree, DuckDB included, so the
+archiver is no longer the cgo-free binary #5 deliberately made it. That is paid for
+anyway by this ticket's own database. **Bonus**: this retired the duplication #5 recorded
+as a finding — `mapNameFromStats` is deleted, and `resolveMatchMap` now takes the name.
+
+**The write pattern, and the review finding that changed it — the most valuable thing to
+come out of this ticket.** It was first written as delete-then-reinsert in a transaction,
+justified in the file header by "single writer, no concurrency, so the ART index bug
+cannot bite". **That justification was false, and this repo had already written down
+why.** `internal/sync/no_art_patterns_test.go` records that `compactMatchSkillRankSuperseded`
+"déclenchait le bug ART #23046 malgré mono-writer + PK BIGINT (crash JGtm 2026-06-20)",
+and admits a raw DELETE to its allowlist only with "PK BIGINT, pas VARCHAR". Both keys
+here are VARCHAR. Verified on the source before acting, not taken on the reviewer's word.
+DuckDB #23046 is about index maintenance during row removal — it does not care how many
+processes are watching, so being the only writer buys nothing against it.
+
+Rewritten to **SELECT-then-UPDATE-or-INSERT, row by row**, which is the shape the same
+file calls safe ("UPDATE ... row-by-row sérialisés ... sont sûrs") and which CLAUDE.md
+names for a database whose rows are refreshed in place. No row is removed to be written
+again. The one remaining removal is the roster prune, and it is narrowed to the players a
+re-read no longer reports — normally none, since a match's roster is fixed by the match.
+
+The ORIGINAL reason for replace-over-upsert still holds and is preserved: participants are
+a SET, so an upsert keyed on (match_id, xuid) would strand a player left over from an
+earlier wrong read. That is what the prune is for. `ON CONFLICT DO UPDATE` stays out
+regardless — it is what ADR 0019/0026 eradicated, and reaching for it in a new tool would
+make the ticket's exemption look like a loophole.
+
+**Idempotency keys on the ARTIFACT, not on the film state.** A match can be `downloaded`
+and still have no artifact — an unsupported map, whose catalogue entry may have arrived
+since — and that one MUST be retried. So the short-circuit asks "is there a recorded
+artifact, and is it still on disk?". A recorded artifact that has gone missing is not an
+archive, so it is rebuilt rather than trusted. Deliberately NOT implemented here: the
+expired/failed retry policy, which is #7's whole ticket. The test asserts on API CALL
+COUNTS rather than row counts, because "no needless re-download" is a claim about not
+fetching — a second pass that re-downloaded the film and rebuilt it would still leave
+exactly one row and pass a row-count assertion.
+
+**Transport failures record NOTHING, and that is a design decision, not an omission.** An
+error the archiver cannot interpret leaves no row at all; only skips (with their named
+reason) and successes are recorded. A transient 5xx that wrote `expired` would stop #7
+from ever retrying it.
+
+**A real crash found by the tests, not a test artifact.** `ReplayDocument.Coverage` is a
+`*Coverage` with `omitempty`: a document that attached nothing carries none, and an
+artifact read back from disk carries none either. Reading `doc.Coverage.Bridge.LivesNamed`
+blindly panicked — on precisely the degraded match the archive most needs to record.
+Guarded, with a test that pins both branches.
+
+**Decoder revision from the binary, not from a linker flag.** Go stamps `vcs.revision`
+into any binary built inside a work tree, so this needs no `-ldflags` and cannot be
+forgotten at build time. Verified end to end with `go version -m` on a real build
+(`vcs.revision=48227ab77…`, `vcs.modified=true` → recorded as `…-dirty`, since an artifact
+built from uncommitted code is not reproducible from the commit alone). A missing stamp
+(`go run`, `go test`) is NORMAL and records as NULL rather than a fabricated value; the
+parsing is split into `revisionFrom` so all three cases are testable, which a test binary
+driving the real build info could never be.
+
+**Results**: `cmd/study-archiver` 26 tests green (1 fixture-gated skip) — rows and roster
+recorded with team/outcome/K-D-A from stats, mode/playlist/duration/source carried through
+the repo's own extractor, all three skip states recorded distinctly, roster recorded even
+when the build is skipped, second pass fetches and builds nothing, missing artifact
+rebuilt, failing run records nothing. `golangci-lint` 0 issues, gofmt and vet clean, every
+file under 500 lines and every function under 70.
+
+**And the FULL Go suite, for the first time on this machine**: `go test ./...` under the
+UCRT toolchain — 135 packages ok, 0 failures. Worth stating plainly, because #5 could only
+claim the `CGO_ENABLED=0` subset; the toolchain fix above is what turned "the parts that
+can run" into the whole thing.
+
+**`data/study/` added to .gitignore.** #4 reserved the directory and nothing wrote to it;
+this ticket is the first thing that does. The archive grows with every match captured and
+holds player data — it is local state, and without the rule the next `git add data/` would
+have committed it.
+
+**Other review findings acted on**: two doc claims that had become FALSE were corrected in
+the same commit, per this file's own preamble rule — `main.go` still advertised
+`CGO_ENABLED=0 go run`, which `facts.go` had just made impossible, and `archive.go` told
+future readers to open the archive read-only when ART rule 4 requires `OpenReadForQuery`
+(a forced `OpenReadOnly` fails against a file already held RW in-process). Also: a nil
+guard on `deps.Archive` so a future wiring gets an error instead of a panic three frames
+down; a warning when an artifact is recorded with no decoder revision, which is exactly
+what `go run` produces — the column exists to make builds traceable, so silently writing
+NULL defeats it; the stale `--gamertag` help text (it now feeds `source_gamertag`); a
+logged rather than swallowed `Close` on the failed-schema path; the team/outcome encodings
+named in the DDL itself. The new database was missing from CLAUDE.md's data map and from
+the `db-schema` skill that CLAUDE.md designates as the schema reference — both now carry
+it, including the write and read disciplines above.
+
+**Two review findings NOT acted on, checked and rejected**: the duration was reported as
+truncating fractional seconds, but `sync.parsePTDuration` returns `*int` — whole seconds
+already, so `*1000` loses nothing. And `derefStr` was reported as a third copy breaching
+rule 6; the `no_local_ptr_helper` ratchet targets `strPtr` CONSTRUCTORS, and the canonical
+`internal/util/pointers` exposes only `Ptr`, no `Deref`. Centralising would mean editing
+`internal/**`, which epic #1 puts out of scope. **Recorded as a finding**: a `Deref[T]`
+next to `Ptr[T]` is the right home, in a ticket allowed to touch that package.
+
+**Next step**: #7 (expired and failed film state handling), which turns the states this
+ticket records into a retry policy.
+
+---
+
+## [2026-09-03] study-archiver fetch-one (ticket #5) — one match, film to artifact — Complete
+
+**Context**: fork issue #5, "1.2 fetch-one: archive a single match's film into a replay
+artifact", the second ticket of the study-tool epic (#1), unblocked by #4 on this same
+branch. Goal: `study-archiver fetch-one <matchId>` downloads a match's whole film into
+the existing chunk cache, works out which map it was played on, and builds the 2D replay
+artifact the existing viewer already reads.
+
+**What the two-axis review changed, and it was worth running.** The spec axis found a
+real defect: the build lock was applied at CONSTRUCTION (`newDeps` handed over
+`serialized(replay.BuildFromFilm)`), which made serialisation a property of one wiring
+rather than of the archiver. `watch` (#8), or any second wiring assembling `deps` itself,
+would have dropped it silently with no test failing. Moved to the CALL SITE (`runBuild`
+in build.go), and the guard now drives concurrent `fetchOne` calls rather than the lock in
+isolation — verified it can still fail: with the mutex removed the test reports 8
+concurrent builds, with it, 1. The standards axis found a write-only `outcome.MapModule`
+field kept "for #6" (deleted — rule 7), four `slog` calls that had dropped their `ctx`
+(threaded through `buildOptions`), a bare `"unknown"` reason literal outside the declared
+set (now a constant, and the reason set is a defined type so a literal cannot re-appear),
+and — the sharpest one — that the file permissions had already diverged from
+`cmd/replay-build` writing into the SAME directories (0o750/0o600 here against
+0o755/0o644 there). Aligned on the existing tree's values, named as constants: the
+artifact has to stay readable by the study server that will serve it.
+
+**The serialisation question the ticket owed an answer to: filmdec does NOT self-
+serialise, so the archiver does.** `killsource.Decode` documents a package-level mutex
+because the bit decoder's replication parameters are package globals. Checked whether
+`internal/analysis/filmdec` — the decoder `replay.BuildFromFilm` drives — does the same:
+it does not. It holds the same class of mutable package-level state
+(`PositionFullPrecision`, `PositionDeltaHasHandleTail`, `PositionCalibratedSkip`,
+`DeltaQuantum`, `DeltaAxisWidth`, `MobilityActionBodyPorted`, the frame-chain counters)
+and imports `"sync"` nowhere — neither does `internal/analysis/replay`. Nothing
+serialises those globals today because every existing caller is a single-threaded offline
+tool: `cmd/replay-build` builds exactly one match per process. So the archiver owns the
+lock, and it is package-level rather than a field on a struct: the state being protected
+is package-level in `filmdec`, so two archiver instances in one process would collide
+exactly as two goroutines do. `TestFetchOne_BuildsNeverOverlap` is the guard.
+
+**Download the film BEFORE judging the map supported.** An unsupported map skips only the
+BUILD; the chunks are fetched and kept. It costs bandwidth on a match that cannot be
+built today and it is the whole point of the tool: the CDN link expires in weeks, the
+quant-bounds catalogue grows whenever `cmd/mapquant-build` is run on a new map.
+Downloading first turns "this map has no bounds yet" into a rebuild (#10) instead of a
+permanent loss.
+
+**A skip is an outcome, not an error.** Four named reasons — `unsupported_map`,
+`no_map_in_stats`, `film_absent`, `no_tracks_decoded` — carried by a `skipError` that
+still unwraps to the underlying sentinel (`filmdec.ErrUnknownMapBounds` survives
+`errors.Is`). The names are the archiver's contract with #6 (which records them as the
+archive row) and #7 (which branches on them for retry policy); free text would have to be
+re-parsed and a bare error would collapse the three retry policies into one. A build that
+returns an ERROR stays an error, so a decoder bug never looks like an ordinary archiving
+outcome. Exit codes follow: 0 archived, 3 skipped, 1 failed, 2 usage.
+
+**No `internal/config`, hence `--xuid` and not `--player`.** `config` is the only package
+that reads `db_profiles.json` (gamertag -> xuid), and it pulls DuckDB — hence cgo — into
+whatever imports it. `cmd/replay-build`, the offline tool this one extends, is
+deliberately cgo-free; this one stays so too, and `CGO_ENABLED=0 go test
+./cmd/study-archiver/` runs with no C toolchain. That mattered concretely here: the
+DuckDB static lib in the module cache does not link against this machine's mingw-w64 GCC
+16.2 (`undefined reference to __emutls_v._ZSt11__once_call`, and others), so ANY
+cgo-linking package of this repo — `cmd/levelup` included, verified — cannot be built or
+tested locally today. Ticket #6 brings the archive database in and with it cgo; that is
+when `--player <Gamertag>` becomes free and can replace `--xuid`.
+
+**Test seam: `fetchOne(ctx, deps, matchID)`, with the catalogues arriving LOADED.** `deps`
+carries an already-parsed quant-bounds catalogue and label catalogue rather than paths, so
+the orchestration can be driven against a throwaway repo root while the reference data
+comes from the real one — and so `watch` (#8) will load them once instead of once per
+match. The build itself is a named function type (`buildFilm`), which is what lets the
+always-running end-to-end test assert the chunk files and the artifact without a 20 MB
+film. The decoder has its own suites (golden assembly, mini-reel); re-testing it here
+would test somebody else's code.
+
+**Results**: `cmd/study-archiver` suite green, 12 tests, 3 consecutive runs — every chunk
+type written at the resolved path with the bytes the CDN served, artifact written at
+`ReplayArtifactPath`, unsupported map keeps the film and writes no artifact, stats with no
+map name and zero-track decode each land their own named reason, expired film (410) writes
+nothing, build error propagates as an error, concurrent fetch-one calls never overlap a
+build.
+`internal/archlint` and `internal/domain/title` green (the `film_chunks` guard-rail from
+#4 stays satisfied: every path goes through `PathResolver`). `make go-api-test` scope
+(`internal/domain/... internal/analysis/... contracttest/...`) green.
+`golangci-lint run ./cmd/study-archiver/...` 0 issues, gofmt clean, `go vet` clean.
+TDD observed on both seams: `resolveMatchMap` and the fetch-one tests failed to compile
+before the implementations existed.
+
+**Not verified locally, and why**: `TestFetchOne_RealFilmEndToEnd` drives the REAL
+`replay.BuildFromFilm` over the repo's existing fake Halo server and the `jgtm_full_match`
+fixture. The fixture is gitignored (6 MB of binaries) and absent from this machine, so
+the test skips — the same convention every other fixture-backed suite here follows. It is
+written, it is not proven. Regenerate with `go run ./cmd/gen_test_fixtures
+download-full-match` (tokens required) to exercise it. The repo's mini-reel
+(`internal/analysis/replay/testdata/minifilm_000d5950`) was evaluated as a stand-in and
+rejected on measurement: its packets are concatenated out of continuity, so
+`bipedSlotBand` — which reads only the FIRST keyframe packet of each chunk — finds no
+biped slot and the build fails with "aucun slot biped (ti=35)". It locks decoders, it
+cannot stand in for a film.
+
+**Findings recorded, not acted on** (rule 5, zero out-of-scope fixes):
+- `mapNameFromStats` is the SECOND reader of `MatchInfo.MapVariant.PublicName` (the first
+  is `extractPublicName` in `internal/sync`, unexported). Two copies is the repo's limit;
+  a third caller must centralise it.
+- `writeArtifact` / `loadGeometry` / `loadStructure` are the second copies of
+  `cmd/replay-build`'s. `rebuild` (#10) lands in this same binary and reuses these, so
+  the count stays at two — but a third offline builder means extracting them.
+- `cmd/study-archiver` is not in `docs/COMMANDS.md`, deliberately: neither
+  `cmd/replay-build` nor `cmd/mapobj-build` is either, and the offline film tools are
+  documented in their own package doc comments.
+
+**Next step**: #6 (archive database: match and participant recording), which persists the
+outcome this ticket returns as a value.
+
+---
+
+## [2026-09-03] Study prefactor (ticket #4) — one owner for the film-chunk path, and a study data root — Complete
+
+**Context**: fork issue #4, "1.1 Prefactor: shared path resolution for film chunks and
+study data", the first unblocked ticket of the study-tool epic (#1). Goal: one place that
+knows where a match's film chunks live and where the study tool's own data lives, so the
+coming archiver and the existing offline tools agree instead of each hand-building the
+same join.
+
+**Main technical decision — this is a behaviour FIX, not a byte-identical refactor.** The
+ticket asks for paths "byte-identical to before". Verified against the source first, and
+that criterion could not be met honestly: `cmd/replay-build/main.go:67` built
+`data/cache/film_chunks/<matchID>` from the FULL match id, while the cache writes under
+the SHORT form (`film_chunks/000d5950/`, cf. `FilmShortMatchID`) and every other consumer
+reads the short form. So the hand-built join was not merely a second copy of the rule, it
+was a latent bug: hand `replay-build` a full-length id with no explicit `filmDir` and it
+looked in a directory nothing ever wrote. It went unnoticed because callers pass `filmDir`
+as `args[1]` or pass an already-short id. Routing through `PathResolver.FilmChunksDir`
+therefore CHANGES the resolved path for full-length ids — from a directory that never
+existed to the one the cache actually wrote — and is byte-identical for short ones. Taken
+deliberately, the ticket's own instruction being to make the scope call explicitly and
+record it.
+
+**Placement**: new files `internal/domain/title/film_paths.go` and `study_paths.go` rather
+than more methods in `registry.go` (846 L, far past the repo's 500 L threshold; rule 5
+forbids growing frozen debt). Same reasoning `film_id.go` already records for itself.
+Shared-file route over the study-local wrapper fallback, as epic #1 recommends: a wrapper
+would have left `replay-build` broken for the fork's own tools.
+
+**Study root**: `data/study/` with `archive.duckdb`, `rasters/`, `map_images/` under it —
+one directory to back up or delete, nothing interleaved with the per-title warehouses. A
+test pins that every study path stays under the root, since a later sibling path would
+break teardown without breaking compilation.
+
+**Results**: `internal/domain/title` suite green; `cmd/replay-build` builds; gofmt clean.
+TDD observed: the new tests failed to compile (methods undefined) before the
+implementation existed.
+
+**The guard-rail earned its keep immediately.** Rule 6 says a centralisation without a
+guard re-diverges, so the new `TestUneSeuleJointureFilmChunks` walks `internal/` and `cmd/`
+for the `"film_chunks"` literal. It found FIVE copies beyond the two I had seen by grep
+(`local_film_cache.go`, `fetch_film_chunks`, `frontb_coverage`, `killsource`,
+`probe_pi_reconcile`). Each was then CHECKED rather than assumed: all resolve chunks under
+an arbitrary root (`c.rootDir` = the legacy Python cache, or a `-cache` flag), not under
+repoRoot, and `local_film_cache.go` already calls `FilmShortMatchID`. They are therefore
+not PathResolver callers — pointing them at it would change which directory they read, not
+rename a path. Allowlisted per-directory with a dated justification (rule 3) rather than
+migrated inside a prefactor (rule 5).
+
+**Finding, not treated**: whether those five arbitrary-root tools should share one
+root-parameterised derivation is a real question, but it is a behaviour decision per tool,
+not a rename. Left for a dedicated pass.
+
+**Conclusion / next step**: branch `feat/study-path-resolution` from `main`. Ticket #4's
+acceptance criteria are met except "byte-identical paths", which is superseded by the
+correction above and recorded here as the ticket's last criterion requires. Next
+unblocked tickets: #5 (1.2 fetch-one), #6 (1.3 archive database).
+
+---
+
 ## [2026-08-26] Hygiene secrets — seed de demo n'extrait plus aucun credential — Complete
 
 **Contexte** : lot A, worktree dedie `wt/lot-a-secrets-demo` (base 3177a57a2). La revue du
@@ -59821,3 +61016,293 @@ A5, A6, A7, A8 (mock HaloClient + engine_test) non implémentés cette session �
 
 ---
 
+
+---
+
+## [2026-09-05] rejeu 2D : cinq defauts d attribution corriges, et l horloge du match publiee — Complete
+
+**Contexte** : session de verification du rejeu contre des DONNEES REELLES (4 films Streets
+archives, 175 484 positions). Chaque defaut ci-dessous a ete constate sur ces films, pas
+deduit d une lecture de code.
+
+**1. APPARIEMENT MORT -> VIE : trois ambiguites, trois refus.** `lives.go` nomme chaque vie par
+la mort qui la termine, sur la seule horloge. Constate sur `36e80b83` : deux joueurs tombes au
+meme tick, appariement DROIT 12+80 = 92 ms, appariement CROISE 46+46 = 92 ms — meme total, et
+c est le croise qui etait juste (verifie sur la geometrie des reapparitions). Aucune distance
+individuelle n etait pourtant a egalite : un test d egalite sur les distances ne voyait rien.
+Trois cas sont desormais refuses plutot que tranches par l ordre de parcours : ecart a egalite
+parfaite, rival a distance egale (une mort entre deux vies jumelles), et echange a somme egale.
+`ownersFromLives` retire en outre ENTIEREMENT un slot en conflit — il gardait la premiere
+lecture, ce que son propre commentaire decrivait deja comme « on ne tranche pas » et que
+`verdictOfBridge` declarait deja non publiable.
+
+**2. UNE TRACK EST UNE VIE, PAS UN SLOT.** `decimateTracks` accumulait par slot sans decouper.
+Un slot reattribue apres reapparition recollait deux vies : le client tracait une ligne droite
+EN TRAVERS de la mort et `isAliveAt` tenait le joueur pour vivant. Constate sur `0e97be38` :
+trous internes de 4,8 / 7,8 / 13,1 s pour un delai de reapparition mesure a ~8 s. Le decoupage
+utilise desormais le MEME seuil que `buildLifeSpans` (`lifeGapUS`).
+
+**3. GRENADES : position choisie sur le temps seul.** `locateThrow` prenait la naissance de
+projectile la plus proche dans 200 ms, les ex aequo departages par le tri (donc par X). Deux
+joueurs qui lancent dans la meme fenetre — banal — et le lancer recevait le projectile de
+l AUTRE. Mesure avant correctif sur `36e80b83` : 171 lancers publies sur 247 sans AUCUN joueur
+a moins de 4 m, distance mediane 7,95 m, pire cas 24,68 m. Le biped de l auteur arbitre
+desormais ; sans pont, une fenetre portant plusieurs naissances n est plus tranchee au hasard.
+Apres : mediane 0,10 m. Le slot du lanceur est aussi publie sur la branche projectile — il
+sortait a zero (201/247), et zero RESSEMBLE a un slot, si bien que le garde d ambiguite du
+client ne se declenchait jamais entre deux zeros.
+
+**4. PROJECTILES : repli du quantum Y.** Nouveau defaut, trouve en regardant l ecran. Un saut
+valant EXACTEMENT l etendue Y de la carte (52,88 m) en un pas de 100 ms, l autre axe fige —
+jamais sur X. 27 a 35 % des trajectoires de chaque film en portaient au moins un, et le client
+tracait une droite en travers de toute la carte. Cause en amont (dequantification, `filmdec`),
+NON corrigee ; ce qui est corrige est la publication d une position fausse : le vol s arrete a
+son dernier point lisible (`projectileMaxStepM`).
+
+**5. HORLOGE DU MATCH publiee (`matchClockZeroMs`).** La frame 0 n est pas le debut de la
+partie : l axe demarre au premier echantillon de position, pendant l avant-match. La duree des
+stats ne permet pas de retrouver l origine (ecart de -25,6 s a +3,6 s sur six matchs). Or
+l appariement des morts resolvait DEJA le decalage entre l horloge du match et celle du film,
+puis le jetait. Mesure sur `36e80b83` : -5 692 ms. Attention, ce zero est l origine FORMELLE
+(creation/chargement), pas le coup d envoi jouable — les barrieres tombent vers 21 s d axe, soit
+~27 s d horloge de match, et rien dans le film ne date cet instant.
+
+**CALIBRATION `sgh_streets` : VERIFIEE, NON MODIFIEE.** Deux ajustements automatiques ont ete
+essayes et REJETES : minimiser les positions sur les pixels pales (29,4 -> 17,1 %) et maximiser
+le recouvrement geometrie/art (IoU 0,79 -> 0,86). Les deux ENCADRENT le rectangle actuel
+(demi-etendues 24,6 et 14,3 contre 16,5) et le cassent sur la verite terrain : le rectangle
+actuel pose les coordonnees Forge des drapeaux a 0,2 et 0,4 m des icones dessinees, contre 5,5
+et 6,6 m pour les deux ajustements. Le pale n est pas un mur : il couvre 41,7 % de la carte,
+les joueurs y sont 25-31 % du temps, et 75,4 % de ces pixels ont une surface BSP jouable
+dessous. 2 points sur 175 484 sortent du rectangle.
+
+**RESULTATS** (film de reference 000d5950) : vies nommees 90 -> 82, tirs 475 -> 444, lancers
+situes 70 -> 67, trajectoires 439 -> 436. Chaque perte est un REFUS sur une donnee qui ne
+tranche pas — le meme arbitrage que le retrait du vote de `owners.go` (496 -> 475).
+Mesure du garde-fou grenade sur ce meme film : 0 lancer a plus de 4 m de son lanceur connu
+contre 3 avant, ecart maximal 0,56 m contre 14,46 m.
+
+**CONCLUSION / PROCHAINE ETAPE** : le fond de carte reste le vrai point faible.
+`map_structure` ne publie que des AABB d instances (`mapstruct-build` le documente : le lien
+instance -> maillage n est pas resolu), d ou un fond « en boites ». Trois pistes, par cout
+croissant : dessiner ces AABB en PLAN (surface la plus haute par pixel, ombrage par altitude,
+contours) — prototype concluant, zero calibration, vaut pour les 14 cartes ; extraire
+`instanced physics instances` (present dans le build serveur dedie, la geometrie de collision
+est exactement « ou l on peut se tenir ») ; resoudre instance -> maillage. Une piste externe
+est apparue en fin de session : l export Blender d une carte (cf. `ekur`, importeur Blender
+avec geometrie de carte multijoueur experimentale) rendrait un rendu ORTHOGRAPHIQUE dont le
+cadrage EST la calibration — a condition de verifier d abord que l export conserve les
+coordonnees monde (Streets doit mesurer ~51,7 x 52,9 m).
+
+---
+
+## [2026-09-06] Streets map floor: ekur render replaces the hand-calibrated art
+
+**Statut** : Complete.
+
+(Entry in English: standing instruction is that new writing is English; existing French
+entries above are left untouched.)
+
+**DECISION TECHNIQUE.** The previous entry's closing hypothesis is CONFIRMED: an ekur Blender
+export keeps world coordinates, so an orthographic render framed on the map's own sbsp AABB
+needs no calibration at all — the framing IS the calibration. Streets measures 51.73 x 52.88 m
+against the ~51.7 x 52.9 m that entry predicted. `apps/study/public/maps/sgh_streets.png` is
+now that render, and `mapImages.config.ts` carries the AABB
+(X[-24.32224, 27.407486], Y[-23.018236, 29.866623]) rather than a fitted rectangle. The
+two-point flag registration is gone, and with it the failure mode that had the art rotated the
+wrong way until a player named their spawn room.
+
+**ROOFS: THE FIX IS PER PIXEL, NOT PER OBJECT.** A plain top-down render hides every street
+under its canopy. Culling roof objects was implemented and MEASURED USELESS (258 objects
+removed, image essentially unchanged): a building arrives as ONE mesh spanning floor to roof,
+so its bbox starts at ground level and no "is this a roof" test fires. A single low cut plane
+fails too — reachable floors here span 0 to 5 m. The asset is composited from 12 plan cuts,
+each pixel taking the lowest cut clearing the local reachable floor (from player positions) by
+2 m. Two tuning traps, both recorded in `tools/map-render/slice_map.js`: the height field must
+be dilated LOCALLY (6 m let one walkway raise the cut over the whole map), and an empty pixel
+must STAY empty (stepping up the stack reinstates every roof).
+
+**SCENE HYGIENE.** The import is 43.5% non-map, measured: 2 393 exact duplicates (same mesh,
+same transform, up to 6 deep — 23.7% of objects), 1 679 objects in ekur's `Master Geometries`
+source-mesh pile parked at the origin (4.17M polys, 49 changed pixels out of 1.58M), plus
+above-play and off-arena geometry. Flat sub-2cm planes look like decals but are NOT culled:
+Halo builds real walls out of thin brushes, and dropping them tore faces off buildings.
+
+**RESULTATS.** 175 484 player positions, 100.00% on drawn geometry, zero calibration.
+`npm run typecheck` clean, 418/418 tests pass, verified in the running app on match 0e97be38 —
+trails follow corridors and turn at building corners.
+
+**CONCLUSION / PROCHAINE ETAPE.** Pipeline is in `tools/map-render/` (README carries the whole
+procedure and the language exception: Blender only embeds Python). Two things left. (1) The
+Forge props layer is still drawing 382 objects of ANOTHER map's decor over every map —
+`LoadGeometry(dir)` serves one directory to all — and now that the floor is good, that wrong
+layer is the worst thing on screen. (2) The other 44 maps can be generated the same way, about
+a minute each once the map is imported to a .blend.
+
+## [2026-09-06] English-only repository audit — Complete
+
+**Context**: the repository was audited for French text, notes, features, data
+paths, and generated artifacts in order to produce the edit inventory for an
+English-only end state.
+
+**Technical decision**: treat this as a repository campaign. The audit records
+runtime, API, database, configuration, documentation, asset, and generated
+artifact surfaces without modifying application code or pre-existing worktree
+changes. Removing French fields and translation columns requires an explicit
+database and client compatibility decision before implementation.
+
+**Results**: created
+.ai/AUDIT_ENGLISH_ONLY_2026-09-06.md with ten retained findings, reproduction
+scans, exclusions, implementation sequence, and validation gates. The scan
+confirmed 21 bilingual web manifests containing 2,964 French entries, 18
+tracked files under docs/FR, French locale negotiation in both apps and the Go
+API, French metadata ingestion and storage paths, and French policy in active
+agent and CI documentation.
+
+**Next step**: review the registry, decide the API/database migration policy,
+then implement the changes as a separate change set and regenerate all derived
+artifacts before running the validation gates.
+
+---
+
+## [2026-09-06] Decoder: weapon witness, per-map props, and what the executable settled
+
+**Statut** : Complete for the decoder changes; the reverse-engineering findings are recorded
+but NOT wired into production.
+
+**TEMOIN D ARME (lives_witness.go).** Life naming matched on ONE quantity: the gap between a
+life ending and a death in the feed. Two players dying in the same instant are therefore
+unresolvable, and both pairs are refused. The film carries a second, independent reading: fire
+events give the weapon per PLAYER, keyframes give carried weapons per SLOT, decoded by
+different code on the same clock. Consulted ONLY inside the two ambiguity branches, and only
+when one candidate has weapon agreements and the other has NONE — so uniform loadouts make it
+silent rather than wrong, which is what allows adding it without reopening the 2026-07-28
+decision. Measured on six films: 9 ties resolved, +8 lives. The control matters more than the
+effect: on pairs the clock resolves unambiguously, the weapon agrees 593 times against 4
+contradictions (99.3%), and those counters now ship in the artifact as a standing check on the
+slot->player bridge. Goldens updated deliberately: 444->446 shots, 82->84 lives.
+
+**PROPS PAR CARTE (registry.go, geometry.go).** `MapGeometryDir` took only the title and
+returned ONE directory, so its CSV was drawn on every match whatever the map: measured, 382
+identical props across six films of three maps, including maps with no structure file at all.
+The file carries no map column - nothing in the data says which map it belongs to. It is moved
+to `map_geometry/UNATTRIBUTED/` with a README rather than deleted, and the resolver now takes
+a module. `LoadGeometry` takes two directories because the props are per-map while the type
+catalogue is per-title; sharing one directory would have forced a copy of the catalogue under
+every map.
+
+**CE QUE L EXECUTABLE A TRANCHE.** Ghidra 12.1.3 + JDK 21 installed under `C:\Users\Wolfie\
+Tools`; the game binary imported with `-noanalysis`, which decompiles a named function in
+about a minute instead of a multi-hour whole-binary pass. Results, all verified against this
+build: the repo's recorded FUN_ addresses still match; the descriptor chain
+(registrar -> `world[ti*8+8]` -> vtable+0x60) is exactly what the game does; and the
+default-state grammars for ti=0/5/6/9 are CORRECT as ported. A second agent (codex,
+gpt-6-astra) resolved all 50 archetypes and verified the four grammars by executing the
+original bytes in Ghidra's p-code emulator (4 680 cases, 0 failures), reproducing the ti=35
+control. Its results agree with the repo's ports in every particular.
+
+**LA VRAIE DECOUVERTE : L EN-TETE DE RECORD KEYFRAME N EST PAS CONSTANT.** The decoder assumed
+64 bits everywhere, a value taken from a biped-specific helper with NO support in the binary.
+ti=9 needs 47 (the only prefix, out of 300, giving eight player entities of stable team split
+4-4 in all six films); at 47 the biped collapses from 19 736 decoded components to zero. The
+header is per entity type. That is why team, respawn timers and objective stats read blank -
+not a wrong grammar, a wrong offset.
+
+**RESULTATS.** Team IS in the film, contrary to `document.go`: 1 873 reads across six films.
+Also confirmed present: `object-dead-state-component` (1 317, on bipeds) and four match-timeline
+signals. Still blank: respawn timers, lives, statborg stats - each needs its own header
+calibration.
+
+**CONCLUSION / PROCHAINE ETAPE.** None of the reverse-engineering is wired in: the benches are
+tests skipped without `REPLAY_FILMS`. The team read needs one missing link before it is usable
+- which PLAYER each ti=9 entity is; the read gives eight teams with no identities attached.
+The nearest real gain remains `object-dead-state-component` on bipeds: it needs no header
+calibration and attacks the measured defect (12,7 % of lives unnamed, 11,5 % of shots orphaned
+as a result).
+
+
+---
+
+## [2026-09-10] Study branch: the replay and viewer work left out on 2026-09-06, committed; branch tip repaired
+
+**Status**: Complete.
+
+**Context**: `38ccdcb1b`, the tip of `feat/study-path-resolution`, did not compile
+`internal/analysis/replay`. `build.go` assigned `doc.MatchClockZeroMS` and read two return values
+from `buildProjectiles`, but the `document.go` and `projectiles.go` they need were never committed.
+The 2026-09-06 session left them out because the same files also held the uncommitted English-only
+conversion (679 modified files in the working copy). `mapImages.config.ts` likewise set
+`preferOverStructure` with nothing reading it.
+
+**Technical decision**: separate the two change sets by hunk instead of committing them together.
+This commit carries only the study/replay work: the match clock beside the replay clock, a canvas
+height taken from the scene's own shape, floor structure scoped to the play area, the per-map
+image preference, grenade throws matched to their author's biped, projectile flights cut at the
+first impossible step, lives split on a slot gap, the map name recovered from `metadata.duckdb`
+when the stats payload carries only an asset id (`sync.LookupAssetCanonicalEN` exported for it),
+and `IsFileLockError` recognising the Windows "being used by another process" wording. Five files
+mixed both sets (`document.go`, `enrich_registry.go`, `StudyReplayCanvas.tsx`, `App.test.tsx`,
+`viewer/i18n.ts`). Their committed version is the branch tip plus the study hunks only, with French
+still a live locale, so the viewer's FR table gains the match-clock strings and the commit stands
+on its own. The English match-clock label is "Match clock", not "Match time", which the scrubber
+already carries.
+
+**Results**: verified on this commit's tree checked out alone (sparse worktree, not the working
+copy). `go build ./...` ok. `go vet` ok on the touched packages. `go test` ok for
+`internal/analysis/replay/...`, `contracttest`, `cmd/study-archiver`, `cmd/study-server` and
+`internal/sync`. `go test -tags=integration -p 1` ok on `internal/sync/...` (9 packages),
+`internal/platform/duckdb` and `internal/persist`. `apps/study` typecheck ok, 418/418 tests. Without the
+lock-classification change, `cmd/study-server`'s two busy-archive tests answer 500 instead of 503 on
+Windows.
+
+**Next step**: the English-only conversion goes to its own branch and a draft PR; it does not pass
+its gates yet.
+
+
+---
+
+## [2026-09-10] Study branch: Go lint ratchet clean under the go.mod toolchain
+
+**Status**: Complete.
+
+**Technical decision**: CI lints with the Go version pinned in `go.mod` (1.26.1), while local Go
+1.27's gofmt accepts files that 1.26.1 rejects. That is why PR #27's `Go Lint` job was red on
+`cmd/study-archiver/archive_test.go` although gofmt passed locally. The file returned two composite
+literals from one multi-line `return`, a construct the two versions indent differently; it now
+builds both first and returns the variables, a form both versions accept. Three more files take
+1.26.1's formatting, which 1.27 also accepts. `managed-player-team-designator-component`, cited in
+five places, becomes `compManagedPlayerTeamDesignator` beside the package's other component
+constants (goconst), and an unused field leaves `TestRespawnPrefixValidate`.
+
+**Results**: `golangci-lint v2.12.2 --new-from-rev=<merge-base>` on the previous commit's tree found
+these 5 issues. After the change, gofmt 1.26.1 and 1.27 both report nothing on the nine files,
+`golangci-lint` reports 0 issues on `internal/analysis/filmdec` and `cmd/study-archiver`, and
+`go vet` plus `go test -count=1` pass on both packages.
+
+**Next step**: push and let CI rule on PR #27.
+
+
+---
+
+## [2026-09-10] Study branch: the OpenAPI contract regenerated from the branch's own Go code
+
+**Status**: Complete.
+
+**Context**: PR #27's `Frontend` job failed on `Type-check` (34 TS errors: `name_fr`,
+`description_fr`, `locale`, ... "does not exist"). `37591d6de` committed an `openapi.yaml`, and the
+`apps/web` client generated from it, that had been produced from the uncommitted English-only
+working tree: 0 `*_fr` fields against 21 on `main`, while the branch's Go structs still declare
+them. Local runs never saw it because they ran on the full working tree, where Go code, contract
+and clients were all English together.
+
+**Technical decision**: regenerate rather than hand-edit. `go run ./cmd/openapi-gen` from the
+branch's Go code, then `npm run generate-types` in `apps/web` and `apps/study`; the contract that
+results differs from `main` only by what the study branch actually adds.
+
+**Results**: `openapi-gen -check` ok; both generated-types freshness checks ok; `go test ./contracttest` ok.
+`apps/web` typecheck ok with the cache purged (34 errors before); `apps/study` typecheck ok and
+418 passed tests, after the hand-built replay fixture gains the `fr` labels the bilingual contract
+requires (it had also been written against the English contract). The contract now differs from
+`main` by 27 lines: the six BridgeHealth weapon-witness counters and `matchClockZeroMs`.
+
+**Next step**: push and let CI rule on PR #27.

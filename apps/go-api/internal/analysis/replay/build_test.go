@@ -37,11 +37,18 @@ func TestBuildFromPositions_Timeline(t *testing.T) {
 	if doc.FrameCount != 101 || doc.DurationMS != 10_100 {
 		t.Errorf("FrameCount/DurationMS = %d/%d, attendu 101/10100", doc.FrameCount, doc.DurationMS)
 	}
+	// L'AXE COUVRE TOUT LE FILM — c'est l'objet de ce test — SANS QUE LA TRACK LE COUVRE.
+	// Le trou de 10 s dépasse `lifeGapUS` : le même slot qui revient après une absence aussi
+	// longue est une RÉAPPARITION, pas la suite du même déplacement. Le troisième échantillon
+	// ouvre donc une seconde vie, qui reste sous MinPoints et n'est pas publiée. Ce que ce
+	// test verrouille est que la première track ne s'étire PAS jusqu'à la frame 100 : recollée,
+	// elle faisait tracer une ligne droite en travers de la mort et tenait le joueur pour
+	// vivant tout du long (cf. decimateTracks).
 	if len(doc.Tracks) != 1 {
-		t.Fatalf("attendu 1 track, obtenu %d", len(doc.Tracks))
+		t.Fatalf("attendu 1 track publiee (la 2e vie est sous MinPoints), obtenu %d", len(doc.Tracks))
 	}
 	pts := doc.Tracks[0].Points
-	want := []Point{{T: 0, X: 1, Y: 1, Z: 0.5}, {T: 1, X: 2, Y: 2, Z: 0.5}, {T: 100, X: 3, Y: 3, Z: 0.5}}
+	want := []Point{{T: 0, X: 1, Y: 1, Z: 0.5}, {T: 1, X: 2, Y: 2, Z: 0.5}}
 	if len(pts) != len(want) {
 		t.Fatalf("points = %+v, attendu %+v", pts, want)
 	}
@@ -50,8 +57,43 @@ func TestBuildFromPositions_Timeline(t *testing.T) {
 			t.Errorf("point %d = %+v, attendu %+v", i, pts[i], want[i])
 		}
 	}
-	if doc.Tracks[0].StartFrame != 0 || doc.Tracks[0].EndFrame != 100 {
-		t.Errorf("fenêtre de vie = [%d,%d], attendu [0,100]", doc.Tracks[0].StartFrame, doc.Tracks[0].EndFrame)
+	if doc.Tracks[0].StartFrame != 0 || doc.Tracks[0].EndFrame != 1 {
+		t.Errorf("fenêtre de vie = [%d,%d], attendu [0,1] — une vie ne franchit pas le trou",
+			doc.Tracks[0].StartFrame, doc.Tracks[0].EndFrame)
+	}
+}
+
+// TestBuildFromPositions_SplitsLivesOnGap : un slot qui REVIENT après plus de `lifeGapUS`
+// donne DEUX tracks, pas une.
+//
+// C'est le défaut qui faisait bouger un joueur mort à l'écran : `decimateTracks` accumulait
+// par slot, et un slot réattribué après une réapparition recollait les deux séjours en une
+// seule trajectoire. Le client, lui, interpole entre deux points consécutifs — il traçait donc
+// une ligne droite en travers de la mort, et `isAliveAt` tenait la vie pour continue. Constaté
+// sur `0e97be38` : des trous internes de 4,8 s, 7,8 s et 13,1 s dans une même track publiée,
+// pour un délai de réapparition mesuré à ~8 s.
+func TestBuildFromPositions_SplitsLivesOnGap(t *testing.T) {
+	const slot uint32 = 512
+	in := []filmdec.BipedPosition{
+		pos(slot, 0, 1, 1, 0.5),
+		pos(slot, 100, 2, 2, 0.5),
+		pos(slot, 10_000, 3, 3, 0.5), // +9,9 s : au-delà de lifeGapUS => nouvelle vie
+		pos(slot, 10_100, 4, 4, 0.5),
+	}
+	doc := BuildFromPositions("000d5950", "halo_infinite", in, nil, Options{FrameIntervalMS: 100})
+	if len(doc.Tracks) != 2 {
+		t.Fatalf("attendu 2 tracks (deux vies), obtenu %d : %+v", len(doc.Tracks), doc.Tracks)
+	}
+	if doc.Tracks[0].EndFrame != 1 || doc.Tracks[1].StartFrame != 100 {
+		t.Errorf("les deux vies doivent border le trou : [%d..%d] puis [%d..%d]",
+			doc.Tracks[0].StartFrame, doc.Tracks[0].EndFrame,
+			doc.Tracks[1].StartFrame, doc.Tracks[1].EndFrame)
+	}
+	// LES DEUX GARDENT LE MÊME SLOT : c'est le même biped, et le pont slot -> joueur les
+	// nomme ensemble. Ce qui change est qu'une vie ne franchit plus la mort.
+	if doc.Tracks[0].Slot != slot || doc.Tracks[1].Slot != slot {
+		t.Errorf("les deux vies doivent porter le slot %d, obtenu %d et %d",
+			slot, doc.Tracks[0].Slot, doc.Tracks[1].Slot)
 	}
 }
 

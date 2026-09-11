@@ -1,5 +1,7 @@
 package replay
 
+import "levelup/go-api/internal/analysis/filmdec"
+
 // owners.go — LE PONT SLOT -> JOUEUR. Une seule source : la LECTURE.
 //
 // CE QUI A ÉTÉ SUPPRIMÉ ICI, ET POURQUOI. Ce fichier portait deux méthodes qui faisaient ÉLIRE
@@ -67,6 +69,28 @@ type OwnerReport struct {
 	// SlotCollisions compte les slots dont les vies nommées désignent des joueurs différents.
 	// Mesuré à 0 sur 000d5950 ; un film non nul invaliderait la table slot -> joueur.
 	SlotCollisions int
+	// AmbiguousTies compte les vies dont la fin coïncide, à l'horloge, avec celle d'une autre
+	// vie encore libre — un écart identique envers la même mort proche, donc un tirage au
+	// sort plutôt qu'un appariement. Ni l'une ni l'autre n'est nommée (cf. lives.go). Mesuré
+	// à 0 sur 000d5950 ; non nul, il dit qu'un échange (deux morts au même tick) a laissé au
+	// moins une paire de vies sans identité plutôt que sur le mauvais joueur.
+	AmbiguousTies int
+	// TiesResolved / WitnessDeferred : ambiguïtés que le TÉMOIN D'ARME a tranchées, en posant
+	// la paire proposée ou en désignant l'autre lecture (cf. lives_witness.go).
+	TiesResolved, WitnessDeferred int
+	// ControlAgree / ControlContradict / ControlSilent MESURENT CE TÉMOIN LÀ OÙ LA RÉPONSE EST
+	// DÉJÀ CONNUE : les paires que l'horloge tranche sans ambiguïté. C'est le seul endroit où
+	// il est falsifiable, et publier `TiesResolved` sans eux dirait combien de refus ont été
+	// levés sans dire si on a eu raison de les lever.
+	ControlAgree, ControlContradict, ControlSilent int
+	// DeathClockOffsetMS place l'origine de l'horloge du MATCH sur celle du FILM : le début du
+	// match tombe à cet instant du film, en millisecondes. C'est le sous-produit de
+	// l'appariement des morts (cf. bestDeathOffset), et il vaut bien plus que l'appariement —
+	// c'est la seule ancre connue du début de partie (cf. ReplayDocument.MatchStartFrame).
+	//
+	// Valide UNIQUEMENT si DeathsNamed > 0 : sans mort appariée, `bestDeathOffset` rend le
+	// bord de sa plage de recherche, pas une mesure.
+	DeathClockOffsetMS int64
 }
 
 // buildOwners construit le pont à partir du seul fil des morts.
@@ -74,7 +98,10 @@ type OwnerReport struct {
 // PAS DE REPLI. Si le film ne porte pas son fil des morts, le pont est VIDE et aucun tir n'est
 // publié — c'est le comportement voulu. Un rejeu muet se voit ; un rejeu qui pose des tirs sur
 // le mauvais joueur ne se voit pas, et c'est bien pire.
-func buildOwners(tracks map[uint32]slotTrack, deaths []Death, idx PlayerIndexTable) OwnerReport {
+func buildOwners(
+	tracks map[uint32]slotTrack, deaths []Death, idx PlayerIndexTable,
+	fire []filmdec.FireEvent, loads []filmdec.KeyframeLoadout,
+) OwnerReport {
 	rep := OwnerReport{Owner: map[uint32]int{}, SlotXUID: map[uint32]uint64{}}
 	if len(deaths) == 0 || len(tracks) == 0 || len(idx.ByXUID) == 0 {
 		return rep
@@ -82,10 +109,19 @@ func buildOwners(tracks map[uint32]slotTrack, deaths []Death, idx PlayerIndexTab
 	lives := buildLifeSpans(tracks)
 	rep.LivesTotal = len(lives)
 	off, _ := bestDeathOffset(lives, deaths)
-	rep.DeathsNamed = nameLivesByDeaths(lives, deaths, off)
+	// Le témoin d'arme n'intervient que sur les ambiguïtés (cf. lives_witness.go) ; nil quand
+	// le film ne porte pas les deux lectures, et le nommage est alors celui d'avant.
+	nr := nameLivesByDeaths(lives, deaths, off, newWeaponWitness(fire, loads, idx.ByXUID))
+	rep.DeathsNamed, rep.AmbiguousTies = nr.named, nr.ambiguous
+	rep.TiesResolved, rep.WitnessDeferred = nr.tiesResolved, nr.witnessDeferred
+	rep.ControlAgree, rep.ControlContradict = nr.controlAgree, nr.controlContradict
+	rep.ControlSilent = nr.controlSilent
 	if rep.DeathsNamed == 0 {
 		return rep
 	}
+	// Le décalage n'est publié qu'une fois qu'au moins une mort s'est appariée : c'est ce qui
+	// distingue une MESURE d'un bord de plage de recherche.
+	rep.DeathClockOffsetMS = off
 	rep.IndexReadings = idx.Readings
 	rep.IndexDisagreements = idx.Disagreements
 	owners, byXUID, collisions := ownersFromLives(lives, idx.ByXUID)

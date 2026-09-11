@@ -174,3 +174,18 @@ func decodeGameEngineRoundTimer(br *BitReader) RoundTimer {
 		Tail: uint8(br.ReadBits(5)),
 	}
 }
+
+// TeamDesignator porte managed-player-team-designator-component (ti=9 i0, FUN_140f581e8).
+//
+// R(4) — une seule valeur, l'index d'équipe tel que le moteur le désigne. Capturé pour
+// CALIBRER : c'est la seule des grandeurs visées dont on connaisse la vérité par ailleurs
+// (le tableau des scores dit qui joue avec qui), donc la seule qui puisse dire si une
+// largeur de default-state candidate est la bonne ou seulement plausible.
+type TeamDesignator struct {
+	Team uint8
+}
+
+// decodeManagedPlayerTeamDesignator lit ti=9 i0 (FUN_140f581e8).
+func decodeManagedPlayerTeamDesignator(br *BitReader) TeamDesignator {
+	return TeamDesignator{Team: uint8(br.ReadBits(4))}
+}

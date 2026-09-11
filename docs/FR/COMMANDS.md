@@ -167,6 +167,95 @@ Liste complète : `go run ./cmd/levelup help`.
 
 ---
 
+## Outil d'étude (hors app)
+
+Un outil local d'analyse adossé à une archive de films de match, capturés avant l'expiration de
+leurs liens CDN. Il vit à côté de l'app et ne partage aucune de ses données : une seule archive
+sous `data/study/`, écrite par l'archiveur et lue par le serveur.
+
+### `study-archiver` — la capture (`cmd/study-archiver`)
+
+```bash
+# Archiver un match : télécharger tout son film dans le cache de chunks et bâtir l'artefact 2D
+go run ./cmd/study-archiver fetch-one --xuid <xuid> <matchId>
+
+# Une passe sur watchlist.toml à la racine. Sort une fois terminée — à lancer toutes les
+# heures depuis le planificateur de l'OS, pas en démon.
+go run ./cmd/study-archiver watch --xuid <xuid>
+
+# Ce que contient l'archive et ce qui a échoué. Aucun appel réseau, aucun credential.
+go run ./cmd/study-archiver status
+
+# Ré-assembler un artefact depuis les chunks déjà sur disque. Hors ligne ; jamais de
+# re-téléchargement.
+go run ./cmd/study-archiver rebuild <matchId>
+```
+
+Joueurs suivis : `watchlist.toml` à la racine (git-ignoré ; modèle `watchlist.example.toml`).
+Codes de sortie : 0 archivé, 3 ignoré pour une raison nommée, 1 échec, 2 usage.
+
+### `study-server` — le service (`cmd/study-server`)
+
+```bash
+# HTTP en lecture seule sur l'archive. Boucle locale par défaut : elle contient les parties
+# d'autres joueurs.
+go run ./cmd/study-server [--addr 127.0.0.1:8100] [--title halo_infinite]
+
+# GET /matches?map=&mode=&player=&from=&to=&min_coverage=&limit=&offset=
+# GET /matches/{match_id}/replay        l'artefact, octet pour octet
+# GET /matches/{match_id}/participants  xuid, team_side, gamertag, kills, deaths, assists
+```
+
+`{match_id}` accepte la forme complète comme la forme courte du film. `from`/`to` acceptent une
+date `AAAA-MM-JJ` (l'intervalle est semi-ouvert : `from=D&to=D` couvre donc le jour D entier) ou
+un instant RFC 3339. `min_coverage` est une fraction de 1 (`0.85`, pas `85`).
+
+**DuckDB est mono-instance par fichier entre processus.** Le serveur n'ouvre donc rien au
+démarrage : il emprunte l'archive tant qu'une requête est en vol et la rend au dernier emprunt,
+laissant le fichier libre entre deux salves — une capture horaire trouve toujours un créneau.
+Pendant qu'une capture tient l'archive, le serveur répond `503 archive_busy` avec un
+`Retry-After` — c'est le comportement attendu, pas une panne.
+
+Les deux binaires se lient à DuckDB : chaîne UCRT requise sous Windows (cf. CLAUDE.md).
+
+### `apps/study` — la visionneuse (Vite + React + TS)
+
+Son application, son serveur de dev, son port. Elle ne partage aucun build avec `apps/web`.
+
+```bash
+cd apps/study
+npm install            # première fois (nécessite .npmrc : legacy-peer-deps)
+npm run dev            # http://localhost:5174
+npm run typecheck      # tsc -b
+npm run test:run       # vitest, une passe
+npm run build          # bundle de production dans dist/
+npm run generate-types # openapi.yaml -> src/lib/api/generated.ts
+```
+
+Les modules de rendu du rejeu sous `src/features/replay/` sont des **copies** de
+`apps/web/src/features/match-replay/`, chacune portant son chemin d'origine et le commit auquel
+elle a été copiée ; le `README.md` du dossier dit pourquoi, et comment tenir la copie honnête.
+
+Le fragment d'URL choisit l'écran : `#/` est l'entrée (un champ qui prend un identifiant de
+match, forme courte ou complète), `#/match/<id>` ouvre un match archivé, et `#/sample` dessine
+un artefact écrit à la main — aucune donnée réelle, aucun serveur, aucun film capturé — pour que
+la visionneuse reste relisible par qui n'a encore rien archivé.
+
+**Ouvrir un vrai match exige `study-server` démarré.** Le serveur de dev relaie `/study` vers
+`127.0.0.1:8100` ; une page qui viserait l'origine du serveur directement ferait une requête
+inter-origines, et `study-server` ne publie volontairement aucun en-tête CORS.
+
+```bash
+go run ./apps/go-api/cmd/study-server    # terminal 1
+cd apps/study && npm run dev             # terminal 2, puis ouvrir #/match/<id>
+```
+
+Un artefact dont la `schemaVersion` n'est pas reconnue affiche un message et ne dessine RIEN :
+l'archive garde des documents construits par plusieurs versions du constructeur, et en lire un
+avec les mauvaises règles produirait une carte plausible et fausse.
+
+---
+
 ## Tests
 
 ### Go (voir [../testing.md](../testing.md))

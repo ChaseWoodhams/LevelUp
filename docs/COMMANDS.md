@@ -164,6 +164,94 @@ Full list: `go run ./cmd/levelup help`.
 
 ---
 
+## Study tool (outside the app)
+
+A local study aid over an archive of match films, captured before their CDN links expire. It
+lives beside the app and shares none of its data: one archive at `data/study/`, written by the
+archiver and read by the server.
+
+### `study-archiver` — capture (`cmd/study-archiver`)
+
+```bash
+# Archive one match: download its whole film into the chunk cache and build the 2D artifact
+go run ./cmd/study-archiver fetch-one --xuid <xuid> <matchId>
+
+# One pass over watchlist.toml at the repo root. Exits when done — run it hourly from the
+# OS scheduler, not as a daemon.
+go run ./cmd/study-archiver watch --xuid <xuid>
+
+# What is in the archive and what went wrong. No network call, no credential.
+go run ./cmd/study-archiver status
+
+# Re-assemble one artifact from the chunks already on disk. Offline; never re-downloads.
+go run ./cmd/study-archiver rebuild <matchId>
+```
+
+Tracked players: `watchlist.toml` at the repo root (git-ignored; model
+`watchlist.example.toml`). Exit codes: 0 archived, 3 skipped for a named reason, 1 failure,
+2 usage.
+
+### `study-server` — serve (`cmd/study-server`)
+
+```bash
+# Read-only HTTP over the archive. Loopback by default: it holds other people's matches.
+go run ./cmd/study-server [--addr 127.0.0.1:8100] [--title halo_infinite]
+
+# GET /matches?map=&mode=&player=&from=&to=&min_coverage=&limit=&offset=
+# GET /matches/{match_id}/replay        the artifact, byte for byte
+# GET /matches/{match_id}/participants  xuid, team_side, gamertag, kills, deaths, assists
+```
+
+`{match_id}` accepts either the full id or the short film form. `from`/`to` take a plain
+`YYYY-MM-DD` date (the range is half-open, so `from=D&to=D` is the whole of day D) or an
+RFC 3339 instant. `min_coverage` is a fraction of 1 (`0.85`, not `85`).
+
+**DuckDB is single-instance-per-file across processes.** The server therefore opens nothing at
+startup: it borrows the archive while a request is in flight and releases it when the last one
+finishes, so it leaves the file free between bursts and an hourly capture always finds a gap.
+While a capture holds the archive the server answers `503 archive_busy` with a `Retry-After` —
+that is expected, not a fault.
+
+Both binaries link DuckDB, so they need the UCRT toolchain on Windows (cf. CLAUDE.md).
+
+### `apps/study` — the viewer (Vite + React + TS)
+
+Its own app, its own dev server, its own port. It never shares a build with `apps/web`.
+
+```bash
+cd apps/study
+npm install            # first time (needs .npmrc: legacy-peer-deps)
+npm run dev            # http://localhost:5174
+npm run typecheck      # tsc -b
+npm run test:run       # vitest, once
+npm run build          # production bundle into dist/
+npm run generate-types # openapi.yaml -> src/lib/api/generated.ts
+```
+
+The replay rendering modules under `src/features/replay/` are **copies** of
+`apps/web/src/features/match-replay/`, each carrying its origin path and the commit it was
+copied at; the folder's `README.md` says why, and how to keep the copy honest.
+
+The URL hash chooses the screen: `#/` is the way in (a field taking a match identifier, short
+or full form), `#/match/<id>` opens an archived match, and `#/sample` draws a hand-written
+artifact — no real match data, no server, no captured film — so the viewer can be reviewed by
+somebody who has archived nothing yet.
+
+**Opening a real match needs `study-server` running.** The dev server proxies `/study` to
+`127.0.0.1:8100`; a page reaching the server's origin directly would be a cross-origin request,
+and `study-server` deliberately publishes no CORS headers.
+
+```bash
+go run ./apps/go-api/cmd/study-server    # terminal 1
+cd apps/study && npm run dev             # terminal 2, then open #/match/<id>
+```
+
+An artifact whose `schemaVersion` the viewer does not recognise renders a message and draws
+NOTHING — the archive keeps documents built by several versions of the builder, and reading one
+with the wrong rules would produce a plausible map that is wrong.
+
+---
+
 ## Tests
 
 ### Go (see [testing.md](testing.md))

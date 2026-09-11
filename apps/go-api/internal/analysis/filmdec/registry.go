@@ -31,8 +31,9 @@ const (
 // consomment pas le même nombre de bits — est déjà couvert par
 // TestCaptureConsumesSameBitsAsDispatch (capture_test.go), pas par un test de grep.
 const (
-	compObjectBodyVitality  = "object-body-vitality-component"
-	compWeaponStateTypeInfo = "weapon-state-type-info"
+	compObjectBodyVitality          = "object-body-vitality-component"
+	compWeaponStateTypeInfo         = "weapon-state-type-info"
+	compManagedPlayerTeamDesignator = "managed-player-team-designator-component"
 )
 
 // Archetype is one ECS archetype: an ordered list of component names. The slice

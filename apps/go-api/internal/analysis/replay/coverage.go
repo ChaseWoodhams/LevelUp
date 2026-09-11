@@ -149,6 +149,26 @@ type BridgeHealth struct {
 	// SlotCollisions : slots dont les vies nommées désignent des joueurs différents. Non
 	// nul, la table slot -> joueur n'est pas représentable et le verdict le dit.
 	SlotCollisions int `json:"slotCollisions"`
+	// AmbiguousTies : vies dont la fin coïncide, à l'horloge, avec celle d'une autre vie —
+	// un échange (deux morts au même tick), où rien ne dit plus laquelle des deux une mort
+	// proche nomme. Ni l'une ni l'autre n'est publiée. Non nul ne dégrade pas le verdict :
+	// c'est le refus qui fonctionne, pas une anomalie à signaler comme telle.
+	AmbiguousTies int `json:"ambiguousTies"`
+	// TiesResolved : ambiguïtés levées par le TÉMOIN D'ARME — l'arme des events de tir du
+	// joueur retrouvée dans le loadout de keyframe du slot (cf. lives_witness.go). Ce sont
+	// des vies qui seraient restées anonymes.
+	TiesResolved int `json:"tiesResolved"`
+	// WitnessDeferred : ambiguïtés où le témoin a désigné l'AUTRE lecture. Elles ne nomment
+	// rien ici ; la paire soutenue est jugée à son tour.
+	WitnessDeferred int `json:"witnessDeferred"`
+	// ControlAgree / ControlContradict / ControlSilent : LE TÉMOIN MESURÉ LÀ OÙ LA RÉPONSE EST
+	// DÉJÀ CONNUE — les paires que l'horloge tranche sans ambiguïté. Publier TiesResolved sans
+	// eux dirait combien de refus ont été levés sans dire si on a eu raison de les lever. Un
+	// ControlContradict notable disqualifie le témoin, y compris sur les ambiguïtés.
+	ControlAgree int `json:"controlAgree"`
+	//nolint:godot // un champ par ligne : cf. l'avertissement sur les tags partagés ci-dessus.
+	ControlContradict int `json:"controlContradict"`
+	ControlSilent     int `json:"controlSilent"`
 }
 
 // VerdictNominal est le verdict d'un calque publiable sans réserve. Nommé plutôt que répété :
@@ -213,6 +233,12 @@ func buildCoverage(shots, grenades, objectives LayerCoverage, own OwnerReport) *
 		IndexReadings:      own.IndexReadings,
 		IndexDisagreements: own.IndexDisagreements,
 		SlotCollisions:     own.SlotCollisions,
+		AmbiguousTies:      own.AmbiguousTies,
+		TiesResolved:       own.TiesResolved,
+		WitnessDeferred:    own.WitnessDeferred,
+		ControlAgree:       own.ControlAgree,
+		ControlContradict:  own.ControlContradict,
+		ControlSilent:      own.ControlSilent,
 	}
 	return &Coverage{
 		Shots: shots, Grenades: grenades, Objectives: objectives, Bridge: b,

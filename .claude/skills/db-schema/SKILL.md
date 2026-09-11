@@ -26,6 +26,73 @@ filepath.Join(repoRoot, "data", "warehouse", "shared_matches_v2.duckdb")
 | `shared_social.duckdb` | `data/titles/{slug}/warehouse/` | Données sociales (followers, activité) |
 | `stats.duckdb` | `data/titles/{slug}/players/{gamertag}/` | Enrichissements individuels uniquement |
 | `xbox_aliases.duckdb` | `data/global/` | **Global** — mapping xuid→gamertag Xbox Services (P5, ADR 0008) |
+| `archive.duckdb` | `data/study/` | **Outil d'étude** — matchs archivés par `cmd/study-archiver` (ticket #6). Hors périmètre app : voir ci-dessous |
+
+## archive.duckdb — la base de l'outil d'étude (hors app)
+
+Base **locale, mono-writer**, écrite UNIQUEMENT par `cmd/study-archiver` (job batch
+sériel). Elle n'est pas dans le circuit `BatchBuilder`/`persist` (ADR 0019/0030) et le
+serveur ne l'ouvre jamais en écriture. Trois tables :
+
+| Table | Contenu |
+|---|---|
+| `matches` | 1 ligne par match archivé : `match_id` (PK), `short_id`, `played_at`, `map_name`, `map_module`, `mode`, `playlist`, `duration_ms`, `source_gamertag`, `film_state`, `skip_reason`, `artifact_path`, `built_at`, `decoder_rev`, compteurs décodés (`tracks`, `points`, `shots`, `named_lives`, `total_lives`), `recorded_at` |
+| `participants` | 1 ligne par (match, joueur) : `xuid`, `gamertag`, `team` (0 Eagle / 1 Cobra), `outcome` (1 nul / 2 victoire / 3 défaite / 4 abandon), `kills`, `deaths`, `assists` — **source : match stats, jamais le film** (le film ne porte aucune information d'équipe) |
+| `watchlist` | `gamertag` (PK), `xuid`, `added_at`, `last_checked` — alimentée par `watch` (#8). `xuid` : résolu UNE fois via l'endpoint profil Xbox Live puis relu de la base (aucun appel ultérieur). `added_at` n'est écrit qu'à l'insertion ; `last_checked` est estampillé à chaque passe réussie — c'est ce qui distingue « rien de neuf » de « le job ne tourne plus ». Correspondance gamertag **insensible à la casse** (les gamertags Xbox le sont). |
+
+`film_state` : `pending` \| `downloaded` \| `expired` \| `failed`. **Politique de reprise
+(#7, `cmd/study-archiver/filmstate.go`)** : `expired` est le SEUL état terminal — le film
+CDN est perdu, aucun run ultérieur ne retente le match. `failed` (décodeur en erreur ou
+zéro trajectoire) et `downloaded` sans artefact (carte absente du catalogue de bornes)
+restent repris à chaque passe : les chunks sont sur disque, un correctif décodeur ou une
+mise à jour du catalogue les récupère. Un échec TRANSITOIRE (5xx, timeout, disque) n'écrit
+aucune ligne — écrire `expired` sur un incident réseau enterrerait le match pour toujours.
+
+`skip_reason` : `film_absent` (→ `expired`), `no_tracks_decoded` et `build_failed`
+(→ `failed`), `unsupported_map` et `no_map_in_stats` (→ `downloaded`, repris plus tard).
+
+**Écritures** : SELECT-then-UPDATE-or-INSERT ligne à ligne, JAMAIS `ON CONFLICT DO UPDATE`
+ni delete-then-reinsert. Mono-writer n'est PAS un argument de sûreté vis-à-vis d'ART
+(#23046 a crashé malgré mono-writer + PK BIGINT, cf. `no_art_patterns_test.go`), et les
+deux clés d'ici sont VARCHAR. **Lectures** (`cmd/study-server` #12, `status` #9) :
+`OpenReadForQuery`, jamais `OpenReadOnly` forcé (DuckDB refuse un handle read-only sur un
+fichier déjà tenu en RW dans le MÊME process).
+
+**Piège cross-process — mesuré le 2026-09-04, `cmd/study-server/crossprocess_test.go`.**
+`OpenReadForQuery` n'ouvre PAS « en READ_ONLY à côté » du writer d'un autre processus : DuckDB
+est mono-instance par fichier entre processus, et le verrou joue dans les DEUX sens. Un lecteur
+qui garde le handle empêche la passe `watch` suivante d'écrire — donc des films perdus. Tout
+lecteur long doit donc emprunter l'archive le temps d'une requête et la rendre, jamais
+l'ouvrir au démarrage. Pendant qu'une capture la tient, la bonne réponse est « occupé », pas
+« en panne » (503 + `Retry-After`, même enveloppe que `handlers.errDBBusy`).
+
+**Piège dans le piège — `OpenReadForQuery` ne suffit PAS à un lecteur concurrent.** Il consulte
+d'abord le cache process (`LookupCachedDB`), documenté « emprunt NON-POSSÉDANT ... le caller ne
+doit pas appeler `Close()` » : le 2e appelant reçoit un handle emprunté et un `release` NO-OP,
+sans incrément de refCount. Un open/close naïf par requête fait donc fermer le `*sql.DB` sous
+les autres requêtes en vol — mesuré : 111 emprunts concurrents sur 320 en `sql: database is
+closed`. Le comptage de références doit être tenu PAR LE LECTEUR
+(`cmd/study-server/archive.go`, `archiveSource`) : ouverture au 1er emprunt en vol, libération
+au dernier.
+
+**Couverture d'un match archivé** : `named_lives / total_lives`, fraction de 1 (ADR 0006) —
+il n'y a PAS de colonne `coverage`. `total_lives = 0` signifie « inconnue », pas « nulle » :
+l'artefact n'a rapporté aucune vie. Les deux lecteurs le distinguent (`coverageRatio`,
+`cmd/study-server/filter.go` : un `CASE` qui rend NULL, donc jamais retenu par un plancher
+de couverture).
+
+**`artifact_path` est un chemin ABSOLU de la machine qui a construit l'artefact** : c'est
+une trace, pas une adresse. Un lecteur résout le fichier par
+`PathResolver.ReplayArtifactPath` (même appel que l'écrivain), et n'utilise la colonne que
+comme drapeau « construit / pas construit ».
+
+**Piège — `recorded()` est un lecteur PARTIEL** (`archive.go`) : il ne SELECT que ce dont
+le contrôle d'idempotence a besoin, donc `mode`, `playlist`, `played_at`, `source_gamertag`,
+`built_at` et `decoder_rev` reviennent à ZÉRO quelle que soit la ligne. Le repasser à
+`recordMatch` EFFACERAIT ces colonnes. C'est pourquoi `rebuild` (#10) écrit via
+`updateBuild()`, qui ne touche que ce que la construction a produit (artefact, compteurs,
+état, révision) et laisse le roster intact — une reconstruction n'a rien de neuf à dire sur
+qui a joué.
 
 ## shared_matches_v2.duckdb
 

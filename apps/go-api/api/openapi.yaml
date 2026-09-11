@@ -8418,6 +8418,18 @@ components:
     BridgeHealth:
       additionalProperties: false
       properties:
+        ambiguousTies:
+          format: int64
+          type: integer
+        controlAgree:
+          format: int64
+          type: integer
+        controlContradict:
+          format: int64
+          type: integer
+        controlSilent:
+          format: int64
+          type: integer
         fromReading:
           format: int64
           type: integer
@@ -8439,6 +8451,12 @@ components:
         slots:
           format: int64
           type: integer
+        tiesResolved:
+          format: int64
+          type: integer
+        witnessDeferred:
+          format: int64
+          type: integer
       required:
         - slots
         - fromReading
@@ -8447,6 +8465,12 @@ components:
         - indexReadings
         - indexDisagreements
         - slotCollisions
+        - ambiguousTies
+        - tiesResolved
+        - witnessDeferred
+        - controlAgree
+        - controlContradict
+        - controlSilent
       type: object
     BucketInfo:
       additionalProperties: false
@@ -18516,6 +18540,9 @@ components:
           type:
             - array
             - "null"
+        matchClockZeroMs:
+          format: int64
+          type: integer
         matchId:
           type: string
         objectives:

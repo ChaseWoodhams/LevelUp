@@ -1,0 +1,19 @@
+# watchlist.example.toml — the players `study-archiver watch` follows.
+#
+# Copy to watchlist.toml (git-ignored) and put the real gamertags in. The real file is
+# ignored on purpose: it names actual people, and whose games somebody studies does not
+# belong in a public repository.
+#
+# One pass per invocation, meant for the OS scheduler (hourly). Films expire in weeks, so
+# the archive is only ever as complete as the passes that ran while the links were alive.
+#
+#   go run ./apps/go-api/cmd/study-archiver watch --xuid <owner xuid>
+#
+# Each gamertag is resolved to an xuid ONCE; the resolution is recorded in the archive
+# database, so later passes cost no lookup. Spelling is case-insensitive and duplicates
+# are dropped.
+
+gamertags = [
+  "Some Pro",
+  "Another Pro",
+]

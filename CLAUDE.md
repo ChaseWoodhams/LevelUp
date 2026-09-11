@@ -13,6 +13,7 @@
 |---|---|---|
 | API + sync + analyse | **Go** (chi + Huma, slog, DuckDB) | `apps/go-api/` |
 | Frontend | **React/TypeScript** (Vite, TanStack Router/Query/Table, ECharts) | `apps/web/` |
+| Outil d'étude (hors app) | **React/TypeScript** (Vite) — app séparée, port 5174 | `apps/study/` |
 | Stockage | **DuckDB** par titre + Parquet (archives) | `data/titles/{slug}/` |
 | Config | JSON + TOML | `db_profiles.json`, `app_settings.json`, `.env.local`, `config/titles/` |
 
@@ -92,6 +93,7 @@ Tous les chemins passent par `PathResolver` (`internal/domain/title/registry.go`
 | Social (followers, activité) | `data/titles/{slug}/warehouse/shared_social.duckdb` |
 | Enrichissements joueur | `data/titles/{slug}/players/{gamertag}/stats.duckdb` |
 | Aliases Xbox globaux | `data/global/xbox_aliases.duckdb` |
+| Archive de l'outil d'étude (hors app) | `data/study/archive.duckdb` |
 | Tokens auth (source unique) | `data/auth/watcher_tokens/{xuid}.json` |
 | Sessions HTTP | `data/sessions/` |
 | Manifests par titre | `config/titles/{slug}/title.toml` + `mappings/{fields,assets,outcomes,capabilities}.toml` |
@@ -175,11 +177,84 @@ make dev                    # go-api (air) + vite
 
 # Requêtes DuckDB ad hoc (pas de Python)
 duckdb data/titles/halo_infinite/warehouse/metadata.duckdb "SELECT ..."
-go run apps/go-api/cmd/inspect_bp/main.go            # outil Go (CGO : gcc msys64)
+go run apps/go-api/cmd/inspect_bp/main.go            # outil Go (CGO — cf. chaîne UCRT ci-dessous)
 
 # CLI principal
 go run ./apps/go-api/cmd/levelup --help              # sync, backfill, diag
+
+# Outil d'étude (archive de films, hors app — épopée #1)
+go run ./apps/go-api/cmd/study-archiver fetch-one --xuid <xuid> <matchId>
+go run ./apps/go-api/cmd/study-archiver watch --xuid <xuid>   # 1 passe sur watchlist.toml
+go run ./apps/go-api/cmd/study-archiver status                # santé de l'archive (sans token)
+go run ./apps/go-api/cmd/study-archiver rebuild <matchId>     # hors ligne, depuis les chunks
+
+# Serveur de l'outil d'étude (sert l'archive à apps/study — épopée #2)
+go run ./apps/go-api/cmd/study-server                         # 127.0.0.1:8100, lecture seule
+
+# Visionneuse de l'outil d'étude (app séparée — ne partage aucun build avec apps/web)
+cd apps/study && npm install && npm run dev                   # http://localhost:5174
+cd apps/study && npm run typecheck && npm run test:run
 ```
+
+`watch` est prévu pour le planificateur de l'OS (horaire), pas en démon : une invocation =
+une passe, puis sortie. `status` et `rebuild` ne font AUCUN appel réseau et ne demandent
+aucun credential. Liste des joueurs suivis : `watchlist.toml` à la racine (git-ignoré,
+modèle `watchlist.example.toml`).
+
+`study-server` expose l'archive en LECTURE SEULE (`GET /matches`, `/matches/{match_id}`,
+`/matches/{match_id}/replay`, `/matches/{match_id}/participants`). Il écoute sur la boucle
+locale par défaut — l'archive contient les films et rosters de parties d'autrui.
+`GET /matches` porte le roster de chaque ligne (une seule requête pour la page) ; la fiche
+`GET /matches/{match_id}` ne le porte pas — l'écran de rejeu lit `/participants`, dont l'échec
+doit faire échouer l'écran, là où une fiche absente ne coûte que l'image calibrée du sol.
+L'artefact est résolu par `PathResolver.ReplayArtifactPath` (jamais par la colonne
+`artifact_path`, qui est un chemin ABSOLU de la machine qui l'a construit) et servi
+tel quel, octet pour octet : la garde de version de schéma est côté client.
+`{match_id}` accepte la forme complète ou la forme courte.
+
+**DuckDB est mono-instance par fichier ENTRE PROCESSUS** (cf. `RUNBOOK_OPS_DUCKDB_CLI_TOOLS`) :
+un serveur qui garderait le handle empêcherait la capture horaire d'écrire — des films perdus.
+`study-server` n'ouvre donc RIEN au démarrage : il emprunte l'archive tant qu'une requête est
+en vol et la rend au dernier emprunt (`archiveSource`, compteur de références tenu par le
+lecteur — `OpenReadForQuery` seul ne suffit pas, son emprunt de cache est non-possédant).
+Pendant qu'une capture la tient, il répond `503 archive_busy` + `Retry-After`. Garde-rails :
+`crossprocess_test.go` (l'archiveur peut écrire entre deux requêtes) et
+`TestArchiveSource_ConcurrentBorrows` (des requêtes parallèles ne se ferment pas la base).
+
+`apps/study` est une app Vite/React **séparée** (port 5174, aucun build partagé avec
+`apps/web`). Ses modules de rendu du rejeu sous `src/features/replay/` sont des **copies**
+de `apps/web/src/features/match-replay/` : pas de workspace câblant les imports inter-apps,
+et `apps/web/**` ne se modifie pas depuis ici. Chaque copie porte en tête son chemin
+d'origine et le commit copié. **Un correctif dans du code copié se fait D'ABORD en amont**
+(`apps/web`), puis on re-copie le fichier et on met à jour le SHA de l'en-tête — sinon les
+deux versions divergent en silence. Détail : `apps/study/src/features/replay/README.md`.
+
+### Chaîne CGO sous Windows — UCRT, PAS mingw64 (constaté 2026-09-03)
+
+Tout paquet qui importe DuckDB (donc `internal/config`, donc la quasi-totalité des
+binaires) se lie en CGO. La bibliothèque statique livrée par `duckdb-go-bindings` est
+construite contre **UCRT** : la lier avec `C:\msys64\mingw64` (chaîne MSVCRT) échoue à
+l'édition de liens, sur des symboles qui n'ont rien à voir avec le code du dépôt
+(`undefined reference to __stdio_common_vsnprintf_s`,
+`__emutls_v._ZSt11__once_call`). Le message ne nomme jamais la cause — d'où cette note.
+
+```bash
+export CC=/c/msys64/ucrt64/bin/gcc.exe   # ucrt64, JAMAIS mingw64
+CGO_ENABLED=1 go build ./cmd/levelup
+```
+
+`internal/ooz` (seul paquet **C++** du dépôt, tiré par `himodule`/`himap`/`mapquant-build`/
+`mapstruct-build`) demande en plus un `CXX`, et le chemin absolu ne suffit pas : le driver
+ne trouve pas ses outils frères et cgo échoue sur un `cgo.exe: exit status 2` qui ne nomme
+aucune cause. Pour une suite complète (`go test ./...`), mettre le répertoire sur le PATH :
+
+```bash
+export PATH="/c/msys64/ucrt64/bin:$PATH" CC=gcc CXX=g++   # constaté 2026-09-03
+```
+
+Vérifié : `cmd/levelup` se lie, `go test ./internal/platform/duckdb/...` passe. Sans ça,
+seuls les paquets sans DuckDB sont testables (`CGO_ENABLED=0`), ce qui exclut en silence
+`persist`, `sync`, `platform/duckdb` et tous les `cmd/` qui ouvrent une base.
 
 Référence complète des commandes : `docs/COMMANDS.md`. Déploiement : `docs/RUNBOOK_GO_LIVE*`
 — **push sur `main` = déploiement prod automatique** : prévenir l'utilisateur avant.

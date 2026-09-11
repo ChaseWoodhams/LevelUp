@@ -447,7 +447,7 @@ func consumeByName(br *BitReader, name string, typeIndex uint32, level uint32) (
 			}
 		}
 		return variant, nil, true
-	case "managed-player-team-designator-component": // ti=9 i0 (FUN_140f581e8) — R(4)
+	case compManagedPlayerTeamDesignator: // ti=9 i0 (FUN_140f581e8) — R(4)
 		br.ReadBits(4)
 		return variant, nil, true
 	case "game-engine-current-state-component": // ti=0 i2 (FUN_14116d1d0) — R(3)
@@ -1190,6 +1190,7 @@ func traverseComponentLoopFrom(br *BitReader, arch Archetype, t *EntityTrace, fr
 		consumeCorruptionCheck(br)
 		t.Comps = append(t.Comps, CompResult{Index: i, Name: arch.Components[i], Variant: variant,
 			Ported: ported, StartBit: start, Payload: payload})
+		observeComponent(t.TypeIndex, arch.Components[i], payload)
 		if arch.Components[i] == compWeaponStateTypeInfo && variant != noVariant && t.HeldWeapon == noVariant {
 			t.HeldWeapon = variant
 		}

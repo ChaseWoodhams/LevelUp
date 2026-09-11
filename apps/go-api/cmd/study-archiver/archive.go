@@ -111,7 +111,10 @@ ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_over_named INTEGER;
 ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_missing_lives INTEGER;
 ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_unknown_named INTEGER;
 ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_lives_gap INTEGER;
-ALTER TABLE participants ADD COLUMN IF NOT EXISTS replay_named_lives INTEGER;`
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS replay_named_lives INTEGER;
+-- rounds: RoundsWon + RoundsLost + RoundsTied from the player's CoreStats. Every round starts
+-- a life with no death behind it, so the ground truth expects deaths + rounds lives.
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS rounds INTEGER;`
 
 // archive is an open handle on the archive database.
 type archive struct {
@@ -191,6 +194,9 @@ type participantRecord struct {
 	Kills    *int
 	Deaths   *int
 	Assists  *int
+	// Rounds is how many rounds the player played (RoundsWon + RoundsLost + RoundsTied): the lives
+	// they started without dying first. NULL when the stats carried no round count.
+	Rounds *int
 	// ReplayNamedLives is how many lives the replay named for this player, beside the official
 	// Deaths it is checked against. NULL when the build did not compare this player.
 	ReplayNamedLives *int
@@ -240,7 +246,7 @@ func (a *archive) recorded(ctx context.Context, matchID string) (matchRecord, bo
 // stats again, so this is what it checks the rebuilt replay against.
 func (a *archive) roster(ctx context.Context, matchID string) ([]participantRecord, error) {
 	rows, err := a.db.SQLDb().QueryContext(ctx, `
-        SELECT xuid, gamertag, team, outcome, kills, deaths, assists
+        SELECT xuid, gamertag, team, outcome, kills, deaths, assists, rounds
         FROM participants WHERE match_id = ? ORDER BY xuid`, matchID)
 	if err != nil {
 		return nil, fmt.Errorf("reading the roster of %s: %w", matchID, err)
@@ -249,16 +255,17 @@ func (a *archive) roster(ctx context.Context, matchID string) ([]participantReco
 	var out []participantRecord
 	for rows.Next() {
 		var (
-			p                                     participantRecord
-			gamertag                              sql.NullString
-			team, outcome, kills, deaths, assists sql.NullInt64
+			p                                             participantRecord
+			gamertag                                      sql.NullString
+			team, outcome, kills, deaths, assists, rounds sql.NullInt64
 		)
-		if err := rows.Scan(&p.XUID, &gamertag, &team, &outcome, &kills, &deaths, &assists); err != nil {
+		if err := rows.Scan(&p.XUID, &gamertag, &team, &outcome, &kills, &deaths, &assists, &rounds); err != nil {
 			return nil, fmt.Errorf("scanning the roster of %s: %w", matchID, err)
 		}
 		p.Gamertag = gamertag.String
 		p.Team, p.Outcome = nullIntPtr(team), nullIntPtr(outcome)
 		p.Kills, p.Deaths, p.Assists = nullIntPtr(kills), nullIntPtr(deaths), nullIntPtr(assists)
+		p.Rounds = nullIntPtr(rounds)
 		out = append(out, p)
 	}
 	if err := rows.Err(); err != nil {

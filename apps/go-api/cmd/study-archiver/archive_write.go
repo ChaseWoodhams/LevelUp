@@ -218,17 +218,17 @@ func writeParticipant(ctx context.Context, tx *sql.Tx, matchID string, p partici
 	if exists {
 		_, err = tx.ExecContext(ctx, `
             UPDATE participants SET gamertag = ?, team = ?, outcome = ?,
-                   kills = ?, deaths = ?, assists = ?, replay_named_lives = ?
+                   kills = ?, deaths = ?, assists = ?, rounds = ?, replay_named_lives = ?
             WHERE match_id = ? AND xuid = ?`,
-			nullString(p.Gamertag), p.Team, p.Outcome, p.Kills, p.Deaths, p.Assists,
+			nullString(p.Gamertag), p.Team, p.Outcome, p.Kills, p.Deaths, p.Assists, p.Rounds,
 			p.ReplayNamedLives, matchID, p.XUID)
 	} else {
 		_, err = tx.ExecContext(ctx, `
             INSERT INTO participants (match_id, xuid, gamertag, team, outcome, kills, deaths, assists,
-                                      replay_named_lives)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                                      rounds, replay_named_lives)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			matchID, p.XUID, nullString(p.Gamertag),
-			p.Team, p.Outcome, p.Kills, p.Deaths, p.Assists, p.ReplayNamedLives)
+			p.Team, p.Outcome, p.Kills, p.Deaths, p.Assists, p.Rounds, p.ReplayNamedLives)
 	}
 	if err != nil {
 		return fmt.Errorf("recording participant %s of %s: %w", p.XUID, matchID, err)

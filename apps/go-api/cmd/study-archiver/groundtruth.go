@@ -8,12 +8,15 @@ package main
 // can: it runs on EVERY archived match, on every build, and needs nothing the archive does not
 // already hold.
 //
-// WHAT THE COMPARISON CAN AND CANNOT SAY. A player who died N times had N + 1 lives: each death
-// ends one, and the end of the match (or the player leaving) ends the last. So:
-//   - OverNamed: lives the replay named for a player BEYOND their N + 1. Those lives belong to
+// WHAT THE COMPARISON CAN AND CANNOT SAY. A player who died N times over R rounds had N + R lives:
+// each death ends one, and each round STARTS one with no death behind it — at a round reset every
+// player's life ends at the same instant and all respawn together (measured in the films of three
+// Oddball matches, and matched to their official round counts: 3, 2, 2). A single-round mode
+// reports R = 1, which is the old N + 1. So:
+//   - OverNamed: lives the replay named for a player BEYOND their N + R. Those lives belong to
 //     somebody else, so this is a naming DEFECT and must stay at zero, whatever the coverage
 //     figures say.
-//   - MissingLives: lives the replay did not name for a player SHORT of their N + 1. That is
+//   - MissingLives: lives the replay did not name for a player SHORT of their N + R. That is
 //     the replay refusing to guess (an ambiguous tie, a life the feed never closed): the work
 //     left, not an error.
 //   - UnknownNamed: lives named after an xuid the stats do not list at all.
@@ -42,7 +45,7 @@ type groundTruth struct {
 	Compared bool
 	// Players is how many roster players carried an official death count.
 	Players int
-	// ExpectedLives is the sum of (deaths + 1) over those players.
+	// ExpectedLives is the sum of (deaths + rounds) over those players.
 	ExpectedLives int
 	// NamedLives is how many lives the replay named for those players.
 	NamedLives   int
@@ -73,7 +76,7 @@ func compareGroundTruth(doc replay.ReplayDocument, roster []participantRecord) g
 		if p.Deaths == nil {
 			continue
 		}
-		expected, n := *p.Deaths+1, named[p.XUID]
+		expected, n := *p.Deaths+roundsOf(p), named[p.XUID]
 		gt.Players++
 		gt.ExpectedLives += expected
 		gt.NamedLives += n
@@ -95,6 +98,15 @@ func compareGroundTruth(doc replay.ReplayDocument, roster []participantRecord) g
 	gt.Compared = true
 	gt.LivesGap = doc.Coverage.Bridge.LivesTotal - gt.ExpectedLives
 	return gt
+}
+
+// roundsOf is how many lives a player started without dying first: one per round played. A row
+// with no round count (recorded before rounds were) counts one, the single-round reading.
+func roundsOf(p participantRecord) int {
+	if p.Rounds == nil || *p.Rounds < 1 {
+		return 1
+	}
+	return *p.Rounds
 }
 
 // groundTruthRecord is a groundTruth as the archive stores it: every column NULL when the

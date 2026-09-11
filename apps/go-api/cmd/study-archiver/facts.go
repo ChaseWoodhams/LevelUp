@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"levelup/go-api/internal/analysis/replay"
@@ -70,6 +71,7 @@ func readMatchFacts(stats map[string]any, sourceGT string) (matchFacts, error) {
 		ms := int64(*reg.DurationSeconds) * 1000
 		facts.DurationMS = &ms
 	}
+	rounds := roundsByXUID(stats)
 	for _, p := range sync.ExtractParticipants(stats) {
 		facts.Roster = append(facts.Roster, participantRecord{
 			XUID:     p.XUID,
@@ -79,9 +81,50 @@ func readMatchFacts(stats map[string]any, sourceGT string) (matchFacts, error) {
 			Kills:    p.Kills,
 			Deaths:   p.Deaths,
 			Assists:  p.Assists,
+			Rounds:   rounds[p.XUID],
 		})
 	}
 	return facts, nil
+}
+
+// roundsByXUID reads how many rounds each player played: RoundsWon + RoundsLost + RoundsTied in
+// the same PlayerTeamStats[0] CoreStats block sync.ExtractParticipants reads K/D/A from.
+//
+// NOT A SECOND EXTRACTION (cf. this file's header): the warehouse does not extract rounds at all,
+// so this is the only reading of them and nothing can disagree with it. A player whose stats carry
+// none of the three is absent from the map.
+//
+// Measured on six archived matches (rounds_measure_test.go): Oddball reported 3 and 2, Zones and
+// CTF reported 1 — a single-round mode says 1, not 0.
+func roundsByXUID(stats map[string]any) map[string]*int {
+	out := map[string]*int{}
+	players, _ := stats["Players"].([]any)
+	for _, p := range players {
+		pm, _ := p.(map[string]any)
+		id, _ := pm["PlayerId"].(string)
+		xuid := strings.TrimSuffix(strings.TrimPrefix(id, "xuid("), ")")
+		if xuid == "" || xuid == id {
+			continue // a bot ("bid(...)") or no id: no roster row to attach rounds to
+		}
+		teams, _ := pm["PlayerTeamStats"].([]any)
+		if len(teams) == 0 {
+			continue
+		}
+		team, _ := teams[0].(map[string]any)
+		st, _ := team["Stats"].(map[string]any)
+		core, _ := st["CoreStats"].(map[string]any)
+		total, seen := 0, false
+		for _, k := range []string{"RoundsWon", "RoundsLost", "RoundsTied"} {
+			if v, ok := core[k].(float64); ok {
+				total, seen = total+int(v), true
+			}
+		}
+		if seen {
+			n := total
+			out[xuid] = &n
+		}
+	}
+	return out
 }
 
 func derefStr(s *string) string {

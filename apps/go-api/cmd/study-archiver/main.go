@@ -82,6 +82,8 @@ func main() {
 		os.Exit(runRebuild(context.Background(), os.Args[2:]))
 	case "recapture":
 		os.Exit(runRecapture(context.Background(), os.Args[2:]))
+	case "backfill-rounds":
+		os.Exit(runBackfillRounds(context.Background(), os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 		os.Exit(exitOK)
@@ -116,6 +118,10 @@ func usage() {
 		"no artifact and whose film is neither expired nor failed, oldest first. The archive, " +
 		"not the recent history, is the list: this is how matches `watch` no longer sees are " +
 		"rescued before their films expire.")
+	slog.Info("usage: study-archiver backfill-rounds --xuid <xuid> [--gamertag GT] [--limit N] " +
+		"[--title slug] [--rps N] - read the stats of every archived match whose roster has no " +
+		"round count, record each player's rounds, and re-grade its ground truth from the " +
+		"artifact on disk. Decodes nothing.")
 }
 
 // commonFlags are the options EVERY archiving subcommand takes: they all authenticate the
@@ -294,6 +300,39 @@ func runRecapture(ctx context.Context, args []string) int {
 	}()
 
 	if sum := recapturePass(ctx, d, *limit); sum.Failed > 0 {
+		return exitFailure
+	}
+	return exitOK
+}
+
+// runBackfillRounds records the round counts of archived matches recorded before the archive
+// kept them, and re-grades their ground truth from the artifacts on disk (backfill_rounds.go).
+func runBackfillRounds(ctx context.Context, args []string) int {
+	fs := flag.NewFlagSet("backfill-rounds", flag.ContinueOnError)
+	common := registerCommonFlags(fs)
+	limit := fs.Int("limit", 0, "process at most N matches (0 = every match missing round counts)")
+	if err := fs.Parse(args); err != nil {
+		return exitUsage
+	}
+	if fs.NArg() != 0 {
+		slog.ErrorContext(ctx, "study-archiver: backfill-rounds takes no positional argument "+
+			"(the matches come from the archive)", "args", fs.Args())
+		return exitUsage
+	}
+
+	d, err := newDeps(ctx, common.request())
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: setup failed", "err", err)
+		return exitFailure
+	}
+	defer func() {
+		if cErr := d.Archive.Close(); cErr != nil {
+			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
+		}
+		d.ReleaseMetadataDB()
+	}()
+
+	if sum := backfillRoundsPass(ctx, d, *limit); sum.Failed > 0 {
 		return exitFailure
 	}
 	return exitOK

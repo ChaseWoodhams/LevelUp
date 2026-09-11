@@ -61660,3 +61660,42 @@ lives named, weapon witness 80 agree / 1 contradict. Open: only 10 projectile fl
 
 **Next step**: rebuild the other 26 Recharge matches (running); Lattice, Origin, Vacancy, Solitude,
 Argyle and Empyrean need their .mvar fetched (mapobj-build) before the same level_id proof.
+
+---
+
+## [2026-09-11] Lives: round resets were the "split lives", and a life can be named by its start
+
+**Status**: In progress (the ground-truth fix and its backfill are complete; start-side naming is
+measured, not yet in the decoder).
+
+**Technical decision (ground truth)**: the check expected deaths + 1 lives per player. The films
+show otherwise on multi-round modes: in e01d80a1 every player's life ends at the same instant
+twice, with no death, and all respawn ~3.5 s later. Halo's own stats agree exactly
+(`TestRoundsInOfficialStats`, six matches read live): Oddball e01d80a1 3 rounds, 36e80b83 and
+0e97be38 2 rounds, Zones c85e424e and both CTF Aquarius matches 1 round (a single-round mode says
+1, not 0). So expected lives = deaths + RoundsWon + RoundsLost + RoundsTied. `facts.go` reads the
+rounds from CoreStats (the warehouse does not extract them, so this is the only reading), the
+archive keeps them in `participants.rounds`, and `roundsOf` counts a missing value as 1. On
+e01d80a1 that moves expected lives from 206 to 222 against 219 spans: the "+13 lives gap" that
+item 1 flagged as split lives was the formula, not the decoder.
+
+`study-archiver backfill-rounds` repairs rows recorded before the column: one stats read per match,
+rounds written, ground truth re-graded from the artifact on disk (no decode). `rebuild` cannot do
+it (no network) and fetchOne returns early on a built match.
+
+**Measurements (`TestSplitLivesMeasurement`, six films)**:
+- Merging same-slot spans with no death at the break: names NOTHING more on any film. The unnamed
+  spans are 16 refused ties + deathless ends that never return to their slot, not same-slot splits.
+- Respawn delay, death -> the same player's next named life: p05 10,059 ms, p25 10,060, median
+  10,060-10,127 ms on all six films. A near-constant.
+- Start-side naming (a life whose start falls 9.86-10.5 s after exactly one player's unaccounted
+  death, and whose death no other life claims): +30 / +12 / +7 / +13 / +20 / +16 names, ZERO
+  identity violations (no player named on two overlapping lives). The base death naming already has
+  3 overlaps on the Aquarius films. The residual over-count was fully explained by the span dump:
+  round resets (every player +1 per extra round) and same-slot splits with the second piece starting
+  0.0 m from where the first ended (a dropout, one life).
+
+**Next step**: run backfill-rounds on the real archive and re-read the lives gap; then put
+start-side naming in `replay/lives.go` (window calibrated from the film's own named respawn delays)
+together with a position-continuous same-slot merge, and rebuild — over-named must stay 0 under
+deaths + rounds.

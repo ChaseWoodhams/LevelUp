@@ -188,6 +188,7 @@ go run ./apps/go-api/cmd/study-archiver watch --xuid <xuid>   # 1 passe sur watc
 go run ./apps/go-api/cmd/study-archiver status                # santé de l'archive (sans token)
 go run ./apps/go-api/cmd/study-archiver rebuild <matchId>     # hors ligne, depuis les chunks
 go run ./apps/go-api/cmd/study-archiver recapture --xuid <xuid>  # re-fetch unbuilt, non-expired matches, oldest first
+go run ./apps/go-api/cmd/study-archiver backfill-rounds --xuid <xuid>  # record rounds on old rows, re-grade ground truth (no decode)
 
 # Serveur de l'outil d'étude (sert l'archive à apps/study — épopée #2)
 go run ./apps/go-api/cmd/study-server                         # 127.0.0.1:8100, lecture seule

@@ -54,6 +54,25 @@ func TestCompareGroundTruth_ExactReplayIsClean(t *testing.T) {
 	}
 }
 
+// Each round starts every player afresh with no death behind it: over three rounds a replay naming
+// deaths + 3 lives is exact. Read as deaths + 1, the same replay would report 4 over-named lives
+// that belong to nobody else.
+func TestCompareGroundTruth_RoundsStartLivesWithoutDeaths(t *testing.T) {
+	p1, p2 := officialPlayer("1", intPtr(2)), officialPlayer("2", intPtr(4))
+	p1.Rounds, p2.Rounds = intPtr(3), intPtr(3)
+	doc := livesDoc(map[string]int{"1": 5, "2": 7}, 0, 12)
+
+	gt := compareGroundTruth(doc, []participantRecord{p1, p2})
+	if gt.ExpectedLives != 12 || gt.OverNamed != 0 || gt.MissingLives != 0 || gt.LivesGap != 0 {
+		t.Errorf("gt = %+v, want 12 expected lives, exact", gt)
+	}
+
+	p1.Rounds, p2.Rounds = nil, nil
+	if gt := compareGroundTruth(doc, []participantRecord{p1, p2}); gt.OverNamed != 4 {
+		t.Errorf("without rounds OverNamed = %d, want 4 (deaths + 1 per player)", gt.OverNamed)
+	}
+}
+
 // A life named beyond a player's deaths + 1 belongs to somebody else: counted, never absorbed
 // by another player's shortfall.
 func TestCompareGroundTruth_OverNamedIsNotOffsetByMissing(t *testing.T) {

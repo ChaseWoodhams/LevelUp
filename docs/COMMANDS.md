@@ -186,6 +186,11 @@ go run ./cmd/study-archiver rebuild <matchId>
 # Fetch again every recorded match with no artifact whose film is neither expired nor failed,
 # oldest first (the matches `watch` no longer sees). Needs the token; --limit N caps a run.
 go run ./cmd/study-archiver recapture --xuid <xuid>
+
+# Record each player's rounds (RoundsWon + RoundsLost + RoundsTied) on archived matches recorded
+# before the archive kept them, and re-grade their ground truth (deaths + rounds lives) from the
+# artifact on disk. One stats read per match, no decode. Needs the token; --limit N caps a run.
+go run ./cmd/study-archiver backfill-rounds --xuid <xuid>
 ```
 
 Tracked players: `watchlist.toml` at the repo root (git-ignored; model

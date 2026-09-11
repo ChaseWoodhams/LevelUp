@@ -61626,3 +61626,37 @@ Known artefact, as on Streets: a few pale wedges where one building spans two cu
 
 **Next step**: the same procedure for Recharge once its bounds are validated (27 matches);
 `ekur-data/levels` has recharge.json, but not the six Forge-style maps.
+
+---
+
+## [2026-09-11] Quant bounds for Recharge and Prism, proven by level_id; Live Fire refused
+
+**Status**: Complete.
+
+**Technical decision**: 109 archived matches were blocked on eight maps with no quant bounds
+(Live Fire 28, Recharge 23, Lattice 19, Origin 13, Vacancy 11, Solitude 8, Argyle 5, Empyrean 2).
+`cmd/mapquant-build` only catalogues a map whose name -> module link is established outside any
+width measurement. `map_objectives.json` already held the .mvar level_ids of Live Fire
+(1253388187), Recharge (−687782121) and Prism (2068765158). A raw int32 LE scan over all 132
+installed modules also hits unrelated modules at random (×1 each), so the criterion is the one the
+three KNOWN links show: Streets -> sgh_streets (ds ×6, pc ×5, any ×2), Aquarius -> ctf_aquarius
+(×8, ×9, ×2), Vagabond -> fo08_wetland (×4, ×3, ×2). The right module is the only level module
+holding the id in all three deploy roots, repeatedly. Recharge -> sgh_blueprint (×7, ×8, ×2) and
+Prism -> sgh_crystalcaves (×6, ×7, ×2) show that signature for exactly one module each.
+
+**Live Fire is NOT catalogued**, though its link is proven the same way (sgh_interlock ×6, ×7,
+×2): `ds/.../sgh_interlock` is a 216 KB stub with no sbsp tag. Reading the pc module instead was
+tried with a witness on every map readable from both roots, and REFUSED: Vagabond's pc main BSP is a
+different, far larger box (x −1929.. against −231..231), so a pc read would hand Live Fire the wrong
+box. The fallback code was removed rather than left behind.
+
+**Results**: the regenerated catalogue has 17 maps; the 15 existing entries are byte-identical
+(only `source` changes, to this machine's Steam path). Recharge's box is 2707 × 2641 × 500 m at
+W 18/18/15 — like Illusion and Chasm, an sbsp far larger than the arena. Checked on the first
+rebuilt Recharge replay (101daf20): players span 33.8 × 34.1 m at z 0..5.7 m (a wrong box would
+stretch or crush that by the ratio of extents), bridge/shots/grenades verdicts nominal, 113 of 135
+lives named, weapon witness 80 agree / 1 contradict. Open: only 10 projectile flights, against
+200-600 on Streets — to investigate on its own.
+
+**Next step**: rebuild the other 26 Recharge matches (running); Lattice, Origin, Vacancy, Solitude,
+Argyle and Empyrean need their .mvar fetched (mapobj-build) before the same level_id proof.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "source": "world bounds x/y/z du tag sbsp principal, lus dans D:/SteamLibrary/steamapps/common/Halo Infinite/deploy/ds/levels/multi",
+  "source": "world bounds x/y/z du tag sbsp principal, lus dans C:/Program Files (x86)/Steam/steamapps/common/Halo Infinite/deploy/ds/levels/multi",
   "maps": {
     "aquarius": {
       "module": "ctf_aquarius",
@@ -233,6 +233,42 @@
       "axisWidths": [
         17,
         17,
+        15
+      ]
+    },
+    "prism": {
+      "module": "sgh_crystalcaves",
+      "min": [
+        -114.45093,
+        -27.205103,
+        -250
+      ],
+      "max": [
+        28.68396,
+        68.92768,
+        61.703808
+      ],
+      "axisWidths": [
+        14,
+        13,
+        15
+      ]
+    },
+    "recharge": {
+      "module": "sgh_blueprint",
+      "min": [
+        -993.9214,
+        -1320.3536,
+        -250
+      ],
+      "max": [
+        1713.4697,
+        1320.3536,
+        250
+      ],
+      "axisWidths": [
+        18,
+        18,
         15
       ]
     },

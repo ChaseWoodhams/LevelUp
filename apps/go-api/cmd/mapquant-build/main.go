@@ -50,9 +50,21 @@ const defaultLevelsDir = `D:/SteamLibrary/steamapps/common/Halo Infinite/deploy/
 // Vagabond est une carte Forge : `fo08_wetland` est sa TOILE, et c'est bien la toile qui
 // porte les bornes de déquantification.
 //
-// NON CATALOGUÉES faute de module établi : Live Fire, Recharge, Prism. Leurs largeurs
-// mesurées désignent un module compatible, mais rien n'établit le lien ; les cataloguer
-// reviendrait à deviner des coordonnées.
+// Recharge, Prism (2026-09-11) : established by the `level_id` of their .mvar
+// (map_objectives.json: −687782121, 2068765158), not by name or width. Scanned as raw int32 LE
+// over all 132 installed modules (`deploy/{any,ds,pc}`), a 4-byte pattern also hits unrelated
+// modules at random (×1 each), so the criterion is the one the three KNOWN links show:
+// Streets -> sgh_streets (ds ×6, pc ×5, any ×2), Aquarius -> ctf_aquarius (×8, ×9, ×2),
+// Vagabond -> fo08_wetland (×4, ×3, ×2) — the right module is the only level module holding the
+// id in all three roots, repeatedly. Both new ids show that signature for exactly one module:
+// sgh_blueprint (×7, ×8, ×2), sgh_crystalcaves (×6, ×7, ×2); every other level module holds
+// them at most once.
+//
+// NOT CATALOGUED: Live Fire. Its link is established the same way (level_id 1253388187 ->
+// sgh_interlock, ×6, ×7, ×2), but `ds/.../sgh_interlock` is a 216 KB stub with NO sbsp tag, so
+// there are no bounds to read. The pc module is NOT a substitute: tried with a witness on every
+// map readable from both, and Vagabond's pc main BSP is a different, larger box
+// (x −1929..… against −231..231). A pc read would hand Live Fire the wrong box.
 var mapModule = map[string]string{
 	"Aquarius":      "ctf_aquarius",
 	"Bazaar":        "ctf_bazaar",
@@ -67,6 +79,8 @@ var mapModule = map[string]string{
 	"Highpower":     "btb_highpower",
 	"Illusion":      "ctf_illusion",
 	"Launch Site":   "va_launchsite",
+	"Prism":         "sgh_crystalcaves",
+	"Recharge":      "sgh_blueprint",
 	"Streets":       "sgh_streets",
 	"Vagabond":      "fo08_wetland",
 }

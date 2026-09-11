@@ -43,7 +43,7 @@ blender -b streets_scene.blend --python render_slices.py -- \
 # 3. Choose a cut per pixel, from the local reachable floor.
 node slice_map.js playceil.txt slicemap.txt 1655 1692
 
-# 4. Composite, and write a mask to check against.
+# 4. Composite, and write a mask to check against (pwsh or Windows PowerShell 5.1's powershell.exe).
 pwsh -File composite.ps1 -SliceDir slices -SliceMap slicemap.txt \
      -Out sgh_streets.png -MaskOut mask.txt
 
@@ -52,8 +52,24 @@ node check_coverage.js mask.txt              # must be 100.00%
 ```
 
 Both exporters and the coverage check read replay documents from
-`data/cache/replays/halo_infinite/` and carry the map's AABB and the match ids at the top of
-the file; edit those when doing a different map.
+`data/cache/replays/halo_infinite/`. The commands above are Streets, which is every tool's
+default. Another map takes its frame, matches and cut stack from the environment and flags,
+never from edits to the scripts:
+
+```bash
+export MAP_BOUNDS=minX,minY,maxX,maxY   # the map's entry in map_quant_bounds.json
+export MAP_MATCHES=id,id,...            # archived replays on that map (short ids)
+export MAP_CUTS=3.5,4.5,...             # the same list as --cuts below
+blender -b <map>_scene.blend --python render_slices.py -- --bounds "$MAP_BOUNDS" \
+  --cuts "$MAP_CUTS" --playtop <above the highest floor> --ramphi <highest floor> ...
+node slice_map.js playceil.txt slicemap.txt <round(width*ppm)> <round(height*ppm)>
+```
+
+`--playtop` culls any object that starts above it (default 9 m, fine for Streets): on a
+multi-level map it must clear the highest reachable floor, which `export_play_ceiling.js`
+prints as `max`, or whole upper floors are deleted. The scene itself comes from ekur's
+"Import Level" operator on `<data folder>/levels/<map>.json`, saved to a `.blend` outside
+the repository.
 
 ## Why a stack of cuts and not one image
 

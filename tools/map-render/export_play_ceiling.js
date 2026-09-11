@@ -3,8 +3,10 @@ const D='C:/Users/Wolfie/Documents/HALO/LevelUp/data/cache/replays/halo_infinite
 // Per 1 m cell: the HIGHEST player feet ever recorded there. That is the top of the
 // reachable stack at that spot -- on a multi-level map it is the upper walkway, not the
 // ground. Anything sitting well above it is a roof, whatever floor it happens to cover.
+// Matches on the map being rendered: Streets unless MAP_MATCHES="id,id" says otherwise.
+const MATCHES=(process.env.MAP_MATCHES||'0e97be38,36e80b83,e01d80a1,c85e424e').split(',');
 const hi=new Map();
-for(const f of ['0e97be38','36e80b83','e01d80a1','c85e424e']){
+for(const f of MATCHES){
   const doc=JSON.parse(fs.readFileSync(D+f+'.json','utf8'));
   for(const t of doc.tracks) for(const p of t.points){
     if(typeof p.z!=='number' || p.z < -20) continue;   // -50 outliers are fall-through

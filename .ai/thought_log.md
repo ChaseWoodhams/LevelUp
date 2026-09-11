@@ -61591,3 +61591,38 @@ each death would tie a ti=5 slot to a player).
 **Next step**: replays can take team from the official stats directly (the archive roster
 carries `team_side` per xuid and the film gives xuid -> player index); the film read then
 serves as a 4-4 consistency check, not as the source.
+
+---
+
+## [2026-09-11] Aquarius floor image: the Streets render pipeline, taught a multi-level map
+
+**Status**: Complete.
+
+**Technical decision**: Aquarius replays had no background at all (no structure, no image). The
+structure route stays closed on purpose: `mapstruct-build` still gives ctf_aquarius 40.2%
+coverage (its instanced geometry does not hold the floors) and the earlier decision not to
+version a floor with holes stands. So Aquarius gets what Streets got: an ekur import rendered
+top-down in Blender on the map's own sbsp AABB, which needs no calibration.
+
+- `tools/map-render` hard-coded Streets (AABB, match ids, cut stack) in five scripts. They now
+  take `MAP_BOUNDS` / `MAP_MATCHES` / `MAP_CUTS` and `--bounds`, with Streets as the default
+  (re-run on Streets: same 828 cells and same slice map header).
+- Aquarius is multi-level: reachable floors 1.6-14.5 m against 0-7 m on Streets. Rendered with
+  16 cuts from 3.5 to 20 m and `--playtop 17` (the default 9 m would have culled the upper floors;
+  0 objects were above 17 m).
+- ekur's headless level import crashed Blender (EXCEPTION_ACCESS_VIOLATION in
+  `mesh_normals_corner_custom_set`, called from ekur's `_create_normals`). Calling
+  `mesh.validate()` before setting custom normals fixed it: 798 meshes, none skipped, 16,699
+  objects, 129 s. The patch lives in the one-off import script, not the addon.
+- `composite.ps1` could never have run as written: PowerShell variable names ignore case, so the
+  pixel buffer `$out` WAS the `[string]$Out` parameter, and the bytes became a string. Renamed
+  `$pixels`, with the reason in a comment.
+
+**Results**: `apps/study/public/maps/ctf_aquarius.png` (2490x1479, 32 px/m) and its
+`mapImages.config.ts` entry framed on X[-39.014282, 38.79729] Y[-27.861597, 18.353075].
+399,473 player positions from ten archived matches: 399,472 (100.00%) on drawn geometry. Control:
+34.3% of the frame is drawn and uniformly random positions land on geometry 34.9% of the time.
+Known artefact, as on Streets: a few pale wedges where one building spans two cut regions.
+
+**Next step**: the same procedure for Recharge once its bounds are validated (27 matches);
+`ekur-data/levels` has recharge.json, but not the six Forge-style maps.

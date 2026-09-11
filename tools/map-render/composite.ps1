@@ -38,7 +38,10 @@ foreach ($f in $files) {
   $bufs += , $b
 }
 
-$out = New-Object byte[] ($stride * $H)
+# NOT `$out`: PowerShell variable names ignore case, so `$out` IS the `[string]$Out` parameter,
+# and assigning a byte array to it silently converts the bytes to one string. The first index
+# into it then fails with "Unable to index into an object of type System.String".
+$pixels = New-Object byte[] ($stride * $H)
 for ($y = 0; $y -lt $H; $y++) {
   $row = $map[$y + 1]; $o = $y * $stride
   for ($x = 0; $x -lt $W; $x++) {
@@ -46,7 +49,7 @@ for ($y = 0; $y -lt $H; $y++) {
     $i = if ($c -ge [char]'0' -and $c -le [char]'9') { [int]$c - 48 } else { [int]$c - 87 }
     if ($i -ge $bufs.Count) { $i = $bufs.Count - 1 }
     $src = $bufs[$i]; $k = $o + $x * 4
-    $out[$k] = $src[$k]; $out[$k+1] = $src[$k+1]; $out[$k+2] = $src[$k+2]; $out[$k+3] = $src[$k+3]
+    $pixels[$k] = $src[$k]; $pixels[$k+1] = $src[$k+1]; $pixels[$k+2] = $src[$k+2]; $pixels[$k+3] = $src[$k+3]
   }
 }
 
@@ -54,7 +57,7 @@ $res = New-Object System.Drawing.Bitmap($W, $H, [System.Drawing.Imaging.PixelFor
 $rect = New-Object System.Drawing.Rectangle(0, 0, $W, $H)
 $d = $res.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::WriteOnly,
                    [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
-[System.Runtime.InteropServices.Marshal]::Copy($out, 0, $d.Scan0, $out.Length)
+[System.Runtime.InteropServices.Marshal]::Copy($pixels, 0, $d.Scan0, $pixels.Length)
 $res.UnlockBits($d)
 $res.Save($Out, [System.Drawing.Imaging.ImageFormat]::Png)
 $res.Dispose()
@@ -67,7 +70,7 @@ if ($MaskOut -ne '') {
   for ($y = 0; $y -lt $H; $y++) {
     $rowc = New-Object char[] $W; $o = $y * $stride
     for ($x = 0; $x -lt $W; $x++) {
-      $rowc[$x] = if ($out[$o + $x * 4 + 3] -gt 8) { '#' } else { '.' }
+      $rowc[$x] = if ($pixels[$o + $x * 4 + 3] -gt 8) { '#' } else { '.' }
     }
     [void]$sb.AppendLine(-join $rowc)
   }

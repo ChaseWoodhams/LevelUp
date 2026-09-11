@@ -80,4 +80,24 @@ export const MAP_IMAGES: MapImageConfig = {
     world: { minX: -24.32224, minY: -23.018236, maxX: 27.407486, maxY: 29.866623 },
     preferOverStructure: true,
   },
+  /**
+   * ctf_aquarius ("Aquarius") — the same pipeline as Streets, so the same guarantee: the frame is
+   * the map's sbsp AABB (map_quant_bounds.json), X[-39.014282, 38.79729] Y[-27.861597, 18.353075],
+   * and nothing was fitted.
+   *
+   * THE CHECK: 399,473 player positions from ten archived matches, 399,472 (100.00%) on drawn
+   * geometry. And the control that keeps that number honest: only 34.3% of the frame is drawn, and
+   * uniformly random positions land on geometry 34.9% of the time.
+   *
+   * Aquarius is MULTI-LEVEL — reachable floors run from 1.6 m to 14.5 m, against 0-7 m on Streets
+   * — so it was rendered with cuts from 3.5 m to 20 m and `--playtop 17`; the Streets defaults
+   * would have culled its upper floors (tools/map-render/README.md).
+   *
+   * No `preferOverStructure`: Aquarius replays carry no structure layer (its instanced geometry
+   * covers 40.2% of the map and is deliberately not versioned), so the image is the floor.
+   */
+  ctf_aquarius: {
+    image: '/maps/ctf_aquarius.png',
+    world: { minX: -39.014282, minY: -27.861597, maxX: 38.79729, maxY: 18.353075 },
+  },
 }

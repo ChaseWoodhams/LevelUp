@@ -13,9 +13,12 @@ const fs=require('fs');
 // Sampling. The field is on a 1 m grid and the render is 24 px/m, so picking the cut from
 // the nearest cell staircases every boundary into 24 px blocks. The grid is smoothed and
 // sampled BILINEARLY, which turns those blocks into a smooth contour.
-const CUTS=[2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,9.5];
+// Must be the --cuts list given to render_slices.py: Streets unless MAP_CUTS="2.0,2.5,..." says otherwise.
+const CUTS=(process.env.MAP_CUTS||'2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0,6.5,7.0,9.5').split(',').map(Number);
 const HEADROOM=2.0, DILATE=1, FILL=10, BLUR=3;
-const r={minX:-24.32224,maxX:27.407486,minY:-23.018236,maxY:29.866623};
+// Frame of the map being rendered: Streets unless MAP_BOUNDS="minX,minY,maxX,maxY" says otherwise.
+const [minX,minY,maxX,maxY]=(process.env.MAP_BOUNDS||'-24.32224,-23.018236,27.407486,29.866623').split(',').map(Number);
+const r={minX,maxX,minY,maxY};
 const W=parseInt(process.argv[4]||"1242",10), H=parseInt(process.argv[5]||"1269",10);
 
 const raw=new Map();

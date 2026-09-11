@@ -15,8 +15,8 @@ from collections import defaultdict
 from mathutils import Vector
 def arg(n,d): return sys.argv[sys.argv.index(n)+1] if n in sys.argv else d
 
-MIN_X, MAX_X = -24.32224, 27.407486
-MIN_Y, MAX_Y = -23.018236, 29.866623
+# The frame is the map's sbsp AABB (map_quant_bounds.json); Streets unless --bounds says otherwise.
+MIN_X, MIN_Y, MAX_X, MAX_Y = [float(v) for v in arg('--bounds', '-24.32224,-23.018236,27.407486,29.866623').split(',')]
 PPM      = float(arg('--ppm','24'))
 PLAY_TOP = float(arg('--playtop','9.0'))
 RAMP_LO  = float(arg('--ramplo','-1.0'))

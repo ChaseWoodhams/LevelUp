@@ -231,7 +231,8 @@ func BuildFromPositions(matchID, titleSlug string, pos []filmdec.BipedPosition,
 	doc.Roster = buildRoster(opt.PlayerIndices, gamertagsOf(opt.Deaths))
 	doc.MatchClockZeroMS = matchClockZero(own, origin)
 	slog.Info("pont slot->joueur",
-		"slots", len(own.Owner), "viesNommees", own.DeathsNamed, "viesTotal", own.LivesTotal,
+		"slots", len(own.Owner), "viesNommees", own.DeathsNamed, "viesNommeesParDebut", own.StartsNamed,
+		"viesTotal", own.LivesTotal,
 		"lecturesIndex", own.IndexReadings, "desaccordsIndex", own.IndexDisagreements,
 		"collisionsSlot", own.SlotCollisions, "viesAmbigues", own.AmbiguousTies,
 		"zeroHorlogeMatchMS", derefI64(doc.MatchClockZeroMS))
@@ -311,7 +312,8 @@ func decimateTracks(sorted []filmdec.BipedPosition, origin, step uint64, minPoin
 		pts       []Point
 		lastFrame int
 		lastTS    uint64
-		closed    [][]Point // vies déjà terminées pour ce slot, dans l'ordre du temps
+		lastPos   filmdec.BipedPosition // pour resumesInPlace : la même règle que buildLifeSpans
+		closed    [][]Point             // vies déjà terminées pour ce slot, dans l'ordre du temps
 	}
 	accs := map[uint32]*acc{}
 	var order []uint32
@@ -328,11 +330,11 @@ func decimateTracks(sorted []filmdec.BipedPosition, origin, step uint64, minPoin
 		}
 		// Un trou plus long que lifeGapUS ferme la vie en cours : ce qui suit est une
 		// RÉAPPARITION sur le même slot, pas la suite du même déplacement.
-		if len(a.pts) > 0 && p.TimestampUS-a.lastTS > lifeGapUS {
+		if len(a.pts) > 0 && p.TimestampUS-a.lastTS > lifeGapUS && !resumesInPlace(a.lastPos, p) {
 			a.closed = append(a.closed, a.pts)
 			a.pts, a.lastFrame = nil, -1
 		}
-		a.lastTS = p.TimestampUS
+		a.lastTS, a.lastPos = p.TimestampUS, p
 		if frame == a.lastFrame {
 			continue
 		}

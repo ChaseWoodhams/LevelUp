@@ -39,7 +39,10 @@ const (
 	//   475/519  apres ce retrait : tout ce qui est affiche vient d une lecture
 	//   444/519  apres le refus des appariements a somme egale (2026-09-05)
 	//   446/519  apres le temoin d arme (2026-09-06)
-	wantShotsAttached  = 446
+	//   476/519  after start-side naming and in-place resumes (2026-09-11): 11 more lives named
+	//            and 5 dropouts no longer cut a life in two, so 30 shots find their slot's owner
+	//            ("slot introuvable" 73 -> 43), with 0 two-candidate shots
+	wantShotsAttached  = 476
 	wantShotsAvailable = 519
 	// wantLivesNamed / wantLivesTotal : 82 vies nommees sur 105. Les 23 restantes sont 4 vies
 	// anterieures au debut reel du match, 6 survivants de fin de partie que le film ne clot par
@@ -55,8 +58,16 @@ const (
 	// AUCUN — sur les 4 echanges ci-dessus il en departage 1, soit 2 vies rendues. Le temoin
 	// est mesure la ou la reponse est connue (les paires non ambigues) : 593 accords contre 4
 	// contradictions sur les six films de reference, soit 99,3 %.
-	wantLivesNamed = 84
-	wantLivesTotal = 105
+	// UPDATE 2026-09-11: 95 of 99. The total falls 105 -> 99 because a slot that goes silent past
+	// lifeGapUS and comes back within lifeResumeM of where it stopped is one life, not two
+	// (resumesInPlace). The named count rises 84 -> 95 because a life can also be named by the death
+	// BEFORE it, one film-measured respawn delay earlier (lives_start.go): the survivors at the end of
+	// the film, which no event closes, are now named. The witnesses held on this film: 0 slot
+	// collisions, 0 player named on two overlapping tracks (one such pair was found and is refused by
+	// startOverlapToleranceUS), 0 shots with two candidate slots, and the weapon witness still at 36
+	// agreements against 4 contradictions, as before the change.
+	wantLivesNamed = 95
+	wantLivesTotal = 99
 	// wantGrenades : 70 lancers DISPONIBLES (decodes), dont 67 situes. Le denominateur ne bouge
 	// pas : c est le rattachement qui perd des lancers, pas le decodage.
 	//
@@ -67,8 +78,10 @@ const (
 	// contre 3 avant, ecart maximal 0,56 m contre 14,46 m — soit le regime annonce par la mesure
 	// qui fonde cette source (0,77 unite entre la naissance et la main de son auteur). Les trois
 	// lancers retires sont ceux qu aucun biped connu ne peut confirmer.
+	// UPDATE 2026-09-11: 69 located, after start-side naming — the two throws gained are the
+	// bridge's, from lives that had no owner before (source "biped" 5 -> 6, "projectile" 62 -> 63).
 	wantGrenades         = 70
-	wantGrenadesAttached = 67
+	wantGrenadesAttached = 69
 	// wantProjectiles : 436 trajectoires publiees. Trois vols de moins qu avant le garde-fou
 	// `projectileMaxStepM` : ils portaient un pas impossible (repli du quantum Y, cf.
 	// projectiles.go) et sont desormais coupes a leur dernier point lisible, ce qui en laisse

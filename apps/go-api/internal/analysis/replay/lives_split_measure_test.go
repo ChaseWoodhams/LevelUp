@@ -81,7 +81,7 @@ func TestSplitLivesMeasurement(t *testing.T) {
 		t.Logf("%s BASE   %s ambiguous %d", id, judgeLives(base, official), repB.ambiguous)
 		classifyUnnamed(t, id, base, deaths, off)
 
-		delays := respawnDelaysMS(base)
+		delays := namedRespawnDelaysMS(base)
 		if len(delays) == 0 {
 			continue
 		}
@@ -90,11 +90,11 @@ func TestSplitLivesMeasurement(t *testing.T) {
 			id, len(delays), pct(0.05), pct(0.25), pct(0.5), pct(0.75), pct(0.95))
 		v0, h0, over0 := identityCheck(base, official)
 		t.Logf("%s BASE   identity: violations %d handoffs %d over-named after handoffs %d", id, v0, h0, over0)
-		lo, hi := pct(0.05)-200, pct(0.75)+300
-		named, added, contested := nameByStart(base, deaths, off, lo, hi)
+		named := append([]lifeSpan(nil), base...)
+		sr := nameLivesByStart(named, deaths, off)
 		v, h, over := identityCheck(named, official)
-		t.Logf("%s START [%d..%d ms] added %d contested %d | violations %d handoffs %d over-named after handoffs %d | %s",
-			id, lo, hi, added, contested, v, h, over, judgeLives(named, official))
+		t.Logf("%s START [%d..%d ms] calibrated %v added %d contested %d | violations %d handoffs %d over-named after handoffs %d | %s",
+			id, sr.loMS, sr.hiMS, sr.calibrated, sr.named, sr.contested, v, h, over, judgeLives(named, official))
 		dumpOverNamed(t, id, base, named, tracks, official)
 	}
 }
@@ -171,76 +171,6 @@ func identityCheck(lives []lifeSpan, official map[uint64]int) (violations, hando
 		}
 	}
 	return violations, handoffs, over
-}
-
-// respawnDelaysMS measures, on lives the death feed already named, the gap between a player's
-// death and the start of that player's next named life. Sorted ascending.
-func respawnDelaysMS(lives []lifeSpan) []int64 {
-	by := map[uint64][]lifeSpan{}
-	for _, l := range lives {
-		if l.xuid != 0 {
-			by[l.xuid] = append(by[l.xuid], l)
-		}
-	}
-	var out []int64
-	for _, ls := range by {
-		sort.Slice(ls, func(i, j int) bool { return ls[i].from < ls[j].from })
-		for i := 1; i < len(ls); i++ {
-			out = append(out, (ls[i].from-ls[i-1].to)/1000)
-		}
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
-	return out
-}
-
-// nameByStart names an unnamed life by the death that PRECEDES its start: a death of player X
-// whose respawn window [lo, hi] holds the life's start, and whose respawn no named life of X
-// already accounts for. A life with two candidate players, or a death claimed by two lives, is
-// left unnamed — no vote. Returns a copy.
-func nameByStart(lives []lifeSpan, deaths []Death, off, lo, hi int64) (named []lifeSpan, added, contested int) {
-	named = append([]lifeSpan(nil), lives...)
-	accounted := func(x uint64, tMS int64) bool {
-		for _, l := range lives {
-			if l.xuid == x {
-				if d := l.from/1000 - tMS; d >= lo && d <= hi {
-					return true
-				}
-			}
-		}
-		return false
-	}
-	claims := map[int][]int{} // death index -> unnamed life indices
-	pick := map[int]int{}     // life index -> death index
-	for li, l := range lives {
-		if l.xuid != 0 {
-			continue
-		}
-		cands := map[uint64]int{}
-		for di, d := range deaths {
-			tMS := d.TimeMS + off
-			if delta := l.from/1000 - tMS; delta < lo || delta > hi || accounted(d.XUID, tMS) {
-				continue
-			}
-			cands[d.XUID] = di
-		}
-		if len(cands) > 1 {
-			contested++
-			continue
-		}
-		for _, di := range cands {
-			claims[di] = append(claims[di], li)
-			pick[li] = di
-		}
-	}
-	for li, di := range pick {
-		if len(claims[di]) > 1 {
-			contested++
-			continue
-		}
-		named[li].xuid = deaths[di].XUID
-		added++
-	}
-	return named, added, contested
 }
 
 func deathNear(sorted []int64, endMS int64) bool {

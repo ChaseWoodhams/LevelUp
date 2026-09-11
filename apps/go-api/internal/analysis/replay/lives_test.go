@@ -20,10 +20,11 @@ func tracksOf(pts ...filmdec.BipedPosition) map[uint32]slotTrack {
 }
 
 func TestBuildLifeSpansSplitsOnGap(t *testing.T) {
-	// Un même slot, deux séjours séparés par plus de lifeGapUS : deux vies.
+	// Un même slot, deux séjours séparés par plus de lifeGapUS, le second AILLEURS (une
+	// réapparition) : deux vies.
 	tr := tracksOf(
 		posAt(512, 1_000_000, 0, 0, 0), posAt(512, 2_000_000, 0, 0, 0),
-		posAt(512, 20_000_000, 0, 0, 0), posAt(512, 21_000_000, 0, 0, 0),
+		posAt(512, 20_000_000, 20, 0, 0), posAt(512, 21_000_000, 20, 0, 0),
 	)
 	lives := buildLifeSpans(tr)
 	if len(lives) != 2 {
@@ -31,6 +32,30 @@ func TestBuildLifeSpansSplitsOnGap(t *testing.T) {
 	}
 	if lives[0].to != 2_000_000 || lives[1].from != 20_000_000 {
 		t.Errorf("bornes de vie inattendues : %+v", lives)
+	}
+}
+
+// A slot silent past lifeGapUS that comes back where it stopped is one life resuming after a
+// dropout (measured 0.0 m on both Aquarius cases), and publication cuts it at the same place.
+func TestLifeResumingInPlaceIsOneLifeInSpansAndTracks(t *testing.T) {
+	pts := []filmdec.BipedPosition{
+		posAt(512, 1_000_000, 5, 5, 0), posAt(512, 2_000_000, 5, 5, 0),
+		posAt(512, 9_500_000, 5.3, 5, 0), posAt(512, 10_500_000, 6, 5, 0), // 7.5 s later, 0.3 m away
+	}
+	if lives := buildLifeSpans(tracksOf(pts...)); len(lives) != 1 {
+		t.Errorf("spans = %d, want 1 life resuming in place", len(lives))
+	}
+	if tracks := decimateTracks(pts, 0, 100_000, 1); len(tracks) != 1 {
+		t.Errorf("published tracks = %d, want 1 - the two cuts must agree", len(tracks))
+	}
+
+	moved := append([]filmdec.BipedPosition(nil), pts...)
+	moved[2], moved[3] = posAt(512, 9_500_000, 25, 5, 0), posAt(512, 10_500_000, 26, 5, 0)
+	if lives := buildLifeSpans(tracksOf(moved...)); len(lives) != 2 {
+		t.Errorf("spans = %d, want 2 when the slot comes back 20 m away", len(lives))
+	}
+	if tracks := decimateTracks(moved, 0, 100_000, 1); len(tracks) != 2 {
+		t.Errorf("published tracks = %d, want 2 when the slot comes back 20 m away", len(tracks))
 	}
 }
 

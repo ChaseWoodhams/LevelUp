@@ -58,6 +58,10 @@ type OwnerReport struct {
 	// DeathsNamed / LivesTotal disent combien de vies le fil des morts a nommées. Un rapport
 	// publié sans son dénominateur ne se juge pas.
 	DeathsNamed, LivesTotal int
+	// StartsNamed counts the lives named by the death BEFORE them (lives_start.go): a player's last
+	// life, or a life the clock could not end-name. Published folded into BridgeHealth.LivesNamed;
+	// kept apart here so DeathsNamed stays what matchClockZero's validity reads.
+	StartsNamed int
 	// IndexReadings est le nombre de chunks de réplication qui ont livré la MÊME table
 	// identité -> index. Il remplace la « marge » de l'ancienne résolution par choix : là où
 	// celle-ci disait « la bonne réponse gagne de 7 points », celui-ci dit « le film l'écrit
@@ -119,6 +123,9 @@ func buildOwners(
 	if rep.DeathsNamed == 0 {
 		return rep
 	}
+	// Start-side naming needs the death-named lives to read its window from, so it runs only once
+	// the clock is anchored by at least one matched death.
+	rep.StartsNamed = nameLivesByStart(lives, deaths, off).named
 	// Le décalage n'est publié qu'une fois qu'au moins une mort s'est appariée : c'est ce qui
 	// distingue une MESURE d'un bord de plage de recherche.
 	rep.DeathClockOffsetMS = off

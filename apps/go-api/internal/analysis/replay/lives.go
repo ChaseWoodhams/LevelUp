@@ -2,6 +2,8 @@ package replay
 
 import (
 	"sort"
+
+	"levelup/go-api/internal/analysis/filmdec"
 )
 
 // lives.go — LE PONT SLOT -> JOUEUR, LU AU LIEU D'ÊTRE VOTÉ.
@@ -69,8 +71,31 @@ type lifeSpan struct {
 	xuid     uint64 // identité lue dans le fil des morts ; 0 = non nommée
 }
 
+// lifeResumeM : a slot silent for more than lifeGapUS that comes back within this distance of
+// where it stopped is the SAME life resuming after a replication dropout, not a respawn.
+//
+// Measured (lives_split_measure_test.go): both same-slot returns on the archived Aquarius films
+// resumed 0.0 m from their last position, after 7.2 s and 7.9 s; left as two lives, the second
+// half carried the slot's name onto a second track. Every respawn in the six films' dumps landed
+// 5.4 m or more from where the previous life ended — a respawn is a spawn point, not the spot.
+const lifeResumeM = 1.0
+
+// resumesInPlace reports whether b continues a in place: both carry world coordinates (a quantum
+// without map bounds is not a position) and b lies within lifeResumeM of a.
+//
+// ONE RULE FOR TWO CUTS. buildLifeSpans (naming) and decimateTracks (publication) must cut lives
+// at the same places, or the bridge would name lives the artifact does not carry.
+func resumesInPlace(a, b filmdec.BipedPosition) bool {
+	if !a.HasWorld || !b.HasWorld {
+		return false
+	}
+	dx, dy, dz := float64(b.X-a.X), float64(b.Y-a.Y), float64(b.Z-a.Z)
+	return dx*dx+dy*dy+dz*dz <= lifeResumeM*lifeResumeM
+}
+
 // buildLifeSpans découpe les trajectoires en vies. Un slot qui disparaît plus de lifeGapUS
-// puis revient est une NOUVELLE vie : le slot migre aux réapparitions.
+// puis revient AILLEURS est une NOUVELLE vie : le slot migre aux réapparitions. S'il revient là
+// où il s'était arrêté (resumesInPlace), c'est la même vie après une coupure de réplication.
 func buildLifeSpans(tracks map[uint32]slotTrack) []lifeSpan {
 	slots := make([]uint32, 0, len(tracks))
 	for s := range tracks {
@@ -83,14 +108,14 @@ func buildLifeSpans(tracks map[uint32]slotTrack) []lifeSpan {
 		if len(pts) == 0 {
 			continue
 		}
-		start, last := int64(pts[0].TimestampUS), int64(pts[0].TimestampUS)
+		start, last, prev := int64(pts[0].TimestampUS), int64(pts[0].TimestampUS), pts[0]
 		for _, p := range pts[1:] {
 			t := int64(p.TimestampUS)
-			if t-last > lifeGapUS {
+			if t-last > lifeGapUS && !resumesInPlace(prev, p) {
 				out = append(out, lifeSpan{slot: s, from: start, to: last})
 				start = t
 			}
-			last = t
+			last, prev = t, p
 		}
 		out = append(out, lifeSpan{slot: s, from: start, to: last})
 	}

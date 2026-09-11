@@ -61699,3 +61699,47 @@ it (no network) and fetchOne returns early on a built match.
 start-side naming in `replay/lives.go` (window calibrated from the film's own named respawn delays)
 together with a position-continuous same-slot merge, and rebuild — over-named must stay 0 under
 deaths + rounds.
+
+---
+
+## [2026-09-11] Replay: name a life by the death before it, and keep a resumed life whole
+
+**Status**: In progress (code, tests, golden and six-film bench done; the archive rebuild under
+deaths + rounds is the last check).
+
+**Technical decision**: two changes to the slot -> player bridge, measured first
+(`TestSplitLivesMeasurement`) and then put in production code.
+- `lives_start.go` — `nameLivesByStart`: after death naming, an unnamed life is named for the
+  player whose death precedes its start by the film's own respawn delay. The window is read from
+  the film ([p05 − 200 ms, p75 + 300 ms] of the delays between a named death and that player's
+  next named life; at least 20 pairs; skipped when p05..p75 spreads over 1 s), never wired to 10 s.
+  No vote: one candidate player, one claimant per death, and a pick that would put a player on two
+  lives overlapping by more than 0.5 s is refused with the other pick. Published folded into
+  `coverage.bridge.livesNamed` (no contract change); `OwnerReport.StartsNamed` keeps the split.
+- `resumesInPlace` (lives.go), used by BOTH `buildLifeSpans` and `decimateTracks`: a slot silent
+  past lifeGapUS that comes back within 1 m of where it stopped is the same life after a
+  replication dropout, not a respawn (Aquarius: 0.0 m after 7.2 s and 7.9 s; respawns land ≥ 5.4 m
+  away).
+
+**Results — golden film 000d5950** (regenerated with `-update`, pinned figures raised with dated
+reasons): tracks 104 -> 99, named 84/105 -> 95/99, anonymous tracks 15 -> 4, shots attached
+446 -> 476 of 519 (85.9 -> 91.7 %, "slot introuvable" 73 -> 43), grenades 67 -> 69 of 70. The
+first version of start naming put one player on two overlapping tracks here (slots 588 and 589,
+both running to the end of the film), which gave 5 shots two candidate slots; the overlap refusal
+removed it. Witnesses after the change: 0 slot collisions, 0 overlapping named tracks, 0
+two-candidate shots, weapon witness 36 agree / 4 contradict — identical to before the change.
+Unit tests: last life named; two candidates refused; no fixed delay names nothing; overlapping
+picks both refused; an accounted respawn is not reused; resume-in-place is one life in spans AND
+tracks, 20 m away is two.
+
+**Results — six archived films, production code** (`TestSplitLivesMeasurement` now calls
+`nameLivesByStart` and the production `buildLifeSpans`): every film calibrated (windows
+9,859-10,527 / 10,460 / 10,426 / 10,427 / 10,760 / 10,543 ms). Lives named by start: e01d80a1 +30,
+36e80b83 +12, c85e424e +7, 0e97be38 +13, c3d46dbc +17, 5329a919 +18. New identity violations: 0 on
+every film (the 1 and 2 on the Aquarius films were already in the death naming). In-place resumes
+took c3d46dbc from 181 to 178 spans and its residual over-count from 2 to 0. The remaining
+over-count against deaths + 1 is on the three Oddball films only (6 / 1 / 3), which played 3, 2 and
+2 rounds: the round resets the archive's deaths + rounds check now allows for.
+
+**Next step**: backfill-rounds, then rebuild the archive with this decoder and read the
+ground truth — over-named must stay 0.

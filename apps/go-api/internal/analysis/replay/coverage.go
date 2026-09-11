@@ -229,7 +229,8 @@ func verdictOfBridge(b BridgeHealth) string {
 func buildCoverage(shots, grenades, objectives LayerCoverage, own OwnerReport) *Coverage {
 	b := BridgeHealth{
 		Slots: len(own.Owner), FromReading: own.FromDeaths,
-		LivesNamed: own.DeathsNamed, LivesTotal: own.LivesTotal,
+		// Both namings read the death feed: by the death that ends a life, and by the one before it.
+		LivesNamed: own.DeathsNamed + own.StartsNamed, LivesTotal: own.LivesTotal,
 		IndexReadings:      own.IndexReadings,
 		IndexDisagreements: own.IndexDisagreements,
 		SlotCollisions:     own.SlotCollisions,

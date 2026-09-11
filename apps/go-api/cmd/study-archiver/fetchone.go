@@ -22,6 +22,7 @@ import (
 
 	"levelup/go-api/internal/analysis/filmdec"
 	"levelup/go-api/internal/analysis/replay"
+	"levelup/go-api/internal/assetnames"
 	"levelup/go-api/internal/domain/title"
 	"levelup/go-api/internal/sync/haloclient"
 )
@@ -65,6 +66,10 @@ type deps struct {
 	// caller must never call MetadataDB.Close() directly, cf. wiring.go). A no-op when
 	// MetadataDB is nil, so the caller's defer needs no nil check of its own.
 	ReleaseMetadataDB func()
+	// AssetNames asks Halo's discovery API for an asset's English name, the fallback when
+	// neither the catalogue nor the local metadata names a map (mapresolve_online.go). Nil in
+	// the offline subcommands.
+	AssetNames assetnames.Fetcher
 	// SourceGamertag is whose archiving pass produced this match. Empty for a bare
 	// fetch-one; `watch` (#8) fills it with the watchlist entry that surfaced the match.
 	SourceGamertag string
@@ -141,7 +146,7 @@ func fetchOneWithStats(ctx context.Context, d deps, matchID string, stats map[st
 	if err != nil {
 		return out, err
 	}
-	mapInfo, mapErr := resolveMatchMap(ctx, facts.MapName, d.Catalog, d.MetadataDB)
+	mapInfo, mapErr := resolveMatchMapOnline(ctx, d, facts)
 	// mapInfo.Name is the RESOLVED name when the metadata fallback found one, and the raw
 	// value otherwise (cf. mapresolve.go) — so the archive row, and the "film archived"
 	// log line downloadFilm writes from this same field, never carry a bare asset GUID

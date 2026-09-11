@@ -61481,3 +61481,38 @@ did not change.
 **Next step**: the missing lives are spread across nearly every player (no match is decided
 by the death quota alone), so the next accuracy work is the per-biped dead-state component and
 the e01d80a1 life split, each now measurable against this check.
+
+---
+
+## [2026-09-11] Study archiver: map names from Halo when metadata is locked, and a recapture command
+
+**Status**: In progress (code complete; the real recapture run and the hourly schedule follow).
+
+**Technical decision**: 139 of the archive's 145 matches were recorded `unsupported_map` with no
+chunks left on disk. Two causes, two fixes.
+
+- **The map-name fallback failed silently whenever the app was running.** Match stats usually
+  carry the map only as an asset id, and `mapresolve.go` names it through `metadata.duckdb`. The
+  running server holds that file read-write and DuckDB admits one process per file, so the
+  archiver opened no handle and every such match stayed unsupported. `mapresolve_online.go`
+  adds a last fallback for the subcommands that hold a token: on a catalogue miss, ask Halo's
+  discovery API for the asset's English name (`halo.NewAssetNameFetcher`, the call the app's
+  sync already uses), with the map's asset id and version id now kept in `matchFacts`. The
+  resolved name is what the archive row records, even when the map has no bounds yet, so a later
+  offline `rebuild` never needs the network or the metadata catalogue.
+- **`watch` never looks back.** It reads the recent history only, so a match recorded without an
+  artifact leaves its window and its film ages out unseen. `study-archiver recapture` walks the
+  archive instead: every recorded match with no artifact whose film is neither `expired` nor
+  `failed` goes back through `fetchOne`, oldest first (films expire by age), with `--limit` and a
+  stop after 5 consecutive failures (a dead token or a network outage, not bad matches).
+
+**Results**: 8 new tests (the online fallback: resolves an id, no call on a catalogue hit or
+without a version id, a failed lookup keeps the local verdict, a resolved name without bounds is
+kept; recapture: only unbuilt non-terminal rows, oldest first under a limit, stops on consecutive
+failures). `go build`, `go vet`, `go test ./cmd/study-archiver`, gofmt 1.26.1,
+`golangci-lint --new-from-merge-base=origin/main` 0 issues. The stored refresh token is valid
+(the API refreshed it this morning) and the API's refresh loop reloads the token store, so the
+archiver can run beside it.
+
+**Next step**: build the binary from this commit, run `recapture` on the real archive, then
+schedule `watch` hourly.

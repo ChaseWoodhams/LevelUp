@@ -182,6 +182,10 @@ go run ./cmd/study-archiver status
 
 # Re-assemble one artifact from the chunks already on disk. Offline; never re-downloads.
 go run ./cmd/study-archiver rebuild <matchId>
+
+# Fetch again every recorded match with no artifact whose film is neither expired nor failed,
+# oldest first (the matches `watch` no longer sees). Needs the token; --limit N caps a run.
+go run ./cmd/study-archiver recapture --xuid <xuid>
 ```
 
 Tracked players: `watchlist.toml` at the repo root (git-ignored; model

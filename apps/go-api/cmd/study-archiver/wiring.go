@@ -25,11 +25,13 @@ import (
 
 	"levelup/go-api/internal/analysis/filmdec"
 	"levelup/go-api/internal/analysis/replay"
+	"levelup/go-api/internal/assetnames"
 	"levelup/go-api/internal/domain"
 	"levelup/go-api/internal/domain/title"
 	"levelup/go-api/internal/games/halo_infinite/replaylabels"
 	authpkg "levelup/go-api/internal/platform/auth"
 	ddb "levelup/go-api/internal/platform/duckdb"
+	"levelup/go-api/internal/platform/halo"
 	"levelup/go-api/internal/sync/haloclient"
 )
 
@@ -102,7 +104,10 @@ func newDepsWith(ctx context.Context, req depsRequest, withClient bool) (deps, e
 			"err", mErr)
 	}
 
-	var client filmAPI
+	var (
+		client     filmAPI
+		assetNames assetnames.Fetcher
+	)
 	if withClient {
 		tokens, tErr := resolveTokens(ctx, paths, req)
 		if tErr != nil {
@@ -110,6 +115,9 @@ func newDepsWith(ctx context.Context, req depsRequest, withClient bool) (deps, e
 		}
 		client = haloclient.NewHaloAPIClient(
 			tokens.SpartanToken, tokens.ClearanceToken, req.RequestsPerSec)
+		// The same token names map assets the stats left as bare ids, so a match is never
+		// recorded unsupported only because the running app holds metadata.duckdb.
+		assetNames = halo.NewAssetNameFetcher(halo.AssetNameResolveRateLimit, tokens)
 	}
 	// Opened LAST, and only once every read-only prerequisite has succeeded: an archive
 	// handle taken before a failing catalogue load would leave a DuckDB file locked by a
@@ -131,6 +139,7 @@ func newDepsWith(ctx context.Context, req depsRequest, withClient bool) (deps, e
 		Archive:           store,
 		MetadataDB:        metadataDB,
 		ReleaseMetadataDB: releaseMetadata,
+		AssetNames:        assetNames,
 		// Handed over unwrapped: the build lock lives at the call site (runBuild), so a
 		// wiring cannot forget it.
 		Build:           replay.BuildFromFilm,

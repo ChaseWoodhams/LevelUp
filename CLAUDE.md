@@ -187,6 +187,7 @@ go run ./apps/go-api/cmd/study-archiver fetch-one --xuid <xuid> <matchId>
 go run ./apps/go-api/cmd/study-archiver watch --xuid <xuid>   # 1 passe sur watchlist.toml
 go run ./apps/go-api/cmd/study-archiver status                # santé de l'archive (sans token)
 go run ./apps/go-api/cmd/study-archiver rebuild <matchId>     # hors ligne, depuis les chunks
+go run ./apps/go-api/cmd/study-archiver recapture --xuid <xuid>  # re-fetch unbuilt, non-expired matches, oldest first
 
 # Serveur de l'outil d'étude (sert l'archive à apps/study — épopée #2)
 go run ./apps/go-api/cmd/study-server                         # 127.0.0.1:8100, lecture seule

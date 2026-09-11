@@ -80,6 +80,8 @@ func main() {
 		os.Exit(runStatus(context.Background(), os.Args[2:]))
 	case "rebuild":
 		os.Exit(runRebuild(context.Background(), os.Args[2:]))
+	case "recapture":
+		os.Exit(runRecapture(context.Background(), os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 		os.Exit(exitOK)
@@ -109,6 +111,11 @@ func usage() {
 		"re-assemble a match's replay artifact from the film chunks already on disk. Makes " +
 		"NO network call and needs no credential; a match whose chunks are gone fails rather " +
 		"than re-downloading.")
+	slog.Info("usage: study-archiver recapture --xuid <xuid> [--gamertag GT] [--limit N] " +
+		"[--title slug] [--interval MS] [--rps N] - fetch again every recorded match that has " +
+		"no artifact and whose film is neither expired nor failed, oldest first. The archive, " +
+		"not the recent history, is the list: this is how matches `watch` no longer sees are " +
+		"rescued before their films expire.")
 }
 
 // commonFlags are the options EVERY archiving subcommand takes: they all authenticate the
@@ -255,6 +262,39 @@ func runRebuild(ctx context.Context, args []string) int {
 	}
 	if out.SkipReason != "" {
 		return exitSkipped
+	}
+	return exitOK
+}
+
+// runRecapture fetches again every recorded match that has no artifact and is neither expired
+// nor failed (recapture.go).
+func runRecapture(ctx context.Context, args []string) int {
+	fs := flag.NewFlagSet("recapture", flag.ContinueOnError)
+	common := registerCommonFlags(fs)
+	limit := fs.Int("limit", 0, "fetch at most N matches, oldest first (0 = every unbuilt match)")
+	if err := fs.Parse(args); err != nil {
+		return exitUsage
+	}
+	if fs.NArg() != 0 {
+		slog.ErrorContext(ctx, "study-archiver: recapture takes no positional argument "+
+			"(the matches come from the archive)", "args", fs.Args())
+		return exitUsage
+	}
+
+	d, err := newDeps(ctx, common.request())
+	if err != nil {
+		slog.ErrorContext(ctx, "study-archiver: setup failed", "err", err)
+		return exitFailure
+	}
+	defer func() {
+		if cErr := d.Archive.Close(); cErr != nil {
+			slog.ErrorContext(ctx, "study-archiver: closing the archive", "err", cErr)
+		}
+		d.ReleaseMetadataDB()
+	}()
+
+	if sum := recapturePass(ctx, d, *limit); sum.Failed > 0 {
+		return exitFailure
 	}
 	return exitOK
 }

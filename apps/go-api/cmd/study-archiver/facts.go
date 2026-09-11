@@ -31,12 +31,16 @@ type matchFacts struct {
 	// MapName is the DISPLAY name; it is also what the quant-bounds catalogue is keyed
 	// by, so map resolution reads it from here rather than digging into the payload
 	// a second time.
-	MapName    string
-	PlayedAt   *time.Time
-	Mode       string
-	Playlist   string
-	DurationMS *int64
-	Roster     []participantRecord
+	MapName string
+	// MapID / MapVersionID identify the map asset: the discovery API needs both to name a map
+	// whose stats carried no display name (mapresolve_online.go).
+	MapID        string
+	MapVersionID string
+	PlayedAt     *time.Time
+	Mode         string
+	Playlist     string
+	DurationMS   *int64
+	Roster       []participantRecord
 }
 
 // readMatchFacts extracts everything the archive records from a raw match-stats payload.
@@ -50,9 +54,11 @@ func readMatchFacts(stats map[string]any, sourceGT string) (matchFacts, error) {
 	}
 	facts := matchFacts{
 		Team0Score: reg.Team0Score, Team1Score: reg.Team1Score,
-		MapName:  derefStr(reg.MapName),
-		Mode:     derefStr(reg.GameVariantName),
-		Playlist: derefStr(reg.PlaylistName),
+		MapName:      derefStr(reg.MapName),
+		MapID:        derefStr(reg.MapID),
+		MapVersionID: derefStr(reg.MapVersionID),
+		Mode:         derefStr(reg.GameVariantName),
+		Playlist:     derefStr(reg.PlaylistName),
 	}
 	if !reg.StartTime.IsZero() {
 		played := reg.StartTime

@@ -177,8 +177,8 @@ func TestWeaponKillsRepo_Load_ByGamertag_AggregatesByWeapon(t *testing.T) {
 	if got[100] != 2 {
 		t.Errorf("kills[AR=100] = %d, want 2", got[100])
 	}
-	if gotLabels[100] != "AR75" {
-		t.Errorf("label[100] = %q, want AR75", gotLabels[100])
+	if gotLabels[100] != "Assault Rifle" {
+		t.Errorf("label[100] = %q, want Assault Rifle (English weapon label)", gotLabels[100])
 	}
 }
 

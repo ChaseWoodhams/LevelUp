@@ -138,6 +138,16 @@ func LoadFieldsFromBytes(path string, raw []byte) (*FieldMappingSet, error) {
 
 func validateField(key canonical.FieldKey, e fieldEntryTOML) []error {
 	var errs []error
+	for lang := range e.Labels {
+		if lang != LocaleEN {
+			errs = append(errs, fmt.Errorf("labels.%s is not supported; use labels.en", lang))
+		}
+	}
+	for lang := range e.Description {
+		if lang != LocaleEN {
+			errs = append(errs, fmt.Errorf("description.%s is not supported; use description.en", lang))
+		}
+	}
 
 	if !canonical.IsKnownFieldKey(key) {
 		errs = append(errs, fmt.Errorf("FieldKey %q absent du canonique central (canonical.AllFieldKeys)", key))
@@ -146,16 +156,7 @@ func validateField(key canonical.FieldKey, e fieldEntryTOML) []error {
 	if e.Labels[LocaleEN] == "" {
 		errs = append(errs, errors.New("labels.en manquant ou vide"))
 	}
-	if e.Labels[LocaleFR] == "" {
-		errs = append(errs, errors.New("labels.fr manquant ou vide"))
-	}
-
-	// Description optionnelle, mais si l'une des deux locales est présente, l'autre l'est aussi.
-	hasDescEN := e.Description[LocaleEN] != ""
-	hasDescFR := e.Description[LocaleFR] != ""
-	if hasDescEN != hasDescFR {
-		errs = append(errs, errors.New("description.en et description.fr doivent être tous les deux présents ou tous les deux absents"))
-	}
+	// Description remains optional and is English-only.
 
 	if !IsKnownUnit(Unit(e.StorageUnit)) {
 		errs = append(errs, fmt.Errorf("storage_unit inconnue: %q", e.StorageUnit))

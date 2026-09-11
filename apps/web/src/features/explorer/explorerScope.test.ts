@@ -13,7 +13,7 @@ const fullScope: ExplorerScope = {
   endDate: '2026-05-01',
   squadScope: 'squad',
   matchIDSearch: 'abc-123',
-  expTypes: new Set(['PVP classé']),
+  expTypes: new Set(['Ranked PvP']),
   playlists: new Set(['Ranked Arena', 'Big Team Battle']),
   mapNames: new Set(['Aquarius']),
   modeNames: new Set(['Slayer']),

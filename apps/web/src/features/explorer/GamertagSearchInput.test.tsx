@@ -34,18 +34,18 @@ describe('GamertagSearchInput', () => {
 
   it('affiche les Joueurs configurés en tête quand on tape', () => {
     renderWithProviders(<GamertagSearchInput onSelect={() => {}} />)
-    const input = screen.getByPlaceholderText(/Rechercher un joueur/i)
+    const input = screen.getByPlaceholderText(/Search a player…/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'Alpha' } })
 
-    expect(screen.getByText('Joueurs configurés')).toBeInTheDocument()
+    expect(screen.getByText('Configured players')).toBeInTheDocument()
     expect(screen.getByText('AlphaPlayer')).toBeInTheDocument()
   })
 
   it('appelle onSelect au clic sur une suggestion', () => {
     const onSelect = vi.fn()
     renderWithProviders(<GamertagSearchInput onSelect={onSelect} />)
-    const input = screen.getByPlaceholderText(/Rechercher un joueur/i)
+    const input = screen.getByPlaceholderText(/Search a player…/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'Alpha' } })
 
@@ -61,13 +61,13 @@ describe('GamertagSearchInput', () => {
       ),
     )
     renderWithProviders(<GamertagSearchInput onSelect={() => {}} />)
-    const input = screen.getByPlaceholderText(/Rechercher un joueur/i)
+    const input = screen.getByPlaceholderText(/Search a player…/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'xq' } })
 
     await waitFor(
       () => {
-        expect(screen.getByText(/Aucun joueur trouvé pour "xq"/)).toBeInTheDocument()
+        expect(screen.getByText(/No player found for "xq"/)).toBeInTheDocument()
       },
       { timeout: 2000 },
     )
@@ -78,12 +78,12 @@ describe('GamertagSearchInput', () => {
   it('affiche le bouton "Rechercher" pour un gamertag hors suggestions, et appelle onSelect au clic', () => {
     const onSelect = vi.fn()
     renderWithProviders(<GamertagSearchInput onSelect={onSelect} />)
-    const input = screen.getByPlaceholderText(/Rechercher un joueur/i)
+    const input = screen.getByPlaceholderText(/Search a player…/i)
     fireEvent.focus(input)
     // 'Zz' ne correspond à aucun joueur configuré (Alpha/Bravo) → saisie libre.
     fireEvent.change(input, { target: { value: 'Zz' } })
 
-    const button = screen.getByText(/Rechercher "Zz"/)
+    const button = screen.getByText(/Search "Zz"/)
     expect(button).toBeInTheDocument()
     fireEvent.click(button)
     expect(onSelect).toHaveBeenCalledWith('Zz')
@@ -92,7 +92,7 @@ describe('GamertagSearchInput', () => {
   it('Entrée recherche le texte exact quand le joueur est inconnu', () => {
     const onSelect = vi.fn()
     renderWithProviders(<GamertagSearchInput onSelect={onSelect} />)
-    const input = screen.getByPlaceholderText(/Rechercher un joueur/i)
+    const input = screen.getByPlaceholderText(/Search a player…/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'Zz' } })
     fireEvent.keyDown(input, { key: 'Enter' })
@@ -118,12 +118,12 @@ describe('GamertagSearchInput', () => {
     )
     const onSelect = vi.fn()
     renderWithProviders(<GamertagSearchInput onSelect={onSelect} />)
-    const input = screen.getByPlaceholderText(/Rechercher un joueur/i)
+    const input = screen.getByPlaceholderText(/Search a player…/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'NeverSeen' } })
 
     // Le bouton apparaît une fois la recherche locale revenue bredouille.
-    const btn = await screen.findByText('Rechercher sur Xbox', undefined, { timeout: 2000 })
+    const btn = await screen.findByText('Search on Xbox', undefined, { timeout: 2000 })
     fireEvent.click(btn)
 
     // Le joueur résolu côté Xbox devient sélectionnable.

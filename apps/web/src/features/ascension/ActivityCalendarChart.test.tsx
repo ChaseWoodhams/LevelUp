@@ -59,7 +59,7 @@ describe('buildActivityCalendarOption', () => {
       since: '2026-05-04',
       until: '2026-05-31',
       days,
-      locale: 'fr',
+      locale: 'en',
     })
     const series = (opt.series as Array<{ type: string; data: unknown[] }>)[0]
     expect(series.type).toBe('heatmap')
@@ -72,7 +72,7 @@ describe('buildActivityCalendarOption', () => {
       since: '2026-05-04',
       until: '2026-05-31',
       days: [],
-      locale: 'fr',
+      locale: 'en',
     })
     expect(opt.visualMap).toBeUndefined()
   })

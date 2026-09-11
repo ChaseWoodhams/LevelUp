@@ -30,11 +30,8 @@ type AssetMapping struct {
 //
 // Chaîne de fallback : locale → en → ID brut.
 func (a AssetMapping) Label(locale string) (label string, usedFallback bool) {
-	if v, ok := a.Labels[locale]; ok && v != "" {
-		return v, false
-	}
 	if v, ok := a.Labels[LocaleEN]; ok && v != "" {
-		return v, true
+		return v, locale != LocaleEN
 	}
 	return a.ID, true
 }

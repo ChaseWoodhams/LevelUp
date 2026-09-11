@@ -36,7 +36,7 @@ export function DataHealthPanel({
       </div>
       <p className="text-xs text-muted-foreground">
         {tA('admin.dh.last_run')} :{' '}
-        <span title={adminAbsoluteTime(dataHealth.ran_at, locale)}>
+        <span title={adminAbsoluteTime(dataHealth.ran_at)}>
           {adminRelativeTime(dataHealth.ran_at, locale)}
         </span>
       </p>

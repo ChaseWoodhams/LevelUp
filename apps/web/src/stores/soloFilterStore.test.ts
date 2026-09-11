@@ -127,7 +127,7 @@ describe('GlobalFilterStore', () => {
     })
     const withPVE = useGlobalFilterStore.getState().filterContextHash
     useGlobalFilterStore.getState().setCascade({
-      experience_types: ['PVP non classé'],
+      experience_types: ['Unranked PvP'],
       playlists: [],
       modes: [],
       maps: [],

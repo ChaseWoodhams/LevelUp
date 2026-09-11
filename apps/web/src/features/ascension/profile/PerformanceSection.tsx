@@ -17,7 +17,6 @@ import {
 import type { ChartSeries } from '@/components/charts/ChartCard'
 import { useProfileI18n } from './useProfileI18n'
 import type { ProfileManifestKey } from '@/lib/i18n/generated/profile'
-import { useAppShellStore } from '@/stores/appShellStore'
 import { localizeTierLabel } from '@/lib/skillTiers'
 
 interface PerformanceSectionProps {
@@ -91,12 +90,11 @@ function SkillTrendSparkline({ points }: { points?: SkillTrendPoint[] }) {
 
 function TierBlock({ rating }: { rating: SkillRatingSnapshot }) {
   const { t } = useProfileI18n()
-  const locale = useAppShellStore((s) => s.locale)
   if (!rating.label) {
     return <p className="text-sm text-muted-foreground">{t('profile.performance.empty')}</p>
   }
   const progressPct = Math.round((rating.progress_ratio ?? 0) * 100)
-  // tier_name (EN) / tier_name_fr (FR) portés par le DTO ; label/next_tier_label
+  // tier_name (EN) / tier_name_en (FR) portés par le DTO ; label/next_tier_label
   // sont composés en EN côté backend (package profile locale-agnostic) → localisés ici.
   // DEC-6 : on affiche les points LUSR (échelle connue du joueur), pas μ/σ bruts.
   // `mu` est la valeur de rating LUSR ; l'écart au palier (points) est rendu sur
@@ -104,7 +102,7 @@ function TierBlock({ rating }: { rating: SkillRatingSnapshot }) {
   return (
     <div>
       <div className="flex items-baseline justify-between">
-        <span className="text-2xl font-bold">{(locale === 'en' ? rating.tier_name : rating.tier_name_fr) || rating.label}</span>
+        <span className="text-2xl font-bold">{rating.tier_name || rating.label}</span>
         <span className="text-xs font-semibold tabular-nums text-muted-foreground">
           {t('profile.performance.lusr_points', { points: rating.mu.toFixed(0) })}
         </span>
@@ -115,14 +113,14 @@ function TierBlock({ rating }: { rating: SkillRatingSnapshot }) {
           style={{ width: `${progressPct}%` }}
           aria-label={t('profile.performance.progress_aria', {
             pct: progressPct,
-            label: localizeTierLabel(rating.label, locale) ?? rating.label,
+            label: localizeTierLabel(rating.label) ?? rating.label,
           })}
         />
       </div>
       {rating.next_tier_label && (
         <p className="mt-1 text-xs text-muted-foreground">
           {t('profile.performance.next_tier')}{' '}
-          <span className="font-semibold">{localizeTierLabel(rating.next_tier_label, locale)}</span>
+          <span className="font-semibold">{localizeTierLabel(rating.next_tier_label)}</span>
           {rating.gap_to_next !== undefined && (
             <>
               {' · '}

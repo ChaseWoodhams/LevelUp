@@ -47,7 +47,7 @@ export function CareerChartsSection({
   lusrLeftSlot,
 }: CareerChartsSectionProps) {
   const locale = useAppShellStore((s) => s.locale) as ManifestLocale
-  const intlLocale = toIntlLocale(locale)
+  const intlLocale = toIntlLocale()
   return (
     <div className="space-y-4" data-testid="career-charts-section">
       {/* career.01 + career.02 + career.03 à gauche | sidebar Succès Xbox à droite */}

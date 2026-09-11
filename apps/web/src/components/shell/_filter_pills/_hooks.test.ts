@@ -68,7 +68,7 @@ describe('computePendingHash', () => {
     })
     const b = computePendingHash({
       ...baseCtx,
-      cascade: { ...DEFAULT_CASCADE, experience_types: ['PVP non classé'] },
+      cascade: { ...DEFAULT_CASCADE, experience_types: ['Unranked PvP'] },
     })
     expect(a).not.toBe(b)
   })

@@ -67,7 +67,7 @@ function sortObjectives(challenges: Challenge[]): Challenge[] {
 
 export function HomePrestigeSection({ playerSlug, titleSlug, locale }: HomePrestigeSectionProps) {
   const [filter, setFilter] = useState<'active' | 'completed'>('active')
-  const numberLocale = intlLocale(locale)
+  const numberLocale = intlLocale()
   const t = (key: HomeManifestKey, values?: Record<string, string | number>) =>
     formatMessage(homeManifest, key, locale, values)
 

@@ -79,7 +79,7 @@ function CronsTable({ crons }: { crons: CronStatusEntry[] }) {
                 </span>
               )}
             </AdminTd>
-            <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(c.last_success_at, locale)}>
+            <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(c.last_success_at)}>
               {c.last_success_at ? adminRelativeTime(c.last_success_at, locale) : tA('admin.crons.never')}
             </AdminTd>
             <AdminTd className="tabular-nums text-muted-foreground">{c.consecutive_failures}</AdminTd>
@@ -109,7 +109,7 @@ function FeaturesTable({ features }: { features: FeatureHeartbeat[] }) {
       {features.map((f) => (
         <AdminTr key={f.feature}>
           <AdminTd className="font-mono text-xs text-foreground">{f.feature}</AdminTd>
-          <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(f.last_seen_at, locale)}>
+          <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(f.last_seen_at)}>
             {f.last_seen_at ? adminRelativeTime(f.last_seen_at, locale) : tA('admin.crons.never')}
           </AdminTd>
           <AdminTd>

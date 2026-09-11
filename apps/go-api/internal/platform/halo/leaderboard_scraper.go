@@ -338,7 +338,7 @@ func (s *LeaderboardScraper) FetchSeasons(ctx context.Context, refPlaylistID str
 	out := make([]domain.WorldSeasonRef, 0, len(seasons))
 	for _, se := range seasons {
 		if id := strings.TrimSpace(se.ID); id != "" {
-			out = append(out, domain.WorldSeasonRef{SeasonID: id, DisplayName: se.DisplayName, NameFR: se.FrenchName()})
+			out = append(out, domain.WorldSeasonRef{SeasonID: id, DisplayName: se.DisplayName, NameFR: se.DisplayName})
 		}
 	}
 	return out, nil
@@ -347,13 +347,6 @@ func (s *LeaderboardScraper) FetchSeasons(ctx context.Context, refPlaylistID str
 // FrenchName retourne la traduction fr-FR de la saison (insensible à la casse de la
 // clé locale), sinon le DisplayName EN en secours.
 func (r WaypointRef) FrenchName() string {
-	for k, v := range r.Translations {
-		if strings.EqualFold(strings.TrimSpace(k), "fr-FR") {
-			if fr := strings.TrimSpace(v); fr != "" {
-				return fr
-			}
-		}
-	}
 	return r.DisplayName
 }
 

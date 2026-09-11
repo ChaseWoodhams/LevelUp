@@ -135,19 +135,16 @@ export function ExplorerPage() {
   })
 
   // ranked_context auto-déduit du multi-select Type d'expérience.
-  // Sélection mono-valeur "PVP classé" → "ranked" (gate skill_tier sur CSR).
-  // Sélection mono-valeur "PVP non classé" → "unranked" (gate skill_tier sur LUSR).
+  // Selection of a single Ranked PvP or Unranked PvP value gates the tier
+  // filter to CSR or LUSR respectively.
   // Toute autre combinaison (multi-valeurs, PVE seul, vide) → "" : skill_tier
   // resté désactivé pour éviter le mélange CSR/LUSR ambigu.
   // Cf. thought_log 2026-05-09 P3 — fusion du single-select "Expérience" dans
   // le multi-select "Type d'expérience" (Option A).
-  // CONTRAT (GH6-1) : 'PVP classé'/'PVP non classé' sont les VALUES FR canoniques du
-  // filtre expérience (identiques en FR et EN — seul le Label affiché est localisé côté
-  // backend). Ne JAMAIS comparer sur un libellé localisé ici.
   const rankedContext: 'ranked' | 'unranked' | '' = (() => {
     if (expTypes.size !== 1) return ''
-    if (expTypes.has('PVP classé')) return 'ranked'
-    if (expTypes.has('PVP non classé')) return 'unranked'
+    if (expTypes.has('Ranked PvP')) return 'ranked'
+    if (expTypes.has('Unranked PvP')) return 'unranked'
     return ''
   })()
 

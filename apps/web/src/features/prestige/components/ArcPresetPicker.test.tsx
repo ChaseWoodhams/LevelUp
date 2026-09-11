@@ -31,7 +31,6 @@ function preset(over: Partial<PresetArc>): PresetArc {
     id: 'p1',
     title_slug: 'halo_infinite',
     title_en: 'Spartan Ascension',
-    title_fr: 'Ascension du Spartan',
     schema_version: 1,
     updated_at: '2026-01-01T00:00:00Z',
     steps: [
@@ -53,24 +52,24 @@ describe('ArcPresetPicker', () => {
 
   it('affiche les presets avec titre FR et aperçu du nombre d\'objectifs', () => {
     mockPresets.current = [preset({})]
-    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="fr" onClose={vi.fn()} />)
+    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
 
-    expect(screen.getByText('Ascension du Spartan')).toBeInTheDocument()
-    expect(screen.getByText(/2 objectifs/i)).toBeInTheDocument()
+    expect(screen.getByText('Spartan Ascension')).toBeInTheDocument()
+    expect(screen.getByText(/2 objectives/i)).toBeInTheDocument()
   })
 
   it('adopte un preset au clic sur « Adopter »', () => {
     mockPresets.current = [preset({ id: 'p-kda' })]
-    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="fr" onClose={vi.fn()} />)
+    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Adopter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Adopt' }))
     expect(adoptMutate).toHaveBeenCalledWith('p-kda', expect.objectContaining({ onSuccess: expect.any(Function) }))
   })
 
   it('affiche un état vide quand aucun preset', () => {
     mockPresets.current = []
-    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="fr" onClose={vi.fn()} />)
-    expect(screen.getByText(/Aucun preset disponible/i)).toBeInTheDocument()
+    render(<ArcPresetPicker playerSlug="u1" titleSlug="halo_infinite" locale="en" onClose={vi.fn()} />)
+    expect(screen.getByText(/No preset available/i)).toBeInTheDocument()
   })
 
   it('utilise le titre EN en locale en', () => {

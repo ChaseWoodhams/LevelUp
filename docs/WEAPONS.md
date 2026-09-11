@@ -220,20 +220,9 @@ view **`v_weapon_kills`**, which:
 UNION-ALLs the `grenade_kills` / `melee_kills` totals from `match_participants`
 under the sentinel IDs `0` and `1`.
 
-Labels (EN/FR) and roles are attached in Go via `weapon_resolver.go` — the
-metadata DB is separate, so it cannot be SQL-joined to the shared DB.
+English labels and roles are attached in Go via `weapon_resolver.go` because the metadata DB is separate from the shared DB.
 
-**Display name — single source keyed by `weapon_key` (V72-06).** The display name
-is resolved `weapon_id → weapon_ids → weapon_key → {en, fr}` from
-`metadata.weapon_name_labels` (`title_slug`, `weapon_key`, `name_en`, `name_fr`),
-seeded at boot from `config/titles/{slug}/mappings/weapon_names.toml`
-(`ReconcileWeaponNameLabels`). All raw id variants of one weapon collapse to a
-single translation (kills the `FRAG GRENADE` vs `Frag Grenade` mismatch). Label
-priority: `weapon_name_labels.name_fr > .name_en > weapon_labels.name_fr >
-weapon_labels.name_en` — the last two only cover ids **without** a `weapon_key`
-(sentinels `0/1/2`, unknowns). The `weapons` registry no longer carries a display
-name (`name_fr` removed); it provides only the dimensions (role/class/family/faction).
-`weapon_labels.name_en` still drives the image URL (`AssetURLAdapter`).
+**Display name — single source keyed by `weapon_key` (V72-06).** The display name is resolved from `metadata.weapon_name_labels.name_en`, seeded at boot from `config/titles/{slug}/mappings/weapon_names.toml`. Historical translation columns remain only for upgrade compatibility. All raw ID variants of one weapon collapse to a single English label, while the registry provides the weapon dimensions (role, class, family, faction).
 
 If `weapon_kills` / `v_weapon_kills` is absent (e.g. a title that does not
 support it), the repo returns `games.ErrCapabilityNotSupported`.

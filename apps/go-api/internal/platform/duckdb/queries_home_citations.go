@@ -46,15 +46,15 @@ SELECT
     ` + StartTimeCanonicalSQL("r") + ` AS start_time,
     COALESCE(r.map_id, '')                                  AS map_id,
     COALESCE(r.map_name, '')                                AS map_name,
-    COALESCE(r.map_name_fr, r.map_name, '')                 AS map_name_fr,
+    COALESCE(r.map_name, '')                 AS map_name_fr,
     COALESCE(r.pair_id, '')                                 AS pair_id,
     COALESCE(r.pair_name, '')                               AS pair_name,
-    COALESCE(r.pair_name_fr, r.pair_name, '')               AS pair_name_fr,
+    COALESCE(r.pair_name, '')               AS pair_name_fr,
     COALESCE(r.game_variant_id, '')                         AS game_variant_id,
     COALESCE(r.game_variant_name, '')                       AS game_variant_name,
     COALESCE(r.playlist_id, '')                             AS playlist_id,
     COALESCE(r.playlist_name, '')                           AS playlist_name,
-    COALESCE(r.playlist_name_fr, r.playlist_name, '')       AS playlist_name_fr,
+    COALESCE(r.playlist_name, '')       AS playlist_name_fr,
     COALESCE(r.is_firefight, FALSE)                         AS is_firefight,
     CASE
         WHEN COALESCE(r.is_ranked, FALSE)

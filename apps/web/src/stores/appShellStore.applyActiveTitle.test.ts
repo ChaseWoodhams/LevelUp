@@ -46,7 +46,6 @@ vi.mock('@/lib/api/client', () => ({
     calls.push(`setApiTitleSlug:${slug}`)
   }),
   getApiTitleSlug: vi.fn(() => 'halo_infinite'),
-  setApiLocale: vi.fn(),
 }))
 
 vi.mock('@/app/queryClient', () => ({
@@ -79,13 +78,13 @@ const BOOTSTRAP_H5 = {
     { slug: 'halo_infinite', name: 'Halo Infinite', status: 'active', capabilities: [], is_default: true, effective_hp_to_kill: 225 },
     { slug: 'halo_5', name: 'Halo 5', status: 'active', capabilities: [], is_default: false, effective_hp_to_kill: 115 },
   ],
-  locale: 'fr', hints_visible_default: true,
+  locale: 'en', hints_visible_default: true,
   feature_flags: { v7_enabled: true, media_enabled: true, demo_mode: false, discord_configured: false, tailscale_enabled: false },
   capabilities: {
     can_read_local_data: true, can_run_sync: true, can_use_live_halo: true, can_manage_settings: true,
     can_reset_media_index: true, can_view_media: true, can_self_provision: true, can_start_initial_sync: true, can_manage_instance: true,
   },
-  settings_excerpt: { lang: 'fr', user_timezone: 'UTC', show_records: true, normalize_mode_labels: true },
+  settings_excerpt: { lang: 'en', user_timezone: 'UTC', show_records: true, normalize_mode_labels: true },
   auth_mode: 'none', registration_mode: 'closed', is_admin: false, first_launch: false,
   instance_locked: false, reauth_required: false, has_password: false, current_username: null,
   oauth_code_flow_enabled: false, demo_mode: false,

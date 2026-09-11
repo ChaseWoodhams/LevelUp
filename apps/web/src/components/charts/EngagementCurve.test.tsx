@@ -87,10 +87,10 @@ describe('EngagementCurve', () => {
         title="Engagement"
         points={samplePoints}
         state="error"
-        errorMessage="Engagement momentanément indisponible"
+        errorMessage="Engagement temporarily unavailable"
       />,
     )
-    expect(getByText('Engagement momentanément indisponible')).toBeTruthy()
+    expect(getByText('Engagement temporarily unavailable')).toBeTruthy()
     // Aucun habillage d'erreur brut (le bug initial : ChartCardError « error »).
     expect(queryByTestId('chart-card-error')).toBeNull()
   })
@@ -99,6 +99,6 @@ describe('EngagementCurve', () => {
     const { getByText } = render(
       <EngagementCurve title="Engagement" points={samplePoints} state="error" />,
     )
-    expect(getByText('Engagement momentanément indisponible')).toBeTruthy()
+    expect(getByText('Engagement temporarily unavailable')).toBeTruthy()
   })
 })

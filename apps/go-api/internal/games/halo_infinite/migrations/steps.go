@@ -97,13 +97,13 @@ func Steps() []migration.Migration {
 		{
 			Name:        "add_mode_name_tr",
 			TargetDB:    migration.TargetMetadata,
-			Description: "Table mode_name_tr : traductions des modes de jeu (FR/EN), portage depuis metadata-prebuilt",
+			Description: "English mode catalog table retained for metadata compatibility",
 			ApplySchema: applyModeNameTr,
 		},
 		{
 			Name:        "seed_playlist_fr_translations",
 			TargetDB:    migration.TargetMetadata,
-			Description: "asset_translations : seed FR canoniques pour playlists Halo Infinite dont l'API a renvoyé l'EN raw en lang fr-FR (cf. thought_log 2026-05-09)",
+			Description: "Historical playlist seed hook retained without creating non-English rows",
 			ApplySchema: applyPlaylistFRSeeds,
 		},
 		// Famille prestige (schéma + 2 ALTER challenge_template) → migrée (b10).

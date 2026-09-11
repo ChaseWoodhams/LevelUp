@@ -61284,6 +61284,34 @@ these 5 issues. After the change, gofmt 1.26.1 and 1.27 both report nothing on t
 
 ---
 
+## [2026-09-10] English-only conversion committed on its own branch
+
+**Status**: In progress (draft PR; the gates do not pass yet).
+
+**Context**: the implementation of `.ai/AUDIT_ENGLISH_ONLY_2026-09-06.md` sat uncommitted in the
+study branch's working copy, mixed with study work that has since been committed separately.
+
+**Technical decision**: commit it on `chore/english-only`, stacked on the study branch, together
+with fixes for damage the conversion itself did. It swapped `fr` and `en` inside words in both
+directions. 58 occurrences of 37 garbled tokens are restored (`useRframeGroup`, `handleRframe`,
+`dfrominator`, the user-visible label `Rframe`, ...), found by listing every token of the diff that
+is absent from the base commit while its swapped form exists there. The CSS grid units `3en`/`1en`
+are back to `fr`. The `apps/study` tests move to the English strings (the language-toggle test
+leaves with the toggle), and its `locale.ts` copy is re-synced with the `apps/web` origin.
+
+**Results**: `go vet ./...` and `go test ./...` pass; `apps/web` typecheck passes; `apps/study` passes
+417/417. Failing: `apps/web` lint (41 errors: 40 unused `_locale`-style parameters, one hardcoded
+JSX string in `SettingsPage.tsx`); `apps/web` vitest (494 failed, 3028 passed, 14 skipped, mostly
+French string assertions); Go integration (the `platform/duckdb` test build reads a removed `.fr`
+field, two `halo5` commendation tests expect French names, and the `prestige` template repo test
+fails; the run was stopped at `platform/session`, so later packages are unmeasured).
+
+**Next step**: remove the unused locale parameters together with their call sites, move the web
+tests to English, fix the three integration failures, bump the origin SHA of the five `apps/study`
+copies this commit changes, then take the PR out of draft.
+
+---
+
 ## [2026-09-10] Study branch: the OpenAPI contract regenerated from the branch's own Go code
 
 **Status**: Complete.
@@ -61306,3 +61334,114 @@ requires (it had also been written against the English contract). The contract n
 `main` by 27 lines: the six BridgeHealth weapon-witness counters and `matchClockZeroMs`.
 
 **Next step**: push and let CI rule on PR #27.
+
+---
+
+## [2026-09-10] English-only branch: making the gates pass (checkpoint)
+
+**Status**: In progress.
+
+**Technical decision**: fix what the conversion broke instead of relaxing the gates. Three real
+defects found by the failing tests are fixed in the app: `pickAssetNameByPreferredLang` fell back
+to the alphabetically first language when no English row existed, so a fr-FR-only asset served
+French (career CSR playlist names, Home map names); `HomeRepo.loadCitationMappingMeta` still served
+the French citation name and description unless the request locale was exactly "en"; and
+`skillTiers.ts` dropped the legacy French tier names, so stored labels like "Or IV" showed raw
+French and sorted as unknown (restored as a read-only French→English map). The remaining failures
+were stale tests: expectations still in French, including damage from the conversion's own letter
+swap and from an earlier pass of mine that mapped the locale literal 'en' to ' at '. Web test
+literals are rewritten from a French→English dictionary built from origin/main's bilingual sources
+(preferring today's wording under the same key), and a replacement is only accepted when the
+English text is on screen in the failure's own DOM dump.
+
+**Results**: Go integration (`-tags=integration -p 1`) is green on every package that failed:
+`platform/duckdb` (27 tests fixed, including the H5 fallback tests that relied on the removed
+fallback), `platform/duckdb/prestige`, `platform/duckdb/halo5`, `sync` (6) and `service` (1).
+apps/web vitest: 494 failing tests down to about 150 in 68 files; no test that passed before is
+failing now. Not done yet: the remaining web tests, web lint (41 errors), four guard tests
+(`no-anglicisms` is obsolete for an English-only UI; `contract-surface` needs its snapshot
+regenerated for the removed `fr` enum members; `no-field-label-dictionary` and
+`no-title-literals` caught real regressions in `FeatureUnavailable.tsx` and the
+`{-$lang}/t/$titleSlug` route), user-visible French literals still in app source (ChartCard,
+GamertagCombobox placeholder, login error, HLS errors), and the copy-guard SHA bump.
+
+**Next step**: fix the two guard regressions and the remaining French literals in the app, then
+the web tests, the lint refactor, and a full run of every gate before pushing.
+
+---
+
+## [2026-09-10] English-only branch: every local gate green
+
+**Status**: Complete (pending CI on PR #28).
+
+**Technical decision**: finish without relaxing a single rule. The last ~90 failing web tests
+get English expectations read from the manifests or the failure's own DOM dump; tests that only
+proved French behaviour are removed or turned into their English equivalent (pickLocalized's
+French fallback, the French tip categories, squad EN≠FR parity, the help glossary's French
+formulas now checked through the English conversion/resistance/impact/survival formulas). About
+70 user-visible French literals left in app source are translated (theme toggle, carousel, star
+button, setup step, Synthesis/Timeseries fallbacks, masked player names, the API connection
+message, the feedback issue body, the charts lab page), operator log and error messages are
+English, and the dead `nameFr` outline-colour field is gone. Deliberately left in French: parsers
+that match legacy stored data (the "sur" mode-label split, the "classé" playlist match), the
+feedback keyword classifier (it reads user input), comments, and one MSW fixture.
+
+The 41 lint errors were unused `_locale` parameters: each is removed together with its call
+sites, driven by tsc (excess arguments, then declarations left unused, looped until clean), and
+two component props that no longer did anything went with them; the demo-mode notice moved into
+the settings i18n table. **Pitfall worth keeping**: TS2554 anchors on the TRAILING excess
+argument, so dropping "the reported argument" is only right when the removed parameter was the
+last one. For `getHelpText(locale, hp)`, `formatLastSeen(…, locale, now)`, `csrTierLabel`,
+`resolveLabel`/`resolveDetail`, `buildSkillTierMarkArea` and `getCompareText` it dropped the
+wrong argument; an AST comparison of every changed signature and call site against HEAD found
+and repaired them. `csrTierLabel` passed two strings, so the typechecker alone would never have
+caught it. The settings PATCH still strips `lang`/`discord_lang` rather than sending them.
+
+**Results**: apps/web typecheck 0 errors, eslint 0 errors, vitest 3,497 passed with one failure
+that only occurs west of UTC (`periodSessionNav` "cap à aujourd'hui", passes with `TZ=UTC` as CI
+runs). apps/study typecheck 0 errors; its six copies re-synced from web (412 tests pass, the five
+copy-guard SHA checks wait for the follow-up bump commit). gofmt 1.26.1 clean on every Go file
+the branch touches; both generated-types freshness checks ok; no Go change since the checkpoint,
+whose integration runs were green.
+
+**Next step**: bump the study copy SHAs, push, let CI rule, take PR #28 out of draft; retarget it
+to `main` once #27 is merged.
+
+---
+
+## [2026-09-10] English-only branch: the three CI gates the local run did not cover
+
+**Status**: Complete (pending CI on PR #28).
+
+**Technical decision**: CI on `1959b125b` failed three jobs that the local gate run had not
+reproduced; each is fixed at its cause.
+
+- **Frontend `lint:fields`**: `tools/lint-no-hardcoded-fields.mjs` only recognised
+  `labels = { en = "…", fr = "…" }`, so on the English-only mappings it extracted nothing and
+  exited on its own "parser broken?" guard. It now reads `labels = { en = "…" }` (122 labels,
+  no violation). The garbled header comments the conversion left in the mapping TOMLs
+  ("labels.en, labels.en", "en+fr") are corrected for both titles.
+- **Go lint (6 issues)**: two SA4009 — `coachCategoryLabel` and `applyMatchHeaderMetaLabels`
+  overwrote their `lang`/`locale` parameter with "en" and kept unreachable French branches;
+  both parameters and the dead branches are gone, and the coach label table is a flat
+  English map (two strings the tests also assert are constants, which settles goconst). A
+  literal "en-US" now uses `LangCodeEN`. The `unused` `loadPairAssetNames` was the tip of a
+  dead cluster: `FiltersRepo.applyModeFRTranslations`, `applyMapFRTranslations` and
+  `applyPlaylistFRTranslations` had no production caller left after the conversion, so they,
+  the five helpers only they used, their now-unused imports and the one test that exercised
+  `applyModeFRTranslations` are deleted (CLAUDE.md: no dead code kept alive by tests).
+- **Go coverage baseline**: the suite itself was green (`go test: exit=0`); the presence gate
+  refused because 65 tests deleted by the conversion (French locale fallbacks, FR seeds, FR
+  label loaders) were still in `.ai/baselines/tests_pre_migration.jsonl`. Following the
+  repository procedure (commit 6fe3110e2), all their event lines are removed by a tool, plus
+  the filter test deleted above: 550 lines for 66 tests, nothing added, final newline kept.
+  Before removal each one was checked as really gone from the sources; two subtest names
+  ("EN", "FR" of `TestChallengeLanguageCandidates`, whose table now loops over language
+  codes) were confirmed by reading the test, since such short names grep everywhere.
+
+**Results**: `lint:fields` ok; web build and `test:coverage` (TZ=UTC) pass, 3,498 tests;
+`go vet`, `go build ./...`, gofmt 1.26.1 clean; `golangci-lint --new-from-merge-base=origin/main`
+0 issues; `go test` for `platform/duckdb`, `notify`, `service` ok, and the duckdb integration
+tests for filters and FR translations ok.
+
+**Next step**: push, let CI rule, take PR #28 out of draft.

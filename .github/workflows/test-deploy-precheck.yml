@@ -24,7 +24,7 @@ on:
     # Docker, inutile pour un commit qui ne touche que des notes d'agent.
     # MISE EN GARDE identique : ne JAMAIS élargir à `docs/**` — le Dockerfile
     # fait `COPY docs /app/docs` et l'API lit docs/CHANGELOG.md +
-    # docs/{FR/,}RELEASE_NOTES.md au runtime. Seul docs/adr/** est ignoré.
+    # docs/RELEASE_NOTES.md at runtime. Only docs/adr/** is ignored.
     paths-ignore:
       - ".ai/**"
       - ".claude/**"

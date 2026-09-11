@@ -1,6 +1,6 @@
-// Package ops — data_quality.go : comptages et listes des « inconnus » data
-// pour le dashboard monitoring admin (assets UUID bruts, modes sans
-// traduction FR, playlists hors catalogue, xuids orphelins, lying bits).
+// Package ops — data_quality.go: counts and lists of data-quality issues for
+// the admin monitoring dashboard (raw UUID assets, unknown modes, playlists
+// outside the catalog, orphaned XUIDs, and lying bits).
 //
 // Fonctions pures sur *sql.DB (testables sur DuckDB :memory:) — l'ouverture
 // des handles (shared RO + metadata RW partagé) appartient au caller
@@ -85,7 +85,7 @@ var rawUUIDColumns = []struct{ Kind, IDCol, NameCol string }{
 
 // CountDataQuality calcule tous les compteurs d'inconnus. Best-effort par
 // section : une requête en échec est remontée en erreur (le caller dégrade).
-func CountDataQuality(ctx context.Context, sharedDB, metaDB *sql.DB, titleSlug, locale string) (DataQualityCounts, error) {
+func CountDataQuality(ctx context.Context, sharedDB, metaDB *sql.DB, titleSlug string) (DataQualityCounts, error) {
 	var c DataQualityCounts
 	if sharedDB == nil {
 		return c, fmt.Errorf("data_quality: sharedDB nil")
@@ -101,7 +101,7 @@ func CountDataQuality(ctx context.Context, sharedDB, metaDB *sql.DB, titleSlug, 
 		}
 	}
 
-	untranslated, err := listUntranslatedModes(ctx, sharedDB, metaDB, locale)
+	untranslated, err := listUntranslatedModes(ctx, sharedDB, metaDB)
 	if err != nil {
 		return c, err
 	}
@@ -151,7 +151,7 @@ func CountDataQuality(ctx context.Context, sharedDB, metaDB *sql.DB, titleSlug, 
 // est découpée en mémoire — les volumes réels sont bornés (nombre d'assets/xuids
 // distincts) et déjà scannés intégralement par CountDataQuality.
 func ListDataQualityIssues(
-	ctx context.Context, sharedDB, metaDB *sql.DB, titleSlug, kind, locale string, limit, offset int,
+	ctx context.Context, sharedDB, metaDB *sql.DB, titleSlug, kind string, limit, offset int,
 ) ([]DataQualityIssue, int, error) {
 	if sharedDB == nil {
 		return nil, 0, fmt.Errorf("data_quality: sharedDB nil")
@@ -168,7 +168,7 @@ func ListDataQualityIssues(
 	case "raw_uuids":
 		all, err = listRawUUIDs(ctx, sharedDB, 0)
 	case "untranslated_modes":
-		all, err = listUntranslatedModes(ctx, sharedDB, metaDB, locale)
+		all, err = listUntranslatedModes(ctx, sharedDB, metaDB)
 	case "orphan_playlists":
 		all, err = listOrphanPlaylists(ctx, sharedDB, metaDB, titleSlug, 0)
 	case "orphan_xuids":
@@ -240,12 +240,10 @@ func listRawUUIDs(ctx context.Context, sharedDB *sql.DB, limit int) ([]DataQuali
 	return out, nil
 }
 
-// metaTableExists indique si une table existe dans la metadata du titre.
-// Certains titres ont un schéma metadata PROPRE (PMT-9 : Halo 5 n'a ni
-// mode_name_tr ni playlists_catalog — ses référentiels vivent ailleurs,
-// asset_translations/pair_name_fr). Un détecteur qui dépend d'un référentiel
-// absent du SCHÉMA du titre est NON APPLICABLE : introspection plutôt que
-// Catalog Error (qui faisait tomber tout l'endpoint en 500 pour le titre).
+// metaTableExists reports whether a table exists in a title's metadata.
+// Some titles have a separate metadata schema, so a detector that depends on
+// an absent catalog is not applicable and must return an empty result instead
+// of turning the endpoint into a 500 response.
 func metaTableExists(ctx context.Context, metaDB *sql.DB, table string) (bool, error) {
 	var n int
 	if err := metaDB.QueryRowContext(ctx,
@@ -259,18 +257,11 @@ func metaTableExists(ctx context.Context, metaDB *sql.DB, table string) (bool, e
 	return n > 0, nil
 }
 
-// listUntranslatedModes liste les modes (clé normalisée via
-// analysis.NormalizeModeLabel) absents de mode_name_tr[lang='fr']. Dégradations :
-//   - metaDB nil (metadata absente/illisible) → tout est considéré non traduit
-//     (dégradation explicite plutôt que faux vert) ;
-//   - table mode_name_tr ABSENTE DU SCHÉMA du titre → détecteur non applicable
-//     (le titre gère ses traductions autrement) → liste vide, jamais une erreur.
-//
-// locale : langue cible de mode_name_tr (défaut « fr » si vide) — paramètre ?locale=.
-func listUntranslatedModes(ctx context.Context, sharedDB, metaDB *sql.DB, locale string) ([]DataQualityIssue, error) {
-	if locale == "" {
-		locale = "fr"
-	}
+// listUntranslatedModes lists normalized modes absent from the English
+// mode_name_tr catalog. A missing metadata handle treats every observed mode
+// as unresolved; a title without the catalog makes this detector inapplicable
+// and returns an empty list.
+func listUntranslatedModes(ctx context.Context, sharedDB, metaDB *sql.DB) ([]DataQualityIssue, error) {
 	if metaDB != nil {
 		exists, err := metaTableExists(ctx, metaDB, "mode_name_tr")
 		if err != nil {
@@ -282,16 +273,16 @@ func listUntranslatedModes(ctx context.Context, sharedDB, metaDB *sql.DB, locale
 			return []DataQualityIssue{}, nil
 		}
 	}
-	frSet := map[string]struct{}{}
+	knownSet := map[string]struct{}{}
 	if metaDB != nil {
-		rows, err := metaDB.QueryContext(ctx, `SELECT mode_en FROM mode_name_tr WHERE lang = ?`, locale)
+		rows, err := metaDB.QueryContext(ctx, `SELECT mode_en FROM mode_name_tr WHERE lang = 'en'`)
 		if err != nil {
 			return nil, fmt.Errorf("load mode_name_tr: %w", err)
 		}
 		for rows.Next() {
 			var k string
 			if scanErr := rows.Scan(&k); scanErr == nil {
-				frSet[strings.TrimSpace(k)] = struct{}{}
+				knownSet[strings.TrimSpace(k)] = struct{}{}
 			}
 		}
 		rows.Close()
@@ -302,7 +293,7 @@ func listUntranslatedModes(ctx context.Context, sharedDB, metaDB *sql.DB, locale
 		return nil, err
 	}
 
-	byMode, err := aggregateUntranslatedModes(ctx, sharedDB, frSet, mapLabels)
+	byMode, err := aggregateUntranslatedModes(ctx, sharedDB, knownSet, mapLabels)
 	if err != nil {
 		return nil, err
 	}
@@ -335,8 +326,8 @@ type untranslatedModeAgg struct {
 	hasLast  bool
 }
 
-// aggregateUntranslatedModes groupe les pair_name de match_registry par mode
-// normalisé (NormalizeModeLabel) et écarte ceux déjà traduits (frSet).
+// aggregateUntranslatedModes groups match_registry pair_name values by their
+// normalized mode and excludes modes already present in the English catalog.
 func aggregateUntranslatedModes(
 	ctx context.Context, sharedDB *sql.DB, frSet map[string]struct{}, mapLabels []string,
 ) (map[string]*untranslatedModeAgg, error) {

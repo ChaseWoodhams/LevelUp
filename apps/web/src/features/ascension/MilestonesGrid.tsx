@@ -128,12 +128,12 @@ interface MilestoneCardProps {
   t: ReturnType<typeof getAscensionText>
 }
 
-function MilestoneCard({ milestone: m, locale, t }: MilestoneCardProps) {
-  const title = locale === 'fr' ? m.title_fr : m.title_en
+function MilestoneCard({ milestone: m, t }: MilestoneCardProps) {
+  const title = m.title_en
   const metricText = useMetricLabel(m.metric)
   // A9 : description lisible localisée ; jamais la formule technique. Absente
   // pour les jalons sans condition explicite -> on n'affiche rien.
-  const condition = locale === 'fr' ? m.condition_fr : m.condition_en
+  const condition = m.condition_en
 
   const cardTone = m.earned
     ? 'border-amber-500/40 bg-amber-500/10' // color-allow: amber distinction milestone earned (CLAUDE.md §20 badge UI)
@@ -161,7 +161,7 @@ function MilestoneCard({ milestone: m, locale, t }: MilestoneCardProps) {
       )}
       {m.earned && m.earned_at && (
         <p className="mt-auto text-2xs text-amber-700 dark:text-amber-300"> {/* color-allow: amber distinction milestone earned (CLAUDE.md §20) */}
-          {interpolate(t.milestonesEarnedAt, { date: formatAscensionDate(m.earned_at, locale) })}
+          {interpolate(t.milestonesEarnedAt, { date: formatAscensionDate(m.earned_at) })}
         </p>
       )}
     </article>

@@ -27,8 +27,8 @@ func NewMilestoneCatalogRepo(db *DB) *MilestoneCatalogRepo {
 var _ milestones.CatalogRepo = (*MilestoneCatalogRepo)(nil)
 
 const milestoneCatalogSelectColumns = `
-SELECT id, title_slug, metric, threshold, title_en, title_fr, icon,
-       condition, condition_fr, condition_en
+SELECT id, title_slug, metric, threshold, title_en, title_en, icon,
+       condition_en, condition_en, condition_en
 FROM milestone_catalog`
 
 // Upsert insère ou remplace une entrée du catalogue.

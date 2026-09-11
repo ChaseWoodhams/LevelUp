@@ -11,1943 +11,1478 @@
 #   3. Consommer via `t('common.section.subkey')` dans le composant
 
 [common.period.all]
-fr = "Toutes les périodes"
 en = "All periods"
 
 [common.period.last_2y]
-fr = "2 dernières années"
 en = "Last 2 years"
 
 [common.period.last_1y]
-fr = "Dernière année"
 en = "Last year"
 
 [common.period.last_1m]
-fr = "Dernier mois"
 en = "Last month"
 
 [common.period.last_1w]
-fr = "Dernière semaine"
 en = "Last week"
 
 [common.outcome.win]
-fr = "Victoire"
 en = "Win"
 
 [common.outcome.loss]
-fr = "Défaite"
 en = "Loss"
 
 [common.outcome.tie]
-fr = "Égalité"
 en = "Tie"
 
 [common.outcome.dnf]
-fr = "Non terminé"
 en = "DNF"
 
 # Pluralisation ICU MessageFormat : {n, plural, one {...} other {...}}
 [common.kpi.matches_count]
-fr = "{n, plural, one {# match} other {# matchs}}"
 en = "{n, plural, one {# match} other {# matches}}"
 
 [common.kpi.kills]
-fr = "Frags"
 en = "Kills"
 
 [common.kpi.deaths]
-fr = "Morts"
 en = "Deaths"
 
 [common.kpi.assists]
-fr = "Assistances"
 en = "Assists"
 
 [common.kpi.kda]
-fr = "K/D/A"
 en = "K/D/A"
 
 [common.kpi.accuracy]
-fr = "Précision"
 en = "Accuracy"
 
 [common.empty.no_data]
-fr = "Aucune donnée à afficher"
 en = "No data to display"
 
 [common.empty.loading]
-fr = "Chargement…"
 en = "Loading…"
 
 [common.empty.error]
-fr = "Erreur de chargement"
 en = "Loading error"
 
 # ─── Shell : navigation et sync status (NavL1, NavL2, AppShellHeader) ───────
 
 [common.shell.sync_running_title]
-fr = "Synchronisation en cours…"
 en = "Sync in progress…"
 
 [common.shell.sync_running_aria]
-fr = "Synchronisation en cours"
 en = "Sync running"
 
 [common.shell.sync_uptodate_title]
-fr = "À jour"
 en = "Up to date"
 
 [common.shell.sync_uptodate_aria]
-fr = "Synchronisation à jour"
 en = "Sync up to date"
 
 [common.shell.nav_main_aria]
-fr = "Navigation principale"
 en = "Main navigation"
 
 [common.shell.logout]
-fr = "Se déconnecter"
 en = "Log out"
 
 [common.shell.logout_failed]
-fr = "Échec de la déconnexion."
 en = "Logout failed."
 
 [common.shell.logo_aria]
-fr = "LevelUp — retour à l'accueil"
 en = "LevelUp — back to home"
 
 [common.shell.settings_tabs_aria]
-fr = "Onglets Paramètres"
 en = "Settings tabs"
 
 [common.shell.nav_menu_open]
-fr = "Ouvrir le menu de navigation"
 en = "Open navigation menu"
 
 [common.shell.nav_menu_close]
-fr = "Fermer le menu"
 en = "Close menu"
 
 [common.shell.nav_menu_title]
-fr = "Navigation"
 en = "Navigation"
 
 [common.shell.nav_actions_open]
-fr = "Ouvrir le menu compte et outils"
 en = "Open account and tools menu"
 
 [common.shell.nav_actions_title]
-fr = "Compte & outils"
 en = "Account & tools"
 
 [common.shell.nav_account]
-fr = "Compte"
 en = "Account"
 
 [common.shell.nav_tools]
-fr = "Outils"
 en = "Tools"
 
 [common.shell.nav_help]
-fr = "Aide"
 en = "Help"
 
 [common.shell.nav_settings]
-fr = "Paramètres"
 en = "Settings"
 
 [common.shell.nav_theme]
-fr = "Thème"
 en = "Theme"
 
 [common.shell.nav_game]
-fr = "Jeu"
 en = "Game"
 
 [common.shell.title_coming_soon]
-fr = "Bientôt disponible"
 en = "Coming soon"
 
 [common.shell.nav_career_aria]
-fr = "Navigation carrière"
 en = "Career navigation"
 
 [common.shell.nav_analytics_aria]
-fr = "Navigation analytique"
 en = "Analytics navigation"
 
 [common.shell.nav_community_aria]
-fr = "Navigation communauté"
 en = "Community navigation"
 
 [common.shell.nav_player_aria]
-fr = "Navigation joueur"
 en = "Player navigation"
 
 [common.shell.player_change_aria]
-fr = "Changer de titre"
 en = "Change title"
 
 [common.shell.player_select]
-fr = "Sélectionner un joueur"
 en = "Select a player"
 
 # ─── Filter pills (FiltresPill, etc.) ────────────────────────────────────
 
 [common.filters.incompatible_aria]
-fr = "Filtres incompatibles"
 en = "Incompatible filters"
 
 [common.filters.advanced_aria]
-fr = "Filtres avancés"
 en = "Advanced filters"
 
 [common.filters.options_updating]
-fr = "Mise à jour des options disponibles…"
 en = "Updating available options…"
 
 [common.filters.experience_type_title]
-fr = "Type d'expérience"
 en = "Experience type"
 
 # ─── Player scope navigation ────────────────────────────────────────────
 
 [common.player_scope.nav_aria]
-fr = "Navigation joueur"
 en = "Player navigation"
 
 [common.player_scope.section_label]
-fr = "Navigation joueur"
 en = "Player navigation"
 
 [common.player_scope.section_title]
-fr = "Parcours principal"
 en = "Main journey"
 
 [common.player_scope.secondary_label]
-fr = "Vues secondaires"
 en = "Secondary views"
 
 [common.player_scope.secondary_hint]
-fr = "Accès plus ciblés"
 en = "More targeted access"
 
 # ─── App shell header ────────────────────────────────────────────────────
 
 [common.shell.header_subtitle]
-fr = "Un shell plus compact, sans sidebar, pour lire vite et plonger plus loin quand c'est utile."
 en = "A more compact shell, sidebarless, for fast reading and deeper dives when needed."
 
 [common.shell.halo_session_label]
-fr = "Session Halo :"
 en = "Halo session:"
 
 [common.shell.hint_section_kept]
-fr = "Le shell garde la section courante quand c'est possible, sinon il revient sur l'accueil du joueur."
 en = "The shell keeps the current section when possible, otherwise it falls back to the player home."
 
 # ─── Filter pill experience type ────────────────────────────────────────
 
 [common.filters.playlists_title]
-fr = "Sélections"
 en = "Playlists"
 
 [common.filters.modes_title]
-fr = "Modes"
 en = "Modes"
 
 [common.filters.maps_title]
-fr = "Cartes"
 en = "Maps"
 
 # ─── Error boundary fallback (class component, locale = fr fallback) ────
 
 [common.error.boundary_title]
-fr = "Une erreur est survenue"
 en = "An error occurred"
 
 [common.error.boundary_description]
-fr = "L'application a rencontré un problème inattendu. Rechargez la page pour réessayer."
 en = "The application encountered an unexpected problem. Reload the page to try again."
 
 [common.error.reload_action]
-fr = "Recharger la page"
 en = "Reload page"
 
 # ─── Auth pages (LoginPage, RegisterPage) ────────────────────────────
 
 [common.auth.username_label]
-fr = "Identifiant"
 en = "Username"
 
 [common.auth.username_placeholder]
-fr = "Ton identifiant"
 en = "Your username"
 
 [common.auth.password_label]
-fr = "Mot de passe"
 en = "Password"
 
 [common.auth.password_placeholder_min]
-fr = "8 caractères minimum"
 en = "8 characters minimum"
 
 [common.auth.password_placeholder_short]
-fr = "8 car. min."
 en = "8 char. min."
 
 [common.auth.username_placeholder_range]
-fr = "3-30 caractères"
 en = "3-30 characters"
 
 [common.auth.confirm_password]
-fr = "Confirmer le mot de passe"
 en = "Confirm password"
 
 [common.auth.invitation_code]
-fr = "Code d'invitation"
 en = "Invitation code"
 
 [common.auth.login_action]
-fr = "Se connecter"
 en = "Sign in"
 
 [common.auth.login_pending]
-fr = "Connexion…"
 en = "Signing in…"
 
 [common.auth.no_account_prompt]
-fr = "Pas encore de compte ?"
 en = "No account yet?"
 
 [common.auth.create_account]
-fr = "Créer un compte"
 en = "Create account"
 
 [common.auth.already_account]
-fr = "Déjà un compte ?"
 en = "Already have an account?"
 
 [common.auth.first_launch_admin]
-fr = "Premier lancement — le compte sera administrateur."
 en = "First launch — the account will be administrator."
 
 [common.auth.invalid_credentials]
-fr = "Identifiants incorrects."
 en = "Invalid credentials."
 
 [common.auth.connection_error]
-fr = "Erreur de connexion."
 en = "Connection error."
 
 # ─── Help menu ───────────────────────────────────────────────────────────
 
 [common.help.glossary]
-fr = "Glossaire & Concepts"
 en = "Glossary & Concepts"
 
 [common.help.release_notes]
-fr = "Notes de version"
 en = "Release notes"
 
 # ─── Admin & setup pages ────────────────────────────────────────────────
 
 [common.admin.no_users]
-fr = "Aucun utilisateur."
 en = "No users."
 
 [common.admin.new_password_for]
-fr = "Nouveau MDP pour"
 en = "New password for"
 
 [common.admin.invitation_codes_section]
-fr = "Codes d'invitation"
 en = "Invitation codes"
 
 [common.admin.no_invitation_codes]
-fr = "Aucun code d'invitation."
 en = "No invitation codes."
 
 [common.admin.invite_generated]
-fr = "Code généré :"
 en = "Code generated:"
 
 [common.admin.invite_generate_failed]
-fr = "Échec de la génération du code."
 en = "Failed to generate code."
 
 [common.admin.invariants_refresh]
-fr = "Vérifier"
 en = "Check"
 
 [common.admin.invariants_loading]
-fr = "Vérification…"
 en = "Checking…"
 
 [common.admin.invariants_empty]
-fr = "Aucun joueur suivi."
 en = "No tracked players."
 
 [common.admin.invariants_all_ok]
-fr = "Tous les invariants sont respectés."
 en = "All invariants hold."
 
 [common.admin.invariants_check_error]
-fr = "Vérification impossible"
 en = "Check failed"
 
 [common.admin.invariants_generated_at]
-fr = "Vérifié à"
 en = "Checked at"
 
 [common.admin.invariants_load_failed]
-fr = "Échec de la vérification des invariants."
 en = "Failed to run invariants check."
 
 [common.admin.invariants_shared_scope]
-fr = "Données partagées"
 en = "Shared data"
 
 [common.admin.page_title]
-fr = "Administration"
 en = "Administration"
 
 [common.admin.back]
-fr = "Retour"
 en = "Back"
 
 [common.admin.loading]
-fr = "Chargement…"
 en = "Loading…"
 
 [common.admin.refresh]
-fr = "Rafraîchir"
 en = "Refresh"
 
 [common.admin.delete_user_confirm]
-fr = "Supprimer l'utilisateur"
 en = "Delete user"
 
 [common.admin.demote_to_user]
-fr = "→ user"
 en = "→ user"
 
 [common.admin.promote_to_admin]
-fr = "→ admin"
 en = "→ admin"
 
 [common.admin.password_btn]
-fr = "MDP"
 en = "Password"
 
 [common.admin.delete]
-fr = "Supprimer"
 en = "Delete"
 
 [common.admin.ok]
-fr = "OK"
 en = "OK"
 
 [common.admin.cancel]
-fr = "Annuler"
 en = "Cancel"
 
 [common.admin.generating]
-fr = "Génération…"
 en = "Generating…"
 
 [common.admin.generate_code]
-fr = "Générer un code"
 en = "Generate a code"
 
 [common.admin.invite_by]
-fr = "par"
 en = "by"
 
 [common.admin.invite_expires]
-fr = "expire"
 en = "expires"
 
 [common.admin.invite_used_by]
-fr = "utilisé par"
 en = "used by"
 
 [common.admin.revoke]
-fr = "Révoquer"
 en = "Revoke"
 
 [common.admin.expired]
-fr = "expiré"
 en = "expired"
 
 [common.admin.contention_section]
-fr = "Contention DB (sync)"
 en = "DB contention (sync)"
 
 [common.admin.contention_desc]
-fr = "Bascules lecture/écriture de la base partagée pendant le sync. Beaucoup de swaps, une attente de drain élevée ou des lectures rejetées (503) = l'app patiente pendant les écritures."
 en = "Read/write switches of the shared database during sync. Many swaps, high drain wait, or rejected reads (503) = the app waits during writes."
 
 [common.admin.contention_unavailable]
-fr = "Métriques de contention indisponibles."
 en = "Contention metrics unavailable."
 
 [common.admin.contention_swaps]
-fr = "Écritures (swaps)"
 en = "Writes (swaps)"
 
 [common.admin.contention_acquire]
-fr = "Bascule RO→RW moy."
 en = "Avg RO→RW switch"
 
 [common.admin.contention_release]
-fr = "Retour RW→RO moy."
 en = "Avg RW→RO return"
 
 [common.admin.contention_drain]
-fr = "Attente drain (cumul)"
 en = "Drain wait (total)"
 
 [common.admin.contention_blocked_avg]
-fr = "Blocage lecteurs moy."
 en = "Avg reader block"
 
 [common.admin.contention_blocked_max]
-fr = "Blocage lecteurs max"
 en = "Max reader block"
 
 [common.admin.contention_503]
-fr = "Lectures rejetées (503)"
 en = "Reads rejected (503)"
 
 [common.admin.contention_failures]
-fr = "Échecs de swap"
 en = "Swap failures"
 
 [common.admin.contention_readers]
-fr = "Lecteurs en vol"
 en = "In-flight readers"
 
 [common.admin.contention_state]
-fr = "État courant"
 en = "Current state"
 
 [common.admin.contention_rw_avg]
-fr = "Détention writer moy."
 en = "Avg writer hold"
 
 [common.admin.contention_rw_max]
-fr = "Détention writer max"
 en = "Max writer hold"
 
 [common.admin.contention_watchdog]
-fr = "Watchdog (> seuil)"
 en = "Watchdog (> threshold)"
 
 [common.admin.contention_holders_title]
-fr = "Détenteurs du writer (fenêtre RW par label)"
 en = "Writer holders (RW window by label)"
 
 [common.admin.contention_holder_label]
-fr = "Détenteur"
 en = "Holder"
 
 [common.admin.contention_holder_count]
-fr = "Nb"
 en = "Count"
 
 [common.admin.contention_holder_total]
-fr = "Total"
 en = "Total"
 
 [common.admin.contention_holder_avg]
-fr = "Moy."
 en = "Avg"
 
 [common.admin.contention_holder_max]
-fr = "Max"
 en = "Max"
 
 [common.admin.tokens_section]
-fr = "Santé des tokens"
 en = "Token health"
 
 [common.admin.tokens_desc]
-fr = "État des tokens d'authentification Halo par joueur (lecture seule, sans déclencher de refresh). « reauth requis » = reconnexion SSO Xbox nécessaire."
 en = "State of Halo authentication tokens per player (read-only, no refresh triggered). « reauth required » = Xbox SSO sign-in needed."
 
 [common.admin.tokens_unavailable]
-fr = "Santé des tokens indisponible."
 en = "Token health unavailable."
 
 [common.admin.tokens_store_unavailable]
-fr = "Store de tokens non configuré (mode legacy)."
 en = "Token store not configured (legacy mode)."
 
 [common.admin.no_tracked_players]
-fr = "Aucun joueur suivi."
 en = "No tracked players."
 
 [common.admin.xsts_expires_on]
-fr = "XSTS expire le"
 en = "XSTS expires on"
 
 [common.admin.token_refresh]
-fr = "Refresh"
 en = "Refresh"
 
 [common.admin.token_msal]
-fr = "MSAL"
 en = "MSAL"
 
 [common.admin.token_xsts]
-fr = "XSTS"
 en = "XSTS"
 
 [common.admin.token_status_ok]
-fr = "OK"
 en = "OK"
 
 [common.admin.token_status_expiring]
-fr = "expire bientôt"
 en = "expiring soon"
 
 [common.admin.token_status_expired]
-fr = "expiré"
 en = "expired"
 
 [common.admin.token_status_absent]
-fr = "absent"
 en = "absent"
 
 [common.admin.token_status_reauth]
-fr = "reauth requis"
 en = "reauth required"
 
 [common.admin.token_source]
-fr = "Source"
 en = "Source"
 
 [common.admin.token_source_unknown]
-fr = "inconnue (aucun scan)"
 en = "unknown (no scan yet)"
 
 [common.admin.token_error_config]
-fr = "Erreur de configuration OAuth"
 en = "OAuth configuration error"
 
 [common.admin.token_error_revoked]
-fr = "Refresh token mort — re-capture requise"
 en = "Refresh token dead — re-capture required"
 
 [common.admin.token_error_transient]
-fr = "Erreur transitoire"
 en = "Transient error"
 
 [common.admin.token_error_at]
-fr = "Dernier échec"
 en = "Last failure"
 
 [common.setup.config_loading]
-fr = "Vérification de la configuration…"
 en = "Checking configuration…"
 
 [common.setup.config_title]
-fr = "Configuration de LevelUp"
 en = "LevelUp setup"
 
 [common.setup.profile_loading]
-fr = "Chargement du profil joueur…"
 en = "Loading player profile…"
 
 [common.setup.config_done]
-fr = "✓ Configuration terminée !"
 en = "✓ Setup complete!"
 
 [common.setup.access_app]
-fr = "Accéder à l'application"
 en = "Access the app"
 
 # ─── Media upload ───────────────────────────────────────────────────────
 
 [common.media.import_in_progress]
-fr = "Import en cours…"
 en = "Import in progress…"
 
 [common.media.drop_files]
-fr = "Déposer les fichiers"
 en = "Drop files"
 
 [common.media.drag_or]
-fr = "Glisser-déposer ou"
 en = "Drag and drop or"
 
 [common.media.supported_formats]
-fr = "MP4, MOV, AVI, MKV, PNG, JPG…"
 en = "MP4, MOV, AVI, MKV, PNG, JPG…"
 
 [common.media.browse]
-fr = "parcourir"
 en = "browse"
 
 [common.media.upload_success]
-fr = "{saved, plural, one {# fichier importé} other {# fichiers importés}} · {indexed} nouv. · {associated} assoc.{thumbnails, plural, =0 {} one { · # miniature} other { · # miniatures}}"
 en = "{saved, plural, one {# file imported} other {# files imported}} · {indexed} new · {associated} assoc.{thumbnails, plural, =0 {} one { · # thumbnail} other { · # thumbnails}}"
 
 [common.media.upload_error]
-fr = "Échec de l'import"
 en = "Upload failed"
 
 [common.media.associate_success]
-fr = "Média associé au match"
 en = "Media linked to match"
 
 [common.media.associate_error]
-fr = "Échec de l'association"
 en = "Association failed"
 
 # ─── Leaderboard ────────────────────────────────────────────────────────
 
 [common.leaderboard.title_world]
-fr = "Classement CSR mondial"
 en = "World CSR ranking"
 
 [common.leaderboard.title_community]
-fr = "Classement communautaire"
 en = "Community ranking"
 
 [common.leaderboard.category_label]
-fr = "Catégorie"
 en = "Category"
 
 [common.leaderboard.playlist_label]
-fr = "Sélection"
 en = "Playlist"
 
 [common.leaderboard.season_label]
-fr = "Saison"
 en = "Season"
 
 [common.leaderboard.world_hint]
-fr = "Top mondial par sélection et saison classée (source Halo Waypoint)."
 en = "World top by ranked playlist and season (source: Halo Waypoint)."
 
 [common.leaderboard.stats_hint]
-fr = "Classement des joueurs croisés (données locales)."
 en = "Ranking of players you have crossed (local data)."
 
 [common.leaderboard.season_archived_badge]
-fr = "archivée"
 en = "archived"
 
 [common.leaderboard.archived_season_note]
-fr = "Saison archivée : classement CSR uniquement (stats détaillées indisponibles pour cette saison)."
 en = "Archived season: CSR ranking only (detailed stats unavailable for this season)."
 
 [common.leaderboard.enrichment_unavailable]
-fr = "Stats détaillées indisponibles pour ce relevé : classement CSR seul ({enriched} joueur(s) enrichi(s) sur {total} affichés)."
 en = "Detailed stats unavailable for this snapshot: CSR ranking only ({enriched} of {total} listed players enriched)."
 
 [common.leaderboard.enrichment_partial]
-fr = "Stats détaillées partielles : {enriched} joueurs enrichis sur {total} affichés — les autres lignes restent vides."
 en = "Partial detailed stats: {enriched} of {total} listed players enriched — the other rows stay empty."
 
 [common.leaderboard.col_player]
-fr = "Joueur"
 en = "Player"
 
 [common.leaderboard.col_tier]
-fr = "Rang"
 en = "Tier"
 
 [common.leaderboard.col_csr]
-fr = "CSR"
 en = "CSR"
 
 [common.leaderboard.col_matches]
-fr = "Matchs"
 en = "Matches"
 
 [common.leaderboard.col_value]
-fr = "Valeur"
 en = "Value"
 
 [common.leaderboard.col_win_rate]
-fr = "Victoires"
 en = "Win rate"
 
 [common.leaderboard.col_kda]
-fr = "FDA"
 en = "KDA"
 
 [common.leaderboard.col_frags]
-fr = "Frags"
 en = "Kills"
 
 [common.leaderboard.col_deaths]
-fr = "Morts"
 en = "Deaths"
 
 [common.leaderboard.col_assists]
-fr = "Assistances"
 en = "Assists"
 
 [common.leaderboard.col_rank_delta]
-fr = "Δ rang"
 en = "Rank Δ"
 
 [common.leaderboard.col_accuracy]
-fr = "Précision"
 en = "Accuracy"
 
 [common.leaderboard.col_dmg_per_kill]
-fr = "Dég./frag"
 en = "Dmg/kill"
 
 [common.leaderboard.col_dmg_per_death]
-fr = "Dég./mort"
 en = "Dmg/death"
 
 [common.leaderboard.trend_tooltip]
-fr = "Tendance vs saison précédente"
 en = "Trend vs previous season"
 
 [common.leaderboard.rank_delta_tooltip]
-fr = "Évolution du rang vs saison précédente"
 en = "Rank change vs previous season"
 
 [common.leaderboard.local_badge]
-fr = "Local"
 en = "Local"
 
 [common.leaderboard.cat_csr_world]
-fr = "CSR mondial"
 en = "World CSR"
 
 [common.leaderboard.cat_kills]
-fr = "Frags"
 en = "Kills"
 
 [common.leaderboard.cat_kda]
-fr = "FDA"
 en = "KDA"
 
 [common.leaderboard.cat_kdr]
-fr = "KDR"
 en = "KDR"
 
 [common.leaderboard.cat_kills_per_game]
-fr = "Frags/partie"
 en = "Kills/game"
 
 [common.leaderboard.cat_accuracy]
-fr = "Précision"
 en = "Accuracy"
 
 [common.leaderboard.cat_damage]
-fr = "Dégâts"
 en = "Damage"
 
 [common.leaderboard.cat_assists]
-fr = "Assistances"
 en = "Assists"
 
 [common.leaderboard.empty_title]
-fr = "Classement vide"
 en = "Empty leaderboard"
 
 # ─── Root layout (API errors, bootstrap) ────────────────────────────────
 
 [common.root.api_unreachable]
-fr = "Impossible de contacter l'API."
 en = "Cannot reach the API."
 
 [common.root.api_check_server_prefix]
-fr = "Vérifiez que le serveur Go est démarré ("
 en = "Make sure the Go server is running ("
 
 [common.root.api_check_server_suffix]
-fr = ")."
 en = ")."
 
 [common.root.api_retry]
-fr = "Réessayer"
 en = "Retry"
 
 [common.root.loading_app]
-fr = "Chargement LevelUp…"
 en = "Loading LevelUp…"
 
 # ─── Reauth banner (refresh_token Xbox mort) ────────────────────────────
 
 [common.reauth.message]
-fr = "La connexion Xbox a expiré — la synchronisation des données est en pause."
 en = "The Xbox connection has expired — data sync is paused."
 
 [common.reauth.action]
-fr = "Rafraîchir"
 en = "Refresh"
 
 # ─── Index route (no player configured) ─────────────────────────────────
 
 [common.index.no_player_configured]
-fr = "Aucun joueur configuré."
 en = "No player configured."
 
 [common.index.configure_app]
-fr = "Configurer l'application"
 en = "Configure the app"
 
 # ─── Replay placeholder ─────────────────────────────────────────────────
 
 [common.replay.in_development]
-fr = "Le rejouer le match en 2D est en cours de développement."
 en = "The 2D match replay is under development."
 
 [common.replay.back_to_match]
-fr = "← Retour au match"
 en = "← Back to match"
 
 # ─── Filter pills (tooltips, ARIA) ──────────────────────────────────────
 
 [common.filters.reset_title]
-fr = "Réinitialiser tous les filtres"
 en = "Reset all filters"
 
 [common.filters.reset_label]
-fr = "↺ Réinitialiser"
 en = "↺ Reset"
 
 [common.filters.matches_count_title]
-fr = "Nombre de matchs correspondant aux filtres actifs"
 en = "Number of matches matching active filters"
 
 [common.filters.browse_label]
-fr = "Voir les matchs"
 en = "View matches"
 
 [common.filters.browse_title]
-fr = "Parcourir les matchs un par un"
 en = "Browse matches one by one"
 
 [common.filters.share_copy]
-fr = "Copier le lien avec les filtres"
 en = "Copy link with filters"
 
 [common.filters.share_copied]
-fr = "Lien copié"
 en = "Link copied"
 
 [common.filters.apply_pending_title]
-fr = "Applique les filtres en attente (cascade et période). Coéquipiers et sessions s'appliquent en direct."
 en = "Apply pending filters (cascade and period). Teammates and sessions apply live."
 
 [common.filters.incompatible_title]
-fr = "Incompatible avec les filtres actifs — cliquez pour désélectionner"
 en = "Incompatible with active filters — click to deselect"
 
 [common.filters.with_selection_hint]
-fr = "avec la sélection actuelle. Cliquez Analyser pour"
 en = "with the current selection. Click Analyze to"
 
 [common.filters.incompatible_full]
-fr = "{n, plural, one {# filtre incompatible} other {# filtres incompatibles}} avec la sélection actuelle. Cliquez Analyser pour les retirer automatiquement."
 en = "{n, plural, one {# incompatible filter} other {# incompatible filters}} with the current selection. Click Analyze to remove them automatically."
 
 [common.filters.period_session_auto]
-fr = "Sélectionner une période vide automatiquement la session active."
 en = "Selecting a period automatically empties the active session."
 
 [common.filters.season_aria]
-fr = "Choix de la saison"
 en = "Season selector"
 
 # ─── Pill Saison — libellés en dur restants (GH2-B1, 2026-07-09) ─────────────
 
 [common.filters.season_pill_label]
-fr = "Saison"
 en = "Season"
 
 [common.filters.season_all]
-fr = "Toutes saisons"
 en = "All seasons"
 
 [common.filters.season_empty_fold]
-fr = "+ {n, plural, one {# saison sans matchs} other {# saisons sans matchs}}"
 en = "+ {n, plural, one {# season without matches} other {# seasons without matches}}"
 
 [common.filters.session_search_placeholder]
-fr = "Rechercher une session…"
 en = "Search a session…"
 
 [common.filters.session_all]
-fr = "Toutes les sessions"
 en = "All sessions"
 
 [common.filters.session_no_match]
-fr = "Aucune session ne correspond."
 en = "No session matches."
 
 # ─── Gamertag combobox (sectioned dropdown) ─────────────────────────────
 
 [common.gamertag.players_configured]
-fr = "Joueurs configurés"
 en = "Configured players"
 
 [common.gamertag.frequent_teammates]
-fr = "Coéquipiers fréquents"
 en = "Frequent teammates"
 
 [common.gamertag.no_player_found_prefix]
-fr = "Aucun joueur trouvé pour \""
 en = "No player found for \""
 
 # Repli live explicite (V72-24) : bouton affiché quand la recherche locale ne
 # trouve pas le joueur, déclenchant la résolution Xbox (round-trip ~2-3 s).
 [common.gamertag.search_on_xbox]
-fr = "Rechercher sur Xbox"
 en = "Search on Xbox"
 
 [common.gamertag.searching_xbox]
-fr = "Recherche sur Xbox…"
 en = "Searching on Xbox…"
 
 # Retour explicite quand le repli live a abouti SANS aucun joueur : sans ce
 # message l'utilisateur voit le bouton disparaître sans rien afficher et croit
 # que la recherche n'a pas fonctionné.
 [common.gamertag.no_xbox_result]
-fr = "Aucun résultat Xbox"
 en = "No Xbox result"
 
 [common.gamertag.xbox_badge]
-fr = "Xbox"
 en = "Xbox"
 
 # ─── Info tooltip ───────────────────────────────────────────────────────
 
 [common.tooltip.more_info_aria]
-fr = "Plus d'informations"
 en = "More information"
 
 # ─── Match card ─────────────────────────────────────────────────────────
 
 [common.match_card.placement_prefix]
-fr = "Placement : #"
 en = "Placement: #"
 
 [common.match_card.map_unknown]
-fr = "Map inconnue"
 en = "Unknown map"
 
 [common.match_card.favorite_add]
-fr = "Ajouter aux favoris"
 en = "Add to favorites"
 
 [common.match_card.favorite_remove]
-fr = "Retirer des favoris"
 en = "Remove from favorites"
 
 [common.match_card.squad]
-fr = "Escouade"
 en = "Squad"
 
 [common.match_card.solo]
-fr = "Solo"
 en = "Solo"
 
 [common.match_card.performance]
-fr = "Performance"
 en = "Performance"
 
 [common.match_card.frags]
-fr = "frags"
 en = "kills"
 
 [common.match_card.assists]
-fr = "assist."
 en = "assists"
 
 [common.match_card.deaths]
-fr = "morts"
 en = "deaths"
 
 [common.match_card.headshots]
-fr = "T. tête"
 en = "Headshots"
 
 [common.match_card.kda]
-fr = "FDA"
 en = "KDA"
 
 [common.match_card.perfect_kills]
-fr = "Parfaits"
 en = "Perfect"
 
 [common.match_card.offensive_yield]
-fr = "Rendement"
 en = "Yield"
 
 [common.match_card.defensive_resistance]
-fr = "Résistance"
 en = "Resistance"
 
 [common.match_card.dmg_per_kill]
-fr = "{n} dégâts/frag"
 en = "{n} dmg/kill"
 
 [common.match_card.dmg_per_death]
-fr = "{n} dégâts/mort"
 en = "{n} dmg/death"
 
 [common.match_card.accuracy]
-fr = "Précision"
 en = "Accuracy"
 
 [common.match_card.avg_life]
-fr = "Vie moy."
 en = "Avg. life"
 
 [common.match_card.team]
-fr = "Équipe"
 en = "Team"
 
 [common.match_card.enemies]
-fr = "Adversaires"
 en = "Enemies"
 
 [common.match_card.mastered]
-fr = "Maîtrisé !"
 en = "Mastered!"
 
 [common.match_card.duration_label]
-fr = "Durée :"
 en = "Duration:"
 
 [common.match_card.date_label]
-fr = "Date :"
 en = "Date:"
 
 # ─── Setup wizard (StepDeviceCode, StepInitialSync, StepPlayer) ─────────
 
 [common.setup.device_starting]
-fr = "Démarrage du Device Code Flow…"
 en = "Starting Device Code Flow…"
 
 [common.setup.device_start_failed]
-fr = "Impossible de démarrer la connexion Microsoft. Veuillez réessayer."
 en = "Unable to start Microsoft sign-in. Please try again."
 
 [common.setup.device_auth_success]
-fr = "✓ Authentification réussie !"
 en = "✓ Authentication successful!"
 
 [common.setup.microsoft_account_identified]
-fr = "Compte Microsoft identifié :"
 en = "Microsoft account identified:"
 
 [common.setup.profile_loading_short]
-fr = "Chargement du profil…"
 en = "Loading profile…"
 
 [common.setup.microsoft_connection_title]
-fr = "Connexion Microsoft"
 en = "Microsoft Sign-In"
 
 [common.setup.go_to]
-fr = "Rends-toi sur"
 en = "Go to"
 
 [common.setup.enter_this_code]
-fr = "et entrez ce code :"
 en = "and enter this code:"
 
 [common.setup.code_valid_still]
-fr = "Code valide encore"
 en = "Code still valid for"
 
 [common.setup.waiting_auth]
-fr = "En attente de l'authentification…"
 en = "Waiting for authentication…"
 
 [common.setup.initial_sync_title]
-fr = "Synchronisation initiale"
 en = "Initial sync"
 
 [common.setup.initial_sync_intro]
-fr = "Nous allons télécharger tes matchs Halo Infinite et calculer tes premières statistiques."
 en = "We will download your Halo Infinite matches and compute your first statistics."
 
 [common.setup.session_rules_note]
-fr = "Les règles de regroupement des sessions et les badges de performance sont configurables dans"
 en = "Session grouping rules and performance badges are configurable in"
 
 [common.setup.settings_analysis]
-fr = "Paramètres → Analyse"
 en = "Settings → Analysis"
 
 [common.setup.after_sync_suffix]
-fr = "après la synchronisation."
 en = "after the sync."
 
 [common.setup.matches_retrieved]
-fr = "matchs récupérés"
 en = "matches retrieved"
 
 [common.setup.time_remaining_about]
-fr = "Temps restant estimé : environ"
 en = "Estimated time remaining: about"
 
 [common.setup.sync_complete]
-fr = "✓ Synchronisation terminée !"
 en = "✓ Sync complete!"
 
 [common.setup.matches_imported]
-fr = "matchs importés."
 en = "matches imported."
 
 [common.setup.open_app]
-fr = "Ouvrir l'application"
 en = "Open the application"
 
 [common.setup.sync_interrupted]
-fr = "⚡ Synchronisation interrompue (redémarrage serveur)."
 en = "⚡ Sync interrupted (server restart)."
 
 [common.setup.resume_sync]
-fr = "Reprendre la synchronisation"
 en = "Resume sync"
 
 [common.setup.sync_failed]
-fr = "✗ Échec de la synchronisation."
 en = "✗ Sync failed."
 
 [common.setup.create_player_profile]
-fr = "Créer ton profil joueur"
 en = "Create your player profile"
 
 [common.setup.halo_identity_linked]
-fr = "Identité Halo liée à cette session :"
 en = "Halo identity linked to this session:"
 
 [common.setup.local_profile_will_be_created]
-fr = "Un profil local sera créé pour ce compte."
 en = "A local profile will be created for this account."
 
 [common.setup.enter_gamertag]
-fr = "Entre ton Gamertag Xbox pour créer ton profil."
 en = "Enter your Xbox Gamertag to create your profile."
 
 [common.setup.select_titles_title]
-fr = "Jeux à suivre"
 en = "Games to track"
 
 [common.setup.select_titles_desc]
-fr = "Choisis les jeux à synchroniser et combien de matchs récupérer pour chacun (au moins un jeu)."
 en = "Choose which games to sync and how many matches to fetch for each (at least one game)."
 
 [common.setup.matches_to_sync]
-fr = "Matchs à synchroniser"
 en = "Matches to sync"
 
 [common.setup.syncing_game_progress]
-fr = "Jeu {current} sur {total}"
 en = "Game {current} of {total}"
 
 # ─── Auth Xbox login page ───────────────────────────────────────────────
 
 [common.auth.xbox_admin_login]
-fr = "Connexion admin (mot de passe)"
 en = "Admin login (password)"
 
 [common.auth.xbox_connect_microsoft]
-fr = "Connecte-toi avec ton compte Microsoft pour accéder à ton dashboard LevelUp."
 en = "Sign in with your Microsoft account to access your LevelUp dashboard."
 
 [common.auth.xbox_sign_in]
-fr = "Se connecter avec Xbox"
 en = "Sign in with Xbox"
 
 [common.auth.xbox_use_9char_code]
-fr = "Utiliser un code à 9 caractères (sur un autre appareil)"
 en = "Use a 9-character code (on another device)"
 
 [common.auth.xbox_preparing]
-fr = "Préparation de la connexion Xbox…"
 en = "Preparing Xbox sign-in…"
 
 [common.auth.xbox_auth_success]
-fr = "✓ Authentification réussie"
 en = "✓ Authentication successful"
 
 [common.auth.xbox_generating_code]
-fr = "Génération du code…"
 en = "Generating code…"
 
 [common.auth.xbox_code_to_enter]
-fr = "Code à saisir"
 en = "Code to enter"
 
 [common.auth.xbox_only_if_you_clicked]
-fr = "Ne saisis ce code que si TU viens de cliquer \"Se connecter avec Xbox\" sur LevelUp."
 en = "Only enter this code if YOU just clicked 'Sign in with Xbox' on LevelUp."
 
 [common.auth.xbox_admin_only]
-fr = "Connexion admin uniquement. Les utilisateurs normaux se connectent via Xbox."
 en = "Admin login only. Normal users sign in through Xbox."
 
 [common.auth.xbox_back_to_xbox]
-fr = "← Retour à la connexion Xbox"
 en = "← Back to Xbox sign-in"
 
 # ─── Onboarding (OpenSpartan import) ────────────────────────────────────
 
 [common.onboarding.welcome]
-fr = "Bienvenue sur LevelUp"
 en = "Welcome to LevelUp"
 
 [common.onboarding.sync_running_intro]
-fr = "On synchronise tes derniers matchs depuis Halo Waypoint. Tu peux continuer vers le dashboard, la sync tourne en arrière-plan et tes données apparaîtront au fur et à mesure."
 en = "We are syncing your latest matches from Halo Waypoint. You can continue to the dashboard; the sync runs in the background and your data will appear progressively."
 
 [common.onboarding.advanced_options]
-fr = "Options avancées →"
 en = "Advanced options →"
 
 [common.onboarding.openspartan_intro]
-fr = "Tu as déjà utilisé un autre client Halo qui stocke ses données en local (OpenSpartan) ? Tu peux importer son fichier"
 en = "Have you already used another Halo client that stores its data locally (OpenSpartan)? You can import its file"
 
 [common.onboarding.openspartan_intro_suffix]
-fr = "ici pour récupérer des matchs plus anciens que ce que l'API Halo expose aujourd'hui."
 en = "here to retrieve matches older than what the Halo API currently exposes."
 
 [common.onboarding.import_card_title]
-fr = "Importer depuis OpenSpartan"
 en = "Import from OpenSpartan"
 
 [common.onboarding.import_card_desc]
-fr = "Si tu as déjà utilisé OpenSpartan, importe ton fichier"
 en = "If you have already used OpenSpartan, import your"
 
 [common.onboarding.import_card_desc_suffix]
-fr = "pour récupérer des matchs plus anciens que ce que l'API Halo expose."
 en = "file to retrieve matches older than what the Halo API exposes."
 
 [common.onboarding.drop_file_here]
-fr = "Glisse-dépose ton fichier"
 en = "Drag and drop your"
 
 [common.onboarding.drop_file_or_browse]
-fr = "ici ou clique pour parcourir"
 en = "file here or click to browse"
 
 [common.onboarding.import_finished]
-fr = "✓ Import terminé"
 en = "✓ Import finished"
 
 [common.onboarding.import_another_file]
-fr = "Importer un autre fichier"
 en = "Import another file"
 
 [common.onboarding.import_success]
-fr = "✓ Import réussi"
 en = "✓ Import successful"
 
 [common.onboarding.matches_imported]
-fr = "Matchs importés"
 en = "Imported matches"
 
 [common.onboarding.highlight_events]
-fr = "Highlight events"
 en = "Highlight events"
 
 [common.onboarding.sessions_computed]
-fr = "Sessions calculées"
 en = "Computed sessions"
 
 [common.onboarding.perf_scores]
-fr = "Performance scores"
 en = "Performance scores"
 
 [common.onboarding.errors_ignored]
-fr = "Erreurs ignorées"
 en = "Ignored errors"
 
 [common.onboarding.combat_details_note]
-fr = "Les détails de combat (cadence, dominance, duels) sont récupérés en arrière-plan depuis les films Halo. Certains matchs trop anciens pourraient ne pas pouvoir être traités intégralement."
 en = "Combat details (cadence, dominance, duels) are retrieved in the background from Halo films. Some matches that are too old may not be able to be fully processed."
 
 # ─── Notifications page ─────────────────────────────────────────────────
 
 [common.notifications.bulk_actions_aria]
-fr = "Actions groupées"
 en = "Bulk actions"
 
 [common.notifications.selected_suffix]
-fr = "sélectionnée(s)"
 en = "selected"
 
 [common.notifications.deselect_all_aria]
-fr = "Désélectionner tout"
 en = "Deselect all"
 
 # ─── Battle Pass reward lightbox ────────────────────────────────────────
 
 [common.battlepass.prev_aria]
-fr = "Récompense précédente"
 en = "Previous reward"
 
 [common.battlepass.next_aria]
-fr = "Récompense suivante"
 en = "Next reward"
 
 # ─── Prestige (LeaderboardPP, Objectifs) ────────────────────────────────
 
 [common.prestige.leaderboard_intro]
-fr = "Classement Prestige entre amis dérivés de l'escouade et des relations."
 en = "Prestige leaderboard with friends derived from the squad and relations."
 
 [common.prestige.select_player_for_leaderboard]
-fr = "Sélectionne un joueur pour voir le classement."
 en = "Select a player to see the leaderboard."
 
 [common.prestige.select_player_for_objectives]
-fr = "Sélectionne un joueur pour voir les objectifs."
 en = "Select a player to see the objectives."
 
 [common.prestige.objectives_subtitle]
-fr = "Profil, objectifs et campagnes d'amélioration personnelle."
 en = "Profile, objectives and personal improvement campaigns."
 
 [common.prestige.module_not_enabled_p5]
-fr = "Le module Prestige n'est pas encore activé sur ce serveur (Phase 5)."
 en = "The Prestige module is not yet enabled on this server (Phase 5)."
 
 [common.prestige.module_not_enabled]
-fr = "Le module Prestige n'est pas encore activé sur ce serveur."
 en = "The Prestige module is not yet enabled on this server."
 
 [common.prestige.free_challenges]
-fr = "Objectifs libres ("
 en = "Free objectives ("
 
 [common.prestige.new_challenge]
-fr = "+ Nouvel objectif"
 en = "+ New objective"
 
 [common.prestige.piloted_challenges]
-fr = "Objectifs pilotés ("
 en = "Piloted objectives ("
 
 [common.prestige.piloted_intro]
-fr = "Le système t'attribue des objectifs quotidiens, hebdo et mensuels."
 en = "The system assigns you daily, weekly and monthly objectives."
 
 [common.prestige.phase5_minimal_title]
-fr = "Phase 5 minimale : non implémenté côté backend"
 en = "Phase 5 minimal: not implemented server-side"
 
 [common.prestige.arcs_in_progress]
-fr = "Arcs en cours"
 en = "Arcs in progress"
 
 [common.prestige.no_arc_in_progress]
-fr = "Aucun arc en cours. Choisis un arc preset ou crée le tien."
 en = "No arc in progress. Pick a preset arc or create your own."
 
 [common.prestige.moment_cards_will_appear]
-fr = "Les moment cards apparaîtront ici à la validation des preuves."
 en = "Moment cards will appear here when the proofs are validated."
 
 [common.prestige.prestige_level]
-fr = "Niveau Prestige"
 en = "Prestige level"
 
 [common.prestige.prestige_points]
-fr = "Points de Prestige"
 en = "Prestige points"
 
 [common.prestige.all_arcs]
-fr = "Tous les arcs"
 en = "All arcs"
 
 [common.prestige.no_friends_for_period]
-fr = "Aucun ami dérivé de l'escouade ou des relations pour cette période."
 en = "No friends derived from squad or relations for this period."
 
 [common.prestige.levelup_prestige]
-fr = "LevelUp · Prestige"
 en = "LevelUp · Prestige"
 
 [common.prestige.completion_rate]
-fr = "Taux de complétion"
 en = "Completion rate"
 
 [common.prestige.top_metrics]
-fr = "Top métriques travaillées"
 en = "Top worked metrics"
 
 [common.prestige.no_data_for_filter]
-fr = "Aucune donnée pour ce filtre."
 en = "No data for this filter."
 
 # ─── Create challenge form ──────────────────────────────────────────────
 
 [common.prestige.damage_done]
-fr = "Dégâts infligés"
 en = "Damage done"
 
 [common.prestige.win_rate_pct]
-fr = "Taux de victoire (%)"
 en = "Win rate (%)"
 
 [common.prestige.sliding_days]
-fr = "Jours glissants"
 en = "Sliding days"
 
 [common.prestige.label_optional]
-fr = "Label (optionnel)"
 en = "Label (optional)"
 
 [common.prestige.label_example]
-fr = "Ex. Slayer Lv.2"
 en = "E.g. Slayer Lv.2"
 
 [common.prestige.loading_suggestions]
-fr = "Chargement des suggestions…"
 en = "Loading suggestions…"
 
 [common.prestige.no_templates_available]
-fr = "Aucun template disponible. Bascule en mode libre pour créer un objectif sur mesure."
 en = "No templates available. Switch to free mode to create a custom objective."
 
 [common.prestige.pick_template_hint]
-fr = "Choisis un template ; ajuste la cible si tu veux."
 en = "Pick a template; adjust the target if needed."
 
 [common.prestige.generating_proposals]
-fr = "Génération des propositions…"
 en = "Generating proposals…"
 
 [common.prestige.three_challenges_catalog]
-fr = "3 objectifs tirés du catalogue, à accepter directement."
 en = "3 objectives from the catalog, ready to accept."
 
 [common.prestige.accept_heroic_prefix]
-fr = "Accepter (Heroic :"
 en = "Accept (Heroic:"
 
 # ─── Settings (GeneralTab, SyncTab) ─────────────────────────────────────
 
 [common.settings.tz_new_york]
-fr = "America/New_York"
 en = "America/New_York"
 
 [common.settings.tz_los_angeles]
-fr = "America/Los_Angeles"
 en = "America/Los_Angeles"
 
 [common.settings.tz_chicago]
-fr = "America/Chicago"
 en = "America/Chicago"
 
 [common.settings.tabs_aria]
-fr = "Onglets paramètres"
 en = "Settings tabs"
 
 [common.settings.my_squad_default]
-fr = "Coéquipiers par défaut (page Escouade)"
 en = "Default teammates (Squad page)"
 
 [common.settings.squad_intro]
-fr = "Gamertags des coéquipiers présélectionnés à l'ouverture de la page Escouade. Les joueurs déjà configurés dans l'app apparaissent en priorité."
 en = "Gamertags of teammates preselected when opening the Squad page. Already configured players appear first."
 
 [common.settings.gamertag_search_placeholder]
-fr = "Rechercher ou saisir un gamertag…"
 en = "Search or enter a gamertag…"
 
 # ─── Changelog ──────────────────────────────────────────────────────────
 
 [common.changelog.load_failed]
-fr = "Impossible de charger le changelog."
 en = "Unable to load the changelog."
 
 [common.changelog.subtitle]
-fr = "Journal des modifications du projet."
 en = "Project change log."
 
 [common.changelog.empty]
-fr = "Aucune entrée disponible."
 en = "No entry available."
 
 # ─── Home (Recent playlists, Session carousel) ──────────────────────────
 
 [common.home.recent_playlists]
-fr = "Sélections récentes"
 en = "Recent playlists"
 
 [common.home.unranked]
-fr = "Sans classement"
 en = "Unranked"
 
 [common.home.rank_unrated]
-fr = "Non classé"
 en = "Unranked"
 
 [common.home.rank_placement]
-fr = "En placement"
 en = "In placement"
 
 [common.home.rank_placement_progress]
-fr = "En placement ({completed}/{total})"
 en = "In placement ({completed}/{total})"
 
 [common.home.rank_label]
-fr = "Rang"
 en = "Rank"
 
 [common.home.no_recent_playlist]
-fr = "Aucune sélection récente disponible."
 en = "No recent playlist available."
 
 [common.home.unknown_playlist]
-fr = "Sélection inconnue"
 en = "Unknown playlist"
 
 [common.home.newer_session_aria]
-fr = "Session plus récente"
 en = "Newer session"
 
 [common.home.older_session_aria]
-fr = "Session plus ancienne"
 en = "Older session"
 
 # ─── Leaderboard block ──────────────────────────────────────────────────
 
 [common.leaderboard.load_error]
-fr = "Erreur de chargement"
 en = "Loading error"
 
 [common.leaderboard.no_match_in_window]
-fr = "Aucun match trouvé dans cette fenêtre. Élargis la recherche."
 en = "No match found in this window. Broaden your search."
 
 [common.charts.efficiency_tooltip]
-fr = "Rendement = efficacité offensive : à quel point les dégâts sont convertis en éliminations. Résistance = solidité défensive : combien de dégâts sont encaissés avant de mourir. Les deux courbes sont exprimées en pourcentage d'une vie : 100 % correspond à une vie complète, soit environ {{HP}} points de dégâts dans le titre affiché — la ligne de référence de chaque graphe marque ce repère. Au-dessus de 100 %, la performance dépasse une vie (rendement : élimination obtenue avec moins d'une vie de dégâts ; résistance : plus d'une vie encaissée avant la mort) ; en dessous, elle reste sous ce niveau. Le survol d'un point affiche la valeur brute en dégâts derrière le pourcentage."
 en = "Output = offensive efficiency: how well damage is turned into kills. Resistance = defensive resilience: how much damage is absorbed before dying. Both curves are expressed as a percentage of one life: 100% equals one full life, about {{HP}} points of damage in the displayed title — each chart's reference line marks that level. Above 100%, performance exceeds one life (output: a kill costs less than one life of damage; resistance: more than one life is absorbed before death); below it, performance stays under that level. Hovering over a point reveals the raw damage value behind the percentage."
 
 # Aide pédagogique UNIQUE du graphe « Écart cumulé au FDA attendu » (Séries
 # temporelles + Sessions) : le graphe n'en avait aucune. Langage simple, pas de
 # vocabulaire statistique — l'important est la PENTE, pas la valeur absolue.
 [common.charts.fda_gap_tooltip]
-fr = "À chaque match, le FDA réel est comparé au FDA attendu (le niveau prévu face à cette opposition). La courbe additionne ces écarts match après match : elle monte quand la performance dépasse l'attendu, elle descend quand elle est en dessous. Sa pente est le signal à suivre — au-dessus de la ligne 0 la performance est en avance sur l'attendu, en dessous elle est en retard. Le trait fin en pointillés est le FDA attendu de chaque match."
 en = "For every match, actual KDA is compared to the KDA expected against that opposition. The line adds up those gaps match after match: it rises when performance beats expectations and falls when it falls short. Watch its slope above all — above the 0 line performance is ahead of expectations, below it it is behind. The thin dashed line is each match's expected KDA."
 
 # Axes du profil « Intensité » (Escouade / Séries temporelles / Sessions). L'axe X
 # ne montre que 3 repères (début / milieu / fin du match) ; rangeSuffix complète la
 # tranche dans le tooltip (ex. « 40-50% du match »).
 [common.charts.intensity_axis_start]
-fr = "Début"
 en = "Start"
 
 [common.charts.intensity_axis_mid]
-fr = "Milieu"
 en = "Midpoint"
 
 [common.charts.intensity_axis_end]
-fr = "Fin"
 en = "End"
 
 [common.charts.intensity_axis_range_suffix]
-fr = "du match"
 en = "of the match"
 
 # ── Groupes / familles (accès mutuel aux données) ──────────────────────────────
 [common.groups.title]
-fr = "Mes groupes"
 en = "My groups"
 
 [common.groups.intro]
-fr = "Les membres d'un groupe partagent l'accès mutuel à leurs données. Invite un ami : il se connecte avec Xbox et rejoint le groupe."
 en = "Members of a group share mutual access to their data. Invite a friend: they sign in with Xbox and join the group."
 
 [common.groups.new_placeholder]
-fr = "Nom du nouveau groupe"
 en = "New group name"
 
 [common.groups.create]
-fr = "Créer"
 en = "Create"
 
 [common.groups.empty]
-fr = "Aucun groupe pour l'instant."
 en = "Not in any group yet."
 
 [common.groups.members]
-fr = "Membres"
 en = "Members"
 
 [common.groups.owner]
-fr = "propriétaire"
 en = "owner"
 
 [common.groups.invite]
-fr = "Inviter un ami"
 en = "Invite a friend"
 
 [common.groups.link_copied]
-fr = "Lien d'invitation copié"
 en = "Invite link copied"
 
 [common.groups.rename]
-fr = "Renommer"
 en = "Rename"
 
 [common.groups.delete]
-fr = "Supprimer"
 en = "Delete"
 
 [common.groups.confirm_delete]
-fr = "Supprimer ce groupe ?"
 en = "Delete this group?"
 
 [common.groups.loading]
-fr = "Chargement…"
 en = "Loading…"
 
 [common.groups.invite_error]
-fr = "Impossible de générer l'invitation."
 en = "Could not generate the invitation."
 
 [common.groups.join_title]
-fr = "Rejoindre un groupe"
 en = "Join a group"
 
 [common.groups.join_intro]
-fr = "Tu as été invité à rejoindre un groupe. Connecte-toi avec Xbox pour rejoindre — ton compte est créé automatiquement."
 en = "You have been invited to join a group. Sign in with Xbox to join — your account is created automatically."
 
 [common.groups.invite_code_label]
-fr = "Code d'invitation"
 en = "Invitation code"
 
 [common.groups.continue_xbox]
-fr = "Continuer avec Xbox"
 en = "Continue with Xbox"
 
 # ─── Onboarding / connexion Xbox (I1, 2026-07-05) ────────────────────────────
 [common.xbox_login.title]
-fr = "Connexion Xbox"
 en = "Xbox sign-in"
 
 [common.xbox_login.retry]
-fr = "Réessayer"
 en = "Retry"
 
 [common.xbox_login.welcome]
-fr = "Bienvenue, {gamertag}"
 en = "Welcome, {gamertag}"
 
 [common.xbox_login.err_demo]
-fr = "Authentification indisponible en mode démo."
 en = "Authentication unavailable in demo mode."
 
 [common.xbox_login.err_start]
-fr = "Impossible de démarrer le flow Xbox."
 en = "Unable to start the Xbox flow."
 
 [common.xbox_login.err_interrupted]
-fr = "La connexion au serveur a été interrompue plusieurs fois. Veuillez réessayer."
 en = "The connection to the server was interrupted several times. Please try again."
 
 [common.xbox_login.err_restart]
-fr = "Impossible de redémarrer le flow."
 en = "Unable to restart the flow."
 
 [common.xbox_login.valid_for]
-fr = "Valide encore"
 en = "Valid for"
 
 # ─── Setup : device-code + sync initiale (I1, 2026-07-05) ────────────────────
 [common.device_code.err_denied]
-fr = "La demande Microsoft a été refusée ou annulée."
 en = "The Microsoft request was denied or cancelled."
 
 [common.device_code.err_ms]
-fr = "Erreur lors de l'authentification Microsoft."
 en = "Error during Microsoft authentication."
 
 [common.device_code.err_halo]
-fr = "Impossible d'obtenir un accès Halo. Veuillez réessayer."
 en = "Unable to obtain Halo access. Please try again."
 
 [common.device_code.err_identity]
-fr = "Impossible de résoudre le Gamertag. Réessaie dans quelques instants."
 en = "Unable to resolve the Gamertag. Try again shortly."
 
 [common.device_code.err_expired]
-fr = "Le code a expiré."
 en = "The code expired."
 
 [common.device_code.err_generic]
-fr = "Échec de l'authentification."
 en = "Authentication failed."
 
 [common.initial_sync.err_auth_expired]
-fr = "La session Halo a expiré. Relance pour renouveler l'authentification."
 en = "The Halo session expired. Restart to renew authentication."
 
 [common.initial_sync.err_halo_api]
-fr = "L'API Halo est temporairement indisponible. Veuillez réessayer."
 en = "The Halo API is temporarily unavailable. Please try again."
 
 [common.initial_sync.err_db]
-fr = "Erreur interne lors de l'enregistrement des données. Contactez le support."
 en = "Internal error while saving data. Contact support."
 
 [common.initial_sync.err_aborted]
-fr = "La synchronisation a été interrompue. Il est possible de relancer."
 en = "Sync was interrupted. It can be restarted."
 
 [common.initial_sync.err_internal]
-fr = "Erreur inattendue. Veuillez réessayer."
 en = "Unexpected error. Please try again."
 
 [common.initial_sync.starting]
-fr = "Démarrage…"
 en = "Starting…"
 
 [common.initial_sync.start_action]
-fr = "Lancer la synchronisation"
 en = "Start sync"
 
 # ─── Inscription (RegisterPage) — I1, 2026-07-05 ─────────────────────────────
 [common.auth.register_instance_closed]
-fr = "Cette instance est fermée aux nouvelles inscriptions."
 en = "This instance is closed to new registrations."
 
 [common.auth.register_password_mismatch]
-fr = "Les mots de passe ne correspondent pas."
 en = "Passwords do not match."
 
 [common.auth.register_err_user_exists]
-fr = "Ce nom d'utilisateur est déjà pris."
 en = "This username is already taken."
 
 [common.auth.register_err_invite_required]
-fr = "Un code d'invitation est requis."
 en = "An invitation code is required."
 
 [common.auth.register_err_invalid_invite]
-fr = "Code d'invitation invalide ou expiré."
 en = "Invalid or expired invitation code."
 
 [common.auth.register_err_closed]
-fr = "Les inscriptions sont fermées."
 en = "Registrations are closed."
 
 [common.auth.register_err_generic]
-fr = "Erreur lors de l'inscription."
 en = "Registration error."
 
 [common.auth.register_submit]
-fr = "Créer le compte"
 en = "Create account"
 
 [common.auth.register_pending]
-fr = "Inscription…"
 en = "Registering…"
 
 # ─── Import OpenSpartan (OpenSpartanImportCard) — I1, 2026-07-05 ─────────────
 [common.onboarding.import_only_db]
-fr = "Seuls les fichiers .db OpenSpartan sont acceptés."
 en = "Only OpenSpartan .db files are accepted."
 
 [common.onboarding.import_too_large]
-fr = "Fichier trop volumineux (max {max} Go)."
 en = "File too large (max {max} GB)."
 
 [common.onboarding.import_start_failed]
-fr = "Échec du démarrage de l'import"
 en = "Failed to start import"
 
 [common.onboarding.cancel]
-fr = "Annuler"
 en = "Cancel"
 
 [common.onboarding.uploading]
-fr = "Envoi…"
 en = "Uploading…"
 
 [common.onboarding.import_action]
-fr = "Importer"
 en = "Import"
 
 [common.onboarding.importing]
-fr = "Import en cours…"
 en = "Importing…"
 
 [common.onboarding.matches_processed]
-fr = "matchs traités"
 en = "matches processed"
 
 [common.onboarding.participants]
-fr = "Participants"
 en = "Participants"
 
 [common.onboarding.medals]
-fr = "Médailles"
 en = "Medals"
 
 [common.onboarding.xuid_aliases]
-fr = "Alias XUID"
 en = "XUID aliases"
 
 [common.onboarding.import_interrupted]
-fr = "Import interrompu"
 en = "Import interrupted"
 
 [common.onboarding.import_failed]
-fr = "Échec de l'import"
 en = "Import failed"
 
 [common.onboarding.retry]
-fr = "Réessayer"
 en = "Retry"
 
 [common.onboarding.import_err_unknown]
-fr = "Erreur inconnue."
 en = "Unknown error."
 
 [common.onboarding.import_err_xuid_mismatch]
-fr = "Cette base OpenSpartan n'appartient pas au compte Xbox connecté."
 en = "This OpenSpartan database does not belong to the connected Xbox account."
 
 [common.onboarding.import_err_low_confidence]
-fr = "Impossible de vérifier que cette base est bien la tienne. Renomme le fichier en <ton-xuid>.db et réessaye."
 en = "Unable to verify this database is yours. Rename the file to <your-xuid>.db and try again."
 
 [common.onboarding.import_err_not_openspartan]
-fr = "Ce fichier ne ressemble pas à une base OpenSpartan reconnaissable."
 en = "This file does not look like a recognisable OpenSpartan database."
 
 [common.onboarding.import_err_demo]
-fr = "L'import OpenSpartan est désactivé en mode démo."
 en = "OpenSpartan import is disabled in demo mode."
 
 [common.onboarding.import_err_auth_required]
-fr = "Connexion Xbox/Halo requise pour lancer un import."
 en = "Xbox/Halo connection required to start an import."
 
 # ─── Barre de filtres (FilterOmnibar + useLocalFilterBar) — I2, 2026-07-05 ───
 [common.filter.analyser]
-fr = "Analyser"
 en = "Analyze"
 
 [common.filter.applied]
-fr = "✓ Appliqué"
 en = "✓ Applied"
 
 # ─── Nav L1 / L2 — sections et onglets (GH-4, 2026-07-08) ───────────────────
@@ -1955,221 +1490,169 @@ en = "✓ Applied"
 # NavL2. Auparavant en dur FR ; passés bilingues (parité FR/EN typée).
 
 [common.nav.section_home]
-fr = "Accueil"
 en = "Home"
 
 [common.nav.section_solo]
-fr = "Solo"
 en = "Solo"
 
 [common.nav.section_squad]
-fr = "Escouade"
 en = "Squad"
 
 [common.nav.section_career]
-fr = "Carrière"
 en = "Career"
 
 [common.nav.section_ascension]
-fr = "Ascension"
 en = "Ascension"
 
 [common.nav.section_community]
-fr = "Communauté"
 en = "Community"
 
 [common.nav.section_media]
-fr = "Médias"
 en = "Media"
 
 [common.nav.section_explorer]
-fr = "Explorer"
 en = "Explorer"
 
 [common.nav.tab_synthesis]
-fr = "Synthèse"
 en = "Summary"
 
 [common.nav.tab_timeseries]
-fr = "Séries temporelles"
 en = "Time series"
 
 [common.nav.tab_sessions]
-fr = "Sessions"
 en = "Sessions"
 
 [common.nav.tab_synergies]
-fr = "Synergies"
 en = "Synergies"
 
 [common.nav.tab_contributions]
-fr = "Contributions"
 en = "Contributions"
 
 [common.nav.tab_dynamique]
-fr = "Dynamique"
 en = "Dynamics"
 
 [common.nav.tab_progression]
-fr = "Progression"
 en = "Progression"
 
 # Citations (terme officiel Halo FR) = Commendations côté EN (cf. UI citations/commendations).
 [common.nav.tab_citations]
-fr = "Citations"
 en = "Commendations"
 
 [common.nav.tab_medals]
-fr = "Médailles"
 en = "Medals"
 
 [common.nav.tab_season_pass]
-fr = "Pass saisonnier"
 en = "Season pass"
 
 [common.nav.tab_profile]
-fr = "Profil"
 en = "Profile"
 
 [common.nav.tab_objectives]
-fr = "Objectifs"
 en = "Objectives"
 
 [common.nav.tab_coaching]
-fr = "Entraînement"
 en = "Coaching"
 
 [common.nav.tab_realisations]
-fr = "Réalisations"
 en = "Achievements"
 
 [common.nav.tab_leaderboard]
-fr = "Classements"
 en = "Leaderboards"
 
 [common.nav.tab_relations]
-fr = "Relations"
 en = "Relations"
 
 [common.nav.tab_compare]
-fr = "Face-à-face"
 en = "Head-to-head"
 
 # Aria du bouton ▾ ouvrant le dropdown d'onglets d'une section (« Onglets <section> »).
 [common.nav.section_tabs_aria]
-fr = "Onglets {section}"
 en = "{section} tabs"
 
 # Aria de la liste des sections dans le drawer mobile.
 [common.nav.sections_aria]
-fr = "Sections"
 en = "Sections"
 
 # ─── Barre de filtres — libellés en dur restants (GH-4, 2026-07-08) ─────────
 
 [common.filters.pill_label]
-fr = "Filtres"
 en = "Filters"
 
 [common.filters.context_aria]
-fr = "Contexte"
 en = "Context"
 
 [common.filters.matches_count]
-fr = "{count, plural, one {# match} other {# matchs}}"
 en = "{count, plural, one {# match} other {# matches}}"
 
 [common.filters.incompatible_tooltip]
-fr = "{n, plural, one {# filtre incompatible} other {# filtres incompatibles}} — ouvrez pour corriger"
 en = "{n, plural, one {# incompatible filter} other {# incompatible filters}} — open to fix"
 
 # ─── Pill Période — libellés en dur restants (GH-4, 2026-07-08) ─────────────
 
 [common.period.prefix_named]
-fr = "Période : {label}"
 en = "Period: {label}"
 
 [common.period.custom_label]
-fr = "Période : personnalisée"
 en = "Period: custom"
 
 [common.period.dialog_aria]
-fr = "Période"
 en = "Period"
 
 [common.period.from]
-fr = "Du"
 en = "From"
 
 [common.period.to]
-fr = "Au"
 en = "To"
 
 [common.period.empty_title]
-fr = "0 match sur cette période"
 en = "0 matches in this period"
 
 [common.period.preset_7d]
-fr = "7 jours"
 en = "7 days"
 
 [common.period.preset_30d]
-fr = "30 jours"
 en = "30 days"
 
 [common.period.preset_90d]
-fr = "90 jours"
 en = "90 days"
 
 [common.period.preset_all]
-fr = "Toutes"
 en = "All"
 
 # ─── Gate de titre (segment /t/{slug} invalide, coming_soon, archivé, ou bascule
 #     impossible) — parité RequireActiveTitle, écran d'indisponibilité title-scoped.
 [common.title_gate.unknown_heading]
-fr = "Titre introuvable"
 en = "Title not found"
 
 [common.title_gate.unknown_body]
-fr = "Ce titre n'existe pas ou n'est plus disponible."
 en = "This title does not exist or is no longer available."
 
 [common.title_gate.coming_soon_heading]
-fr = "Bientôt disponible"
 en = "Coming soon"
 
 [common.title_gate.coming_soon_body]
-fr = "Ce titre n'est pas encore accessible."
 en = "This title is not accessible yet."
 
 [common.title_gate.archived_heading]
-fr = "Titre archivé"
 en = "Archived title"
 
 [common.title_gate.archived_body]
-fr = "Ce titre a été archivé et n'est plus consultable."
 en = "This title has been archived and is no longer available."
 
 [common.title_gate.switch_failed_heading]
-fr = "Changement de titre impossible"
 en = "Cannot switch title"
 
 [common.title_gate.switch_failed_body]
-fr = "Le changement de titre a échoué. Réessaie ou reviens au titre actif."
 en = "Switching title failed. Retry or go back to the active title."
 
 # Toast émis quand la bascule échoue MAIS qu'un joueur courant existe : on revient
 # automatiquement au titre actif (D-6, Phase 4b). Distinct de switch_failed_body
 # (écran manuel « Réessaie ou reviens »), car ici le retour est AUTOMATIQUE.
 [common.title_gate.switch_failed_toast]
-fr = "Le changement de titre a échoué. Retour au titre actif."
 en = "Title switch failed. Returning to the active title."
 
 [common.title_gate.back_to_active]
-fr = "Retourner au titre actif"
 en = "Back to the active title"
 
 [common.title_gate.retry]
-fr = "Réessayer"
 en = "Retry"

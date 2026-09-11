@@ -23,7 +23,7 @@ vi.mock('./useProfileI18n', () => ({
   useProfileI18n: () => ({
     t: (key: string, vars?: Record<string, unknown>) =>
       vars ? `${key}::${Object.entries(vars).map(([k, v]) => `${k}=${v}`).join(',')}` : key,
-    locale: 'fr' as const,
+    locale: 'en' as const,
   }),
 }))
 
@@ -31,7 +31,6 @@ import { PerformanceSection } from './PerformanceSection'
 
 const RATING: SkillRatingSnapshot = {
   tier_name: 'Onyx',
-  tier_name_fr: 'Onyx',
   sub_tier: 3,
   label: 'Onyx III',
   mu: 1850,

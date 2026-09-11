@@ -17,7 +17,6 @@ title_slug = "halo_infinite"
 id = "halo_infinite.matches.100"
 metric = "matches_played"
 threshold = 100
-title_fr = "Centurion"
 title_en = "Centurion"
 icon = "milestone_100_matches"
 
@@ -25,7 +24,6 @@ icon = "milestone_100_matches"
 id = "halo_infinite.wins.50"
 metric = "wins"
 threshold = 50
-title_fr = "Vainqueur"
 title_en = "Winner"
 `)
 
@@ -42,8 +40,8 @@ title_en = "Winner"
 	if out[0].Threshold != 100 {
 		t.Errorf("Threshold = %v, want 100", out[0].Threshold)
 	}
-	if out[1].TitleFR != "Vainqueur" {
-		t.Errorf("TitleFR = %q, want Vainqueur", out[1].TitleFR)
+	if out[1].TitleFR != "Winner" {
+		t.Errorf("TitleFR = %q, want English fallback", out[1].TitleFR)
 	}
 }
 
@@ -53,7 +51,6 @@ func TestParseCatalog_MissingTitleSlug(t *testing.T) {
 id = "x"
 metric = "m"
 threshold = 1
-title_fr = "fr"
 title_en = "en"
 `)
 	_, err := parseCatalogBytes(in)
@@ -75,7 +72,6 @@ title_slug = "halo_infinite"
 [[milestones]]
 metric = "m"
 threshold = 1
-title_fr = "fr"
 title_en = "en"`,
 			"missing id",
 		},
@@ -86,7 +82,6 @@ title_slug = "halo_infinite"
 [[milestones]]
 id = "x"
 threshold = 1
-title_fr = "fr"
 title_en = "en"`,
 			"missing metric",
 		},
@@ -98,8 +93,8 @@ title_slug = "halo_infinite"
 id = "x"
 metric = "m"
 threshold = 1
-title_fr = "fr"`,
-			"missing title_en or title_fr",
+			`,
+			"missing title_en",
 		},
 		{
 			"zero threshold",
@@ -109,7 +104,6 @@ title_slug = "halo_infinite"
 id = "x"
 metric = "m"
 threshold = 0
-title_fr = "fr"
 title_en = "en"`,
 			"threshold must be > 0",
 		},

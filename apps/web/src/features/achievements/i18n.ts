@@ -37,31 +37,6 @@ export interface AchievementsText {
 }
 
 export const ACHIEVEMENTS_TEXT: Record<AchievementsLocale, AchievementsText> = {
-  fr: {
-    sectionTitle: 'Succès Xbox',
-    summaryUnlocked: 'Débloqués',
-    summaryGamerscore: 'Gamerscore',
-    summaryCompletion: 'Complétion',
-    filterAll: 'Tous',
-    filterUnlocked: 'Débloqués',
-    filterInProgress: 'En cours',
-    filterNotStarted: 'Non commencé',
-    filterCategoryAll: 'Toutes catégories',
-    filterCategoryMultiplayer: 'Multijoueur',
-    filterCategoryCampaign: 'Campagne',
-    filterCategoryOther: 'Autres',
-    sortDefault: 'Défaut',
-    sortDateAsc: 'Date ↑',
-    sortDateDesc: 'Date ↓',
-    empty: 'Aucun succès en base.',
-    emptyHint: 'Lance le backfill : levelup sync-achievements --gamertag <gt>',
-    loadError: 'Erreur lors du chargement des succès.',
-    retry: 'Réessayer',
-    unlockedAt: (date) => `Débloqué le ${date}`,
-    progress: (current, target) => `${current} / ${target}`,
-    scrollHintForward: 'Voir les succès suivants',
-    scrollHintBack: 'Voir les succès précédents',
-  },
   en: {
     sectionTitle: 'Xbox Achievements',
     summaryUnlocked: 'Unlocked',
@@ -93,28 +68,20 @@ export const ACHIEVEMENTS_TEXT: Record<AchievementsLocale, AchievementsText> = {
  * pickLocalized — sélectionne la chaîne dans la locale demandée avec fallback.
  *
  * Règles :
- *   - locale="fr" : prend `fr` si non vide, sinon `en`, sinon "" (les deux vides)
- *   - locale="en" : prend `en` si non vide, sinon `fr`, sinon ""
+ *   - locale="en" : prend `en` si non vide, sinon `en`, sinon "" (les deux vides)
+ *   - locale="en" : prend `en` si non vide, sinon `en`, sinon ""
  *
  * Utile parce que l'API Xbox Achievements peut renvoyer un seul des deux
  * pour certains achievements localisés partiellement, ou les deux vides
  * pour des champs optionnels (locked_desc).
  *
  * @param en - chaîne anglaise (peut être vide ou undefined)
- * @param fr - chaîne française (peut être vide ou undefined)
+ * @param en - chaîne française (peut être vide ou undefined)
  * @param locale - locale courante de l'app
  */
-export function pickLocalized(
-  en: string | undefined,
-  fr: string | undefined,
-  locale: AchievementsLocale,
-): string {
+export function pickLocalized(en: string | undefined): string {
   const enStr = en ?? ''
-  const frStr = fr ?? ''
-  if (locale === 'fr') {
-    return frStr || enStr
-  }
-  return enStr || frStr
+  return enStr
 }
 
 /**
@@ -123,12 +90,11 @@ export function pickLocalized(
  */
 export function formatUnlockedDate(
   iso: string | undefined,
-  locale: AchievementsLocale,
 ): string | null {
   if (!iso) return null
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return null
-  return date.toLocaleDateString(intlLocale(locale), {
+  return date.toLocaleDateString(intlLocale(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

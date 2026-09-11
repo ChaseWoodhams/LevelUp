@@ -74,7 +74,7 @@ export function SyncPlayersTable({
                   {p.gamertag}
                   <div
                     className="text-xs font-normal text-muted-foreground"
-                    title={adminAbsoluteTime(p.attempted_at, locale)}
+                    title={adminAbsoluteTime(p.attempted_at)}
                   >
                     {adminRelativeTime(p.attempted_at, locale)}
                   </div>
@@ -91,7 +91,7 @@ export function SyncPlayersTable({
                   </span>
                 </td>
                 <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-muted-foreground">
-                  {formatDurationMs(p.duration_ms, locale)}
+                  {formatDurationMs(p.duration_ms)}
                 </td>
                 <td className="px-3 py-2 text-right font-mono text-xs tabular-nums text-foreground">
                   {p.matches_inserted ?? 0}

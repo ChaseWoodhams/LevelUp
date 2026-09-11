@@ -52,14 +52,14 @@ func TestExtractCSRRowIfRanked_RankedStable(t *testing.T) {
 	if row.Tier != "Gold" {
 		t.Errorf("Tier: want Gold, got %q", row.Tier)
 	}
-	if row.TierFR != "Or" {
-		t.Errorf("TierFR: want Or, got %q", row.TierFR)
+	if row.TierFR != "Gold" {
+		t.Errorf("TierFR: want Gold, got %q", row.TierFR)
 	}
 	if row.SubTier != 5 {
 		t.Errorf("SubTier: want 5, got %d", row.SubTier)
 	}
-	if row.TierLabel != "Or V" {
-		t.Errorf("TierLabel: want %q, got %q", "Or V", row.TierLabel)
+	if row.TierLabel != "Gold V" {
+		t.Errorf("TierLabel: want %q, got %q", "Gold V", row.TierLabel)
 	}
 	if row.RatingDelta == nil || *row.RatingDelta != 12 {
 		t.Errorf("RatingDelta: want +12, got %v", row.RatingDelta)
@@ -214,10 +214,10 @@ func TestTranslateTierFR_UnknownTier(t *testing.T) {
 	// plutôt que d'écraser par vide.
 	cases := map[string]string{
 		"Bronze":   "Bronze",
-		"Silver":   "Argent",
-		"Gold":     "Or",
-		"Platinum": "Platine",
-		"Diamond":  "Diamant",
+		"Silver":   "Silver",
+		"Gold":     "Gold",
+		"Platinum": "Platinum",
+		"Diamond":  "Diamond",
 		"Onyx":     "Onyx",
 		"Champion": "Champion", // inconnu → passthrough
 		"":         "",         // vide → vide (placement géré ailleurs)
@@ -231,9 +231,9 @@ func TestTranslateTierFR_UnknownTier(t *testing.T) {
 
 func TestFormatCSRTierLabel_DiamondWithSubTier(t *testing.T) {
 	// Cas standard : Diamond III avec sub-tier — chiffres romains
-	got := formatCSRTierLabel("Diamond", "Diamant", 3, 1650, 0)
-	if got != "Diamant III" {
-		t.Errorf("Diamond III: got %q, want %q", got, "Diamant III")
+	got := formatCSRTierLabel("Diamond", "Diamond", 3, 1650, 0)
+	if got != "Diamond III" {
+		t.Errorf("Diamond III: got %q, want %q", got, "Diamond III")
 	}
 }
 
@@ -241,9 +241,9 @@ func TestFormatCSRTierLabel_SubTierZeroNotOnyx(t *testing.T) {
 	// Edge case : un tier non-Onyx avec SubTier=0 (peu probable mais
 	// possible si l'API renvoie un payload partiel). Doit retourner juste
 	// le tier FR sans suffixe numérique.
-	got := formatCSRTierLabel("Gold", "Or", 0, 1300, 0)
-	if got != "Or" {
-		t.Errorf("Gold no-subtier: got %q, want %q", got, "Or")
+	got := formatCSRTierLabel("Gold", "Gold", 0, 1300, 0)
+	if got != "Gold" {
+		t.Errorf("Gold no-subtier: got %q, want %q", got, "Gold")
 	}
 }
 
@@ -266,7 +266,7 @@ func TestExtractCSRRowIfRanked_DeltaNilWhenNoPreMatchCSR(t *testing.T) {
 	if row.RatingDelta != nil {
 		t.Errorf("RatingDelta: want nil when no PreMatchCSR, got %v", *row.RatingDelta)
 	}
-	if row.TierFR != "Platine" {
-		t.Errorf("TierFR: want Platine, got %q", row.TierFR)
+	if row.TierFR != "Platinum" {
+		t.Errorf("TierFR: want Platinum, got %q", row.TierFR)
 	}
 }

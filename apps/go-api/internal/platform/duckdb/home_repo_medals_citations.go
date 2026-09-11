@@ -54,17 +54,14 @@ func (r *HomeRepo) LoadFavoriteWeapon(ctx context.Context, locale string) (strin
 	// l'ancien COALESCE(name_en, name_fr)).
 	weaponName := ""
 	if m, ok := resolveWeaponMeta(ctx, r.pdb.Metadata, r.pdb.TitleSlug, []int64{int64(weaponID)})[int64(weaponID)]; ok {
-		if locale == "en" && m.nameEN != "" {
+		if m.nameEN != "" {
 			weaponName = m.nameEN
 		} else {
 			weaponName = m.label
 		}
 	}
 	if weaponName == "" {
-		weaponName = "Inconnue"
-		if locale == "en" {
-			weaponName = "Unknown"
-		}
+		weaponName = "Unknown"
 	}
 	return weaponName, totalKills, nil
 }
@@ -161,7 +158,7 @@ type medalLabel struct {
 
 // resolveMedalLabels résout les labels de médailles locale-aware (GH2-B6). La
 // chaîne de priorité label/description vient de la source unique
-// medalLabelDescCoalesceSQL(locale) + medalTranslationJoinsSQL(locale) —
+// medalLabelDescCoalesceSQL() + medalTranslationJoinsSQL() —
 // partagée avec la vue Match (GH-5b) et l'Explorer : sous UI EN, ne jamais
 // injecter les colonnes FR (sinon la tuile Home affiche du FR sous EN).
 func resolveMedalLabels(ctx context.Context, db *DB, medalIDs []int64, locale string) map[int64]medalLabel {
@@ -170,7 +167,7 @@ func resolveMedalLabels(ctx context.Context, db *DB, medalIDs []int64, locale st
 		return result
 	}
 
-	labelExpr, descExpr := medalLabelDescCoalesceSQL(locale)
+	labelExpr, descExpr := medalLabelDescCoalesceSQL()
 	// Chaîne locale-aware : medal_translations[locale, en-US] > medal_definitions.
 	q, mArgs, ok := buildLookupQuery(
 		`SELECT md.medal_name_id,
@@ -178,7 +175,7 @@ func resolveMedalLabels(ctx context.Context, db *DB, medalIDs []int64, locale st
 		        `+descExpr+` AS description,
 		        COALESCE(NULLIF(TRIM(md.difficulty),''), 'Normal') AS difficulty
 		 FROM medal_definitions md
-		 `+medalTranslationJoinsSQL(locale)+`
+		 `+medalTranslationJoinsSQL()+`
 		 WHERE md.medal_name_id IN (%s)`,
 		medalIDs,
 	)
@@ -457,11 +454,7 @@ func loadCommendationDefsFromMetadata(ctx context.Context, metadata *DB, ids []s
 		args[i] = id
 	}
 	in := strings.Join(placeholders, ", ")
-	// Nom locale-aware : EN privilégie name_en, FR (défaut) name_fr, repli croisé.
-	nameExpr := `COALESCE(NULLIF(TRIM(name_fr), ''), name_en)`
-	if ctxkeys.Locale(ctx) == "en" {
-		nameExpr = `COALESCE(NULLIF(TRIM(name_en), ''), name_fr)`
-	}
+	nameExpr := `COALESCE(NULLIF(TRIM(name_en), ''), '')`
 	query := `SELECT commendation_id,
 	                 ` + nameExpr + ` AS name,
 	                 COALESCE(icon_url, '') AS icon_url,
@@ -529,22 +522,20 @@ func (r *HomeRepo) loadCitationMappingMeta(ctx context.Context, norms []string) 
 		return result
 	}
 	defer rows.Close()
-	enLocale := ctxkeys.Locale(ctx) == "en"
 	for rows.Next() {
 		var norm, display, displayEN, imagePath, tierTargets, description, descriptionEN string
 		if err := rows.Scan(&norm, &display, &displayEN, &imagePath, &tierTargets, &description, &descriptionEN); err != nil {
 			continue
 		}
-		// Locale-aware (GH2-B6 + GH4) : sous UI EN, le nom anglais prime (fallback FR)
-		// et la description EN (description_en) prime. Si description_en est absente →
-		// nom seul (masquée) : principe GH-5b « EN n'injecte jamais de FR ».
-		if enLocale {
-			if displayEN != "" {
-				display = displayEN
-			}
-			description = descriptionEN
+		// English-only (GH2-B6 + GH4): the English name wins, and the description is
+		// description_en or nothing — the legacy French citation_name_display is only a
+		// last resort for the NAME when no English name exists, and the French description
+		// is never served (GH-5b). This used to depend on the request locale being exactly
+		// "en", so a request without one got the French columns.
+		if displayEN != "" {
+			display = displayEN
 		}
-		result[norm] = citationMeta{display: display, imagePath: imagePath, tierTargets: tierTargets, description: description}
+		result[norm] = citationMeta{display: display, imagePath: imagePath, tierTargets: tierTargets, description: descriptionEN}
 	}
 	return result
 }

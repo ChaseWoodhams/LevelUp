@@ -25,8 +25,8 @@ vi.mock('@/features/filters/queries', () => ({
       },
       available_options: {
         experience_types: [
-          { value: 'PVP classé', label: 'PVP classé', count: 10 },
-          { value: 'PVP non classé', label: 'PVP non classé', count: 20 },
+          { value: 'Ranked PvP', label: 'Ranked PvP', count: 10 },
+          { value: 'Unranked PvP', label: 'Unranked PvP', count: 20 },
         ],
         playlists: [{ value: 'Slayer Ranked', label: 'Slayer Ranked', count: 10 }],
         modes: [{ value: 'Slayer', label: 'Slayer', count: 30 }],
@@ -52,17 +52,17 @@ vi.mock('@/features/squad/useActiveSeason', () => ({
 
 // Mock appShellStore.locale pour MultiSelectFilter (qui consomme la locale).
 vi.mock('@/stores/appShellStore', () => ({
-  useAppShellStore: (selector: (s: { locale: string }) => unknown) => selector({ locale: 'fr' }),
+  useAppShellStore: (selector: (s: { locale: string }) => unknown) => selector({ locale: 'en' }),
 }))
 
 const LABELS: LocalFilterBarLabels = {
-  experience: 'Expérience',
-  experienceAll: 'Toutes',
-  experienceRanked: 'Classé',
-  experienceUnranked: 'Non classé',
+  experience: 'Experience',
+  experienceAll: 'All',
+  experienceRanked: 'Ranked',
+  experienceUnranked: 'Unranked',
   playlists: 'Playlists',
   modes: 'Modes',
-  reset: 'Réinitialiser',
+  reset: 'Reset',
 }
 
 beforeEach(() => {
@@ -94,7 +94,7 @@ describe('useLocalFilterBar', () => {
     }
     render(<Wrapper />)
 
-    expect(screen.getByRole('button', { name: /Expérience\s*:/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Experience\s*:/ })).toBeInTheDocument()
   })
 
   it('committedHash a le format FNV-1a 32 bits (8 hex chars)', () => {
@@ -112,19 +112,19 @@ describe('useLocalFilterBar', () => {
     render(<Wrapper />)
 
     // Avant clic : seul le trigger est visible (les options du popup absentes)
-    const trigger = screen.getByRole('button', { name: /Expérience\s*:/ })
+    const trigger = screen.getByRole('button', { name: /Experience\s*:/ })
     // Avant clic : pas de bouton option "Classé X" (count concaténé en accessible name).
-    expect(screen.queryByRole('button', { name: /^Classé\d*$/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Ranked\d*$/ })).not.toBeInTheDocument()
 
     act(() => {
       fireEvent.click(trigger)
     })
 
     // Après clic : les 3 options sont rendues — leur accessible name concatène
-    // le label et le count (ex: "Toutes30", "Classé10", "Non classé20").
-    expect(screen.getByRole('button', { name: /^Toutes\d+$/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^Classé\d+$/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^Non classé\d+$/ })).toBeInTheDocument()
+    // le label et le count (ex: "Toutes30", "Classé10", "Unranked20").
+    expect(screen.getByRole('button', { name: /^All\d+$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Ranked\d+$/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Unranked\d+$/ })).toBeInTheDocument()
   })
 
   it('hasActiveFilters reflète l’état committed (false initial)', () => {
@@ -141,7 +141,7 @@ describe('useLocalFilterBar', () => {
     }
     render(<Wrapper />)
 
-    expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Playlists/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Modes/ })).toBeInTheDocument()
   })

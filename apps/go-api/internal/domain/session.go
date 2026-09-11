@@ -82,7 +82,7 @@ func (s *SessionData) IsMeaningful() bool {
 		s.ActiveSyncJobID != nil ||
 		s.AuthReady ||
 		s.CurrentTitleSlug != "" ||
-		s.Locale != "fr" ||
+		s.Locale != "en" ||
 		!s.HintsVisible
 }
 

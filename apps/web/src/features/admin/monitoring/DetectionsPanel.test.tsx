@@ -31,10 +31,10 @@ function mockDetectionsList() {
 }
 
 describe('DetectionsPanel — note dialog', () => {
-  beforeEach(() => useAppShellStore.setState({ locale: 'fr' }))
+  beforeEach(() => useAppShellStore.setState({ locale: 'en' }))
   afterEach(() => {
     vi.restoreAllMocks()
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   it('Annuler le dialog → aucune mutation PATCH', async () => {
@@ -49,11 +49,11 @@ describe('DetectionsPanel — note dialog', () => {
 
     renderWithProviders(<DetectionsPanel />)
 
-    const resolveBtn = await screen.findByRole('button', { name: /Résoudre/i })
+    const resolveBtn = await screen.findByRole('button', { name: /Resolve/i })
     fireEvent.click(resolveBtn)
 
     // Le dialog s'ouvre ; on annule.
-    const cancelBtn = await screen.findByRole('button', { name: /Annuler/i })
+    const cancelBtn = await screen.findByRole('button', { name: /Cancel/i })
     fireEvent.click(cancelBtn)
 
     // Laisser une éventuelle mutation partir (elle ne DOIT PAS partir).
@@ -76,13 +76,13 @@ describe('DetectionsPanel — note dialog', () => {
 
     renderWithProviders(<DetectionsPanel />)
 
-    const resolveBtn = await screen.findByRole('button', { name: /Résoudre/i })
+    const resolveBtn = await screen.findByRole('button', { name: /Resolve/i })
     fireEvent.click(resolveBtn)
 
     const textarea = await screen.findByRole('textbox')
     fireEvent.change(textarea, { target: { value: 'note test' } })
 
-    const confirmBtn = await screen.findByRole('button', { name: /Valider/i })
+    const confirmBtn = await screen.findByRole('button', { name: /Confirm/i })
     fireEvent.click(confirmBtn)
 
     await waitFor(() => expect(patchedStatus).toBe('resolved'))

@@ -3,7 +3,6 @@ import { playerRelativePath } from '@/lib/title-routing'
 
 /** Titre localisé — parité FR/EN obligatoire par typage (CLAUDE.md règle 1). */
 interface LocalizedTitle {
-  fr: string
   en: string
 }
 
@@ -32,57 +31,57 @@ interface RouteTitleRule {
 // affichée.
 const PLAYER_SUFFIX_OVERRIDES: RouteTitleRule[] = [
   // Accueil
-  { pattern: '', title: { fr: 'Accueil', en: 'Home' } }, // racine joueur nue
-  { pattern: '/home', title: { fr: 'Accueil', en: 'Home' } },
+  { pattern: '', title: { en: 'Home' } }, // racine joueur nue
+  { pattern: '/home', title: { en: 'Home' } },
   // Solo
-  { pattern: '/stats/timeseries', title: { fr: 'Séries temporelles', en: 'Time series' } },
-  { pattern: '/stats/sessions', title: { fr: 'Sessions', en: 'Sessions' } },
-  { pattern: '/stats/synthesis', title: { fr: 'Synthèse', en: 'Summary' } },
-  { pattern: '/stats', title: { fr: 'Solo', en: 'Solo' } },
+  { pattern: '/stats/timeseries', title: { en: 'Time series' } },
+  { pattern: '/stats/sessions', title: { en: 'Sessions' } },
+  { pattern: '/stats/synthesis', title: { en: 'Summary' } },
+  { pattern: '/stats', title: { en: 'Solo' } },
   // Escouade
-  { pattern: '/squad/synergies', title: { fr: 'Synergies', en: 'Synergies' } },
-  { pattern: '/squad/contributions', title: { fr: 'Contributions', en: 'Contributions' } },
-  { pattern: '/squad/dynamique', title: { fr: 'Dynamique', en: 'Dynamics' } },
-  { pattern: '/squad', title: { fr: 'Escouade', en: 'Squad' } },
+  { pattern: '/squad/synergies', title: { en: 'Synergies' } },
+  { pattern: '/squad/contributions', title: { en: 'Contributions' } },
+  { pattern: '/squad/dynamique', title: { en: 'Dynamics' } },
+  { pattern: '/squad', title: { en: 'Squad' } },
   // Carrière — nuance Citations/Commendations (I18) : la source est fixée par la ROUTE
   // (/career/citations = moteur dérivé Infinite, /career/commendations = totaux natifs
   // H5), jamais par une donnée runtime — même distinction que l'ex-effet local de
   // `UnifiedCitationsPage` (titleKey), désormais supprimé au profit de cette table
   // (source unique). FR identique dans les deux cas (« Citations » est le terme
   // officiel Halo FR pour les deux titres, cf. `common.nav.tab_citations`).
-  { pattern: '/career/citations', title: { fr: 'Citations', en: 'Citations' } },
-  { pattern: '/career/commendations', title: { fr: 'Citations', en: 'Commendations' } },
-  { pattern: '/career/medals', title: { fr: 'Médailles', en: 'Medals' } },
-  { pattern: '/career/season-pass', title: { fr: 'Pass saisonnier', en: 'Season pass' } },
-  { pattern: '/career', title: { fr: 'Carrière', en: 'Career' } },
+  { pattern: '/career/citations', title: { en: 'Citations' } },
+  { pattern: '/career/commendations', title: { en: 'Commendations' } },
+  { pattern: '/career/medals', title: { en: 'Medals' } },
+  { pattern: '/career/season-pass', title: { en: 'Season pass' } },
+  { pattern: '/career', title: { en: 'Career' } },
   // Ascension (refonte 4 onglets 2026-07 : Profil + Objectifs + Entraînement + Réalisations)
   {
     pattern: '/ascension/objectifs',
-    title: { fr: 'Ascension — Objectifs', en: 'Ascension — Objectives' },
+    title: { en: 'Ascension — Objectives' },
   },
   {
     pattern: '/ascension/coaching',
-    title: { fr: 'Ascension — Entraînement', en: 'Ascension — Coaching' },
+    title: { en: 'Ascension — Coaching' },
   },
   {
     pattern: '/ascension/realisations',
-    title: { fr: 'Ascension — Réalisations', en: 'Ascension — Achievements' },
+    title: { en: 'Ascension — Achievements' },
   },
-  { pattern: '/ascension', title: { fr: 'Ascension', en: 'Ascension' } },
+  { pattern: '/ascension', title: { en: 'Ascension' } },
   // Route historique /objectifs redirect → /ascension/objectifs (préservée pour bookmarks).
-  { pattern: '/objectifs', title: { fr: 'Ascension', en: 'Ascension' } },
+  { pattern: '/objectifs', title: { en: 'Ascension' } },
   // Communauté / Palmarès
-  { pattern: '/community/compare', title: { fr: 'Face-à-face', en: 'Head-to-head' } },
-  { pattern: '/community/relations', title: { fr: 'Relations', en: 'Relations' } },
-  { pattern: '/community/prestige', title: { fr: 'Leaderboard PP', en: 'Leaderboard PP' } },
-  { pattern: '/community', title: { fr: 'Communauté', en: 'Community' } },
+  { pattern: '/community/compare', title: { en: 'Head-to-head' } },
+  { pattern: '/community/relations', title: { en: 'Relations' } },
+  { pattern: '/community/prestige', title: { en: 'Leaderboard PP' } },
+  { pattern: '/community', title: { en: 'Community' } },
   // Médias / Explorer
-  { pattern: '/media', title: { fr: 'Médias', en: 'Media' } },
-  { pattern: '/explorer', title: { fr: 'Explorer', en: 'Explorer' } },
+  { pattern: '/media', title: { en: 'Media' } },
+  { pattern: '/explorer', title: { en: 'Explorer' } },
   // Divers
-  { pattern: '/matches/$matchId/replay', title: { fr: 'Replay', en: 'Replay' } },
-  { pattern: '/matches/$matchId', title: { fr: 'Match', en: 'Match' } },
-  { pattern: '/notifications', title: { fr: 'Notifications', en: 'Notifications' } },
+  { pattern: '/matches/$matchId/replay', title: { en: 'Replay' } },
+  { pattern: '/matches/$matchId', title: { en: 'Match' } },
+  { pattern: '/notifications', title: { en: 'Notifications' } },
 ]
 
 // Titres des pages agnostiques (hors scope joueur). Table EXHAUSTIVE (I18) — couvre
@@ -94,40 +93,40 @@ const PLAYER_SUFFIX_OVERRIDES: RouteTitleRule[] = [
 // `shellNavigation.GLOBAL_SHELL_LINKS` (même sort que PLAYER_*_NAV_ITEMS ci-dessus —
 // supprimé, 0 autre consommateur).
 const STATIC_ROUTE_TITLES: RouteTitleRule[] = [
-  { pattern: '/', title: { fr: 'Accueil', en: 'Home' } },
+  { pattern: '/', title: { en: 'Home' } },
   {
     pattern: '/admin/detections',
-    title: { fr: 'Administration — Détections', en: 'Administration — Detections' },
+    title: { en: 'Administration — Detections' },
   },
   {
     pattern: '/admin/data',
-    title: { fr: 'Administration — Données', en: 'Administration — Data' },
+    title: { en: 'Administration — Data' },
   },
   {
     pattern: '/admin/sync',
-    title: { fr: 'Administration — Sync', en: 'Administration — Sync' },
+    title: { en: 'Administration — Sync' },
   },
   {
     pattern: '/admin/system',
-    title: { fr: 'Administration — Système', en: 'Administration — System' },
+    title: { en: 'Administration — System' },
   },
   {
     pattern: '/admin/management',
-    title: { fr: 'Administration — Gestion', en: 'Administration — Management' },
+    title: { en: 'Administration — Management' },
   },
-  { pattern: '/admin', title: { fr: 'Administration', en: 'Administration' } },
-  { pattern: '/changelog', title: { fr: 'Changelog', en: 'Changelog' } },
-  { pattern: '/groups', title: { fr: 'Mes groupes', en: 'My groups' } },
-  { pattern: '/help', title: { fr: 'Aide', en: 'Help' } },
-  { pattern: '/join', title: { fr: 'Rejoindre un groupe', en: 'Join a group' } },
+  { pattern: '/admin', title: { en: 'Administration' } },
+  { pattern: '/changelog', title: { en: 'Changelog' } },
+  { pattern: '/groups', title: { en: 'My groups' } },
+  { pattern: '/help', title: { en: 'Help' } },
+  { pattern: '/join', title: { en: 'Join a group' } },
   // Sandbox dev interne, jamais lié depuis la nav prod (cf. ChartsShowcasePage) —
   // conservé pour que l'onglet ne reste pas nu si on y accède en direct.
-  { pattern: '/lab/charts', title: { fr: 'Aperçu graphiques', en: 'Charts gallery' } },
-  { pattern: '/login', title: { fr: 'Connexion', en: 'Sign in' } },
-  { pattern: '/onboarding/openspartan', title: { fr: 'Bienvenue', en: 'Welcome' } },
-  { pattern: '/register', title: { fr: 'Inscription', en: 'Register' } },
-  { pattern: '/settings', title: { fr: 'Paramètres', en: 'Settings' } },
-  { pattern: '/setup', title: { fr: 'Configuration', en: 'Setup' } },
+  { pattern: '/lab/charts', title: { en: 'Charts gallery' } },
+  { pattern: '/login', title: { en: 'Sign in' } },
+  { pattern: '/onboarding/openspartan', title: { en: 'Welcome' } },
+  { pattern: '/register', title: { en: 'Register' } },
+  { pattern: '/settings', title: { en: 'Settings' } },
+  { pattern: '/setup', title: { en: 'Setup' } },
 ]
 
 function escapeRegex(value: string): string {

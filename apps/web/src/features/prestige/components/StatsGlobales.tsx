@@ -4,16 +4,16 @@
  * Référence : Axe 8 du plan conceptuel (onglet Mon parcours, section "stats globales").
  *
  * Affiche :
- *  - Nombre de défis complétés par palier (Normal/Heroic/Legendary/Mythic)
+ *  - Nombre de défis completed par palier (Normal/Heroic/Legendary/Mythic)
  *  - Taux de complétion global (filtre auto/libre)
  *  - Top 5 métriques travaillées
  *
  * Phase 5 minimale : version statique calculée client-side depuis la liste de
- * défis complétés. Une vraie API d'agrégation viendra avec le calage post-alpha.
+ * défis completed. Une vraie API d'agrégation viendra avec le calage post-alpha.
  */
 import { useMemo, useState } from 'react'
 import type { Challenge, Tier, ChallengeMode } from '@/lib/prestige'
-import { TIER_COLORS, TIER_LABELS_FR } from '@/lib/prestige'
+import { TIER_COLORS, TIER_LABELS_EN } from '@/lib/prestige'
 import { useAssetLabel } from '@/lib/i18n/fieldMappings'
 import { useMetricLabel } from '@/lib/i18n/metricLabel'
 import { useAppShellStore } from '@/stores/appShellStore'
@@ -71,7 +71,7 @@ export function StatsGlobales({ challenges }: StatsGlobalesProps) {
             : `${Math.round((stats.totalCompleted / stats.totalCreated) * 100)} %`}
         </p>
         <p className="text-xs text-muted-foreground">
-          {stats.totalCompleted} complétés / {stats.totalCreated} créés
+          {stats.totalCompleted} completed / {stats.totalCreated} créés
         </p>
       </div>
 
@@ -152,7 +152,7 @@ function TierCount({
   const color = TIER_COLORS[tier]
   // Phase 4 plan finition multi-titres : libellé du tier via TOML, fallback dict.
   const tierLabelFromTOML = useAssetLabel('challenge_tier', tier)
-  const tierLabel = tierLabelFromTOML !== tier ? tierLabelFromTOML : TIER_LABELS_FR[tier]
+  const tierLabel = tierLabelFromTOML !== tier ? tierLabelFromTOML : TIER_LABELS_EN[tier]
   return (
     <div
       className="rounded-md border bg-card p-3 text-center"
@@ -164,7 +164,7 @@ function TierCount({
       <p className="mt-1 text-xl font-bold" style={{ color }}>
         {completed}
       </p>
-      <p className="text-2xs text-muted-foreground">/ {created} créés</p>
+      <p className="text-2xs text-muted-foreground">/ {created} created</p>
     </div>
   )
 }

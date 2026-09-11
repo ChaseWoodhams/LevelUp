@@ -19,7 +19,7 @@ const mockShellState = {
   currentPlayer: { player_slug: 'demo-player', gamertag: 'DemoPlayer' } as
     | { player_slug: string; gamertag: string }
     | null,
-  locale: 'fr' as 'fr' | 'en',
+  locale: 'en' as 'en' | 'en',
   currentTitleSlug: 'halo_infinite',
 }
 
@@ -88,14 +88,14 @@ describe('AscensionCoachingTab — composition (couche Coaching)', () => {
       player_slug: 'demo-player',
       gamertag: 'DemoPlayer',
     }
-    mockShellState.locale = 'fr'
+    mockShellState.locale = 'en'
     mockProfile.current = null
     mockPatterns.current = null
   })
 
   it('renders the coaching LayerSection header', () => {
     render(<AscensionCoachingTab />)
-    expect(screen.getByText(/Ascension — Coaching d'amélioration/i)).toBeInTheDocument()
+    expect(screen.getByText(/Ascension — Improvement coaching/i)).toBeInTheDocument()
   })
 
   it('renders the Coach focus + proposals cards', () => {
@@ -146,7 +146,7 @@ describe('AscensionCoachingTab — composition (couche Coaching)', () => {
     mockShellState.currentPlayer = null
     render(<AscensionCoachingTab />)
     expect(
-      screen.getByText(/Sélectionne un joueur pour voir l'entraînement/i),
+      screen.getByText(/Select a player to view coaching/i),
     ).toBeInTheDocument()
   })
 })

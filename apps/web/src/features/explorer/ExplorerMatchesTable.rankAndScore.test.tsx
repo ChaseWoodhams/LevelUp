@@ -78,18 +78,18 @@ describe('Colonne Rang — badge image avec repli texte', () => {
         playerSlug="me"
       />,
     )
-    const img = screen.getByAltText('Diamant IV')
+    const img = screen.getByAltText('Diamond IV')
     expect(img).toHaveAttribute('src', '/static/ranks/halo_infinite/120px-HINF-CSR_Diamond4.png')
     // Le libellé n'est plus écrit en clair dans la cellule : l'image le remplace.
-    expect(screen.queryByText('Diamant IV')).toBeNull()
+    expect(screen.queryByText('Diamond IV')).toBeNull()
   })
 
   it('sans URL de badge (titre sans image), garde le texte localisé du palier', () => {
     renderWithProviders(
       <ExplorerMatchesTable rows={[makeRow({ skill_tier_label: 'Diamant IV' })]} playerSlug="me" />,
     )
-    expect(screen.getByText('Diamant IV')).toBeInTheDocument()
-    expect(screen.queryByAltText('Diamant IV')).toBeNull()
+    expect(screen.getByText('Diamond IV')).toBeInTheDocument()
+    expect(screen.queryByAltText('Diamond IV')).toBeNull()
   })
 
   it('placement en cours : le badge unranked_N (JGtm) prime sur le badge de palier', () => {
@@ -110,12 +110,12 @@ describe('Colonne Rang — badge image avec repli texte', () => {
     // unranked_N (N=done*10/total) via PlacementPendingCell (variant "rating",
     // réutilisée telle quelle — même mécanisme que la colonne Note). La colonne
     // Note (rating_type) lit le MÊME placement_done/total → 2 images identiques.
-    const imgs = screen.getAllByAltText('En placement')
+    const imgs = screen.getAllByAltText('In placement')
     expect(imgs).toHaveLength(2) // Rang + Note
     for (const img of imgs) {
       expect(img).toHaveAttribute('src', expect.stringContaining('unranked_3.png'))
     }
-    expect(screen.queryByAltText('Diamant IV')).toBeNull()
+    expect(screen.queryByAltText('Diamond IV')).toBeNull()
     expect(screen.queryByText('3/10')).toBeNull()
   })
 })
@@ -155,7 +155,7 @@ describe('Colonne Score personnel', () => {
     )
     // L'en-tête est rendu sur 2 lignes (« Score » / « personnel ») : c'est
     // l'aria-label du bouton de tri qui porte le libellé complet et lisible.
-    expect(screen.getByLabelText('Trier par Score personnel')).toBeInTheDocument()
+    expect(screen.getByLabelText('Sort by Personal score')).toBeInTheDocument()
   })
 
   it('parité EN : le libellé anglais est servi et rendu en entier', () => {
@@ -168,7 +168,7 @@ describe('Colonne Score personnel', () => {
     // coupé sur 2 lignes, mais jamais tronqué (aucun mot perdu).
     const header = screen.getByLabelText('Sort by Personal score')
     expect(header.textContent?.replace(/\s+/g, '')).toContain('Personalscore')
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   it('trie sur la valeur numérique', () => {
@@ -184,7 +184,7 @@ describe('Colonne Score personnel', () => {
       />,
     )
     const names = ['Aquarius', 'Bazaar', 'Catalyst']
-    const header = screen.getByLabelText('Trier par Score personnel')
+    const header = screen.getByLabelText('Sort by Personal score')
 
     fireEvent.click(header) // 1er clic : décroissant (NUMERIC_SORT)
     expect(bodyMapOrder(names)).toEqual(['Bazaar', 'Catalyst', 'Aquarius'])

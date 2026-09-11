@@ -556,7 +556,7 @@ ORDER BY name_canonical`
 // analysis.CSRTierOrdinal — source UNIQUE de l'ordre des paliers (pas de CASE SQL
 // dupliqué). Raison : certains titres (Halo 5) exposent le palier (DesignationId →
 // "Diamond", sub_tier) mais une valeur numérique = 0 (l'API ne la fournit pas).
-// Exiger value > 0 masquait un vrai pic (ex. Diamant V) → "Non classé" erroné.
+// Exiger value > 0 masquait un vrai pic (ex. Diamant V) → "Unranked" erroné.
 // Title-agnostic : titre avec valeur (Infinite, départage) ET tier-only (H5).
 const Q26csrAlltimePeak = `
 SELECT

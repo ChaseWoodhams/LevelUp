@@ -300,7 +300,7 @@ func TestGetWorldLeaderboardCatalog(t *testing.T) {
 				i, cat.Seasons[i].ID, cat.Seasons[i].Enriched, w.id, w.enriched)
 		}
 	}
-	// Playlists : 2 distinctes (depuis le leaderboard) ; la playlist connue a son libellé FR.
+	// Playlists: 2 distinct (from the leaderboard); the known playlist has its English label.
 	if len(cat.Playlists) != 2 {
 		t.Fatalf("playlists = %d, attendu 2 (%+v)", len(cat.Playlists), cat.Playlists)
 	}
@@ -313,8 +313,8 @@ func TestGetWorldLeaderboardCatalog(t *testing.T) {
 			unknownLabel = p.DisplayName
 		}
 	}
-	if arenaLabel != "Arène classée" {
-		t.Errorf("libellé Arena = %q, attendu \"Arène classée\"", arenaLabel)
+	if arenaLabel != "Ranked Arena" {
+		t.Errorf("Arena label = %q, want \"Ranked Arena\"", arenaLabel)
 	}
 	if unknownLabel != "unknown-pl" {
 		t.Errorf("libellé inconnu = %q, attendu fallback sur l'asset_id", unknownLabel)

@@ -424,11 +424,11 @@ func TestBuildCapabilities_Normal(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestBuildSettingsExcerpt_Defaults(t *testing.T) {
-	cfg := &config.AppConfig{Lang: "fr"}
+	cfg := &config.AppConfig{Lang: "en"}
 	settings := map[string]interface{}{}
 	excerpt := buildSettingsExcerpt(cfg, settings)
-	if excerpt.Lang != "fr" {
-		t.Errorf("expected fr, got %s", excerpt.Lang)
+	if excerpt.Lang != "en" {
+		t.Errorf("expected en, got %s", excerpt.Lang)
 	}
 	if excerpt.UserTimezone != "Europe/Paris" {
 		t.Errorf("expected Europe/Paris, got %s", excerpt.UserTimezone)

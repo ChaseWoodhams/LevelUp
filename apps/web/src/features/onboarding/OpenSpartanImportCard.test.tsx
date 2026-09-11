@@ -21,9 +21,9 @@ import { commonManifest, type CommonManifestKey } from '@/lib/i18n/generated/com
 const API = '/api/v1'
 
 // Traducteur FR pour les tests unitaires de failureMessageFromCode (le composant
-// injecte le t() du store locale ; ici on force 'fr' pour asserter les libellés).
+// injecte le t() du store locale ; ici on force 'en' pour asserter les libellés).
 const tFr = (key: CommonManifestKey, vars?: Record<string, string | number>) =>
-  formatMessage(commonManifest, key, 'fr', vars)
+  formatMessage(commonManifest, key, 'en', vars)
 
 function renderCard() {
   const client = new QueryClient({
@@ -58,7 +58,7 @@ describe('OpenSpartanImportCard — idle state', () => {
     fireEvent.change(input, {
       target: { files: [new File(['text'], 'report.txt', { type: 'text/plain' })] },
     })
-    expect(screen.getByRole('alert').textContent).toMatch(/\.db OpenSpartan/i)
+    expect(screen.getByRole('alert').textContent).toMatch(/OpenSpartan \.db/i)
     const submit = screen.getByTestId('openspartan-submit') as HTMLButtonElement
     expect(submit.disabled).toBe(true)
   })
@@ -141,10 +141,10 @@ describe('OpenSpartanImportCard — happy path', () => {
     )
 
     const success = screen.getByTestId('openspartan-success')
-    expect(success.textContent).toMatch(/Import réussi/i)
+    expect(success.textContent).toMatch(/Import successful/i)
     expect(within(success).getByText('12 / 12')).toBeTruthy() // Matchs importés
     expect(within(success).getByText('200')).toBeTruthy() // Médailles
-    expect(within(success).getByText(/sessions calcul/i)).toBeTruthy() // Post-import block visible
+    expect(within(success).getByText(/Computed sessions/i)).toBeTruthy() // Post-import block visible
   })
 })
 
@@ -196,9 +196,9 @@ describe('OpenSpartanImportCard — failure path', () => {
       { timeout: 5000 },
     )
     const failure = screen.getByTestId('openspartan-failure')
-    expect(failure.textContent).toMatch(/n'appartient pas au compte/i)
+    expect(failure.textContent).toMatch(/does not belong to the connected Xbox account/i)
     // Retry button drops us back to idle.
-    fireEvent.click(within(failure).getByRole('button', { name: /réessayer/i }))
+    fireEvent.click(within(failure).getByRole('button', { name: /Retry/i }))
     expect(screen.getByTestId('openspartan-dropzone')).toBeTruthy()
   })
 })
@@ -206,11 +206,11 @@ describe('OpenSpartanImportCard — failure path', () => {
 describe('failureMessageFromCode — unit', () => {
   it('maps every documented Error.Code to a localised sentence', () => {
     const cases: Array<{ code: string; expected: RegExp }> = [
-      { code: 'xuid_mismatch', expected: /pas au compte Xbox/i },
-      { code: 'owner_low_confidence', expected: /vérifier/i },
-      { code: 'not_openspartan_db', expected: /OpenSpartan reconnaissable/i },
-      { code: 'upload_too_large', expected: /max 1 Go/i },
-      { code: 'demo_mode', expected: /mode démo/i },
+      { code: 'xuid_mismatch', expected: /does not belong to the connected Xbox account/i },
+      { code: 'owner_low_confidence', expected: /Unable to verify/i },
+      { code: 'not_openspartan_db', expected: /recognisable OpenSpartan/i },
+      { code: 'upload_too_large', expected: /max 1 GB/i },
+      { code: 'demo_mode', expected: /demo mode/i },
       { code: 'halo_auth_required', expected: /Xbox\/Halo/i },
     ]
     for (const c of cases) {
@@ -225,6 +225,6 @@ describe('failureMessageFromCode — unit', () => {
   })
 
   it('falls back to a default message when error is null', () => {
-    expect(failureMessageFromCode(null, tFr)).toMatch(/inconnue/i)
+    expect(failureMessageFromCode(null, tFr)).toMatch(/Unknown error/i)
   })
 })

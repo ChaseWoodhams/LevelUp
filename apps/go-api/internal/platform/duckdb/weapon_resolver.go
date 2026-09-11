@@ -73,10 +73,10 @@ func resolveWeaponMeta(ctx context.Context, meta *DB, titleSlug string, weaponID
 	// weapon_key, ou metadata non seedée en test). Le registre `weapons` ne fournit
 	// PLUS de nom (dimensions seules). name_en reste weapon_labels (URL image). label ""
 	// → id inconnu de toutes les sources (caller décide).
-	labelExpr := "COALESCE(NULLIF(wl.name_fr,''), NULLIF(wl.name_en,''), '')"
+	labelExpr := "COALESCE(NULLIF(wl.name_en,''), '')"
 	nameJoin := ""
 	if weaponNameLabelsAvailable(ctx, meta) {
-		labelExpr = "COALESCE(NULLIF(wnl.name_fr,''), NULLIF(wnl.name_en,''), NULLIF(wl.name_fr,''), NULLIF(wl.name_en,''), '')"
+		labelExpr = "COALESCE(NULLIF(wnl.name_en,''), NULLIF(wl.name_en,''), '')"
 		nameJoin = " LEFT JOIN weapon_name_labels wnl ON wnl.title_slug = wi.title_slug AND wnl.weapon_key = wi.weapon_key"
 	}
 	query := "SELECT ids.v," +
@@ -154,7 +154,7 @@ func resolveWeaponLabelsOnly(ctx context.Context, meta *DB, uniqueIDs []int64) m
 		parts[i] = strconv.FormatUint(uint64(id), 10) //nolint:gosec
 	}
 	query := "SELECT weapon_id," +
-		" COALESCE(name_fr, name_en, CAST(weapon_id AS VARCHAR)) AS label," +
+		" COALESCE(name_en, CAST(weapon_id AS VARCHAR)) AS label," +
 		" COALESCE(name_en, '') AS name_en" +
 		" FROM weapon_labels WHERE weapon_id IN (" + strings.Join(parts, ",") + ")"
 	rows, err := meta.Query(ctx, query)

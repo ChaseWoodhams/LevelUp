@@ -87,7 +87,7 @@ export function Carousel({ children, className = '' }: CarouselProps) {
         type="button"
         onClick={() => scroll('left')}
         disabled={!canLeft}
-        aria-label="Précédent"
+        aria-label="Previous"
         className="shrink-0 flex items-center justify-center w-9 rounded-l-lg border-y border-l border-border bg-background/95 backdrop-blur-sm transition-all duration-150 hover:bg-muted disabled:cursor-default disabled:opacity-30 disabled:hover:bg-background/95"
       >
         <ChevronLeftIcon />
@@ -107,7 +107,7 @@ export function Carousel({ children, className = '' }: CarouselProps) {
         type="button"
         onClick={() => scroll('right')}
         disabled={!canRight}
-        aria-label="Suivant"
+        aria-label="Next"
         className="shrink-0 flex items-center justify-center w-9 rounded-r-lg border-y border-r border-border bg-background/95 backdrop-blur-sm transition-all duration-150 hover:bg-muted disabled:cursor-default disabled:opacity-30 disabled:hover:bg-background/95"
       >
         <ChevronRightIcon />

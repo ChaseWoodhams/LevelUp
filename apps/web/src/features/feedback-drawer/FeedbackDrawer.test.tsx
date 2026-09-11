@@ -32,7 +32,7 @@ afterEach(() => {
 describe('FeedbackDrawer — rendu et accessibilité', () => {
   it('rend le mini-tab caché initialement (drawer fermé)', () => {
     renderWithProviders(<FeedbackDrawer />)
-    const btn = screen.getByRole('button', { name: /Envoyer un retour/i })
+    const btn = screen.getByRole('button', { name: /Send feedback/i })
     expect(btn).toBeInTheDocument()
     expect(btn).toHaveAttribute('aria-expanded', 'false')
   })
@@ -45,7 +45,7 @@ describe('FeedbackDrawer — rendu et accessibilité', () => {
 
   it("ouvre le drawer au clic sur le mini-tab", () => {
     renderWithProviders(<FeedbackDrawer />)
-    fireEvent.click(screen.getByRole('button', { name: /Envoyer un retour/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Send feedback/i }))
     expect(useFeedbackDrawerStore.getState().isOpen).toBe(true)
   })
 })
@@ -61,16 +61,16 @@ describe('FeedbackDrawer — interactions', () => {
   it("submit désactivé si titre vide", () => {
     useFeedbackDrawerStore.setState({ isOpen: true })
     renderWithProviders(<FeedbackDrawer />)
-    const btn = screen.getByRole('button', { name: /Ouvrir sur GitHub/i })
+    const btn = screen.getByRole('button', { name: /Open on GitHub/i })
     expect(btn).toBeDisabled()
   })
 
   it("submit ouvre window.open avec URL GitHub valide", async () => {
     useFeedbackDrawerStore.setState({ isOpen: true })
     renderWithProviders(<FeedbackDrawer />)
-    const titleInput = screen.getByPlaceholderText(/Résume ton retour/i)
+    const titleInput = screen.getByPlaceholderText(/Sum up your feedback in a few words/i)
     fireEvent.change(titleInput, { target: { value: 'mon retour' } })
-    const submitBtn = screen.getByRole('button', { name: /Ouvrir sur GitHub/i })
+    const submitBtn = screen.getByRole('button', { name: /Open on GitHub/i })
     await waitFor(() => expect(submitBtn).toBeEnabled())
     fireEvent.click(submitBtn)
     expect(window.open).toHaveBeenCalled()
@@ -85,7 +85,7 @@ describe('FeedbackDrawer — interactions', () => {
   it("change de type via segmented control", () => {
     useFeedbackDrawerStore.setState({ isOpen: true })
     renderWithProviders(<FeedbackDrawer />)
-    const ideaTab = screen.getByRole('tab', { name: /Idée/i })
+    const ideaTab = screen.getByRole('tab', { name: /Idea/i })
     fireEvent.click(ideaTab)
     expect(ideaTab).toHaveAttribute('aria-selected', 'true')
   })
@@ -101,10 +101,10 @@ describe('FeedbackDrawer — popup blocker fallback', () => {
       configurable: true,
     })
     renderWithProviders(<FeedbackDrawer />)
-    fireEvent.change(screen.getByPlaceholderText(/Résume ton retour/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Sum up your feedback in a few words/i), {
       target: { value: 'titre' },
     })
-    const submitBtn = screen.getByRole('button', { name: /Ouvrir sur GitHub/i })
+    const submitBtn = screen.getByRole('button', { name: /Open on GitHub/i })
     await waitFor(() => expect(submitBtn).toBeEnabled())
     fireEvent.click(submitBtn)
     await waitFor(() => expect(writeTextSpy).toHaveBeenCalled())
@@ -123,10 +123,10 @@ describe('FeedbackDrawer — anti-spam', () => {
       JSON.stringify(Array.from({ length: 5 }, () => Date.now())),
     )
     renderWithProviders(<FeedbackDrawer />)
-    fireEvent.change(screen.getByPlaceholderText(/Résume ton retour/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Sum up your feedback in a few words/i), {
       target: { value: 'titre' },
     })
-    const submitBtn = screen.getByRole('button', { name: /Ouvrir sur GitHub/i })
+    const submitBtn = screen.getByRole('button', { name: /Open on GitHub/i })
     await waitFor(() => expect(submitBtn).toBeDisabled())
   })
 })
@@ -136,10 +136,10 @@ describe('FeedbackDrawer — observabilité', () => {
     useFeedbackDrawerStore.setState({ isOpen: true })
     const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
     renderWithProviders(<FeedbackDrawer />)
-    fireEvent.change(screen.getByPlaceholderText(/Résume ton retour/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Sum up your feedback in a few words/i), {
       target: { value: 'titre top secret' },
     })
-    const submitBtn = screen.getByRole('button', { name: /Ouvrir sur GitHub/i })
+    const submitBtn = screen.getByRole('button', { name: /Open on GitHub/i })
     await waitFor(() => expect(submitBtn).toBeEnabled())
     fireEvent.click(submitBtn)
     await waitFor(() => expect(infoSpy).toHaveBeenCalled())
@@ -161,10 +161,10 @@ describe('FeedbackDrawer — observabilité', () => {
       configurable: true,
     })
     renderWithProviders(<FeedbackDrawer />)
-    fireEvent.change(screen.getByPlaceholderText(/Résume ton retour/i), {
+    fireEvent.change(screen.getByPlaceholderText(/Sum up your feedback in a few words/i), {
       target: { value: 'titre' },
     })
-    const submitBtn = screen.getByRole('button', { name: /Ouvrir sur GitHub/i })
+    const submitBtn = screen.getByRole('button', { name: /Open on GitHub/i })
     await waitFor(() => expect(submitBtn).toBeEnabled())
     expect(() => fireEvent.click(submitBtn)).not.toThrow()
   })

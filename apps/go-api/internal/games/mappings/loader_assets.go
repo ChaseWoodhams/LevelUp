@@ -120,11 +120,13 @@ func LoadAssetsFromBytes(path string, raw []byte) (*AssetMappingSet, error) {
 
 func validateAsset(kind, id string, e assetEntryTOML) []error {
 	var errs []error
+	for lang := range e.Labels {
+		if lang != LocaleEN {
+			errs = append(errs, fmt.Errorf("labels.%s is not supported; use labels.en", lang))
+		}
+	}
 	if _, ok := e.Labels[LocaleEN]; !ok || strings.TrimSpace(e.Labels[LocaleEN]) == "" {
 		errs = append(errs, fmt.Errorf("label EN manquant"))
-	}
-	if _, ok := e.Labels[LocaleFR]; !ok || strings.TrimSpace(e.Labels[LocaleFR]) == "" {
-		errs = append(errs, fmt.Errorf("label FR manquant"))
 	}
 	if e.DisplayOrder < 0 {
 		errs = append(errs, fmt.Errorf("display_order doit être >= 0 (reçu %d)", e.DisplayOrder))

@@ -25,41 +25,6 @@ export interface CompareText {
   metrics: Record<string, string>
 }
 
-const FR_TEXT: CompareText = {
-  intlLocale: 'fr-FR',
-  pageTitle: 'Face-à-face',
-  backToExplorer: 'Retour à l\'Explorer',
-  searchPlaceholder: 'Rechercher un joueur…',
-  emptyPrompt: 'Recherchez un joueur pour lancer le face-à-face.',
-  loading: 'Chargement de la comparaison…',
-  vs: 'vs',
-  notFoundTitle: 'Joueur introuvable',
-  notFoundDescription: 'Ce joueur n\'existe pas ou n\'a aucune donnée accessible.',
-  errorTitle: 'Erreur',
-  errorDescription: 'Impossible de récupérer la comparaison.',
-  partialWarning: (gamertag) => `Les données de ${gamertag} sont partielles — certaines métriques peuvent être absentes.`,
-  ariaWinner: (name) => `${name} domine cette métrique`,
-  ariaEqual: 'Égalité',
-  sampleSize: (n) => `(sur ${n} matchs)`,
-  notAvailable: 'N/A',
-  ariaNotAvailable: 'Donnée non disponible',
-  catCombat: 'Combat',
-  catPrecision: 'Précision & Survie',
-  catBilan: 'Bilan & Rang',
-  // N'entrent ici que les métriques SANS FieldKey canonique équivalent (cf.
-  // METRIC_TO_FIELD_KEY plus bas) : toutes les autres viennent du registre.
-  metrics: {
-    kills_per_game: 'Frags/match',
-    deaths_per_game: 'Morts/match',
-    assists_per_game: 'Assistances/match',
-    career_rank: 'Rang carrière',
-    csr: 'CSR (saison actuelle)',
-    csr_alltime: 'CSR (record)',
-    perf_ath: 'Perf. record',
-    lusr_ath: 'LUSR record',
-  },
-}
-
 const EN_TEXT: CompareText = {
   intlLocale: 'en-GB',
   pageTitle: 'Head-to-head',
@@ -95,12 +60,11 @@ const EN_TEXT: CompareText = {
 }
 
 const TEXT: Record<Locale, CompareText> = {
-  fr: FR_TEXT,
   en: EN_TEXT,
 }
 
-export function normalizeCompareLocale(locale?: string | null): Locale {
-  return locale === 'en' ? 'en' : 'fr'
+export function normalizeCompareLocale(): Locale {
+  return 'en'
 }
 
 /**
@@ -135,10 +99,9 @@ export const METRIC_TO_FIELD_KEY: Record<string, string> = {
 }
 
 export function getCompareText(
-  locale?: string | null,
   fieldMappings?: { fields: Record<string, { label: string }> },
 ): CompareText {
-  const base = TEXT[normalizeCompareLocale(locale)]
+  const base = TEXT[normalizeCompareLocale()]
   if (!fieldMappings) return base
   const merged: CompareText = {
     ...base,

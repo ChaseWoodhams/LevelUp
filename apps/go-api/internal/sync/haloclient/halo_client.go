@@ -126,7 +126,7 @@ type HaloClient interface {
 	// Retourne slice vide (pas d'erreur) si le joueur n'a aucun classement.
 	GetPlayerCSRs(ctx context.Context, xuid, seasonID string) ([]PlayerPlaylistCSR, error)
 	// GetPlaylistCsr récupère le CSR d'un joueur pour UNE playlist classée (mécanisme
-	// Grunt). Marche pour n'importe quelle playlist/saison — renvoie "Non classé"
+	// Grunt). Marche pour n'importe quelle playlist/saison — renvoie "Unranked"
 	// (nil, nil) si jamais jouée. Permet d'afficher toutes les playlists classées
 	// sans dériver de l'historique du joueur.
 	GetPlaylistCsr(ctx context.Context, playlistID, xuid, seasonID string) (*PlayerPlaylistCSR, error)

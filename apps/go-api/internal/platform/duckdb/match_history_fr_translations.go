@@ -10,10 +10,7 @@ package duckdb
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
 	"strings"
-	"time"
 
 	"levelup/go-api/internal/analysis"
 	"levelup/go-api/internal/domain"
@@ -35,8 +32,8 @@ func applyMatchHistoryFRTranslations(ctx context.Context, pdb *PlayerDB, rows []
 
 	// Lookup bulk via MetadataRepo (même chemin que home_repo).
 	metaRepo := NewMetadataRepoFromDB(pdb.Metadata)
-	langs := PreferredLangsForLocale("fr")
-	langsEN := PreferredLangsForLocale("en")
+	langs := PreferredAssetLanguages()
+	langsEN := PreferredAssetLanguages()
 
 	mapNames, _ := metaRepo.ResolveAssetNamesBulk(ctx, "map", mapIDs, langs)
 	pairNames, _ := metaRepo.ResolveAssetNamesBulk(ctx, "pair", pairIDs, langs)
@@ -130,7 +127,7 @@ func applyMatchHistoryPairFR(
 	if row.PairID != nil {
 		assetName = pairNames[*row.PairID]
 	}
-	if fr := analysis.ResolvePairNameFR(
+	if fr := analysis.ResolvePairName(
 		derefString(row.PairName),
 		derefString(row.PairNameFR),
 		assetName,
@@ -179,7 +176,7 @@ func collectDistinctIDs(rows []domain.MatchHistoryRawRow, get func(domain.MatchH
 // loadModeFRBatch charge mode_name_tr (FR) pour la liste de modes EN normalisés.
 // Best-effort : retourne un map vide si erreur ou table absente.
 //
-// Wrapper map[string]struct{} → loadModeNamesFRForKeys, conservé pour préserver
+// Wrapper map[string]struct{} → loadModeNamesForKeys, conservé pour préserver
 // la signature historique du caller match_history.
 func loadModeFRBatch(ctx context.Context, pdb *PlayerDB, modeENSet map[string]struct{}) map[string]string {
 	if len(modeENSet) == 0 || pdb == nil || pdb.Metadata == nil {
@@ -189,49 +186,10 @@ func loadModeFRBatch(ctx context.Context, pdb *PlayerDB, modeENSet map[string]st
 	for k := range modeENSet {
 		enList = append(enList, k)
 	}
-	return loadModeNamesFRForKeys(ctx, pdb.Metadata, enList)
+	return loadModeNamesForKeys(ctx, pdb.Metadata, enList)
 }
 
-// loadModeNamesFRForKeys / loadKnownModesEN : DÉPLACÉS dans mode_name_tr.go
+// loadModeNamesForKeys / loadKnownModesEN : DÉPLACÉS dans mode_name_tr.go
 // (2026-07-25) — source unique du SQL sur metadata.mode_name_tr, cf. le
 // garde-rail no_mode_name_tr_literal_test.go. Aucun changement de signature ni
 // de comportement pour les callers de ce fichier.
-
-// loadPairAssetNamesFR charge asset_translations[asset_type='pair', lang='fr'|'fr-FR']
-// pour les pair_id donnés. Helper partagé entre match_history et filters pour
-// le fallback de re-lookup mode_name_tr (cf. analysis.ResolvePairNameFR).
-// Best-effort : retourne nil en cas d'erreur.
-func loadPairAssetNamesFR(ctx context.Context, meta *DB, pairIDs []string) map[string]string {
-	if meta == nil || len(pairIDs) == 0 {
-		return nil
-	}
-	ph := strings.TrimRight(strings.Repeat("?,", len(pairIDs)), ",")
-	q := fmt.Sprintf(`SELECT asset_id, name FROM asset_translations
-		WHERE asset_type = 'pair' AND lang IN ('fr-FR', 'fr') AND asset_id IN (%s)
-		ORDER BY asset_id, CASE WHEN lang = 'fr-FR' THEN 0 ELSE 1 END`, ph)
-	args := make([]any, len(pairIDs))
-	for i, id := range pairIDs {
-		args[i] = id
-	}
-	ctx2, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-	// QueryRecovered : auto-réparation si handle metadata FATAL-invalidated (bug ART).
-	rows, err := meta.QueryRecovered(ctx2, q, args...)
-	if err != nil {
-		if !isTableNotFoundErr(err) {
-			slog.WarnContext(ctx, "fr_translations: loadPairAssetNamesFR failed", "err", err)
-		}
-		return nil
-	}
-	defer rows.Close()
-	out := make(map[string]string, len(pairIDs))
-	for rows.Next() {
-		var id, name string
-		if rows.Scan(&id, &name) == nil {
-			if _, exists := out[id]; !exists {
-				out[id] = strings.TrimSpace(name)
-			}
-		}
-	}
-	return out
-}

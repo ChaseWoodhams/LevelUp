@@ -129,7 +129,7 @@ export function HomeRecentPlaylistsCard({
                               ? placementCompleted === 0
                                 ? t('common.home.rank_unrated')
                                 : t('common.home.rank_placement')
-                              : localizeTierLabel(item.tier_label, locale) ?? t('common.home.rank_label')
+                              : localizeTierLabel(item.tier_label) ?? t('common.home.rank_label')
                           }
                           testId={isPlacement ? 'home-rank-unranked-image' : undefined}
                           opacity={isPlacement ? 'dim' : 'full'}
@@ -155,7 +155,7 @@ export function HomeRecentPlaylistsCard({
                           data-testid="home-rank-tier-label"
                           className="truncate text-sm font-semibold text-foreground"
                         >
-                          {localizeTierLabel(item.tier_label, locale)}
+                          {localizeTierLabel(item.tier_label)}
                         </p>
                       ) : isPlacement ? (
                         <p
@@ -205,7 +205,7 @@ export function HomeRecentPlaylistsCard({
                             data-testid="home-recent-playlist-next-tier"
                             className="shrink-0 truncate text-2xs font-medium text-muted-foreground"
                           >
-                            {localizeTierLabel(item.next_tier_label, locale)}
+                            {localizeTierLabel(item.next_tier_label)}
                           </span>
                         )}
                       </div>

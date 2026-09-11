@@ -64,7 +64,7 @@ describe('AdminInitialSyncCard — titre ciblé (multi-titre)', () => {
     renderWithProviders(<AdminInitialSyncCard onJobSettled={() => {}} />)
 
     fireEvent.click(screen.getByText('choisir-joueur'))
-    fireEvent.click(screen.getByText(/Lancer la synchronisation initiale/i))
+    fireEvent.click(screen.getByText(/Run initial sync/i))
 
     await waitFor(() => expect(submitted).toHaveLength(1))
     expect(submitted[0]).toMatchObject({ player_slug: 'choco', title_slug: 'halo_5' })
@@ -75,7 +75,7 @@ describe('AdminInitialSyncCard — titre ciblé (multi-titre)', () => {
     renderWithProviders(<AdminInitialSyncCard onJobSettled={() => {}} />)
 
     fireEvent.click(screen.getByText('choisir-joueur'))
-    fireEvent.click(screen.getByText(/Lancer la synchronisation initiale/i))
+    fireEvent.click(screen.getByText(/Run initial sync/i))
 
     await waitFor(() => expect(submitted).toHaveLength(1))
     expect(submitted[0].title_slug).toBe('halo_infinite')
@@ -83,7 +83,7 @@ describe('AdminInitialSyncCard — titre ciblé (multi-titre)', () => {
 
   it('AFFICHE le jeu ciblé sur la carte (nom lisible du titre actif)', () => {
     renderWithProviders(<AdminInitialSyncCard onJobSettled={() => {}} />)
-    expect(screen.getByText('Jeu ciblé :')).toBeInTheDocument()
+    expect(screen.getByText('Target game:')).toBeInTheDocument()
     expect(screen.getByText('Halo 5')).toBeInTheDocument()
   })
 

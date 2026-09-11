@@ -11,7 +11,7 @@ import { useAppShellStore } from '@/stores/appShellStore'
 describe('CombatYieldBar', () => {
   afterEach(() => {
     // Restaure la locale par défaut du store entre les tests (GH3-3).
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
   it('renders without error with no props', () => {
     const { container } = render(<CombatYieldBar />)
@@ -49,7 +49,7 @@ describe('CombatYieldBar', () => {
   })
 
   it('shows tooltip on hover when data is present (FR)', () => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
     const { container } = render(
       <CombatYieldBar
         offensiveConversion={0.9}
@@ -60,10 +60,10 @@ describe('CombatYieldBar', () => {
     )
     const wrapper = container.firstChild as HTMLElement
     fireEvent.mouseEnter(wrapper)
-    expect(screen.getByText(/Rendement/i)).toBeTruthy()
-    expect(screen.getByText(/Résistance/i)).toBeTruthy()
-    expect(screen.getByText(/dégâts\/frag/i)).toBeTruthy()
-    expect(screen.getByText(/dégâts\/mort/i)).toBeTruthy()
+    expect(screen.getByText(/Yield/i)).toBeTruthy()
+    expect(screen.getByText(/Resistance/i)).toBeTruthy()
+    expect(screen.getByText(/dmg\/kill/i)).toBeTruthy()
+    expect(screen.getByText(/dmg\/death/i)).toBeTruthy()
   })
 
   // GH3-3 : sous UI EN, la légende de la barre suit la locale (dmg/kill · dmg/death,
@@ -85,7 +85,7 @@ describe('CombatYieldBar', () => {
     expect(screen.getByText(/dmg\/kill/i)).toBeTruthy()
     expect(screen.getByText(/dmg\/death/i)).toBeTruthy()
     // Aucun libellé FR ne doit subsister sous EN.
-    expect(screen.queryByText(/dégâts/i)).toBeNull()
+    expect(screen.queryByText(/Damage/i)).toBeNull()
   })
 
   it('hides tooltip on mouse leave', () => {

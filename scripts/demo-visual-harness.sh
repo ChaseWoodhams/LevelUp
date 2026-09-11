@@ -157,15 +157,13 @@ fi
 # {dir}/players/DEMO/stats.duckdb + {dir}/warehouse/*.duckdb. DB_PROFILES et
 # APP_SETTINGS pointent les configs ÉMISES par le seed (parité avec le service
 # levelup-demo de docker-compose.yml, qui les bind-mount par-dessus celles du
-# repo). LEVELUP_DEMO_LOCALE=fr : la vitrine démo force l'anglais par défaut, les
-# specs vérifient l'UI FR.
+# repo). The demo runtime is English-only.
 start_api() {
 	(
 		cd "$GO_API_DIR"
 		LEVELUP_REPO_ROOT="$(native_path "$REPO_ROOT")" \
 			LEVELUP_DEMO_MODE=true \
 			LEVELUP_DEMO_FIXTURES_DIR="$(native_path "$DEMO_ROOT")" \
-			LEVELUP_DEMO_LOCALE=fr \
 			LEVELUP_DB_PROFILES="$(native_path "$DEMO_ROOT")/db_profiles.json" \
 			LEVELUP_APP_SETTINGS="$(native_path "$DEMO_ROOT")/app_settings.json" \
 			LEVELUP_API_PORT="$API_PORT" \

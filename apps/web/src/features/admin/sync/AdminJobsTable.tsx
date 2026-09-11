@@ -83,7 +83,7 @@ export function AdminJobsTable({ jobs }: { jobs: AsyncJobStatus[] }) {
           {sortedJobs.map((job) => (
             <tr key={job.job_id} className="border-b last:border-b-0 hover:bg-muted/30">
               <td className="px-3 py-2">
-                <span className="font-medium text-foreground">{jobTypeLabel(job.job_type, locale)}</span>
+                <span className="font-medium text-foreground">{jobTypeLabel(job.job_type)}</span>
                 {(job.current_step || job.error?.message) && (
                   <div
                     className="max-w-[24rem] truncate text-xs text-muted-foreground"
@@ -101,7 +101,7 @@ export function AdminJobsTable({ jobs }: { jobs: AsyncJobStatus[] }) {
               </td>
               <td
                 className="px-3 py-2 text-xs text-muted-foreground"
-                title={adminAbsoluteTime(job.started_at ?? undefined, locale)}
+                title={adminAbsoluteTime(job.started_at ?? undefined)}
               >
                 {adminRelativeTime(job.started_at ?? undefined, locale)}
               </td>
@@ -109,7 +109,6 @@ export function AdminJobsTable({ jobs }: { jobs: AsyncJobStatus[] }) {
                 {job.started_at && job.finished_at
                   ? formatDurationMs(
                       new Date(job.finished_at).getTime() - new Date(job.started_at).getTime(),
-                      locale,
                     )
                   : '—'}
               </td>

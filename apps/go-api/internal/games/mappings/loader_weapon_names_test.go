@@ -9,9 +9,9 @@ title_slug     = "halo_5"
 schema_version = 2
 
 [weapons]
-h5_frag_grenade = { en = "Frag Grenade", fr = "Grenade à fragmentation" }
-h5_light_rifle  = { en = "Light Rifle", fr = "Fusil léger" }
-h5_railgun      = { en = "Railgun", fr = "Railgun" }
+h5_frag_grenade = { en = "Frag Grenade" }
+h5_light_rifle  = { en = "Light Rifle" }
+h5_railgun      = { en = "Railgun" }
 `)
 	set, err := LoadWeaponNamesFromBytes("weapon_names.toml", raw)
 	if err != nil {
@@ -27,10 +27,10 @@ h5_railgun      = { en = "Railgun", fr = "Railgun" }
 	if len(names) != 3 {
 		t.Fatalf("names count: got %d, want 3", len(names))
 	}
-	if got := names["h5_frag_grenade"]; got.En != "Frag Grenade" || got.Fr != "Grenade à fragmentation" {
+	if got := names["h5_frag_grenade"]; got.En != "Frag Grenade" || got.Fr != "Frag Grenade" {
 		t.Errorf("h5_frag_grenade: got %+v", got)
 	}
-	// EN == FR autorisé (aucun FR officiel connu → EN dans les deux).
+	// Legacy fields mirror the English label for compatibility.
 	if got := names["h5_railgun"]; got.En != "Railgun" || got.Fr != "Railgun" {
 		t.Errorf("h5_railgun: got %+v", got)
 	}
@@ -50,27 +50,20 @@ func TestLoadWeaponNames_Invalid(t *testing.T) {
 	cases := map[string]string{
 		"meta manquant": `
 [weapons]
-k = { en = "A", fr = "A" }
+k = { en = "A" }
 `,
 		"schema_version zero": `
 [meta]
 title_slug = "halo_5"
 [weapons]
-k = { en = "A", fr = "A" }
+k = { en = "A" }
 `,
 		"en vide": `
 [meta]
 title_slug     = "halo_5"
 schema_version = 1
 [weapons]
-k = { en = "", fr = "A" }
-`,
-		"fr vide (jamais de FR invente : mettre le EN)": `
-[meta]
-title_slug     = "halo_5"
-schema_version = 1
-[weapons]
-k = { en = "A", fr = "" }
+k = { en = "" }
 `,
 		"aucune arme": `
 [meta]

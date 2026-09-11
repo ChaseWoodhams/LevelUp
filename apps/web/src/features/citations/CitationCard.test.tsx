@@ -19,7 +19,7 @@ function item(over: Partial<CitationDisplayItem>): CitationDisplayItem {
 
 describe('CitationCard', () => {
   it('rend un anneau (svg) + paliers + progression vers le prochain palier quand tierée et non maîtrisée', () => {
-    const { container } = render(<CitationCard item={item({})} locale="fr" />)
+    const { container } = render(<CitationCard item={item({})} locale="en" />)
     expect(container.querySelector('svg')).toBeTruthy()
     expect(screen.getByText('3/5')).toBeTruthy()
     expect(screen.getByText('45/50')).toBeTruthy()
@@ -33,18 +33,18 @@ describe('CitationCard', () => {
   })
 
   it('sans palier (tier_count 0) : fallback icône (pas d’anneau svg) + total à vie pour la source native', () => {
-    const { container } = render(<CitationCard item={item({ tierCount: 0, tierIndex: 0, total: 7 })} locale="fr" />)
+    const { container } = render(<CitationCard item={item({ tierCount: 0, tierIndex: 0, total: 7 })} locale="en" />)
     expect(container.querySelector('svg')).toBeNull()
     expect(screen.getByText('7')).toBeTruthy()
   })
 
   it('source infinite : anneau TOUJOURS rendu même sans palier (parité historique)', () => {
-    const { container } = render(<CitationCard item={item({ source: 'infinite', tierCount: 0, tierIndex: 0 })} locale="fr" />)
+    const { container } = render(<CitationCard item={item({ source: 'infinite', tierCount: 0, tierIndex: 0 })} locale="en" />)
     expect(container.querySelector('svg')).toBeTruthy()
   })
 
   it('source infinite non maîtrisée : pas de total à vie nu (uniquement progression palier)', () => {
-    render(<CitationCard item={item({ source: 'infinite' })} locale="fr" />)
+    render(<CitationCard item={item({ source: 'infinite' })} locale="en" />)
     expect(screen.getByText('45/50')).toBeTruthy()
     expect(screen.queryByText('45')).toBeNull()
   })

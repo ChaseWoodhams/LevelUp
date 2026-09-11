@@ -11,10 +11,10 @@ import (
 
 // ─── labelFR ─────────────────────────────────────────────────────────────
 
-func TestLabelFR_PrefersFR(t *testing.T) {
+func TestLabelFR_UsesEnglish(t *testing.T) {
 	t.Parallel()
-	if got := labelFR("Bonjour", "Hello"); got != "Bonjour" {
-		t.Errorf("labelFR(Bonjour, Hello) = %q, want Bonjour", got)
+	if got := labelFR("Bonjour", "Hello"); got != "Hello" {
+		t.Errorf("labelFR(legacy, Hello) = %q, want Hello", got)
 	}
 }
 
@@ -44,13 +44,13 @@ func TestNormalizeHomeLocale_EN(t *testing.T) {
 	}
 }
 
-func TestNormalizeHomeLocale_FR(t *testing.T) {
+func TestNormalizeHomeLocale_AlwaysEnglish(t *testing.T) {
 	t.Parallel()
 	// Toute valeur non-en (FR, vide, inconnu) doit retourner "fr" par défaut.
 	cases := []string{"fr", "FR", "fr-FR", "", "  ", "unknown", "de-DE"}
 	for _, in := range cases {
-		if got := normalizeHomeLocale(in); got != "fr" {
-			t.Errorf("normalizeHomeLocale(%q) = %q, want fr", in, got)
+		if got := normalizeHomeLocale(in); got != "en" {
+			t.Errorf("normalizeHomeLocale(%q) = %q, want en", in, got)
 		}
 	}
 }
@@ -64,17 +64,17 @@ func TestLabelForLocale_EN_PrefersEN(t *testing.T) {
 	}
 }
 
-func TestLabelForLocale_EN_FallbackFR(t *testing.T) {
+func TestLabelForLocale_EmptyEnglishStaysEmpty(t *testing.T) {
 	t.Parallel()
-	if got := labelForLocale("en", "Bonjour", ""); got != "Bonjour" {
-		t.Errorf("labelForLocale(en, FR-only) = %q, want Bonjour", got)
+	if got := labelForLocale("en", "Bonjour", ""); got != "" {
+		t.Errorf("labelForLocale(en, legacy-only) = %q, want empty", got)
 	}
 }
 
-func TestLabelForLocale_FR(t *testing.T) {
+func TestLabelForLocale_IgnoresLegacyLocale(t *testing.T) {
 	t.Parallel()
-	if got := labelForLocale("fr", "Bonjour", "Hello"); got != "Bonjour" {
-		t.Errorf("labelForLocale(fr) = %q, want Bonjour", got)
+	if got := labelForLocale("fr", "Bonjour", "Hello"); got != "Hello" {
+		t.Errorf("labelForLocale(legacy) = %q, want Hello", got)
 	}
 }
 
@@ -108,11 +108,11 @@ func TestOutcomeLabelForLocale_EN_Unknown(t *testing.T) {
 	}
 }
 
-func TestOutcomeLabelForLocale_FR_Win(t *testing.T) {
+func TestOutcomeLabelForLocale_LegacyLocaleUsesEnglish(t *testing.T) {
 	t.Parallel()
 	got := outcomeLabelForLocale(homeOutcomeWin, "fr")
-	if got == "" || got == "Match" {
-		t.Errorf("outcomeLabelForLocale(WIN, fr) = %q, want non-empty FR label", got)
+	if got != "Victory" {
+		t.Errorf("outcomeLabelForLocale(WIN, legacy) = %q, want Victory", got)
 	}
 }
 

@@ -20,7 +20,6 @@ import { perfScale } from '@/lib/accessibility/scales'
 import { kdaNetColor } from '@/lib/colors/outcomePalette'
 import { getPerfColor } from '@/lib/perf-color'
 import { formatDateRange, formatSignedFixed } from '@/lib/formatters'
-import { useAppShellStore } from '@/stores/appShellStore'
 import { useExplorerPrefsStore } from '@/stores/explorerPrefsStore'
 import type { ExplorerBriefing } from '@/lib/api/types'
 import type { ExplorerManifestKey } from '@/lib/i18n/generated/explorer'
@@ -76,23 +75,21 @@ function BriefingToggleChevron({ collapsed }: { collapsed: boolean }) {
 function formatPeriod(
   start: string | null | undefined,
   end: string | null | undefined,
-  locale: string,
 ): string | undefined {
   if (!start) return undefined
   // Intervalle daté COMPLET (année incluse) via le helper canonique formatDateRange —
   // factorise mois/année (« 3–12 mars 2025 ») ; date simple si end absent/égal.
-  return formatDateRange(start, end, locale === 'en' ? 'en-US' : 'fr-FR')
+  return formatDateRange(start, end, 'en-US')
 }
 
 export function ExplorerBriefingStrip({ briefing, t }: Props) {
-  const locale = useAppShellStore((s) => s.locale)
   const collapsed = useExplorerPrefsStore((s) => s.briefingCollapsed)
   const toggleCollapsed = useExplorerPrefsStore((s) => s.toggleBriefingCollapsed)
   if (!briefing) return null
 
   const scope = briefing.scope
   const baseline = briefing.baseline
-  const period = formatPeriod(briefing.period_start, briefing.period_end, locale)
+  const period = formatPeriod(briefing.period_start, briefing.period_end)
   const matchesCount = scope?.matches ?? 0
 
   const kda = scope?.kda ?? null

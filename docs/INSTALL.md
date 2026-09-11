@@ -1,7 +1,4 @@
 # Installation Guide — LevelUp
-
-French version: [FR/INSTALL.md](FR/INSTALL.md)
-
 > Complete guide to install and configure LevelUp on your machine.
 
 ---

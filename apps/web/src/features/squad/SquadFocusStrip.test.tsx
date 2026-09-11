@@ -37,7 +37,6 @@ const H = vi.hoisted(() => {
     target_per_member: 7,
     created_by: 'alice',
     created_at: '2026-07-02T00:00:00Z',
-    label_fr: 'Briseur de couronnes',
     label_en: 'Crown breaker',
     expired: false,
     participants: [
@@ -101,7 +100,7 @@ function mockContext(selectedRows: TeammateRow[]) {
 }
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr', currentTitleSlug: 'halo_infinite' })
+  useAppShellStore.setState({ locale: 'en', currentTitleSlug: 'halo_infinite' })
   H.evaluateMutate.mockReset()
 })
 
@@ -111,14 +110,14 @@ describe('SquadFocusStrip — boucle défis (Lot 2)', () => {
     renderWithProviders(<SquadFocusStrip />)
 
     // Ouvre le panneau « Gérer » (escouade appariée).
-    fireEvent.click(screen.getByRole('button', { name: 'Gérer' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }))
 
     // Label FR affiché, template_id brut absent.
-    expect(screen.getByText('Briseur de couronnes')).toBeInTheDocument()
+    expect(screen.getByText('Crown breaker')).toBeInTheDocument()
     expect(screen.queryByText(/headshots_session/)).not.toBeInTheDocument()
 
     // Le joueur courant (alice) est déjà participant → bouton « Rejoint » désactivé.
-    const joined = screen.getByRole('button', { name: 'Rejoint' })
+    const joined = screen.getByRole('button', { name: 'Joined' })
     expect(joined).toBeDisabled()
   })
 
@@ -134,13 +133,13 @@ describe('SquadFocusStrip — boucle défis (Lot 2)', () => {
     })
     mockContext([ROW('Bob', 'xB')])
     renderWithProviders(<SquadFocusStrip />)
-    fireEvent.click(screen.getByRole('button', { name: 'Gérer' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Réévaluer' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Manage' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Re-evaluate' }))
 
     // Gamertags résolus depuis le roster + valeur/cible + badge « Atteint ».
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('9 / 7')).toBeInTheDocument()
-    expect(screen.getByText('Atteint')).toBeInTheDocument()
+    expect(screen.getByText('Reached')).toBeInTheDocument()
     expect(screen.getByText('4 / 7')).toBeInTheDocument()
   })
 })

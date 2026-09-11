@@ -32,7 +32,6 @@ export function SquadObjectivesPanel({
   members: SquadMember[]
   t: SquadFocusText
 }) {
-  const locale = useAppShellStore((s) => s.locale)
   const titleSlug = useAppShellStore((s) => s.currentTitleSlug)
   const { data } = useSquadChallenges(squadId, playerSlug)
   const join = useJoinSquadChallenge()
@@ -95,7 +94,7 @@ export function SquadObjectivesPanel({
       ) : (
         <ul className="space-y-2">
           {challenges.map((c) => {
-            const label = (locale === 'en' ? c.label_en : c.label_fr) || t.challenge
+            const label = (c.label_en) || t.challenge
             const isParticipant = c.participants.some((p) => p.user_id === playerSlug)
             return (
               <li
@@ -190,7 +189,7 @@ export function SquadObjectivesPanel({
                 className="flex items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2"
               >
                 <span className="truncate text-sm">
-                  {locale === 'en' ? tpl.label_en : tpl.label_fr}
+                  {tpl.label_en}
                 </span>
                 <Button
                   size="sm"

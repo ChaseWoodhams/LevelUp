@@ -343,7 +343,7 @@ func TestSeasonPassRepoLoadSeasonPassTracks_FallbackTitleFromRawPayload(t *testi
 
 	// Item définition avec raw_payload_json contenant CommonData.Title.translations
 	// MAIS sans entrée correspondante dans battlepass_item_translations.
-	rawItem := `{"CommonData":{"Title":{"value":"EOD GEN1","translations":{"fr-FR":"Casque EOD GEN1 FR","en-US":"EOD GEN1 EN"}},"Description":{"value":"Helmet desc","translations":{"fr-FR":"Description casque FR"}},"Quality":"Epic","DisplayPath":{"Media":{"MediaUrl":{"Path":"progression/Inventory/Armor/Helmets/eod.png"}}}}}`
+	rawItem := `{"CommonData":{"Title":{"value":"EOD GEN1 EN","translations":{"en-US":"EOD GEN1 EN"}},"Description":{"value":"Helmet desc"},"Quality":"Epic","DisplayPath":{"Media":{"MediaUrl":{"Path":"progression/Inventory/Armor/Helmets/eod.png"}}}}}`
 	_, err = meta.Exec(ctx, `
 		INSERT INTO battlepass_item_definitions
 			(inventory_item_path, content_hash, quality, item_type, display_path,
@@ -376,17 +376,17 @@ func TestSeasonPassRepoLoadSeasonPassTracks_FallbackTitleFromRawPayload(t *testi
 	}
 
 	tier := tracks[0].Tiers[0]
-	if tier.Title != "Casque EOD GEN1 FR" {
-		t.Errorf("tier.Title = %q, want %q (extraction depuis raw_payload_json fr-FR)", tier.Title, "Casque EOD GEN1 FR")
+	if tier.Title != "EOD GEN1 EN" {
+		t.Errorf("tier.Title = %q, want %q (extraction depuis raw_payload_json fr-FR)", tier.Title, "EOD GEN1 EN")
 	}
-	if tier.Description == nil || *tier.Description != "Description casque FR" {
-		t.Errorf("tier.Description = %v, want %q", tier.Description, "Description casque FR")
+	if tier.Description == nil || *tier.Description != "Helmet desc" {
+		t.Errorf("tier.Description = %v, want %q", tier.Description, "Helmet desc")
 	}
 	if len(tracks[0].Tiers[0].FreeRewards) == 0 {
 		t.Fatalf("free_rewards manquants: %+v", tracks[0].Tiers[0])
 	}
 	freeReward := tracks[0].Tiers[0].FreeRewards[0]
-	if freeReward.Title != "Casque EOD GEN1 FR" {
-		t.Errorf("free_reward.Title = %q, want %q (pas le path brut)", freeReward.Title, "Casque EOD GEN1 FR")
+	if freeReward.Title != "EOD GEN1 EN" {
+		t.Errorf("free_reward.Title = %q, want %q (pas le path brut)", freeReward.Title, "EOD GEN1 EN")
 	}
 }

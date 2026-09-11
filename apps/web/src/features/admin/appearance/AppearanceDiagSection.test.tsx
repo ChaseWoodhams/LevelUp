@@ -58,31 +58,31 @@ function mockDiag(resp: AppearanceDiagnosisResponse, opts?: { delayMs?: number }
 async function selectAndDiagnose() {
   const select = screen.getByRole('combobox')
   fireEvent.change(select, { target: { value: 'jgtm' } })
-  fireEvent.click(screen.getByRole('button', { name: /Diagnostiquer/i }))
+  fireEvent.click(screen.getByRole('button', { name: /Diagnose/i }))
 }
 
 describe('AppearanceDiagSection', () => {
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr', availablePlayers: [player('jgtm', 'JGtm')] })
+    useAppShellStore.setState({ locale: 'en', availablePlayers: [player('jgtm', 'JGtm')] })
   })
   afterEach(() => {
-    useAppShellStore.setState({ locale: 'fr', availablePlayers: [] })
+    useAppShellStore.setState({ locale: 'en', availablePlayers: [] })
   })
 
   it('état initial : aucun diagnostic lancé', () => {
     renderWithProviders(<AppearanceDiagSection />)
-    expect(screen.getByText('Aucun diagnostic lancé')).toBeInTheDocument()
+    expect(screen.getByText('No diagnosis run yet')).toBeInTheDocument()
     // Le bouton est désactivé tant qu'aucun joueur n'est sélectionné.
-    expect(screen.getByRole('button', { name: /Diagnostiquer/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Diagnose/i })).toBeDisabled()
   })
 
   it('état en cours : le diagnostic tourne', async () => {
     mockDiag(FOUR_VERDICTS, { delayMs: 80 })
     renderWithProviders(<AppearanceDiagSection />)
     await selectAndDiagnose()
-    expect((await screen.findAllByText(/Diagnostic en cours/i)).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText(/Diagnosing/i)).length).toBeGreaterThan(0)
     // Puis le résultat arrive.
-    await screen.findByText('Bannière')
+    await screen.findByText('Banner')
   })
 
   it('rend 4 verdicts distincts + composants + CTA de réauthentification', async () => {
@@ -91,24 +91,24 @@ describe('AppearanceDiagSection', () => {
     await selectAndDiagnose()
 
     // Libellés des 4 composants.
-    await screen.findByText('Bannière')
-    expect(screen.getByText('Emblème')).toBeInTheDocument()
-    expect(screen.getByText('Arrière-plan')).toBeInTheDocument()
-    expect(screen.getByText('Indicatif de service')).toBeInTheDocument()
+    await screen.findByText('Banner')
+    expect(screen.getByText('Emblem')).toBeInTheDocument()
+    expect(screen.getByText('Backdrop')).toBeInTheDocument()
+    expect(screen.getByText('Service tag')).toBeInTheDocument()
 
     // Badges de verdict.
-    expect(screen.getByText('Absent côté Microsoft')).toBeInTheDocument()
-    expect(screen.getByText('À jour')).toBeInTheDocument()
-    expect(screen.getByText('Temporaire')).toBeInTheDocument()
-    expect(screen.getByText('Réauthentification requise')).toBeInTheDocument()
+    expect(screen.getByText('Missing upstream')).toBeInTheDocument()
+    expect(screen.getByText('Up to date')).toBeInTheDocument()
+    expect(screen.getByText('Transient')).toBeInTheDocument()
+    expect(screen.getByText('Re-authentication required')).toBeInTheDocument()
 
     // « rien à faire, servi par design » (upstream_missing).
     expect(
-      screen.getByText(/servie par design/i),
+      screen.getByText(/served by design/i),
     ).toBeInTheDocument()
 
     // CTA de réauthentification (auth_required) → flux SSO existant.
-    const cta = screen.getByText('Se connecter via Xbox').closest('a')
+    const cta = screen.getByText('Sign in with Xbox').closest('a')
     expect(cta).not.toBeNull()
     expect(cta?.getAttribute('href')).toContain('/auth/xbox/login')
 
@@ -121,9 +121,9 @@ describe('AppearanceDiagSection', () => {
     renderWithProviders(<AppearanceDiagSection />)
     await selectAndDiagnose()
 
-    const badges = await screen.findAllByText('Non pris en charge')
+    const badges = await screen.findAllByText('Not supported')
     expect(badges.length).toBe(4)
     // Valeur servie absente → état vide explicite (pas d'image cassée).
-    expect(screen.getAllByText('Aucune valeur servie').length).toBe(4)
+    expect(screen.getAllByText('No served value').length).toBe(4)
   })
 })

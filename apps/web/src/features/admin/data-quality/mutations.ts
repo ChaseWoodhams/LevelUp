@@ -39,7 +39,7 @@ export function useRunRegistryNamesBackfill() {
 export function useResolveModeTranslation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (req: { mode_en: string; name_fr: string }) =>
+    mutationFn: (req: { mode_en: string; name_en: string }) =>
       api.post<ResolveResult>('/admin/actions/translations/mode', req),
     onSuccess: () => invalidateDataQuality(queryClient),
   })

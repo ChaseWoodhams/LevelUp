@@ -37,7 +37,7 @@ const ITEM_C = makeItem({ basename: 'C.mp4', file_path: '/media/C.mp4', map_name
 describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -63,7 +63,7 @@ describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
     })
 
     expect(screen.getByText(/Lecture impossible/)).toBeInTheDocument()
-    expect(screen.getByText(/Format vidéo non supporté/)).toBeInTheDocument()
+    expect(screen.getByText(/Video format not supported/)).toBeInTheDocument()
   })
 
   it('affiche un message spécifique pour erreur de décodage (code 3)', () => {
@@ -80,7 +80,7 @@ describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
     act(() => {
       fireEvent.error(video)
     })
-    expect(screen.getByText(/Erreur de décodage/)).toBeInTheDocument()
+    expect(screen.getByText(/Video decoding error/)).toBeInTheDocument()
   })
 
   it('affiche le basename de la vidéo en erreur pour aider l\'utilisateur', () => {
@@ -105,7 +105,7 @@ describe('CoverFlowModal — gestion erreur vidéo (MIME, codec, etc)', () => {
 describe('CoverFlowModal — stabilité de l\'item courant', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -352,7 +352,7 @@ describe('CoverFlowModal — stabilité de l\'item courant', () => {
       />,
     )
 
-    const reassocButton = screen.getByRole('button', { name: /Réassocier/ })
+    const reassocButton = screen.getByRole('button', { name: /Reassociate/ })
     fireEvent.click(reassocButton)
 
     expect(onReassociate).toHaveBeenCalledTimes(1)
@@ -371,7 +371,7 @@ describe('CoverFlowModal — stabilité de l\'item courant', () => {
       />,
     )
 
-    expect(screen.getByRole('button', { name: 'Associer' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Associate' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Réassocier' })).not.toBeInTheDocument()
   })
 })
@@ -379,7 +379,7 @@ describe('CoverFlowModal — stabilité de l\'item courant', () => {
 describe('CoverFlowModal — icône "ouvrir le match" header', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -393,7 +393,7 @@ describe('CoverFlowModal — icône "ouvrir le match" header', () => {
         playerSlug="myGT"
       />,
     )
-    const link = screen.getByRole('link', { name: /Ouvrir.*match/ })
+    const link = screen.getByRole('link', { name: /Open.*match/ })
     expect(link).toBeInTheDocument()
     // Lien PLEINE PAGE title-scoped (lot 2-C) : titleSlug = défaut store 'halo_infinite'.
     expect(link).toHaveAttribute('href', `/t/halo_infinite/players/myGT/matches/${ITEM_A.match_id}`)
@@ -410,7 +410,7 @@ describe('CoverFlowModal — icône "ouvrir le match" header', () => {
         currentMatchId={ITEM_A.match_id ?? undefined}
       />,
     )
-    expect(screen.queryByRole('link', { name: /Ouvrir.*match/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Open.*match/ })).not.toBeInTheDocument()
   })
 
   it('masque l\'icône quand item n\'a pas de match associé', () => {
@@ -424,7 +424,7 @@ describe('CoverFlowModal — icône "ouvrir le match" header', () => {
         playerSlug="myGT"
       />,
     )
-    expect(screen.queryByRole('link', { name: /Ouvrir.*match/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Open.*match/ })).not.toBeInTheDocument()
   })
 
   it('le href suit la navigation entre items du carrousel', () => {
@@ -440,11 +440,11 @@ describe('CoverFlowModal — icône "ouvrir le match" header', () => {
       />,
     )
     // Lien PLEINE PAGE title-scoped (lot 2-C) : titleSlug = défaut store 'halo_infinite'.
-    expect(screen.getByRole('link', { name: /Ouvrir.*match/ })).toHaveAttribute('href', '/t/halo_infinite/players/GT/matches/match-X')
+    expect(screen.getByRole('link', { name: /Open.*match/ })).toHaveAttribute('href', '/t/halo_infinite/players/GT/matches/match-X')
 
     fireEvent.keyDown(window, { key: 'ArrowRight' })
 
-    expect(screen.getByRole('link', { name: /Ouvrir.*match/ })).toHaveAttribute('href', '/t/halo_infinite/players/GT/matches/match-Y')
+    expect(screen.getByRole('link', { name: /Open.*match/ })).toHaveAttribute('href', '/t/halo_infinite/players/GT/matches/match-Y')
   })
 
   it('si onOpenMatch est fourni, le rendu est un <button> qui appelle le callback avec le match_id courant', () => {
@@ -462,13 +462,13 @@ describe('CoverFlowModal — icône "ouvrir le match" header', () => {
       />,
     )
     // Avec onOpenMatch, plus de <a> mais un <button>.
-    expect(screen.queryByRole('link', { name: /Ouvrir.*match/ })).not.toBeInTheDocument()
-    screen.getByRole('button', { name: /Ouvrir.*match/ }).click()
+    expect(screen.queryByRole('link', { name: /Open.*match/ })).not.toBeInTheDocument()
+    screen.getByRole('button', { name: /Open.*match/ }).click()
     expect(onOpenMatch).toHaveBeenLastCalledWith('match-X')
 
     fireEvent.keyDown(window, { key: 'ArrowRight' })
 
-    screen.getByRole('button', { name: /Ouvrir.*match/ }).click()
+    screen.getByRole('button', { name: /Open.*match/ }).click()
     expect(onOpenMatch).toHaveBeenLastCalledWith('match-Y')
     expect(onOpenMatch).toHaveBeenCalledTimes(2)
   })
@@ -479,7 +479,7 @@ describe('CoverFlowModal — icône "ouvrir le match" header', () => {
 describe('CoverFlowModal — bouton autoChain', () => {
   afterEach(() => {
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 
@@ -538,7 +538,7 @@ describe('CoverFlowModal — enchaînement automatique effectif', () => {
   afterEach(() => {
     vi.useRealTimers()
     act(() => {
-      useAppShellStore.setState({ locale: 'fr' })
+      useAppShellStore.setState({ locale: 'en' })
     })
   })
 

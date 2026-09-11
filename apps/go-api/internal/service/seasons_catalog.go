@@ -108,8 +108,8 @@ func projectTOMLSeasons(assets *mappings.AssetMappingSet) []SeasonCatalogEntry {
 		if e.StartDate == nil {
 			continue
 		}
-		label, _ := e.Label(mappings.LocaleFR)
-		labelEN, _ := e.Label(mappings.LocaleEN)
+		label, _ := e.Label(mappings.LocaleEN)
+		labelEN := label
 		extra := make(map[string]string, len(e.Extra))
 		for k, v := range e.Extra {
 			extra[k] = v

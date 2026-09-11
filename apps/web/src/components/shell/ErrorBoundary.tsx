@@ -10,9 +10,9 @@ import { formatMessage } from '@/lib/i18n/format'
 import { commonManifest, type CommonManifestKey } from '@/lib/i18n/generated/common'
 
 // ErrorBoundary est une class component : impossible d'utiliser useAppShellStore.
-// On résout en locale "fr" par défaut au moment du rendu (fallback FR-first).
+// On résout en locale "en" par défaut au moment du rendu (fallback FR-first).
 function tr(key: CommonManifestKey): string {
-  return formatMessage(commonManifest, key, 'fr')
+  return formatMessage(commonManifest, key, 'en')
 }
 
 interface ErrorBoundaryProps {
@@ -38,7 +38,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // Logging minimal — peut être branché sur Sentry ou autre service.
-    console.error('[ErrorBoundary] Erreur non gérée :', error, info.componentStack)
+    console.error('[ErrorBoundary] Unhandled error:', error, info.componentStack)
   }
 
   render(): ReactNode {

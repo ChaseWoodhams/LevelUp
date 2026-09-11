@@ -1,40 +1,38 @@
 /**
  * Wrapper runtime des manifests i18n typés (lib/i18n/generated/*).
  *
- * Resout une cle via ICU MessageFormat (pluralisation, select, interpolation
- * typee). Conformement au PLAN_META_FOUNDATIONS_GO § 3.4.2.
+ * Resolves a manifest key with ICU MessageFormat (plural, select, and typed
+ * interpolation).
  *
- * Usage cote composant :
+ * Component usage:
  *
  *   import { commonManifest } from '@/lib/i18n/generated/common'
  *   import { formatMessage } from '@/lib/i18n/format'
  *
- *   formatMessage(commonManifest, 'common.period.last_1y', 'fr')
- *   // -> "Dernière année"
+ *   formatMessage(commonManifest, 'common.period.last_1y', 'en')
+ *   // -> "Last year"
  *
- *   formatMessage(commonManifest, 'common.kpi.matches_count', 'fr', { n: 5 })
- *   // -> "5 matchs"
+ *   formatMessage(commonManifest, 'common.kpi.matches_count', 'en', { n: 5 })
+ *   // -> "5 matches"
  *
- *   formatMessage(commonManifest, 'common.kpi.matches_count', 'fr', { n: 1 })
+ *   formatMessage(commonManifest, 'common.kpi.matches_count', 'en', { n: 1 })
  *   // -> "1 match"
  */
 import { IntlMessageFormat } from 'intl-messageformat'
 import type { Locale } from '@/lib/i18n/locale'
 
-/** Locales supportees par les manifests. Alias du type central `Locale` (lib/i18n/locale). */
+/** Manifest locale alias for the canonical `Locale` type. */
 export type ManifestLocale = Locale
 
 /**
- * Forme generique d'un manifest genere : map<key, {fr, en}>.
- * On utilise `Record<string, ...>` ici car les modules generes sont `as const`
- * avec des cles literales ; les helpers consommateurs doivent re-typer
- * leur manifest pour beneficier de l'autocompletion stricte.
+ * Generic shape of a generated manifest: map<key, {en}>. `Record<string, ...>`
+ * keeps this helper compatible with generated `as const` modules while callers
+ * retain literal-key autocomplete through their own manifest type.
  */
 export type ManifestEntries = Readonly<Record<string, Readonly<Record<ManifestLocale, string>>>>
 
-// Cache process des MessageFormat compiles : clef = "<locale>::<message>".
-// Compiler une string ICU est non-trivial ; on memoize pour eviter de payer
-// le cout a chaque rendu.
+// Process cache for compiled MessageFormat instances. Compiling an ICU string
+// is non-trivial, so memoize it across renders.
 const formatterCache = new Map<string, IntlMessageFormat>()
 
 function getFormatter(locale: ManifestLocale, message: string): IntlMessageFormat {
@@ -48,13 +46,11 @@ function getFormatter(locale: ManifestLocale, message: string): IntlMessageForma
 }
 
 /**
- * formatMessage resout une cle d'un manifest et applique l'interpolation ICU.
- * Si la cle est absente, retourne la cle elle-meme (degradation visible mais
- * non-cassante en prod).
+ * formatMessage resolves a manifest key and applies ICU interpolation. Missing
+ * keys return the key itself so the problem remains visible without breaking production.
  *
- * Les `vars` sont passees telles quelles a IntlMessageFormat.format() :
- * pluralisation `{n, plural, ...}`, select `{x, select, ...}`, interpolation
- * de date `{date, date, long}` etc.
+ * `vars` are passed directly to IntlMessageFormat.format(): plural, select,
+ * date, and other ICU expressions are supported.
  */
 export function formatMessage<M extends ManifestEntries>(
   manifest: M,
@@ -64,7 +60,7 @@ export function formatMessage<M extends ManifestEntries>(
 ): string {
   const entry = manifest[key]
   if (!entry) {
-    // Cle inconnue : on retourne la cle (visible en UI -> repere pour fix).
+    // Unknown key: return it visibly so the missing entry is easy to fix.
     return key
   }
   const message = entry[locale]
@@ -72,8 +68,7 @@ export function formatMessage<M extends ManifestEntries>(
     return key
   }
   if (!vars) {
-    // Pas d'interpolation : on peut court-circuiter MessageFormat si la
-    // string ne contient pas d'accolades (gain perf).
+    // Skip MessageFormat when no interpolation is present.
     if (!message.includes('{')) {
       return message
     }
@@ -83,13 +78,13 @@ export function formatMessage<M extends ManifestEntries>(
     const out = fmt.format(vars)
     return Array.isArray(out) ? out.join('') : String(out)
   } catch {
-    // Si le format est mal forme cote TOML, ne pas casser la page.
+    // Keep the page usable when a TOML entry has malformed ICU syntax.
     return message
   }
 }
 
 /**
- * resetFormatterCache vide le cache MessageFormat. Reserve aux tests.
+ * resetFormatterCache clears the MessageFormat cache for tests.
  */
 export function resetFormatterCache(): void {
   formatterCache.clear()

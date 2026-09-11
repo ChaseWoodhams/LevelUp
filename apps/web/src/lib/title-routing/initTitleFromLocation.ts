@@ -1,4 +1,4 @@
-import { setApiTitleSlug, setApiLocale } from '@/lib/api/client'
+import { setApiTitleSlug } from '@/lib/api/client'
 import { parseRouteSegments } from './parseRouteSegments'
 
 /**
@@ -12,7 +12,6 @@ import { parseRouteSegments } from './parseRouteSegments'
  * runtime tant qu'aucune route ne porte de segment (Phase 1) — câblage prêt.
  */
 export function initTitleFromLocation(pathname: string): void {
-  const { lang, titleSlug } = parseRouteSegments(pathname)
+  const { titleSlug } = parseRouteSegments(pathname)
   if (titleSlug) setApiTitleSlug(titleSlug)
-  if (lang) setApiLocale(lang)
 }

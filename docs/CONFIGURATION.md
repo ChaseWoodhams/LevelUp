@@ -1,7 +1,4 @@
 # Configuration Guide — LevelUp
-
-French version: [FR/CONFIGURATION.md](FR/CONFIGURATION.md)
-
 > Complete configuration guide for the Go backend (`apps/go-api`): player profiles
 > (`db_profiles.json`), application settings (`app_settings.json`), environment
 > variables, and the single source of auth tokens.
@@ -214,7 +211,6 @@ auto-detection) before any `os.Getenv` read.
 | `LEVELUP_RATE_LIMIT_RPM` | HTTP rate limit (requests/minute). | built-in default |
 | `LEVELUP_WEB_DIST` | Path to the built frontend (`apps/web/dist`), set by the Docker image. | (none) |
 | `LEVELUP_DEMO_MODE` | `true` enables demo mode. | `false` |
-| `LEVELUP_LANG` | Default UI/CLI language. | `fr` |
 | `LEVELUP_APP_VERSION` | Reported app version. | `dev` |
 | `LEVELUP_USE_SHARED_PROVIDER` | Enable the SharedDBProvider RO↔RW swap (ADR 0016). | (off) |
 

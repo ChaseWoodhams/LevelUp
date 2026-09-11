@@ -9,467 +9,357 @@
 # ─── Objectifs (CTF/Zones/Oddball) — carte sobre de scope, V72-03 ────────────
 
 [timeseries.objectives.title]
-fr = "Objectifs"
 en = "Objectives"
 
 [timeseries.objectives.flag_captures]
-fr = "Captures de drapeau"
 en = "Flag captures"
 
 [timeseries.objectives.flag_returns]
-fr = "Retours de drapeau"
 en = "Flag returns"
 
 [timeseries.objectives.flag_steals]
-fr = "Vols de drapeau"
 en = "Flag steals"
 
 [timeseries.objectives.flag_carrier_time]
-fr = "Temps porteur (drapeau)"
 en = "Flag carrier time"
 
 [timeseries.objectives.zone_captures]
-fr = "Zones capturées"
 en = "Zones captured"
 
 [timeseries.objectives.zone_secures]
-fr = "Zones sécurisées"
 en = "Zones secured"
 
 [timeseries.objectives.zone_time]
-fr = "Temps en zone"
 en = "Time in zones"
 
 [timeseries.objectives.skull_grabs]
-fr = "Récupérations du crâne"
 en = "Skull grabs"
 
 [timeseries.objectives.skull_carrier_time]
-fr = "Temps porteur (crâne)"
 en = "Skull carrier time"
 
 # ─── Tabs ──────────────────────────────────────────────────────────────────
 
 [timeseries.tabs.summary]
-fr = "Synthèse"
 en = "Summary"
 
 [timeseries.tabs.distributions]
-fr = "Distributions"
 en = "Distributions"
 
 [timeseries.tabs.progression]
-fr = "Progression"
 en = "Progression"
 
 # ─── Onglet KPIs ───────────────────────────────────────────────────────────
 
 [timeseries.summary.empty_title]
-fr = "KPIs indisponibles"
 en = "KPIs unavailable"
 
 [timeseries.summary.empty_description]
-fr = "Aucune carte KPI n'a été calculée pour cette période."
 en = "No KPI card computed for this period."
 
 [timeseries.summary.kda_timeline_title]
-fr = "Timeline K/D par match"
 en = "K/D timeline per match"
 
 [timeseries.summary.kda_kills]
-fr = "Frags"
 en = "Kills"
 
 [timeseries.summary.kda_deaths]
-fr = "Morts"
 en = "Deaths"
 
 [timeseries.summary.kda_ratio]
-fr = "K/D"
 en = "K/D"
 
 [timeseries.summary.kda_y_axis_left]
-fr = "Frags / Morts"
 en = "Kills / Deaths"
 
 [timeseries.summary.kda_y_axis_right]
-fr = "K/D"
 en = "K/D"
 
 [timeseries.summary.kda_empty_title]
-fr = "Aucun match"
 en = "No match"
 
 [timeseries.summary.kda_empty_description]
-fr = "Aucun match disponible pour cette période."
 en = "No match available for this period."
 
 # ─── Onglet Cumul ──────────────────────────────────────────────────────────
 
 [timeseries.cumul.kd_title]
-fr = "K/D cumulé"
 en = "Cumulative K/D"
 
 [timeseries.cumul.kd_series_label]
-fr = "K/D cumulé"
 en = "Cumulative K/D"
 
 [timeseries.cumul.net_title]
-fr = "Score net cumulé"
 en = "Cumulative net score"
 
 [timeseries.cumul.net_series_label]
-fr = "Frags – Morts cumulés"
 en = "Cumulative kills – deaths"
 
 [timeseries.cumul.rolling_title]
-fr = "K/D glissant (20 matchs)"
 en = "Rolling K/D (20 matches)"
 
 [timeseries.cumul.rolling_series_label]
-fr = "K/D glissant"
 en = "Rolling K/D"
 
 [timeseries.cumul.kd_axis_y]
-fr = "K/D"
 en = "K/D"
 
 [timeseries.cumul.kd_reference]
-fr = "K/D = 1"
 en = "K/D = 1"
 
 [timeseries.cumul.net_axis_y]
-fr = "Net"
 en = "Net"
 
 # ─── Onglet Forme ──────────────────────────────────────────────────────────
 
 [timeseries.form.empty_title]
-fr = "Tendance indisponible"
 en = "Trend unavailable"
 
 [timeseries.form.empty_description]
-fr = "Il faut davantage de matchs pour calculer une régression interprétable sur cette période."
 en = "More matches required to compute an interpretable regression for this period."
 
 [timeseries.form.kd_slope]
-fr = "Pente K/D"
 en = "K/D slope"
 
 [timeseries.form.winrate_slope]
-fr = "Pente du taux de victoire"
 en = "Win rate slope"
 
 [timeseries.form.r_squared]
-fr = "R²"
 en = "R²"
 
 [timeseries.form.r_squared_warning]
-fr = "R² < 0.3 — tendance non significative"
 en = "R² < 0.3 — non-significant trend"
 
 [timeseries.form.r_squared_unreliable]
-fr = "Tendance peu fiable"
 en = "Unreliable trend"
 
 [timeseries.form.ewma_title]
-fr = "EWMA K/D (α = 0.20)"
 en = "EWMA K/D (α = 0.20)"
 
 [timeseries.form.ewma_series_label]
-fr = "EWMA K/D"
 en = "EWMA K/D"
 
 [timeseries.form.ewma_axis_y]
-fr = "K/D lissé"
 en = "Smoothed K/D"
 
 [timeseries.form.per_match]
-fr = "/match"
 en = "/match"
 
 # ─── Onglet Intensité ──────────────────────────────────────────────────────
 
 [timeseries.intensity.heatmap_title]
-fr = "Heatmap d'intensité (jour × heure)"
 en = "Intensity heatmap (day × hour)"
 
 [timeseries.intensity.score_per_min_title]
-fr = "Score par minute"
 en = "Score per minute"
 
 [timeseries.intensity.score_per_min_series_label]
-fr = "Score/min"
 en = "Score/min"
 
 [timeseries.intensity.score_per_min_axis_y]
-fr = "pts/min"
 en = "pts/min"
 
 # ─── Onglet Distributions ─────────────────────────────────────────────────
 
 [timeseries.distributions.kda_title]
-fr = "Distribution K/D"
 en = "K/D distribution"
 
 [timeseries.distributions.kda_axis_x]
-fr = "K/D"
 en = "K/D"
 
 [timeseries.distributions.kills_title]
-fr = "Distribution des frags"
 en = "Kills distribution"
 
 [timeseries.distributions.kills_axis_x]
-fr = "Frags / match"
 en = "Kills / match"
 
 [timeseries.distributions.accuracy_title]
-fr = "Distribution Précision"
 en = "Accuracy distribution"
 
 [timeseries.distributions.accuracy_axis_x]
-fr = "Précision (%)"
 en = "Accuracy (%)"
 
 [timeseries.distributions.score_per_min_title]
-fr = "Distribution Score/min"
 en = "Score/min distribution"
 
 [timeseries.distributions.score_per_min_axis_x]
-fr = "Score / min"
 en = "Score / min"
 
 [timeseries.distributions.rolling_wr_title]
-fr = "Distribution du taux de victoire glissant"
 en = "Rolling win rate distribution"
 
 [timeseries.distributions.rolling_wr_axis_x]
-fr = "Taux de victoire (%)"
 en = "Win rate (%)"
 
 [timeseries.distributions.correlations_title]
-fr = "Corrélations"
 en = "Correlations"
 
 [timeseries.distributions.outcome_win_fallback]
-fr = "Victoire"
 en = "Win"
 
 [timeseries.distributions.outcome_loss_fallback]
-fr = "Défaite"
 en = "Loss"
 
 [timeseries.distributions.outcome_unknown_fallback]
-fr = "Inconnu"
 en = "Unknown"
 
 # ─── États transverses ─────────────────────────────────────────────────────
 
 [timeseries.empty.no_data]
-fr = "Données insuffisantes"
 en = "Insufficient data"
 
 [timeseries.empty.no_data_description]
-fr = "Aucun point disponible pour cette période."
 en = "No point available for this period."
 
 [timeseries.empty.page_title]
-fr = "Séries temporelles indisponibles"
 en = "Timeseries unavailable"
 
 [timeseries.empty.page_description]
-fr = "Le backend n'a renvoyé aucune charge utile pour cette page. Vérifie les filtres, les données locales ou la requête API."
 en = "Backend returned no payload for this page. Check filters, local data or API request."
 
 [timeseries.errors.load_failed]
-fr = "Erreur lors du chargement des séries"
 en = "Failed to load timeseries"
 
 [timeseries.errors.retry]
-fr = "Réessayer"
 en = "Retry"
 
 [timeseries.skill_progression.title_csr]
-fr = "Progression CSR"
 en = "CSR Progression"
 
 [timeseries.skill_progression.title_lusr]
-fr = "Progression LUSR"
 en = "LUSR Progression"
 
 [timeseries.skill_progression.title_mixed]
-fr = "Classement"
 en = "Skill Ranking"
 
 [timeseries.skill_progression.axis_y]
-fr = "Rating"
 en = "Rating"
 
 [timeseries.skill_progression.placement_series]
-fr = "Placement"
 en = "Placement"
 
 [timeseries.skill_progression.season_break]
-fr = "Saison"
 en = "Season"
 
 # ─── Onglet Summary — titres de charts & labels inline (migration H-D4) ──────
 
 [timeseries.summary.outcome_sequence]
-fr = "Séquence des résultats"
 en = "Outcome sequence"
 
 [timeseries.summary.kd_timeline_title]
-fr = "Évolution Frags / Morts"
 en = "Kills / Deaths timeline"
 
 [timeseries.summary.kd_yaxis]
-fr = "Frags / Morts"
 en = "Kills / Deaths"
 
 # Serie « Bonus » du chart Frags / Morts : masquee par defaut, empilee sur les frags.
 # Meme texte que la serie Bonus de la page Escouade (squad i18n.ts, performanceCharts)
 # afin que les deux surfaces expliquent l'assistance de la meme facon (ADR 0006).
 [timeseries.summary.bonus_label]
-fr = "Bonus"
 en = "Bonus"
 
 [timeseries.summary.bonus_tooltip]
-fr = "Bonus = assistances ÷ 3 : dans le FDA, 3 assistances valent 1 frag (FDA = (frags + assistances/3) − morts). La série empile ce bonus au-dessus des frags du match ; elle est masquée par défaut, clique « Bonus » dans la légende pour l'afficher."
 en = "Bonus = assists ÷ 3: in KDA, 3 assists count as 1 kill (KDA = (kills + assists/3) − deaths). The series stacks that bonus on top of the match kills; it is hidden by default, click \"Bonus\" in the legend to show it."
 
 [timeseries.summary.kda_distribution_title]
-fr = "Distribution FDA"
 en = "KDA distribution"
 
 [timeseries.summary.density]
-fr = "Densité"
 en = "Density"
 
 [timeseries.summary.mean]
-fr = "Moyenne"
 en = "Mean"
 
 [timeseries.summary.median]
-fr = "Médiane"
 en = "Median"
 
 [timeseries.summary.avg_life_axis]
-fr = "Durée de vie (s)"
 en = "Average life (s)"
 
 [timeseries.summary.trend]
-fr = "Tendance"
 en = "Trend"
 
 # Écart cumulé au FDA attendu (D1 + retouche UX 2026-07-24) — aire cumulée
 # signée réel vs attendu + courbe FDA attendu par match (axe secondaire), MÊME
 # forme que Sessions (SessionFdaGapCumulative).
 [timeseries.summary.fda_gap_title]
-fr = "Écart cumulé au FDA attendu"
 en = "Cumulative KDA gap to expected"
 
 [timeseries.summary.fda_gap_series]
-fr = "Écart cumulé"
 en = "Cumulative gap"
 
 [timeseries.summary.fda_gap_real]
-fr = "Réel"
 en = "Actual"
 
 [timeseries.summary.fda_gap_expected]
-fr = "Attendu"
 en = "Expected"
 
 [timeseries.summary.fda_gap_gap]
-fr = "Écart"
 en = "Gap"
 
 # KPI de pied de carte : écart moyen par match du joueur suivi (cohérent avec les
 # pastilles « écart moyen / match » de l'onglet Synergies Escouade).
 [timeseries.summary.fda_gap_avg_caption]
-fr = "Écart moyen par match"
 en = "Average gap per match"
 
 [timeseries.summary.fda_gap_per_match]
-fr = "/match"
 en = "/game"
 
 [timeseries.summary.kill_types_title]
-fr = "Répartition des frags"
 en = "Kill type distribution"
 
 [timeseries.summary.kill_melee]
-fr = "Mêlée"
 en = "Melee"
 
 [timeseries.summary.kill_power]
-fr = "Arme lourde"
 en = "Power weapon"
 
 [timeseries.summary.kill_grenade]
-fr = "Grenade"
 en = "Grenade"
 
 [timeseries.summary.kill_other]
-fr = "Autres"
 en = "Other"
 
 [timeseries.summary.kill_assassination]
-fr = "Assassinat"
 en = "Assassination"
 
 [timeseries.summary.kill_ground_pound]
-fr = "Frappe au sol"
 en = "Ground Pound"
 
 [timeseries.summary.kill_shoulder_bash]
-fr = "Charge d'épaule"
 en = "Shoulder Bash"
 
 [timeseries.summary.solo_perf_session]
-fr = "Performance solo par session"
 en = "Solo performance per session"
 
 [timeseries.summary.solo_perf_week]
-fr = "Performance solo par semaine"
 en = "Solo performance per week"
 
 [timeseries.summary.solo_perf_month]
-fr = "Performance solo par mois"
 en = "Solo performance per month"
 
 [timeseries.summary.perf_label]
-fr = "Performance"
 en = "Performance"
 
 [timeseries.summary.win_rate_label]
-fr = "Taux de victoire"
 en = "Win rate"
 
 [timeseries.summary.winrate_vs_history_title]
-fr = "Taux de victoire — Session vs Historique"
 en = "Win rate — Session vs History"
 
 [timeseries.summary.session_label]
-fr = "Session"
 en = "Session"
 
 [timeseries.summary.history_label]
-fr = "Historique"
 en = "History"
 
 [timeseries.summary.parity_label]
-fr = "Parité"
 en = "Parity"
 
 [timeseries.summary.zero_winrate_label]
-fr = "0 % de victoires"
 en = "0 % win rate"
 
 [timeseries.summary.mapperf_vs_history_title]
-fr = "Performance par carte — Session vs Historique"
 en = "Performance per map — Session vs History"
 
 # ─── Onglet Progression — labels inline (migration H-D4) ─────────────────────
@@ -479,156 +369,118 @@ en = "Performance per map — Session vs History"
 # Timeseries, Escouade/Dynamique et Sessions.
 
 [timeseries.progression.per_minute_title]
-fr = "Stats par minute"
 en = "Stats per minute"
 
 [timeseries.progression.per_minute_suffix]
-fr = " /min"
 en = " /min"
 
 [timeseries.progression.kill_types_title]
-fr = "Répartition des frags"
 en = "Kill type distribution"
 
 [timeseries.progression.kill_type_other]
-fr = "Autres"
 en = "Other"
 
 [timeseries.progression.spree_headshots_title]
-fr = "Folie meurtrière / Tirs à la tête / Frags parfaits"
 en = "Killing spree / Headshots / Perfect kills"
 
 [timeseries.progression.spree_label]
-fr = "Folie meurtrière (max)"
 en = "Killing spree (max)"
 
 [timeseries.progression.perfect_kills]
-fr = "Frags parfaits"
 en = "Perfect kills"
 
 [timeseries.progression.rank_score_title]
-fr = "Rang et score personnel"
 en = "Rank and personal score"
 
 # XP de carrière (estimée) — série sur l'onglet Progression.
 [timeseries.progression.career_xp_title]
-fr = "XP de carrière (estimée)"
 en = "Career XP (estimated)"
 
 [timeseries.progression.career_xp_cumulative]
-fr = "XP de carrière cumulée sur la période affichée (estimée)"
 en = "Career XP accumulated over the displayed period (estimated)"
 
 [timeseries.progression.career_xp_per_match]
-fr = "XP estimée gagnée par match (2 × score personnel depuis nov. 2025)"
 en = "Estimated XP earned per match (2 × personal score since Nov 2025)"
 
 [timeseries.progression.career_xp_tooltip]
-fr = "Estimation : XP = multiplicateur d'éra × score personnel du match (×1 avant le 18/11/2025, ×2 depuis — Operation: Infinite). Matchs connus uniquement ; le Firefight et les playlists à multiplicateur spécial sont exclus ou approximés."
 en = "Estimate: XP = era multiplier × the match's personal score (×1 before 2025-11-18, ×2 since — Operation: Infinite). Known matches only; Firefight and playlists with special multipliers are excluded or approximated."
 
 [timeseries.progression.rank]
-fr = "Rang"
 en = "Rank"
 
 [timeseries.progression.rank_perf_title]
-fr = "Rang et performance"
 en = "Rank and performance"
 
 [timeseries.progression.efficiency_title]
-fr = "Rendement & Résistance"
 en = "Output & resistance"
 
 [timeseries.progression.ref_100]
-fr = "Réf. 100%"
 en = "Ref. 100%"
 
 [timeseries.progression.rate_offensive]
-fr = "Rendement (%)"
 en = "Output (%)"
 
 [timeseries.progression.rate_defensive]
-fr = "Résistance (%)"
 en = "Resistance (%)"
 
 [timeseries.progression.per_effective_frag]
-fr = "/ frag effectif"
 en = "/ effective kill"
 
 [timeseries.progression.per_death]
-fr = "/ mort"
 en = "/ death"
 
 [timeseries.progression.ref_one_life]
-fr = "1 vie"
 en = "1 life"
 
 [timeseries.progression.intensity_title]
-fr = "Intensité"
 en = "Intensity"
 
 [timeseries.progression.intensity_subtitle]
-fr = "Répartition des frags par phase de match"
 en = "Frag distribution across match phases"
 
 [timeseries.progression.intensity_tooltip]
-fr = "Chaque match est découpé en 10 tranches de durée égale. Le trait plein montre à quel moment les frags tombent : à gauche le début du match, à droite la fin. La zone colorée autour dit à quel point ça change d'un match à l'autre — large, le jeu varie beaucoup selon les parties ; étroite, le profil reste à peu près le même. Le pointillé est le niveau d'un match où les frags seraient répartis également du début à la fin : au-dessus, c'est un moment fort, en dessous un moment creux."
 en = "Each match is split into 10 equal slices. The solid line shows when kills happen: start of the match on the left, end on the right. The shaded band around it shows how much this changes from match to match — wide means play varies a lot depending on the game, narrow means it stays much the same every time. The dashed line is the level of a match where kills would be spread evenly from start to finish: above it is a strong stretch, below it a quiet one."
 
 [timeseries.progression.intensity_median]
-fr = "Médiane"
 en = "Median"
 
 [timeseries.progression.intensity_envelope]
-fr = "Enveloppe P25–P75"
 en = "P25–P75 envelope"
 
 [timeseries.progression.intensity_ref]
-fr = "10 %"
 en = "10%"
 
 [timeseries.progression.match_history_title]
-fr = "Historique des matchs"
 en = "Match history"
 
 [timeseries.progression.col_win_prob]
-fr = "Prob. vic."
 en = "Win prob."
 
 # ─── Onglet Distributions — labels inline (migration H-D4) ───────────────────
 
 [timeseries.distributions.life_title]
-fr = "Durée de vie moyenne (s)"
 en = "Average life (s)"
 
 [timeseries.distributions.seconds]
-fr = "Secondes"
 en = "Seconds"
 
 [timeseries.distributions.spree_axis]
-fr = "Folie meurtrière"
 en = "Killing spree"
 
 [timeseries.distributions.life_vs_kills]
-fr = "Vie vs Frags"
 en = "Life vs Kills"
 
 [timeseries.distributions.life_axis]
-fr = "Vie (s)"
 en = "Life (s)"
 
 [timeseries.distributions.accuracy_vs_kda]
-fr = "Précision vs FDA"
 en = "Accuracy vs KDA"
 
 [timeseries.distributions.life_vs_deaths]
-fr = "Vie vs Morts"
 en = "Life vs Deaths"
 
 [timeseries.distributions.kills_vs_deaths]
-fr = "Frags vs Morts"
 en = "Kills vs Deaths"
 
 [timeseries.distributions.mmr_title]
-fr = "MMR équipe vs MMR adverse"
 en = "Team MMR vs Enemy MMR"

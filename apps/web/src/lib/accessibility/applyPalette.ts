@@ -22,20 +22,20 @@ export function applyPalette(palette: Palette, paletteKey: string): void {
     if (!value) {
       log.warn(
         `missing-token:${paletteKey}:${token}`,
-        `Token manquant dans la palette "${paletteKey}" : ${token}`,
+        `Token missing from palette "${paletteKey}": ${token}`,
       )
       continue
     }
     if (!/^#[0-9a-fA-F]{3,8}$/.test(value)) {
       log.warn(
         `invalid-hex:${paletteKey}:${token}`,
-        `Valeur invalide pour "${token}" dans "${paletteKey}" : ${value}`,
+        `Invalid value for "${token}" in "${paletteKey}": ${value}`,
       )
     }
     root.style.setProperty(tokenVar(token as SemanticToken), value)
   }
 
-  log.info(`Palette appliquée : ${_activePaletteKey ?? 'none'} → ${paletteKey}`)
+  log.info(`Palette applied: ${_activePaletteKey ?? 'none'} → ${paletteKey}`)
   _activePaletteKey = paletteKey
 }
 

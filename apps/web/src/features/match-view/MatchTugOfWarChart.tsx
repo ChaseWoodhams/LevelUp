@@ -264,11 +264,11 @@ function buildKillFeedSeries(input: KillFeedInput): Record<string, unknown>[] {
     xAxisIndex: axisIndex, yAxisIndex: axisIndex, tooltip: { formatter: scatterFmt }, z: 3,
   })
   return [
-    lane(colorTeam, allyLaneY, 0, 'Lane alliée'),
-    scatter(allyKills, allyLaneY, 0, 'Mes kills', colorTeam),
+    lane(colorTeam, allyLaneY, 0, 'Ally lane'),
+    scatter(allyKills, allyLaneY, 0, 'My kills', colorTeam),
     ...buildWaveSeries(detectTeamWaves(allyKills), { color: colorTeam, laneY: allyLaneY, axisIndex: 0, sideLabel: t.combatTeamLabel, xuidMeta }),
-    lane(colorEnemy, 0, 1, 'Lane ennemie'),
-    scatter(enemyKills, 0, 1, 'Kills ennemis', colorEnemy),
+    lane(colorEnemy, 0, 1, 'Enemy lane'),
+    scatter(enemyKills, 0, 1, 'Enemy kills', colorEnemy),
     ...buildWaveSeries(detectTeamWaves(enemyKills), { color: colorEnemy, laneY: 0, axisIndex: 1, sideLabel: t.combatEnemyLabel, xuidMeta }),
   ]
 }

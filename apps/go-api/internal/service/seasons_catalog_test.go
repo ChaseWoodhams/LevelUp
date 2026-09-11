@@ -90,14 +90,14 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.season.season1]
-labels = { en = "Heroes of Reach", fr = "Heroes of Reach" }
+labels = { en = "Heroes of Reach" }
 display_order = 10
 start_date = "2021-12-08T00:00:00Z"
 end_date   = "2022-05-03T00:00:00Z"
 extra = { csr_season_id = "CsrSeason1", short_label = "S1" }
 
 [assets.season.season2]
-labels = { en = "Lone Wolves", fr = "Loups solitaires" }
+labels = { en = "Lone Wolves" }
 display_order = 20
 start_date = "2022-05-03T00:00:00Z"
 end_date   = "2022-11-08T00:00:00Z"
@@ -137,8 +137,8 @@ func TestSeasonsCatalog_TOMLOnly(t *testing.T) {
 	if got[0].Label != "Heroes of Reach" {
 		t.Errorf("FR label fallback = %q, want Heroes of Reach", got[0].Label)
 	}
-	if got[1].Label != "Loups solitaires" {
-		t.Errorf("FR label = %q, want Loups solitaires", got[1].Label)
+	if got[1].Label != "Lone Wolves" {
+		t.Errorf("label = %q, want Lone Wolves", got[1].Label)
 	}
 }
 
@@ -172,8 +172,8 @@ func TestSeasonsCatalog_DBPopulated_Merged(t *testing.T) {
 		t.Errorf("S1 end date = %v, want 2022-05-04 (DB wins)", got[0].End)
 	}
 	// TOML labels (FR) préservés malgré la fusion.
-	if got[1].Label != "Loups solitaires" {
-		t.Errorf("S2 label = %q, want Loups solitaires (TOML wins)", got[1].Label)
+	if got[1].Label != "Lone Wolves" {
+		t.Errorf("S2 label = %q, want Lone Wolves (TOML wins)", got[1].Label)
 	}
 	// Extra TOML préservés.
 	if got[0].Extra["csr_season_id"] != "CsrSeason1" {

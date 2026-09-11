@@ -280,7 +280,6 @@ func inspectMatch(shared, globalDB *sql.DB, mid string) {
 	var (
 		startTime                sql.NullString
 		mapID, mapName, pairName sql.NullString
-		pairNameFR, mapNameFR    sql.NullString
 		playlistID, playlistName sql.NullString
 		isFirefight, isRanked    sql.NullBool
 		backfillCompleted        sql.NullInt64
@@ -291,7 +290,6 @@ func inspectMatch(shared, globalDB *sql.DB, mid string) {
 		SELECT
 			`+analysis.SQLStartTimeCanonical("")+`::VARCHAR,
 			map_id, map_name, pair_name,
-			pair_name_fr, map_name_fr,
 			playlist_id, playlist_name,
 			is_firefight, is_ranked,
 			backfill_completed,
@@ -299,7 +297,6 @@ func inspectMatch(shared, globalDB *sql.DB, mid string) {
 			match_intensity
 		FROM match_registry WHERE match_id = ?`, mid).Scan(
 		&startTime, &mapID, &mapName, &pairName,
-		&pairNameFR, &mapNameFR,
 		&playlistID, &playlistName,
 		&isFirefight, &isRanked,
 		&backfillCompleted, &eventsLoaded, &matchIntensity,
@@ -311,9 +308,7 @@ func inspectMatch(shared, globalDB *sql.DB, mid string) {
 	fmt.Printf("  start_time     : %s\n", nstr(startTime))
 	fmt.Printf("  map_id         : %s\n", flag2(mapID))
 	fmt.Printf("  map_name       : %s\n", flag2(mapName))
-	fmt.Printf("  map_name_fr    : %s\n", flag2(mapNameFR))
 	fmt.Printf("  pair_name      : %s\n", flag2(pairName))
-	fmt.Printf("  pair_name_fr   : %s\n", flag2(pairNameFR))
 	fmt.Printf("  playlist_id    : %s\n", flag2(playlistID))
 	fmt.Printf("  is_firefight   : %v   is_ranked: %v\n", isFirefight.Bool, isRanked.Bool)
 	fmt.Printf("  events_loaded  : %v\n", eventsLoaded.Bool)

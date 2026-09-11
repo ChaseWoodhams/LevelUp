@@ -22,7 +22,7 @@ function setEntry(entry: ChartReview | undefined) {
 
 describe('ReviewBadge', () => {
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
     setEntry(undefined)
   })
 
@@ -37,17 +37,17 @@ describe('ReviewBadge', () => {
   })
 
   it('rend le libellé FR selon le statut', () => {
-    setEntry({ status: 'verify', note: { fr: 'note fr', en: 'note en' } })
+    setEntry({ status: 'verify', note: { en: 'note en' } })
     render(<ReviewBadge reviewKey={KNOWN_KEY} />)
     const badge = screen.getByTestId('chart-review-badge')
-    expect(badge.textContent).toBe('À vérifier')
+    expect(badge.textContent).toBe('To verify')
     expect(badge.getAttribute('data-review-status')).toBe('verify')
-    expect(badge.getAttribute('title')).toContain('note fr')
+    expect(badge.getAttribute('title')).toContain('note en')
   })
 
   it('rend le libellé EN quand la locale bascule', () => {
     useAppShellStore.setState({ locale: 'en' })
-    setEntry({ status: 'new', note: { fr: 'note fr', en: 'note en' } })
+    setEntry({ status: 'new', note: { en: 'note en' } })
     render(<ReviewBadge reviewKey={KNOWN_KEY} />)
     const badge = screen.getByTestId('chart-review-badge')
     expect(badge.textContent).toBe('New')
@@ -55,8 +55,8 @@ describe('ReviewBadge', () => {
   })
 
   it('rend le statut « suppression » avec son libellé dédié', () => {
-    setEntry({ status: 'removal', note: { fr: 'note fr', en: 'note en' } })
+    setEntry({ status: 'removal', note: { en: 'note en' } })
     render(<ReviewBadge reviewKey={KNOWN_KEY} />)
-    expect(screen.getByTestId('chart-review-badge').textContent).toBe('Suppression ?')
+    expect(screen.getByTestId('chart-review-badge').textContent).toBe('Remove?')
   })
 })

@@ -14,19 +14,19 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 color_token = "outcome.positive"
 
 [outcomes.loss]
-labels = { en = "Loss", fr = "Défaite" }
+labels = { en = "Loss" }
 color_token = "outcome.negative"
 
 [outcomes.tie]
-labels = { en = "Tie", fr = "Égalité" }
+labels = { en = "Tie" }
 color_token = "outcome.neutral"
 
 [outcomes.dnf]
-labels = { en = "DNF", fr = "Abandon" }
+labels = { en = "DNF" }
 color_token = "outcome.neutral"
 `)
 	set, err := LoadOutcomesFromBytes("test.toml", doc)
@@ -40,8 +40,8 @@ color_token = "outcome.neutral"
 	if !ok {
 		t.Fatal("Get(win) introuvable")
 	}
-	if lbl, _ := got.Label("fr"); lbl != "Victoire" {
-		t.Errorf("Label fr = %q, want Victoire", lbl)
+	if lbl, _ := got.Label("en"); lbl != "Win" {
+		t.Errorf("Label en = %q, want Win", lbl)
 	}
 	if got.ColorToken != "outcome.positive" {
 		t.Errorf("ColorToken = %q, want outcome.positive", got.ColorToken)
@@ -55,15 +55,15 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 color_token = "outcome.positive"
 
 [outcomes.loss]
-labels = { en = "Loss", fr = "Défaite" }
+labels = { en = "Loss" }
 color_token = "outcome.negative"
 
 [outcomes.tie]
-labels = { en = "Tie", fr = "Égalité" }
+labels = { en = "Tie" }
 color_token = "outcome.neutral"
 `)
 	set, _ := LoadOutcomesFromBytes("test.toml", doc)
@@ -86,7 +86,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 color_token = "outcome.positive"
 `)
 	set, _ := LoadOutcomesFromBytes("test.toml", doc)
@@ -110,7 +110,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [outcomes.totally_invented]
-labels = { en = "?", fr = "?" }
+labels = { en = "?" }
 color_token = "outcome.neutral"
 `)
 	_, err := LoadOutcomesFromBytes("test.toml", doc)
@@ -129,7 +129,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 `)
 	_, err := LoadOutcomesFromBytes("test.toml", doc)
 	if err == nil {
@@ -140,22 +140,22 @@ labels = { en = "Win", fr = "Victoire" }
 	}
 }
 
-func TestLoadOutcomesFromBytes_MissingFRLabel(t *testing.T) {
+func TestLoadOutcomesFromBytes_MissingENLabel(t *testing.T) {
 	doc := []byte(`
 [meta]
 title_slug = "halo_infinite"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win" }
+labels = { fr = "Win" }
 color_token = "outcome.positive"
 `)
 	_, err := LoadOutcomesFromBytes("test.toml", doc)
 	if err == nil {
-		t.Fatal("expected error for missing FR label")
+		t.Fatal("expected error for missing EN label")
 	}
-	if !strings.Contains(err.Error(), "label FR manquant") {
-		t.Errorf("error = %v, want label FR manquant", err)
+	if !strings.Contains(err.Error(), "label EN manquant") {
+		t.Errorf("error = %v, want label EN manquant", err)
 	}
 }
 
@@ -200,7 +200,7 @@ title_slug = "smoke"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 color_token = "outcome.positive"
 `)
 	if err := os.WriteFile(tomlPath, doc, 0o644); err != nil {

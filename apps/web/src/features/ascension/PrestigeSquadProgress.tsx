@@ -107,7 +107,7 @@ export function PrestigeSquadProgress() {
 
   if (rows.length === 0) return null
 
-  const numberLocale = intlLocale(locale)
+  const numberLocale = intlLocale()
   const t = getAscensionText(locale)
 
   return (

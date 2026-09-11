@@ -36,8 +36,8 @@ describe('GamertagCombobox', () => {
     renderWithProviders(
       <GamertagCombobox selected={[]} onChange={() => {}} />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Joueurs configurés')).toBeInTheDocument()
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
+    expect(screen.getByText('Configured players')).toBeInTheDocument()
     expect(screen.getByText('AlphaPlayer')).toBeInTheDocument()
     expect(screen.getByText('BravoGamer')).toBeInTheDocument()
   })
@@ -52,8 +52,8 @@ describe('GamertagCombobox', () => {
         ]}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Coéquipiers fréquents')).toBeInTheDocument()
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
+    expect(screen.getByText('Frequent teammates')).toBeInTheDocument()
     expect(screen.getByText('CharlieX')).toBeInTheDocument()
     expect(screen.getByText('12×')).toBeInTheDocument()
   })
@@ -69,13 +69,13 @@ describe('GamertagCombobox', () => {
     renderWithProviders(
       <GamertagCombobox selected={[]} onChange={() => {}} />,
     )
-    const input = screen.getByPlaceholderText(/Rechercher un gamertag/i)
+    const input = screen.getByPlaceholderText(/Search a gamertag/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'xq' } })
 
     await waitFor(
       () => {
-        expect(screen.getByText(/Aucun joueur trouvé pour "xq"/)).toBeInTheDocument()
+        expect(screen.getByText(/No player found for "xq"/)).toBeInTheDocument()
       },
       { timeout: 2000 },
     )
@@ -92,19 +92,19 @@ describe('GamertagCombobox', () => {
     )
 
     renderWithProviders(<GamertagCombobox selected={[]} onChange={() => {}} />)
-    const input = screen.getByPlaceholderText(/Rechercher un gamertag/i)
+    const input = screen.getByPlaceholderText(/Search a gamertag/i)
     fireEvent.focus(input)
     fireEvent.change(input, { target: { value: 'GhostGT' } })
 
-    const cta = await screen.findByText('Rechercher sur Xbox', {}, { timeout: 2000 })
+    const cta = await screen.findByText('Search on Xbox', {}, { timeout: 2000 })
     fireEvent.click(cta)
 
     await waitFor(
-      () => expect(screen.getByText('Aucun résultat Xbox')).toBeInTheDocument(),
+      () => expect(screen.getByText('No Xbox result')).toBeInTheDocument(),
       { timeout: 2000 },
     )
     // Un seul message « rien trouvé » (pas d'empilement avec le message local).
-    expect(screen.queryByText(/Aucun joueur trouvé pour/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/No player found for/)).not.toBeInTheDocument()
   })
 
   it('affiche les presets (escouades/groupes) et charge le roster au clic', () => {
@@ -119,7 +119,7 @@ describe('GamertagCombobox', () => {
         presetGroups={[
           {
             key: 'squads',
-            label: 'Mes escouades',
+            label: 'My squads',
             options: [
               { id: 'sq1', name: 'Ranked', subtitle: 'surtout Classé', gamertags: ['Choco', 'JGtm'] },
             ],
@@ -127,8 +127,8 @@ describe('GamertagCombobox', () => {
         ]}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Mes escouades')).toBeInTheDocument()
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
+    expect(screen.getByText('My squads')).toBeInTheDocument()
     expect(screen.getByText('surtout Classé')).toBeInTheDocument()
     // Clic = charge le roster entier (≠ ajout d'un joueur).
     fireEvent.click(screen.getByText('Ranked'))
@@ -140,11 +140,11 @@ describe('GamertagCombobox', () => {
       <GamertagCombobox
         selected={[]}
         onChange={() => {}}
-        footer={<button type="button">Enregistrer la compo</button>}
+        footer={<button type="button">Save lineup</button>}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
-    expect(screen.getByText('Enregistrer la compo')).toBeInTheDocument()
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
+    expect(screen.getByText('Save lineup')).toBeInTheDocument()
   })
 
   it('appelle onClose à la fermeture du popover (clic extérieur)', () => {
@@ -158,7 +158,7 @@ describe('GamertagCombobox', () => {
         }}
       />,
     )
-    fireEvent.focus(screen.getByPlaceholderText(/Rechercher un gamertag/i))
+    fireEvent.focus(screen.getByPlaceholderText(/Search a gamertag/i))
     fireEvent.mouseDown(document.body) // clic hors du combobox → ferme
     expect(closed).toBe(1)
   })
@@ -181,7 +181,7 @@ describe('GamertagCombobox', () => {
     renderWithProviders(
       <GamertagCombobox selected={[]} onChange={(v) => { result = v }} />,
     )
-    const input = screen.getByPlaceholderText(/Rechercher un gamertag/i)
+    const input = screen.getByPlaceholderText(/Search a gamertag/i)
     fireEvent.focus(input)
     // 'UnknownGuy' n'est dans aucune suggestion (configurés Alpha/Bravo) → saisie libre.
     fireEvent.change(input, { target: { value: 'UnknownGuy' } })

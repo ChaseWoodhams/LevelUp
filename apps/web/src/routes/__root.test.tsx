@@ -171,7 +171,7 @@ describe('RootLayout — titre d’onglet locale-aware (I18)', () => {
       authMode: 'none',
       firstLaunch: false,
       setupRequired: false,
-      locale: 'fr',
+      locale: 'en',
     })
   })
 
@@ -181,7 +181,7 @@ describe('RootLayout — titre d’onglet locale-aware (I18)', () => {
 
   it('reflète la locale du store sans navigation (pathname inchangé)', () => {
     render(<RootLayout />)
-    expect(document.title).toBe('LevelUp - Accueil')
+    expect(document.title).toBe('LevelUp - Home')
 
     act(() => {
       useAppShellStore.setState({ locale: 'en' })

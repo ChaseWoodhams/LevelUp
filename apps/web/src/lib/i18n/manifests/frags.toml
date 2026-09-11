@@ -5,11 +5,9 @@
 
 # ── Titres de cartes ──────────────────────────────────────────────────────────
 [frags.charts.sunburst_title]
-fr = "Répartition des frags"
 en = "Frag distribution"
 
 [frags.charts.weapon_breakdown_title]
-fr = "Frags par arme"
 en = "Kills by weapon"
 
 # Titre du bloc « Outils de destruction » (armes du registre + détail mêlée/grenade/
@@ -17,58 +15,45 @@ en = "Kills by weapon"
 # Synthesis + Sessions + Timeseries (onglet Résumé). Les autres surfaces gardent
 # weapon_breakdown_title (« Frags par arme »).
 [frags.charts.detail_title]
-fr = "Outils de destruction"
 en = "Tools of destruction"
 
 [frags.charts.center_total_label]
-fr = "Frags"
 en = "Kills"
 
 [frags.empty.no_data]
-fr = "Aucun frag sur ce périmètre"
 en = "No kills in this scope"
 
 # ── Badge d'autorité de la donnée ─────────────────────────────────────────────
 [frags.authority.exact]
-fr = "exact"
 en = "exact"
 
 [frags.authority.estimated]
-fr = "estimé"
 en = "estimated"
 
 # ── Fragments de tooltip (pourcentages) ───────────────────────────────────────
 [frags.tooltip.share_total]
-fr = "{pct} % du total"
 en = "{pct}% of total"
 
 [frags.tooltip.share_class]
-fr = "{pct} % de {className}"
 en = "{pct}% of {className}"
 
 # ── Classes (niveau 1 du sunburst — axe manipulation) ─────────────────────────
 [frags.class.shoulder]
-fr = "Arme d'épaule"
 en = "Shoulder"
 
 [frags.class.sidearm]
-fr = "Arme de poing"
 en = "Sidearm"
 
 [frags.class.heavy]
-fr = "Lourde"
 en = "Heavy"
 
 [frags.class.melee]
-fr = "Mêlée"
 en = "Melee"
 
 [frags.class.grenade]
-fr = "Grenade"
 en = "Grenade"
 
 [frags.class.spartan_ability]
-fr = "Capacités spartanes"
 en = "Spartan abilities"
 
 # Classes d'ENGIN (V73-3.2) : seul le nom de la CLASSE est traduit ici (il est
@@ -78,61 +63,47 @@ en = "Spartan abilities"
 # FragRoleEntry.label. Les recopier ici dupliquerait ce TOML et ferait enfler ce
 # manifeste partagé à chaque titre ajouté.
 [frags.class.vehicle]
-fr = "Véhicule"
 en = "Vehicle"
 
 [frags.class.turret]
-fr = "Tourelle"
 en = "Turret"
 
 [frags.class.unattributed]
-fr = "Non attribué"
 en = "Unattributed"
 
 # ── Rôles (niveau 2) — armes (registre) ───────────────────────────────────────
 [frags.role.precision]
-fr = "Précision"
 en = "Precision"
 
 [frags.role.automatic]
-fr = "Automatique"
 en = "Automatic"
 
 [frags.role.sniper]
-fr = "Sniper"
 en = "Sniper"
 
 [frags.role.shotgun]
-fr = "Fusil à pompe"
 en = "Shotgun"
 
 [frags.role.sidearm]
-fr = "Arme de poing"
 en = "Sidearm"
 
 [frags.role.power]
-fr = "Arme Puissante"
 en = "Power weapon"
 
 [frags.role.special]
-fr = "Spéciale"
 en = "Special"
 
 # ── Rôles (niveau 2) — mécaniques natives (API, H5 cap-gated) ─────────────────
 [frags.role.assassination]
-fr = "Assassinat"
 en = "Assassination"
 
 [frags.role.direct_melee]
-fr = "Corps-à-corps"
 en = "Direct melee"
 
 [frags.role.ground_pound]
-fr = "Coup au sol"
 en = "Ground pound"
 
 [frags.role.shoulder_bash]
-fr = "Charge spartane"
 en = "Shoulder bash"
 
 # ── Rôles (niveau 2) — TYPE de grenade (classe Grenade, V72-15.2) ──────────────
@@ -140,21 +111,16 @@ en = "Shoulder bash"
 # déjà porté par la classe). grenade_other = familles non typées + résidu de
 # réconciliation vers le total API.
 [frags.role.grenade_frag]
-fr = "Fragmentation"
 en = "Fragmentation"
 
 [frags.role.grenade_plasma]
-fr = "Plasma"
 en = "Plasma"
 
 [frags.role.grenade_dynamo]
-fr = "Dynamo"
 en = "Dynamo"
 
 [frags.role.grenade_splinter]
-fr = "Splinter"
 en = "Splinter"
 
 [frags.role.grenade_other]
-fr = "Autre grenade"
 en = "Other grenade"

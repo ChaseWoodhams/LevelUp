@@ -50,7 +50,7 @@ func TestApplyModeTranslationsFR(t *testing.T) {
 	tr := func(_ context.Context, _ []string) (map[string]string, error) {
 		return map[string]string{"Slayer": "Assassin", "Team Slayer": "Assassin par équipe"}, nil
 	}
-	p := (&PrestigeSquadMatchProvider{}).WithModeTranslatorFR(tr)
+	p := (&PrestigeSquadMatchProvider{}).WithModeTranslator(tr)
 	got := p.applyModeTranslationsFR(ctx, []string{"Team Slayer", "CTF"})
 	if len(got) != 2 || got[0] != "Assassin par équipe" || got[1] != "CTF" {
 		t.Fatalf("applyModeTranslationsFR = %v, want [Assassin par équipe CTF]", got)
@@ -62,7 +62,7 @@ func TestApplyModeTranslationsFR(t *testing.T) {
 	}
 
 	// Erreur du traducteur → modes inchangés (best-effort, jamais vide).
-	pErr := (&PrestigeSquadMatchProvider{}).WithModeTranslatorFR(
+	pErr := (&PrestigeSquadMatchProvider{}).WithModeTranslator(
 		func(context.Context, []string) (map[string]string, error) { return nil, errors.New("metadata absente") },
 	)
 	if got := pErr.applyModeTranslationsFR(ctx, []string{"Slayer"}); len(got) != 1 || got[0] != "Slayer" {
@@ -70,7 +70,7 @@ func TestApplyModeTranslationsFR(t *testing.T) {
 	}
 
 	// Traduction blanche → EN conservé (un libellé n'est jamais vidé).
-	pBlank := (&PrestigeSquadMatchProvider{}).WithModeTranslatorFR(
+	pBlank := (&PrestigeSquadMatchProvider{}).WithModeTranslator(
 		func(context.Context, []string) (map[string]string, error) {
 			return map[string]string{"Slayer": "  "}, nil
 		},
@@ -106,7 +106,7 @@ func TestApplyPlaylistTranslationsFR(t *testing.T) {
 		}
 		return out, nil
 	}
-	p := (&PrestigeSquadMatchProvider{}).WithPlaylistTranslatorFR(tr)
+	p := (&PrestigeSquadMatchProvider{}).WithPlaylistTranslator(tr)
 	got := p.applyPlaylistTranslationsFR(ctx, []string{"Quick Play", "Big Team Battle"}, idByLabel)
 	if len(got) != 2 || got[0] != "Partie rapide" || got[1] != "Big Team Battle" {
 		t.Fatalf("applyPlaylistTranslationsFR = %v, want [Partie rapide Big Team Battle]", got)
@@ -118,7 +118,7 @@ func TestApplyPlaylistTranslationsFR(t *testing.T) {
 	}
 
 	// Erreur du traducteur → libellés inchangés (best-effort, jamais vide).
-	pErr := (&PrestigeSquadMatchProvider{}).WithPlaylistTranslatorFR(
+	pErr := (&PrestigeSquadMatchProvider{}).WithPlaylistTranslator(
 		func(context.Context, []string) (map[string]string, error) { return nil, errors.New("metadata absente") },
 	)
 	if got := pErr.applyPlaylistTranslationsFR(ctx, []string{"Quick Play"}, idByLabel); len(got) != 1 || got[0] != "Quick Play" {
@@ -126,7 +126,7 @@ func TestApplyPlaylistTranslationsFR(t *testing.T) {
 	}
 
 	// Traduction blanche → libellé COALESCE conservé (jamais vidé).
-	pBlank := (&PrestigeSquadMatchProvider{}).WithPlaylistTranslatorFR(
+	pBlank := (&PrestigeSquadMatchProvider{}).WithPlaylistTranslator(
 		func(_ context.Context, ids []string) (map[string]string, error) {
 			out := map[string]string{}
 			for _, id := range ids {

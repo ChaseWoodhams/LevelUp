@@ -34,14 +34,14 @@ describe('ThemeToggle', () => {
       </ThemeProvider>,
     )
 
-    const toggle = screen.getByRole('switch', { name: /Passer au thème clair/i })
+    const toggle = screen.getByRole('switch', { name: /Switch to light theme/i })
 
     expect(toggle).toHaveAttribute('aria-checked', 'true')
     expect(document.documentElement.dataset.theme).toBe('dark')
 
     await user.click(toggle)
 
-    expect(screen.getByRole('switch', { name: /Passer au thème sombre/i })).toHaveAttribute(
+    expect(screen.getByRole('switch', { name: /Switch to dark theme/i })).toHaveAttribute(
       'aria-checked',
       'false',
     )

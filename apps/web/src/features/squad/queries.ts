@@ -22,7 +22,6 @@ export function useTeammates(
       filterContextHash,
       confirmedGts,
       sessionLabels,
-      request.locale ?? '',
       request.filter_exact_composition ?? false,
     ),
     queryFn: () =>

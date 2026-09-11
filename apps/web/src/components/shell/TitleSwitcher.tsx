@@ -71,7 +71,7 @@ export function TitleSwitcher({ onSwitched }: TitleSwitcherProps) {
       } catch (err) {
         log.warn(
           'title_switch:direct_fallback_failed',
-          'bascule directe (aucun joueur) échouée',
+          'direct switch (no player) failed',
           err,
         )
       } finally {

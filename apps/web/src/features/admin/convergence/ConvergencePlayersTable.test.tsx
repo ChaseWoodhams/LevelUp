@@ -72,7 +72,7 @@ describe('ConvergencePlayersTable — tri CLIENT par en-têtes (I16)', () => {
 
   it('clic sur « Enrichissement » trie numériquement (desc au 1er clic)', () => {
     renderTable(report())
-    const header = screen.getByText('Enrichment manquant')
+    const header = screen.getByText('Missing enrichment')
     fireEvent.click(header)
     expect(rowOrder(names)).toEqual(['Bravo', 'Charlie', 'Alpha'])
   })

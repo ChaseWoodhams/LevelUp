@@ -129,7 +129,7 @@ export function SessionParticipationBars({
   if (entry && !entry.participation?.length) {
     log.warn(
       `participation_empty:${entry.session_label ?? ''}`,
-      'Profil de participation vide : aucun axe dans entry.participation (backend)',
+      'Empty participation profile: no axis in entry.participation (backend)',
     )
   }
 

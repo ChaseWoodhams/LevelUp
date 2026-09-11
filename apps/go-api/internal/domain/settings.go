@@ -7,8 +7,8 @@ package domain
 // SettingsResponse est le payload retourné par GET /settings.
 // discord_webhook_url n'est JAMAIS inclus — seulement discord_webhook_url_present.
 type SettingsResponse struct {
-	Lang                 string `json:"lang" enum:"fr,en"`
-	DiscordLang          string `json:"discord_lang" enum:"fr,en"`
+	Lang                 string `json:"lang" enum:"en"`
+	DiscordLang          string `json:"discord_lang" enum:"en"`
 	UserTimezone         string `json:"user_timezone"`
 	NormalizeModeLabels  bool   `json:"normalize_mode_labels"`
 	ShowRecords          bool   `json:"show_records"`

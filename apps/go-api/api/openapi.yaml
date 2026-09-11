@@ -595,7 +595,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Error
-      summary: Action admin — upsert asset_translations (en-US et/ou fr-FR) pour un asset playlist/map/pair/game_variant (résolution effective des UUID inconnus) (auth admin requis)
+      summary: Action admin — upsert asset_translations (en-US et/ou en-US) pour un asset playlist/map/pair/game_variant (résolution effective des UUID inconnus) (auth admin requis)
       tags:
         - admin
   /admin/actions/translations/mode:
@@ -624,7 +624,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Error
-      summary: Action admin — upsert mode_name_tr[fr] pour un mode normalisé (résout un mode non traduit, effet immédiat) (auth admin requis)
+      summary: Action admin — upsert mode_name_tr[en] pour un mode normalisé (résout un mode non traduit, effet immédiat) (auth admin requis)
       tags:
         - admin
   /admin/db-contention:
@@ -808,18 +808,6 @@ paths:
   /admin/monitoring/data-quality:
     get:
       operationId: getAdminMonitoringDataQuality
-      parameters:
-        - explode: false
-          in: query
-          name: title
-          schema:
-            type: string
-        - description: Locale cible du compteur untranslated_modes (défaut fr).
-          explode: false
-          in: query
-          name: locale
-          schema:
-            type: string
       responses:
         "200":
           content:
@@ -859,12 +847,6 @@ paths:
               - untranslated_modes
               - orphan_playlists
               - orphan_xuids
-            type: string
-        - description: Locale cible des modes sans traduction (défaut fr).
-          explode: false
-          in: query
-          name: locale
-          schema:
             type: string
         - explode: false
           in: query
@@ -2307,12 +2289,6 @@ paths:
   /help/release-notes:
     get:
       operationId: getReleaseNotes
-      parameters:
-        - explode: false
-          in: query
-          name: lang
-          schema:
-            type: string
       responses:
         "200":
           content:
@@ -2328,7 +2304,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Error
-      summary: Notes de release dérivées du git log
+      summary: Release notes derived from git log
       tags:
         - health
   /jobs/{job_id}:
@@ -4520,10 +4496,6 @@ paths:
           schema:
             type: string
         - in: header
-          name: X-LevelUp-Locale
-          schema:
-            type: string
-        - in: header
           name: If-None-Match
           schema:
             type: string
@@ -6061,7 +6033,7 @@ paths:
         N'expose jamais le contenu complet de session.
 
         **Invariants :**
-        - `locale` ∈ {fr, en} si fourni
+        - `locale` ∈ {en} si fourni
         - `player_slug` doit référencer un slug existant
         - Retourne 404 si le slug est inconnu
       operationId: updateSessionContext
@@ -6577,24 +6549,6 @@ paths:
   /titles/{slug}/field-mappings:
     get:
       operationId: getTitleFieldMappings
-      parameters:
-        - in: path
-          name: slug
-          required: true
-          schema:
-            type: string
-        - explode: false
-          in: query
-          name: locale
-          schema:
-            enum:
-              - fr
-              - en
-            type: string
-        - in: header
-          name: If-None-Match
-          schema:
-            type: string
       responses:
         "200":
           content:
@@ -6835,8 +6789,6 @@ components:
           type: integer
         description_en:
           type: string
-        description_fr:
-          type: string
         gamerscore:
           format: int64
           type: integer
@@ -6846,11 +6798,7 @@ components:
           type: boolean
         locked_desc_en:
           type: string
-        locked_desc_fr:
-          type: string
         name_en:
-          type: string
-        name_fr:
           type: string
         rarity_category:
           type: string
@@ -6870,9 +6818,7 @@ components:
       required:
         - achievement_id
         - name_en
-        - name_fr
         - description_en
-        - description_fr
         - gamerscore
         - is_secret
         - unlocked
@@ -7042,8 +6988,6 @@ components:
       properties:
         generated_at:
           type: string
-        locale:
-          type: string
         lying_bits_events:
           format: int64
           type: integer
@@ -7079,7 +7023,6 @@ components:
       required:
         - title_slug
         - generated_at
-        - locale
         - raw_uuid_playlists
         - raw_uuid_maps
         - raw_uuid_pairs
@@ -7131,8 +7074,6 @@ components:
             - "null"
         kind:
           type: string
-        locale:
-          type: string
         title_slug:
           type: string
         total:
@@ -7142,7 +7083,6 @@ components:
         - title_slug
         - generated_at
         - kind
-        - locale
         - items
         - total
       type: object
@@ -7981,15 +7921,11 @@ components:
       properties:
         description:
           type: string
-        description_fr:
-          type: string
         id:
           type: string
         image_url:
           type: string
         name_en:
-          type: string
-        name_fr:
           type: string
         sprite_height:
           format: int64
@@ -8008,7 +7944,6 @@ components:
       required:
         - id
         - name_en
-        - name_fr
         - image_url
       type: object
     AssetReference:
@@ -8336,7 +8271,7 @@ components:
             - $ref: '#/components/schemas/HaloIdentitySummary'
             - type: "null"
         locale:
-          default: fr
+          default: en
           type: string
         oauth_code_flow_enabled:
           type: boolean
@@ -8959,8 +8894,6 @@ components:
         next_rank_image_url:
           type: string
         next_rank_name_en:
-          type: string
-        next_rank_name_fr:
           type: string
         progress_pct:
           format: double
@@ -11214,7 +11147,7 @@ components:
           format: double
           type: number
         experience_type_label:
-          default: Non classé
+          default: Unranked
           type: string
         had_bot_teammate:
           description: Un coéquipier était un bot. Exposé sur les best_matches de la carrière (les LOSS avec bot sont exclus côté backend).
@@ -12263,8 +12196,6 @@ components:
           type: integer
         max_rank_name_en:
           type: string
-        max_rank_name_fr:
-          type: string
         percentage:
           format: double
           type: number
@@ -13106,11 +13037,8 @@ components:
       properties:
         en:
           type: string
-        fr:
-          type: string
       required:
         - en
-        - fr
       type: object
     LabelValue:
       additionalProperties: false
@@ -16010,8 +15938,6 @@ components:
       properties:
         condition_en:
           type: string
-        condition_fr:
-          type: string
         earned:
           type: boolean
         earned_at:
@@ -16028,14 +15954,11 @@ components:
           type: number
         title_en:
           type: string
-        title_fr:
-          type: string
       required:
         - id
         - metric
         - threshold
         - title_en
-        - title_fr
         - earned
       type: object
     MilestonesResponse:
@@ -17923,8 +17846,6 @@ components:
           type: string
         reason_key_en:
           type: string
-        reason_key_fr:
-          type: string
         reason_params:
           type: string
         resolved_at:
@@ -19269,7 +19190,6 @@ components:
           type: boolean
         locale:
           enum:
-            - fr
             - en
           nullable: true
           type: string
@@ -19796,7 +19716,6 @@ components:
           type: boolean
         discord_lang:
           enum:
-            - fr
             - en
           type: string
         discord_notifications_enabled:
@@ -19815,7 +19734,6 @@ components:
           type: array
         lang:
           enum:
-            - fr
             - en
           type: string
         media_captures_base_dir:
@@ -19928,11 +19846,8 @@ components:
           type: integer
         tier_name:
           type: string
-        tier_name_fr:
-          type: string
       required:
         - tier_name
-        - tier_name_fr
         - sub_tier
         - label
         - mu
@@ -21286,16 +21201,12 @@ components:
           type: string
         description_en:
           type: string
-        description_fr:
-          type: string
         historical_streak:
           format: int64
           type: integer
         is_arc_step:
           type: boolean
         label_en:
-          type: string
-        label_fr:
           type: string
         target_tier:
           type: string
@@ -22208,8 +22119,6 @@ components:
                   type: string
               type: object
           type: object
-        locale:
-          type: string
         picked_solo_session_labels:
           items:
             type: string
@@ -22233,8 +22142,6 @@ components:
           type: string
         description_en:
           type: string
-        description_fr:
-          type: string
         eval_type:
           type: string
         heroic_target:
@@ -22245,8 +22152,6 @@ components:
         is_long_term:
           type: boolean
         label_en:
-          type: string
-        label_fr:
           type: string
         legendary_target:
           format: double
@@ -22296,7 +22201,6 @@ components:
         - eval_type
         - mode_filter
         - label_en
-        - label_fr
         - normal_target
         - heroic_target
         - legendary_target
@@ -22544,8 +22448,6 @@ components:
           format: double
           type: number
         map_name:
-          type: string
-        map_name_fr:
           type: string
         match_id:
           type: string
@@ -23221,14 +23123,11 @@ components:
           type: integer
         label_en:
           type: string
-        label_fr:
-          type: string
         weapon_id:
           format: int64
           type: integer
       required:
         - weapon_id
-        - label_fr
         - label_en
         - kills
       type: object
@@ -23237,13 +23136,10 @@ components:
       properties:
         en:
           type: string
-        fr:
-          type: string
         fx:
           type: string
       required:
         - en
-        - fr
       type: object
     WinLossPoint:
       additionalProperties: false

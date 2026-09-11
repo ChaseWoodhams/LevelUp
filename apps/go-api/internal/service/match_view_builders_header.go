@@ -14,7 +14,6 @@ import (
 	"levelup/go-api/internal/analysis"
 	"levelup/go-api/internal/analysis/narrative"
 	skillv2 "levelup/go-api/internal/analysis/skill_v2"
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 	"levelup/go-api/internal/games"
 	"levelup/go-api/internal/games/canonical"
@@ -53,7 +52,7 @@ func buildMatchHeader(
 		return h
 	}
 
-	applyMatchHeaderMetaLabels(&h, meta, ctxkeys.Locale(ctx))
+	applyMatchHeaderMetaLabels(&h, meta)
 	applyMatchHeaderMapImage(ctx, &h, matchID, meta, assetURL)
 	h.PlayableDurationSeconds = headerGameplayDurationSeconds(meta)
 	h.IsRanked = meta.IsRanked
@@ -86,51 +85,29 @@ func headerGameplayDurationSeconds(meta *domain.MatchMetaRaw) *int64 {
 	return &gp
 }
 
-// applyMatchHeaderMetaLabels renseigne StartTime, MapUI, MapID, ModeUI, PlaylistLabel,
-// LOCALE-AWARE (locale de la requête). Sous UI EN, le header servait des libellés FR
-// (map/mode/playlist) composés avec un joint « on » côté front → « Assassin en équipe
-// on Bazaar » (GH-9). EN = noms canoniques API (MapNameEN, pair_name EN, PlaylistName
-// brut) ; FR = traductions (comportement historique préservé à l'octet).
-func applyMatchHeaderMetaLabels(h *domain.MatchViewHeader, meta *domain.MatchMetaRaw, locale string) {
-	isEN := locale == "en"
+// applyMatchHeaderMetaLabels fills StartTime, MapUI, MapID, ModeUI and PlaylistLabel with
+// the canonical English names: MapNameEN (asset_translations en-US), the mode derived from
+// pair_name, and the raw PlaylistName, each falling back to the raw value.
+func applyMatchHeaderMetaLabels(h *domain.MatchViewHeader, meta *domain.MatchMetaRaw) {
 	h.StartTime = meta.StartTime
 	if meta.StartTime != nil {
-		h.StartTimeLabel = formatDateLong(*meta.StartTime, locale)
+		h.StartTimeLabel = formatDateLong(*meta.StartTime, "en")
 	}
-	// Map : EN canonique (asset_translations en-US) sous UI EN, FR sinon ; fallback brut.
-	if isEN && meta.MapNameEN != nil && *meta.MapNameEN != "" {
+	if meta.MapNameEN != nil && *meta.MapNameEN != "" {
 		h.MapUI = *meta.MapNameEN
-	} else if !isEN && meta.MapNameFR != nil && *meta.MapNameFR != "" {
-		h.MapUI = *meta.MapNameFR
 	} else if meta.MapName != nil {
 		h.MapUI = *meta.MapName
 	}
 	if meta.MapAssetID != nil {
 		h.MapID = *meta.MapAssetID
 	}
-	// Mode : sous UI EN on dérive du pair_name EN (pas de traduction FR injectée) ;
-	// sinon ModeNameFR pré-résolu par le repo (fallback ResolveModeUI(pair, pairFR)).
-	var modeUI *string
-	if isEN {
-		modeUI = analysis.ResolveModeUI(meta.PairName, nil)
-	} else {
-		modeUI = meta.ModeNameFR
-		if modeUI == nil || *modeUI == "" {
-			modeUI = analysis.ResolveModeUI(meta.PairName, meta.PairNameFR)
-		}
-	}
-	if modeUI != nil {
-		// Re-normalise SYSTÉMATIQUEMENT : le libellé peut arriver brut avec un nom de
-		// map collé (pair_name = "Slayer on Forest"). NormalizeModeLabel strippe le
-		// suffixe " on/sur <map>" — sinon le front recompose "Slayer on Forest sur Forêt".
+	if modeUI := analysis.ResolveModeUI(meta.PairName, nil); modeUI != nil {
+		// Always re-normalise: the label can arrive raw with a map name attached
+		// (pair_name = "Slayer on Forest"). NormalizeModeLabel strips the " on <map>"
+		// suffix, otherwise the front end would render the map twice.
 		h.ModeUI = analysis.NormalizeModeLabel(*modeUI, h.MapUI)
 	}
-	// Playlist : EN brut (PlaylistName) sous UI EN, FR (PlaylistNameFR) sinon.
-	if isEN && meta.PlaylistName != nil && *meta.PlaylistName != "" {
-		h.PlaylistLabel = *meta.PlaylistName
-	} else if !isEN && meta.PlaylistNameFR != nil && *meta.PlaylistNameFR != "" {
-		h.PlaylistLabel = *meta.PlaylistNameFR
-	} else if meta.PlaylistName != nil {
+	if meta.PlaylistName != nil {
 		h.PlaylistLabel = *meta.PlaylistName
 	}
 }

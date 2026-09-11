@@ -45,7 +45,7 @@ describe('NavL1', () => {
     useAppShellStore.setState({
       currentPlayer: { player_slug: 'test-player', gamertag: 'TestPlayer' } as unknown as ReturnType<typeof useAppShellStore.getState>['currentPlayer'],
       availablePlayers: [{ player_slug: 'test-player', gamertag: 'TestPlayer' }] as unknown as ReturnType<typeof useAppShellStore.getState>['availablePlayers'],
-      locale: 'fr',
+      locale: 'en',
       authMode: 'none',
       isAdmin: false,
       // Baseline fail-open : titre courant introuvable dans availableTitles → toutes
@@ -63,7 +63,7 @@ describe('NavL1', () => {
   it('affiche Communauté dans la navigation principale', () => {
     renderWithProviders(<NavL1 />)
 
-    expect(screen.getByRole('link', { name: 'Communauté' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Community' })).toBeInTheDocument()
   })
 
   it('marque Communauté actif sur les sous-routes du hub', () => {
@@ -71,15 +71,15 @@ describe('NavL1', () => {
 
     renderWithProviders(<NavL1 />)
 
-    expect(screen.getByRole('link', { name: 'Communauté' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: 'Community' })).toHaveAttribute('aria-current', 'page')
   })
 
   it('place Communauté avant Médias et après Ascension dans la L1', () => {
     renderWithProviders(<NavL1 />)
 
     const objectifsLink = screen.getByRole('link', { name: 'Ascension' })
-    const communauteLink = screen.getByRole('link', { name: 'Communauté' })
-    const mediaLink = screen.getByRole('link', { name: 'Médias' })
+    const communauteLink = screen.getByRole('link', { name: 'Community' })
+    const mediaLink = screen.getByRole('link', { name: 'Media' })
 
     expect(
       objectifsLink.compareDocumentPosition(communauteLink) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -106,9 +106,9 @@ describe('NavL1', () => {
   it('place Ascension entre Escouade et Communauté', () => {
     renderWithProviders(<NavL1 />)
 
-    const escouadeLink = screen.getByRole('link', { name: 'Escouade' })
+    const escouadeLink = screen.getByRole('link', { name: 'Squad' })
     const objectifsLink = screen.getByRole('link', { name: 'Ascension' })
-    const communauteLink = screen.getByRole('link', { name: 'Communauté' })
+    const communauteLink = screen.getByRole('link', { name: 'Community' })
 
     expect(
       escouadeLink.compareDocumentPosition(objectifsLink) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -121,9 +121,9 @@ describe('NavL1', () => {
   it('expose l\'onglet Entraînement dans la dropdown Ascension', () => {
     renderWithProviders(<NavL1 />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Onglets Ascension' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ascension tabs' }))
 
-    const coaching = screen.getByRole('menuitem', { name: 'Entraînement' })
+    const coaching = screen.getByRole('menuitem', { name: 'Coaching' })
     expect(coaching).toBeInTheDocument()
     expect(coaching).toHaveAttribute('href', '/t/halo_infinite/players/test-player/ascension/coaching')
   })
@@ -131,12 +131,12 @@ describe('NavL1', () => {
   it('ordonne Profil / Objectifs / Entraînement / Réalisations dans la dropdown Ascension', () => {
     renderWithProviders(<NavL1 />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Onglets Ascension' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ascension tabs' }))
 
-    const profile = screen.getByRole('menuitem', { name: 'Profil' })
-    const objectives = screen.getByRole('menuitem', { name: 'Objectifs' })
-    const coaching = screen.getByRole('menuitem', { name: 'Entraînement' })
-    const realisations = screen.getByRole('menuitem', { name: 'Réalisations' })
+    const profile = screen.getByRole('menuitem', { name: 'Profile' })
+    const objectives = screen.getByRole('menuitem', { name: 'Objectives' })
+    const coaching = screen.getByRole('menuitem', { name: 'Coaching' })
+    const realisations = screen.getByRole('menuitem', { name: 'Achievements' })
 
     expect(objectives).toHaveAttribute('href', '/t/halo_infinite/players/test-player/ascension/objectifs')
     expect(
@@ -168,11 +168,11 @@ describe('NavL1', () => {
 
     renderWithProviders(<NavL1 />)
 
-    expect(screen.queryByRole('link', { name: 'Médias' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Carrière' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Media' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Career' })).not.toBeInTheDocument()
     // Sections transverses toujours présentes (non gatées).
-    expect(screen.getByRole('link', { name: 'Accueil' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Communauté' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Community' })).toBeInTheDocument()
   })
 
   it('masque Ascension pour un titre sans capability lusr', () => {
@@ -181,7 +181,7 @@ describe('NavL1', () => {
     renderWithProviders(<NavL1 />)
 
     expect(screen.queryByRole('link', { name: 'Ascension' })).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Carrière' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Médias' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Career' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Media' })).toBeInTheDocument()
   })
 })

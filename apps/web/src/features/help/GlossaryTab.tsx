@@ -349,7 +349,7 @@ function CollapsibleSection({ label, sectionName, children }: CollapsibleSection
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-2 text-xs font-medium uppercase tracking-wide text-foreground/50 hover:text-foreground transition-colors mb-1"
-        aria-label={open ? `Réduire la section ${sectionName}` : `Afficher la section ${sectionName}`}
+        aria-label={open ? `Collapse the ${sectionName} section` : `Expand the ${sectionName} section`}
         aria-expanded={open}
       >
         <span>{label}</span>

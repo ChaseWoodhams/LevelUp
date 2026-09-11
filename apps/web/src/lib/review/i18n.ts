@@ -18,11 +18,6 @@ interface ReviewText {
 }
 
 export const REVIEW_TEXT: Record<Locale, Record<ChartReviewStatus, ReviewText>> = {
-  fr: {
-    verify: { label: 'À vérifier', aria: 'Graphe à vérifier' },
-    new: { label: 'Nouveau', aria: 'Nouveau graphe' },
-    removal: { label: 'Suppression ?', aria: 'Graphe candidat à la suppression' },
-  },
   en: {
     verify: { label: 'To verify', aria: 'Chart to verify' },
     new: { label: 'New', aria: 'New chart' },

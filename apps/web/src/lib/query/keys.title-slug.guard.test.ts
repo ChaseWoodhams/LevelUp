@@ -64,13 +64,13 @@ const titleScopedInvocations: Record<string, () => readonly unknown[]> = {
   engagementTimeseries: () => queryKeys.engagementTimeseries(P, T, 'h', 50),
   engagementSquadSession: () => queryKeys.engagementSquadSession(P, T, [], []),
   // Accueil / palmarès / social.
-  home: () => queryKeys.home(P, T, 'fr'),
-  seasonPass: () => queryKeys.seasonPass(P, T, 'fr'),
+  home: () => queryKeys.home(P, T),
+  seasonPass: () => queryKeys.seasonPass(P, T),
   palmaresRelations: () => queryKeys.palmaresRelations(P, T),
   // Escouade / synthèse / sessions / compare.
   teammates: () => queryKeys.teammates(P, T, 'h', []),
   synthesis: () => queryKeys.synthesis(P, T, 'h'),
-  sessionDetail: () => queryKeys.sessionDetail(P, T, 'h', 's', 'c', false, 'fr'),
+  sessionDetail: () => queryKeys.sessionDetail(P, T, 'h', 's', 'c', false),
   comparePlayer: () => queryKeys.comparePlayer(P, T, 'gt'),
   // Médias (feuilles ; mediaBase est un préfixe large -> agnostique).
   media: () => queryKeys.media(P, T, 'h'),
@@ -79,13 +79,13 @@ const titleScopedInvocations: Record<string, () => readonly unknown[]> = {
   mediaAudioConfig: () => queryKeys.mediaAudioConfig(P, T),
   mediaMatchCandidates: () => queryKeys.mediaMatchCandidates(P, T, null, 5),
   // Citations / médailles / commendations / timeseries.
-  citations: () => queryKeys.citations(P, T, 'h', 'fr'),
-  medals: () => queryKeys.medals(P, T, 'fr'),
-  commendationTotals: () => queryKeys.commendationTotals(P, T, 'fr'),
+  citations: () => queryKeys.citations(P, T, 'h'),
+  medals: () => queryKeys.medals(P, T),
+  commendationTotals: () => queryKeys.commendationTotals(P, T),
   timeseries: () => queryKeys.timeseries(P, T, 'h'),
   // Classement.
   leaderboard: () => queryKeys.leaderboard(P, T),
-  leaderboardCatalog: () => queryKeys.leaderboardCatalog(P, T, 'fr'),
+  leaderboardCatalog: () => queryKeys.leaderboardCatalog(P, T),
   // Notifications (feuilles ; notificationsAll est un préfixe large -> agnostique).
   notifications: () => queryKeys.notifications(P, T, {}),
   notificationsUnreadCount: () => queryKeys.notificationsUnreadCount(P, T),

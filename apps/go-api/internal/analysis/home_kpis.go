@@ -136,11 +136,7 @@ func buildHomeCareerRank(raw *domain.HomeSpartanIdentityRow, locale string, rank
 		title = strings.TrimSpace(optionalStringValue(raw.RankTier))
 	}
 	if title == "" {
-		if loc == "en" {
-			title = fmt.Sprintf("Rank %d", raw.RankNumber)
-		} else {
-			title = fmt.Sprintf("Rang %d", raw.RankNumber)
-		}
+		title = fmt.Sprintf("Rank %d", raw.RankNumber)
 	}
 
 	// is_max_rank fiable : l'API Halo (RewardTrack.IsMaxRank) ne marque pas

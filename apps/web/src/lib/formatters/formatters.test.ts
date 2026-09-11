@@ -26,10 +26,10 @@ import {
 } from './index'
 
 describe('formatDate', () => {
-  it('format ISO en medium FR', () => {
-    const result = formatDate('2026-04-29T12:00:00Z', 'fr-FR')
-    // Le résultat exact dépend du fuseau ; on vérifie qu'il contient avril
-    expect(result).toMatch(/avr|avril/i)
+  it('ISO date in medium style', () => {
+    const result = formatDate('2026-04-29T12:00:00Z', 'en-US')
+    // The exact result depends on the time zone; check the month name.
+    expect(result).toMatch(/Apr/)
   })
 
   it('format ISO en short EN', () => {
@@ -38,81 +38,81 @@ describe('formatDate', () => {
   })
 
   it('renvoie le fallback sur null/undefined/empty/invalide', () => {
-    expect(formatDate(null, 'fr-FR')).toBe('—')
-    expect(formatDate(undefined, 'fr-FR')).toBe('—')
-    expect(formatDate('', 'fr-FR')).toBe('—')
-    expect(formatDate('not-a-date', 'fr-FR')).toBe('—')
+    expect(formatDate(null, 'en-US')).toBe('—')
+    expect(formatDate(undefined, 'en-US')).toBe('—')
+    expect(formatDate('', 'en-US')).toBe('—')
+    expect(formatDate('not-a-date', 'en-US')).toBe('—')
   })
 
   it('respecte un fallback custom', () => {
-    expect(formatDate(null, 'fr-FR', undefined, 'N/A')).toBe('N/A')
+    expect(formatDate(null, 'en-US', undefined, 'N/A')).toBe('N/A')
   })
 })
 
 describe('formatDateRange', () => {
+  // Noon UTC keeps every date on the same calendar day in any runner time zone within
+  // ±11 h; a bare 'YYYY-MM-DD' is UTC midnight and shows the previous day west of UTC.
   it('factorise mois/année quand la période est dans le même mois (année incluse)', () => {
-    const r = formatDateRange('2025-03-03', '2025-03-12', 'fr-FR')
-    expect(r).toMatch(/mars/i)
+    const r = formatDateRange('2025-03-03T12:00:00Z', '2025-03-12T12:00:00Z', 'en-US')
+    expect(r).toMatch(/Mar/)
     expect(r).toMatch(/2025/)
     expect(r).toMatch(/3/)
     expect(r).toMatch(/12/)
-    // Année factorisée : une seule occurrence de "2025".
+    // Year factored out: a single occurrence of "2025".
     expect(r.match(/2025/g)?.length).toBe(1)
   })
 
   it('affiche les deux années quand elles diffèrent', () => {
-    const r = formatDateRange('2024-03-03', '2025-01-12', 'fr-FR')
+    const r = formatDateRange('2024-03-03T12:00:00Z', '2025-01-12T12:00:00Z', 'en-US')
     expect(r).toMatch(/2024/)
     expect(r).toMatch(/2025/)
   })
 
   it('date simple si end absent, égal à start, ou invalide', () => {
-    const single = formatDateRange('2025-03-03', null, 'fr-FR')
-    expect(single).toMatch(/mars/i)
+    const single = formatDateRange('2025-03-03T12:00:00Z', null, 'en-US')
+    expect(single).toMatch(/Mar/)
     expect(single).toMatch(/2025/)
-    expect(formatDateRange('2025-03-03', '2025-03-03', 'fr-FR')).toBe(single)
-    expect(formatDateRange('2025-03-03', 'not-a-date', 'fr-FR')).toBe(single)
+    expect(formatDateRange('2025-03-03T12:00:00Z', '2025-03-03T12:00:00Z', 'en-US')).toBe(single)
+    expect(formatDateRange('2025-03-03T12:00:00Z', 'not-a-date', 'en-US')).toBe(single)
   })
 
   it('renvoie le fallback sur start invalide', () => {
-    expect(formatDateRange(null, '2025-03-12', 'fr-FR')).toBe('—')
-    expect(formatDateRange('', null, 'fr-FR')).toBe('—')
-    expect(formatDateRange('not-a-date', null, 'fr-FR')).toBe('—')
-    expect(formatDateRange(null, null, 'fr-FR', 'N/A')).toBe('N/A')
+    expect(formatDateRange(null, '2025-03-12', 'en-US')).toBe('—')
+    expect(formatDateRange('', null, 'en-US')).toBe('—')
+    expect(formatDateRange('not-a-date', null, 'en-US')).toBe('—')
+    expect(formatDateRange(null, null, 'en-US', 'N/A')).toBe('N/A')
   })
 })
 
 describe('formatDateShort', () => {
-  it('format DD/MM FR', () => {
-    expect(formatDateShort('2026-04-29')).toMatch(/29\/04/)
+  it('MM/DD format', () => {
+    // Noon UTC stays on the same calendar day in every runner time zone within ±11 h.
+    expect(formatDateShort('2026-04-29T12:00:00Z')).toMatch(/04\/29/)
   })
 })
 
 describe('formatDateTime', () => {
   it('format date+time selon la locale', () => {
-    const result = formatDateTime('2026-04-29T12:00:00Z', 'fr-FR')
-    // Doit contenir une date et une heure
-    expect(result).toMatch(/\d{2}\/\d{2}\/\d{4}/)
+    const result = formatDateTime('2026-04-29T12:00:00Z', 'en-US')
+    // Must contain a date and a time
+    expect(result).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/)
+    expect(result).toMatch(/\d{1,2}:\d{2}/)
   })
 
   it('fallback sur null', () => {
-    expect(formatDateTime(null, 'fr-FR')).toBe('—')
+    expect(formatDateTime(null, 'en-US')).toBe('—')
   })
 })
 
 describe('formatNumber', () => {
-  it('format avec séparateurs FR', () => {
-    expect(formatNumber(12345, 'fr-FR', 0)).toMatch(/12.345/)
-    expect(formatNumber(12345.6, 'fr-FR', 1)).toMatch(/12.345,6/)
-  })
-
   it('format avec séparateurs EN', () => {
     expect(formatNumber(12345, 'en-US', 0)).toBe('12,345')
+    expect(formatNumber(12345.6, 'en-US', 1)).toBe('12,345.6')
   })
 
   it('fallback sur null/NaN', () => {
-    expect(formatNumber(null, 'fr-FR')).toBe('—')
-    expect(formatNumber(NaN, 'fr-FR')).toBe('—')
+    expect(formatNumber(null, 'en-US')).toBe('—')
+    expect(formatNumber(NaN, 'en-US')).toBe('—')
   })
 })
 
@@ -131,17 +131,16 @@ describe('formatNumberFixed', () => {
 
 describe('formatRatio / formatKDA', () => {
   it('2 décimales locale-sensitive', () => {
-    expect(formatRatio(2.345, 'fr-FR')).toMatch(/2,35/)
     expect(formatRatio(2.345, 'en-US')).toBe('2.35')
   })
 
   it('formatKDA est un alias de formatRatio', () => {
-    expect(formatKDA(2.345, 'fr-FR')).toBe(formatRatio(2.345, 'fr-FR'))
+    expect(formatKDA(2.345, 'en-US')).toBe(formatRatio(2.345, 'en-US'))
   })
 
   it('fallback sur null', () => {
-    expect(formatRatio(null, 'fr-FR')).toBe('—')
-    expect(formatKDA(null, 'fr-FR')).toBe('—')
+    expect(formatRatio(null, 'en-US')).toBe('—')
+    expect(formatKDA(null, 'en-US')).toBe('—')
   })
 })
 

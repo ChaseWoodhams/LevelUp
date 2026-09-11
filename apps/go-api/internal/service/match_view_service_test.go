@@ -109,27 +109,27 @@ func (m *mockMatchViewRepo) GetMatchSharedCSRs(_ context.Context, _ string) (map
 // C'est le test de non-régression principal pour le bug "titre = Forbidden uniquement"
 // (2026-05-09) où mode_ui était nil faute de lookup mode_name_tr.
 func TestMatchViewService_LocalisationFR_ModeMapPlaylistTraduits(t *testing.T) {
-	modeFR, mapFR, plFR := "Capture du drapeau", "Forbidden", "Partie rapide"
+	modeEN, mapEN, plEN := "Capture the Flag", "Forbidden", "Quick Play"
 	repo := &mockMatchViewRepo{
 		meta: &domain.MatchMetaRaw{
-			MatchID:        "m-fr",
-			ModeNameFR:     &modeFR,
-			MapNameFR:      &mapFR,
-			PlaylistNameFR: &plFR,
+			MatchID:      "m-fr",
+			PairName:     &modeEN,
+			MapName:      &mapEN,
+			PlaylistName: &plEN,
 		},
 	}
 	resp, err := NewMatchViewService(repo, "x").GetMatchView(context.Background(), "m-fr")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if resp.Header.ModeUI != "Capture du drapeau" {
-		t.Errorf("ModeUI = %q, want 'Capture du drapeau' (mode_name_tr lookup)", resp.Header.ModeUI)
+	if resp.Header.ModeUI != "Capture the Flag" {
+		t.Errorf("ModeUI = %q, want 'Capture the Flag'", resp.Header.ModeUI)
 	}
 	if resp.Header.MapUI != "Forbidden" {
 		t.Errorf("MapUI = %q, want 'Forbidden' (asset_translations)", resp.Header.MapUI)
 	}
-	if resp.Header.PlaylistLabel != "Partie rapide" {
-		t.Errorf("PlaylistLabel = %q, want 'Partie rapide' (asset_translations)", resp.Header.PlaylistLabel)
+	if resp.Header.PlaylistLabel != "Quick Play" {
+		t.Errorf("PlaylistLabel = %q, want 'Quick Play'", resp.Header.PlaylistLabel)
 	}
 }
 
@@ -176,8 +176,8 @@ func TestMatchViewService_LocalisationFR_ENFallbackSiPasDeFR(t *testing.T) {
 
 // TestMatchViewService_LocalisationFR_FRPrioritaireSurEN : quand MapNameFR et
 // MapName sont tous les deux renseignés, la version FR est utilisée.
-func TestMatchViewService_LocalisationFR_FRPrioritaireSurEN(t *testing.T) {
-	mapEN, mapFR := "Aquarius", "Verseau"
+func TestMatchViewService_EnglishPreferredOverLegacyTranslation(t *testing.T) {
+	mapEN, mapFR := "Aquarius", "Legacy Map"
 	repo := &mockMatchViewRepo{
 		meta: &domain.MatchMetaRaw{
 			MatchID:   "m-fr-pref",
@@ -189,8 +189,8 @@ func TestMatchViewService_LocalisationFR_FRPrioritaireSurEN(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if resp.Header.MapUI != "Verseau" {
-		t.Errorf("MapUI = %q, want 'Verseau' (FR prioritaire sur EN)", resp.Header.MapUI)
+	if resp.Header.MapUI != "Aquarius" {
+		t.Errorf("MapUI = %q, want 'Aquarius'", resp.Header.MapUI)
 	}
 }
 

@@ -5,7 +5,6 @@
 # (internal/games/halo_infinite/replaylabels), jamais a l'execution d'une requete.
 #
 # POURQUOI CE FICHIER EXISTE (lot 3.1/3.2). Ces trois catalogues vivaient EN GO, et deux
-# d'entre eux en FRANCAIS DANS LE CODE — ce qui interdit l'anglais autant qu'un second
 # titre. Pire, les grenades etaient nommees DEUX FOIS et differemment : le rang 2
 # s'affichait « Dynamo » dans les compteurs d'inventaire et « Shock » sur le lancer, sur
 # la MEME fiche (constate sur le film 000d5950). Une seule table, ici.
@@ -29,19 +28,15 @@ schema_version = 1
 # sert aussi bien au compteur porte (Inventory.G) qu'au type d'un lancer (Grenade.rank).
 [[grenades]]
 en = "Frag"
-fr = "Fragmentation"
 
 [[grenades]]
 en = "Plasma"
-fr = "Plasma"
 
 [[grenades]]
 en = "Dynamo"
-fr = "Dynamo"
 
 [[grenades]]
 en = "Spike"
-fr = "Spike"
 
 # Capacites d'armure, par index lu dans le record de biped.
 #
@@ -49,10 +44,10 @@ fr = "Spike"
 # dans le jeu. Un index absent de cette table s'affiche avec son NUMERO — jamais devine,
 # jamais approche par le nom d'une capacite voisine.
 [abilities]
-"3" = { en = "Drop Wall", fr = "mur portatif" }
-"4" = { en = "Grappleshot", fr = "grappin" }
-"5" = { en = "Thruster", fr = "propulseur" }
-"6" = { en = "Threat Sensor", fr = "capteur de menace" }
+"3" = { en = "Drop Wall" }
+"4" = { en = "Grappleshot" }
+"5" = { en = "Thruster" }
+"6" = { en = "Threat Sensor" }
 
 # Effet de rendu d'un tir, par weapon_key (cf. weapon_names.toml pour le nom affiche).
 #

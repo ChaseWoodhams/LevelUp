@@ -40,9 +40,7 @@ type templateEntryTOML struct {
 	EvalType        string  `toml:"eval_type"`
 	ModeFilter      string  `toml:"mode_filter"`
 	LabelEN         string  `toml:"label_en"`
-	LabelFR         string  `toml:"label_fr"`
 	DescriptionEN   string  `toml:"description_en"`
-	DescriptionFR   string  `toml:"description_fr"`
 	NormalTarget    float64 `toml:"normal_target"`
 	HeroicTarget    float64 `toml:"heroic_target"`
 	LegendaryTarget float64 `toml:"legendary_target"`
@@ -62,9 +60,7 @@ type presetsTOML struct {
 type presetArcEntryTOML struct {
 	ID            string                   `toml:"id"`
 	TitleEN       string                   `toml:"title_en"`
-	TitleFR       string                   `toml:"title_fr"`
 	DescriptionEN string                   `toml:"description_en"`
-	DescriptionFR string                   `toml:"description_fr"`
 	Steps         []presetArcStepEntryTOML `toml:"steps"`
 }
 
@@ -107,9 +103,9 @@ func LoadTemplatesFromTOML(ctx context.Context, repo TemplateRepo, path string) 
 			EvalType:        EvalType(t.EvalType),
 			ModeFilter:      defaultStr(t.ModeFilter, "universal"),
 			LabelEN:         t.LabelEN,
-			LabelFR:         t.LabelFR,
+			LabelFR:         t.LabelEN,
 			DescriptionEN:   t.DescriptionEN,
-			DescriptionFR:   t.DescriptionFR,
+			DescriptionFR:   t.DescriptionEN,
 			NormalTarget:    t.NormalTarget,
 			HeroicTarget:    t.HeroicTarget,
 			LegendaryTarget: t.LegendaryTarget,
@@ -149,16 +145,16 @@ func LoadPresetArcsFromTOML(ctx context.Context, repo PresetArcRepo, path string
 	steps := make([]PresetArcStep, 0)
 	now := time.Now().UTC()
 	for _, a := range doc.Arcs {
-		if a.ID == "" || a.TitleEN == "" || a.TitleFR == "" {
-			return 0, fmt.Errorf("preset arc %q: id/title_en/title_fr requis", a.ID)
+		if a.ID == "" || a.TitleEN == "" {
+			return 0, fmt.Errorf("preset arc %q: id/title_en requis", a.ID)
 		}
 		arcs = append(arcs, PresetArc{
 			ID:            a.ID,
 			TitleSlug:     doc.Meta.TitleSlug,
 			TitleEN:       a.TitleEN,
-			TitleFR:       a.TitleFR,
+			TitleFR:       a.TitleEN,
 			DescriptionEN: a.DescriptionEN,
-			DescriptionFR: a.DescriptionFR,
+			DescriptionFR: a.DescriptionEN,
 			SchemaVersion: doc.Meta.SchemaVersion,
 			UpdatedAt:     now,
 		})
@@ -190,8 +186,8 @@ func LoadPresetArcsFromTOML(ctx context.Context, repo PresetArcRepo, path string
 
 // validateTemplateEntry vérifie la cohérence d'un template TOML.
 func validateTemplateEntry(t templateEntryTOML) error {
-	if t.ID == "" || t.Metric == "" || t.LabelEN == "" || t.LabelFR == "" {
-		return fmt.Errorf("id/metric/label_en/label_fr requis")
+	if t.ID == "" || t.Metric == "" || t.LabelEN == "" {
+		return fmt.Errorf("id/metric/label_en requis")
 	}
 	if !Cadence(t.Cadence).Valid() {
 		return fmt.Errorf("cadence invalide: %q", t.Cadence)

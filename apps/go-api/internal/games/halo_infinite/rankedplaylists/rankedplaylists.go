@@ -9,7 +9,7 @@
 // saisons ; seul l'identifiant de saison CSR change (résolu dynamiquement par
 // LevelUp via csr_season_calendars). Le rang par saison se lit ensuite par
 // playlist via l'endpoint skill `/hi/playlist/{id}/csrs?season=` (mécanisme Grunt
-// Skill.GetPlaylistCsr), qui renvoie "Non classé" si la playlist n'a jamais été
+// Skill.GetPlaylistCsr), qui renvoie "Unranked" si la playlist n'a jamais été
 // jouée.
 //
 // Refresh : relancer le fetch métadonnée (cf. cmd de régénération) quand 343

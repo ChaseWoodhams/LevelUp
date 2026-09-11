@@ -76,7 +76,7 @@ func (m *mockCareerRepo) GetCSRSnapshots(_ context.Context, _ string) ([]domain.
 func (m *mockCareerRepo) AvailableCSRSeasons(_ context.Context) ([]domain.CSRSeasonOption, error) {
 	return nil, nil
 }
-func (m *mockCareerRepo) LoadModeTranslationsFR(_ context.Context, _ []string) (map[string]string, error) {
+func (m *mockCareerRepo) LoadModeNames(_ context.Context, _ []string) (map[string]string, error) {
 	return nil, nil
 }
 func (m *mockCareerRepo) LoadPlaylistAssetTranslationsFR(_ context.Context, _ []string) (map[string]string, error) {
@@ -185,7 +185,7 @@ func TestCareerService_GetCareerPage_H5TotalRanks152(t *testing.T) {
 	// s'appliquer à un service titre halo_5. On y met un rank_id 111 avec un libellé
 	// HINF distinct pour prouver l'absence d'écrasement.
 	hinfCatalog := mappings.NewRankCatalog("halo_infinite", []mappings.RankEntry{
-		{ID: 111, Title: map[string]string{"fr": "Cavalier HINF", "en": "HINF Rider"}},
+		{ID: 111, Title: map[string]string{"en": "HINF Rider"}},
 	})
 
 	svc := NewCareerService(&mockCareerRepo{}).
@@ -271,7 +271,7 @@ func TestCareerService_GetCareerPage_HINFCatalogAppliesSameTitle(t *testing.T) {
 
 	rankData := &domain.CareerRankData{RankNumber: 111, RecordedAt: time.Now()}
 	hinfCatalog := mappings.NewRankCatalog("halo_infinite", []mappings.RankEntry{
-		{ID: 111, Title: map[string]string{"fr": "Cavalier HINF", "en": "HINF Rider"}},
+		{ID: 111, Title: map[string]string{"en": "HINF Rider"}},
 	})
 	svc := NewCareerService(&mockCareerRepo{rank: rankData}).
 		WithTitleSlug("halo_infinite").
@@ -281,8 +281,8 @@ func TestCareerService_GetCareerPage_HINFCatalogAppliesSameTitle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetCareerPage: %v", err)
 	}
-	if resp.Summary.RankLabel != "Cavalier HINF" {
-		t.Errorf("RankLabel = %q, want \"Cavalier HINF\" (catalogue même titre doit s'appliquer)", resp.Summary.RankLabel)
+	if resp.Summary.RankLabel != "HINF Rider" {
+		t.Errorf("RankLabel = %q, want \"HINF Rider\" (matching title catalog should apply)", resp.Summary.RankLabel)
 	}
 }
 

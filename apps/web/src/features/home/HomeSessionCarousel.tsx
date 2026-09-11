@@ -13,7 +13,6 @@ import { InfoTooltip } from '@/components/ui/info-tooltip'
 import { OutcomeBar } from '@/components/ui/outcome-bar'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { intlLocale } from '@/lib/formatters'
-import type { ManifestLocale } from '@/lib/i18n/format'
 import { formatMessage } from '@/lib/i18n/format'
 import { commonManifest, type CommonManifestKey } from '@/lib/i18n/generated/common'
 import { homeManifest, type HomeManifestKey } from '@/lib/i18n/generated/home'
@@ -56,7 +55,7 @@ function ChevronDownIcon() {
   )
 }
 
-function formatSessionDate(startedAt: string | null, locale: ManifestLocale): string {
+function formatSessionDate(startedAt: string | null): string {
   if (!startedAt) return ''
   const d = new Date(startedAt)
   const now = new Date()
@@ -65,8 +64,8 @@ function formatSessionDate(startedAt: string | null, locale: ManifestLocale): st
     d < oneYearAgo
       ? { day: 'numeric', month: 'short', year: 'numeric' }
       : { day: 'numeric', month: 'short' }
-  const loc = intlLocale(locale)
-  const sep = locale === 'en' ? ' at ' : ' à '
+  const loc = intlLocale()
+  const sep = ' at '
   return (
     d.toLocaleDateString(loc, dateOpts) +
     sep +
@@ -289,9 +288,9 @@ export function HomeSessionCarousel({
             {/* Date de début + durée */}
             {session.started_at && (
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {formatSessionDate(session.started_at, locale)}
+                {formatSessionDate(session.started_at)}
                 {session.ended_at
-                  ? ` · ${th('home.sessions.duration_prefix')}${locale === 'en' ? ': ' : ' : '}${formatSessionDuration(session.started_at, session.ended_at)}`
+                  ? ` · ${th('home.sessions.duration_prefix')}: ${formatSessionDuration(session.started_at, session.ended_at)}`
                   : null}
               </p>
             )}

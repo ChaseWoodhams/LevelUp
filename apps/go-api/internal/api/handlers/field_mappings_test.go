@@ -22,8 +22,8 @@ title_slug     = "test_title"
 schema_version = 1
 
 [fields.kills]
-labels        = { en = "Kills", fr = "Éliminations" }
-description   = { en = "Total kills.", fr = "Total des éliminations." }
+labels        = { en = "Kills" }
+description   = { en = "Total kills." }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -56,7 +56,7 @@ func newHandler(reg FieldMappingsRegistry) *FieldMappingsHandler {
 	return NewFieldMappingsHandler(reg, slog.New(slog.NewJSONHandler(io.Discard, nil)))
 }
 
-func TestFieldMappingsHandler_Success_FR(t *testing.T) {
+func TestFieldMappingsHandler_Success_EN(t *testing.T) {
 	t.Parallel()
 	stub := &stubRegistry{set: mustLoad(t)}
 	h := newHandler(stub)
@@ -64,7 +64,7 @@ func TestFieldMappingsHandler_Success_FR(t *testing.T) {
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(sub chi.Router) { h.Mount(sub) })
 
-	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings?locale=fr", nil)
+	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -92,11 +92,11 @@ func TestFieldMappingsHandler_Success_FR(t *testing.T) {
 		t.Errorf("schema_version = %d", body.SchemaVersion)
 	}
 	kills := body.Fields["kills"]
-	if kills.Label != "Éliminations" {
-		t.Errorf("kills FR label = %q", kills.Label)
+	if kills.Label != "Kills" {
+		t.Errorf("kills English label = %q", kills.Label)
 	}
-	if kills.Description != "Total des éliminations." {
-		t.Errorf("kills FR description = %q", kills.Description)
+	if kills.Description != "Total kills." {
+		t.Errorf("kills English description = %q", kills.Description)
 	}
 }
 
@@ -108,7 +108,7 @@ func TestFieldMappingsHandler_FallbackEN_OnUnknownLocale(t *testing.T) {
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(sub chi.Router) { h.Mount(sub) })
 
-	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings?locale=es", nil)
+	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -179,11 +179,11 @@ title_slug     = "test_title"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 50
 
 [assets.season.season6]
-labels = { en = "Spirit of Fire", fr = "Spirit of Fire" }
+labels = { en = "Spirit of Fire" }
 display_order = 60
 start_date = "2024-03-19T00:00:00Z"
 end_date   = "2024-06-18T00:00:00Z"
@@ -207,7 +207,7 @@ func TestFieldMappingsHandler_SeasonAssetIncludesDates(t *testing.T) {
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(sub chi.Router) { h.Mount(sub) })
 
-	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings?locale=fr", nil)
+	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -287,7 +287,6 @@ func (f *fakeSeasonsCatalog) Load(_ context.Context, _ string) []SeasonCatalogEn
 
 func TestFieldMappingsHandler_SeasonsCatalog_OverridesTOMLBucket(t *testing.T) {
 	t.Parallel()
-	// TOML : season6 (FR : "Spirit of Fire")
 	// Catalog (TOML+DB merged) : season6 (DB-fresh dates) + season14 (DB-only "Skyfall")
 	// Le handler doit retourner les 2 dans assets.season, avec les dates et
 	// labels du catalog (qui sont la source de vérité).
@@ -358,8 +357,8 @@ func TestFieldMappingsHandler_SeasonsCatalog_OverridesTOMLBucket(t *testing.T) {
 		t.Errorf("season14 end_date = %v, want nil (saison ouverte)", s14.EndDate)
 	}
 
-	// Les autres kinds (mode.ranked) restent intacts (fallback FR par défaut).
-	if body.Assets["mode"]["ranked"].Label != "Classé" {
+	// Les autres kinds (mode.ranked) restent intacts (English default).
+	if body.Assets["mode"]["ranked"].Label != "Ranked" {
 		t.Errorf("mode.ranked label perdu : %v", body.Assets["mode"]["ranked"])
 	}
 }
@@ -375,7 +374,7 @@ func TestFieldMappingsHandler_SeasonsCatalogEmpty_FallsBackToTOML(t *testing.T) 
 	r := chi.NewRouter()
 	r.Route("/api/v1", func(sub chi.Router) { h.Mount(sub) })
 
-	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings?locale=fr", nil)
+	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -388,52 +387,35 @@ func TestFieldMappingsHandler_SeasonsCatalogEmpty_FallsBackToTOML(t *testing.T) 
 	}
 }
 
-// TestFieldMappingsHandler_SeasonsCatalog_LocaleAware prouve GH3-1 : la liste
-// des saisons de la SaisonPill suit la locale de requête. season2 a des libellés
-// distincts (FR "Loups solitaires" / EN "Lone Wolves") ; le bucket season doit
-// servir le bon selon ?locale=. Une saison DB-only sans traduction (LabelEN vide)
-// garde son Name brut dans les deux locales.
-func TestFieldMappingsHandler_SeasonsCatalog_LocaleAware(t *testing.T) {
+// TestFieldMappingsHandler_SeasonsCatalog_UsesEnglishLabels verifies the fixed response locale.
+func TestFieldMappingsHandler_SeasonsCatalog_UsesEnglishLabels(t *testing.T) {
 	t.Parallel()
 	start := time.Date(2022, 5, 3, 0, 0, 0, 0, time.UTC)
 	dbOnlyStart := time.Date(2026, 4, 15, 0, 0, 0, 0, time.UTC)
 	catalog := &fakeSeasonsCatalog{
 		entries: []SeasonCatalogEntry{
-			{ID: "season2", Label: "Loups solitaires", LabelEN: "Lone Wolves", Start: start, DisplayOrder: 20},
-			// DB-only : pas de traduction → même Name FR et EN.
+			{ID: "season2", Label: "Lone Wolves", LabelEN: "Lone Wolves", Start: start, DisplayOrder: 20},
 			{ID: "season14", Label: "Skyfall", LabelEN: "Skyfall", Start: dbOnlyStart, DisplayOrder: 70},
 		},
 	}
-
-	load := func(locale string) map[string]assetMappingDTO {
-		t.Helper()
-		stub := &stubRegistry{set: mustLoad(t), assets: mustLoadAssets(t)}
-		h := newHandler(stub).WithSeasonsCatalog(catalog)
-		r := chi.NewRouter()
-		r.Route("/api/v1", func(sub chi.Router) { h.Mount(sub) })
-		req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings?locale="+locale, nil)
-		w := httptest.NewRecorder()
-		r.ServeHTTP(w, req)
-		if w.Code != http.StatusOK {
-			t.Fatalf("locale=%s status = %d, body=%s", locale, w.Code, w.Body.String())
-		}
-		var body fieldMappingsResponse
-		if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
-			t.Fatalf("locale=%s unmarshal: %v", locale, err)
-		}
-		return body.Assets["season"]
+	stub := &stubRegistry{set: mustLoad(t), assets: mustLoadAssets(t)}
+	h := newHandler(stub).WithSeasonsCatalog(catalog)
+	r := chi.NewRouter()
+	r.Route("/api/v1", func(sub chi.Router) { h.Mount(sub) })
+	req := httptest.NewRequest("GET", "/api/v1/titles/test_title/field-mappings", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, body=%s", w.Code, w.Body.String())
 	}
-
-	fr := load("fr")
-	if fr["season2"].Label != "Loups solitaires" {
-		t.Errorf("FR season2 label = %q, want Loups solitaires", fr["season2"].Label)
+	var body fieldMappingsResponse
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal: %v", err)
 	}
-	en := load("en")
-	if en["season2"].Label != "Lone Wolves" {
-		t.Errorf("EN season2 label = %q, want Lone Wolves (jamais le FR sous EN)", en["season2"].Label)
+	if body.Assets["season"]["season2"].Label != "Lone Wolves" {
+		t.Errorf("season2 label = %q, want Lone Wolves", body.Assets["season"]["season2"].Label)
 	}
-	// DB-only : identique dans les deux locales.
-	if fr["season14"].Label != "Skyfall" || en["season14"].Label != "Skyfall" {
-		t.Errorf("season14 DB-only label FR=%q EN=%q, want Skyfall/Skyfall", fr["season14"].Label, en["season14"].Label)
+	if body.Assets["season"]["season14"].Label != "Skyfall" {
+		t.Errorf("season14 label = %q, want Skyfall", body.Assets["season"]["season14"].Label)
 	}
 }

@@ -25,15 +25,15 @@ export function resolveSkillPeakState(
     if (remaining > 0) {
       const total = peak.placement_total ?? 10
       const completed = Math.max(0, Math.min(total - 1, total - remaining))
-      if (completed === 0) return { state: 'placement', detail: 'Non classé' }
+      if (completed === 0) return { state: 'placement', detail: 'Unranked' }
       return { state: 'placement', detail: `En placement (${completed}/${total})` }
     }
     return { state: 'value', detail: '' }
   }
   if (hasHistory) {
     return mode === 'ranked'
-      ? { state: 'placement', detail: 'En placement' }
-      : { state: 'neutral', detail: 'Sans classement' }
+      ? { state: 'placement', detail: 'Placement' }
+      : { state: 'neutral', detail: 'Unranked' }
   }
-  return { state: 'absent', detail: 'Non classé' }
+  return { state: 'absent', detail: 'Unranked' }
 }

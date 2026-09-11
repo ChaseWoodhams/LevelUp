@@ -89,7 +89,7 @@ func BuildDemoRouter(ctx context.Context, opts Options) (http.Handler, *huma.Ope
 		// Secret par défaut → isProduction=false (cookies non Secure, cf. NewRouter).
 		SessionSecret:   "CHANGE_ME_IN_PRODUCTION", // pragma: allowlist secret
 		CORSOrigins:     []string{},
-		Lang:            "fr",
+		Lang:            "en",
 		PrestigeEnabled: opts.Prestige,
 	}
 

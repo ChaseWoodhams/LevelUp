@@ -44,7 +44,7 @@ export function InvariantsSection() {
           {data?.generated_at && (
             <p className="text-xs text-muted-foreground">
               {t('common.admin.invariants_generated_at')}{' '}
-              {new Date(data.generated_at).toLocaleString(intlLocale(locale))}
+              {new Date(data.generated_at).toLocaleString(intlLocale())}
             </p>
           )}
         </div>

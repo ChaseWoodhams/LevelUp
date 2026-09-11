@@ -70,9 +70,9 @@ SELECT
     p1.match_id,
     ` + StartTimeCanonicalSQL("r") + ` AS start_time,
     COALESCE(r.map_name, '')                                     AS map_name,
-    COALESCE(r.map_name_fr, r.map_name, '')                      AS map_ui,
+    COALESCE(r.map_name, '')                      AS map_ui,
     COALESCE(r.pair_name, '')                                    AS pair_name,
-    COALESCE(r.playlist_name_fr, r.playlist_name, '')            AS playlist_name,
+    COALESCE(r.playlist_name, '')            AS playlist_name,
     COALESCE(r.is_firefight, FALSE)                              AS is_firefight,
     COALESCE(r.is_ranked, FALSE)                                 AS is_ranked,
     COALESCE(p1.outcome, 0)                                      AS outcome,
@@ -114,7 +114,7 @@ SELECT
     -- pair_name_fr brut + pair_id : alimentent la cascade canonique de
     -- résolution du mode FR (asset_translations[pair] + mode_name_tr), comme
     -- l'historique des matchs. Sans eux, un pair_name=UUID fuirait à l'UI.
-    COALESCE(r.pair_name_fr, '')                                         AS pair_name_fr,
+    COALESCE(r.pair_name, '')                                            AS pair_name_fr,
     COALESCE(r.pair_id, '')                                              AS pair_id,
     -- game_variant_id : source du mode pour les titres SANS pair_name (Halo 5 :
     -- pair_name/pair_id vides mais game_variant_id peuplé). Résolu read-time via
@@ -140,7 +140,7 @@ var Q31TeammateMatches = `
 SELECT
     p.match_id,
     ` + StartTimeCanonicalSQL("r") + ` AS start_time,
-    COALESCE(r.map_name_fr, r.map_name, '')                      AS map_ui,
+    COALESCE(r.map_name, '')                      AS map_ui,
     COALESCE(r.pair_name, '')                                    AS pair_name,
     COALESCE(p.outcome, 0)                                       AS outcome,
     COALESCE(p.kills, 0)                                         AS kills,
@@ -243,8 +243,8 @@ WHERE p.match_id IN (%s)`
 // Paramètre : ?1 = xuid du joueur.
 const Q33SynthesisHeatmap = `
 SELECT
-    COALESCE(r.map_name_fr, r.map_name, 'Unknown')    AS map_name,
-    COALESCE(r.pair_name_fr, r.pair_name, 'Unknown')  AS mode_name,
+    COALESCE(r.map_name, 'Unknown')    AS map_name,
+    COALESCE(r.pair_name, 'Unknown')  AS mode_name,
     COUNT(DISTINCT p.match_id)                         AS match_count,
     SUM(CASE WHEN %s THEN 1 ELSE 0 END)    AS wins
 FROM match_participants p

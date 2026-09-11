@@ -51,7 +51,7 @@ describe('SetupPage', () => {
 
   it('affiche le spinner tant que le bootstrap n’est pas terminé', () => {
     renderWithProviders(<SetupPage />)
-    expect(screen.getByText(/Vérification de la configuration/i)).toBeInTheDocument()
+    expect(screen.getByText(/Checking configuration…/i)).toBeInTheDocument()
   })
 
   it('affiche l’étape de connexion Microsoft quand setupState=no_halo_link', async () => {
@@ -63,7 +63,7 @@ describe('SetupPage', () => {
 
     renderWithProviders(<SetupPage />)
     await waitFor(() => {
-      expect(screen.getByText(/Connexion Microsoft/i)).toBeInTheDocument()
+      expect(screen.getByText(/Microsoft Sign-In/i)).toBeInTheDocument()
     })
   })
 
@@ -101,9 +101,9 @@ describe('SetupPage', () => {
     renderWithProviders(<SetupPage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Impossible de démarrer la connexion Microsoft/i)).toBeInTheDocument()
+      expect(screen.getByText(/Unable to start Microsoft sign-in\. Please try again\./i)).toBeInTheDocument()
     })
-    expect(screen.getByRole('button', { name: /Réessayer/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Retry/i })).toBeInTheDocument()
     // Le spinner de démarrage ne doit plus être présent.
     expect(screen.queryByText(/Démarrage du Device Code Flow/i)).not.toBeInTheDocument()
   })

@@ -20,7 +20,7 @@ export function makeCategoricalScale<K extends string>(
 
     log.error(
       `categorical:unknown:${scaleKey}:${key}`,
-      `categoricalScale : clé inconnue "${key}". Clés valides : ${knownKeys.join(', ')}`,
+      `categoricalScale: unknown key "${key}". Valid keys: ${knownKeys.join(', ')}`,
     )
     return null
   }

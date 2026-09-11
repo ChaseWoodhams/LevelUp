@@ -65,9 +65,7 @@ func run(dbPath string) error {
 			eval_type           VARCHAR NOT NULL,
 			mode_filter         VARCHAR NOT NULL DEFAULT 'universal',
 			label_en            VARCHAR NOT NULL,
-			label_fr            VARCHAR NOT NULL,
 			description_en      VARCHAR,
-			description_fr      VARCHAR,
 			normal_target       DOUBLE NOT NULL,
 			heroic_target       DOUBLE NOT NULL,
 			legendary_target    DOUBLE NOT NULL,
@@ -79,6 +77,14 @@ func run(dbPath string) error {
 			`CREATE INDEX idx_ctmpl_title_cadence ON challenge_template(title_slug, cadence)`,
 			`CREATE INDEX idx_ctmpl_metric ON challenge_template(metric)`,
 		},
+		insertSQL: `INSERT INTO challenge_template
+			(id, title_slug, metric, window_type, window_value, cadence, eval_type, mode_filter,
+			 label_en, description_en, normal_target, heroic_target, legendary_target, mythic_target,
+			 schema_version, updated_at)
+			SELECT id, title_slug, metric, window_type, window_value, cadence, eval_type, mode_filter,
+			 COALESCE(label_en, ''), COALESCE(description_en, ''),
+			 normal_target, heroic_target, legendary_target, mythic_target, schema_version, updated_at
+			FROM challenge_template_repair_tmp`,
 	}); err != nil {
 		return fmt.Errorf("challenge_template: %w", err)
 	}
@@ -109,15 +115,18 @@ func run(dbPath string) error {
 			id              VARCHAR PRIMARY KEY,
 			title_slug      VARCHAR NOT NULL,
 			title_en        VARCHAR NOT NULL,
-			title_fr        VARCHAR NOT NULL,
 			description_en  VARCHAR,
-			description_fr  VARCHAR,
 			schema_version  INTEGER NOT NULL DEFAULT 1,
 			updated_at      TIMESTAMP DEFAULT CAST(now() AT TIME ZONE 'UTC' AS TIMESTAMP)
 		)`,
 		indexSQL: []string{
 			`CREATE INDEX idx_parc_title ON preset_arc(title_slug)`,
 		},
+		insertSQL: `INSERT INTO preset_arc
+			(id, title_slug, title_en, description_en, schema_version, updated_at)
+			SELECT id, title_slug, COALESCE(title_en, ''),
+			 COALESCE(description_en, ''), schema_version, updated_at
+			FROM preset_arc_repair_tmp`,
 	}); err != nil {
 		return fmt.Errorf("preset_arc: %w", err)
 	}
@@ -130,6 +139,7 @@ type repairSpec struct {
 	tempTable string
 	createSQL string
 	indexSQL  []string
+	insertSQL string
 }
 
 func repairTable(ctx context.Context, db *sql.DB, spec repairSpec) error {
@@ -165,7 +175,11 @@ func repairTable(ctx context.Context, db *sql.DB, spec repairSpec) error {
 	}
 
 	// 4. Réinsérer les données
-	if err := exec(fmt.Sprintf(`INSERT INTO %s SELECT * FROM %s`, spec.table, spec.tempTable)); err != nil {
+	insertSQL := spec.insertSQL
+	if insertSQL == "" {
+		insertSQL = fmt.Sprintf(`INSERT INTO %s SELECT * FROM %s`, spec.table, spec.tempTable)
+	}
+	if err := exec(insertSQL); err != nil {
 		return fmt.Errorf("reinsert data: %w", err)
 	}
 	slog.Info("data restored", "table", spec.table, "rows", count)

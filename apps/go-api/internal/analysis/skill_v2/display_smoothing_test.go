@@ -116,16 +116,16 @@ func TestFormatTierSubLabel(t *testing.T) {
 			plat = b
 		}
 	}
-	if got := FormatTierSubLabel(gold, 3); got != "Or III" {
-		t.Errorf("Or III : got %q", got)
+	if got := FormatTierSubLabel(gold, 3); got != "Gold III" {
+		t.Errorf("Gold III: got %q", got)
 	}
-	if got := FormatTierSubLabel(plat, 2); got != "Platine II" {
-		t.Errorf("Platine II : got %q", got)
+	if got := FormatTierSubLabel(plat, 2); got != "Platinum II" {
+		t.Errorf("Platinum II: got %q", got)
 	}
 	if got := FormatTierSubLabel(onyx, 0); got != "Onyx" {
 		t.Errorf("Onyx : got %q", got)
 	}
-	if got := FormatTierSubLabel(TierBoundary{}, 1); got != "Non classé" {
+	if got := FormatTierSubLabel(TierBoundary{}, 1); got != "Unranked" {
 		t.Errorf("tier vide : got %q", got)
 	}
 }

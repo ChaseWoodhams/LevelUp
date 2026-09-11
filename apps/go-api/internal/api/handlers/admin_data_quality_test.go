@@ -45,17 +45,17 @@ func dqPostJSON(path, body string) *http.Request {
 func newDQHandler(t *testing.T) *AdminDataQualityHandler {
 	t.Helper()
 	return NewAdminDataQualityHandler(
-		func(_ context.Context, titleSlug, locale string) (domain.AdminDataQualityCounts, error) {
-			return domain.AdminDataQualityCounts{TitleSlug: titleSlug, Locale: locale, RawUUIDTotal: 3}, nil
+		func(_ context.Context, titleSlug string) (domain.AdminDataQualityCounts, error) {
+			return domain.AdminDataQualityCounts{TitleSlug: titleSlug, RawUUIDTotal: 3}, nil
 		},
-		func(_ context.Context, titleSlug, kind, locale string, limit, offset int) (domain.AdminDataQualityIssues, error) {
+		func(_ context.Context, titleSlug, kind string, limit, offset int) (domain.AdminDataQualityIssues, error) {
 			if limit > 500 {
 				t.Errorf("limit non clampé : %d", limit)
 			}
 			if offset < 0 {
 				t.Errorf("offset négatif non normalisé : %d", offset)
 			}
-			return domain.AdminDataQualityIssues{TitleSlug: titleSlug, Kind: kind, Locale: locale, Total: 1,
+			return domain.AdminDataQualityIssues{TitleSlug: titleSlug, Kind: kind, Total: 1,
 				Items: []domain.AdminDataQualityIssue{{Kind: "untranslated_mode", ID: "Husky Raid CTF", Occurrences: 4}}}, nil
 		},
 		func(_ context.Context, _ string, dryRun bool) (domain.RegistryNamesBackfillResult, error) {
@@ -64,11 +64,11 @@ func newDQHandler(t *testing.T) *AdminDataQualityHandler {
 			}
 			return domain.RegistryNamesBackfillResult{}, errBusySentinel
 		},
-		func(_ context.Context, _, modeEN, nameFR string) (domain.ResolveResult, error) {
+		func(_ context.Context, _, modeEN, nameEN string) (domain.ResolveResult, error) {
 			return domain.ResolveResult{Action: "created", ModeEN: modeEN}, nil
 		},
 		func(_ context.Context, _ string, req domain.AssetTranslationRequest) (domain.ResolveResult, error) {
-			return domain.ResolveResult{Action: "created", Langs: []string{"fr-FR"}}, nil
+			return domain.ResolveResult{Action: "created", Langs: []string{"en-US"}}, nil
 		},
 		func(_ context.Context, _ string) (domain.CatalogRefreshResult, error) {
 			return domain.CatalogRefreshResult{Playlists: 5}, nil
@@ -140,33 +140,6 @@ func TestAdminDQ_GetIssues_KindValidation(t *testing.T) {
 	}
 }
 
-// TestAdminDQ_LocaleParam : le paramètre ?locale= est normalisé (trim/minuscule,
-// défaut « fr ») et transmis aux runners counts + issues (échoté dans le payload
-// pour un libellé front honnête).
-func TestAdminDQ_LocaleParam(t *testing.T) {
-	h := newDQHandler(t)
-
-	// Issues sans locale → défaut « fr ».
-	rec := serveAdminDataQuality(h, httptest.NewRequest(http.MethodGet, "/admin/monitoring/data-quality/issues?kind=untranslated_modes", nil))
-	var iss domain.AdminDataQualityIssues
-	if err := json.Unmarshal(rec.Body.Bytes(), &iss); err != nil || iss.Locale != "fr" {
-		t.Fatalf("issues locale défaut = %q err=%v (attendu fr)", iss.Locale, err)
-	}
-
-	// Issues ?locale=EN → normalisé « en ».
-	rec = serveAdminDataQuality(h, httptest.NewRequest(http.MethodGet, "/admin/monitoring/data-quality/issues?kind=untranslated_modes&locale=EN", nil))
-	if err := json.Unmarshal(rec.Body.Bytes(), &iss); err != nil || iss.Locale != "en" {
-		t.Fatalf("issues locale = %q err=%v (attendu en)", iss.Locale, err)
-	}
-
-	// Counts ?locale= vide → défaut « fr ».
-	rec = serveAdminDataQuality(h, httptest.NewRequest(http.MethodGet, "/admin/monitoring/data-quality", nil))
-	var cnt domain.AdminDataQualityCounts
-	if err := json.Unmarshal(rec.Body.Bytes(), &cnt); err != nil || cnt.Locale != "fr" {
-		t.Fatalf("counts locale défaut = %q err=%v (attendu fr)", cnt.Locale, err)
-	}
-}
-
 // TestAdminDQ_RegistryNames_DryRunAndBusy : dry-run → 200 compteurs ; runner
 // busy (sentinelle) → 409 enveloppe already_running.
 func TestAdminDQ_RegistryNames_DryRunAndBusy(t *testing.T) {
@@ -193,20 +166,20 @@ func TestAdminDQ_Translations_Validation(t *testing.T) {
 	h := newDQHandler(t)
 
 	rec := serveAdminDataQuality(h, dqPostJSON("/admin/actions/translations/mode",
-		`{"mode_en": "", "name_fr": "Assassin"}`))
+		`{"mode_en": "", "name_en": "Assassin"}`))
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("mode_en vide : status=%d (attendu 400)", rec.Code)
 	}
 
 	long := strings.Repeat("x", 200)
 	rec = serveAdminDataQuality(h, dqPostJSON("/admin/actions/translations/mode",
-		`{"mode_en": "Slayer", "name_fr": "`+long+`"}`))
+		`{"mode_en": "Slayer", "name_en": "`+long+`"}`))
 	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("name_fr trop long : status=%d (attendu 400)", rec.Code)
+		t.Fatalf("name_en trop long : status=%d (attendu 400)", rec.Code)
 	}
 
 	rec = serveAdminDataQuality(h, dqPostJSON("/admin/actions/translations/mode",
-		`{"mode_en": "Slayer", "name_fr": "Assassin"}`))
+		`{"mode_en": "Slayer", "name_en": "Assassin"}`))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("valide : status=%d (attendu 200)", rec.Code)
 	}
@@ -218,7 +191,7 @@ func TestAdminDQ_Translations_Validation(t *testing.T) {
 		t.Fatalf("asset sans nom : status=%d (attendu 400)", rec.Code)
 	}
 	rec = serveAdminDataQuality(h, dqPostJSON("/admin/actions/translations/asset",
-		`{"asset_kind": "pair", "asset_id": "p-1", "name_fr": "Fiesta"}`))
+		`{"asset_kind": "pair", "asset_id": "p-1", "name_en": "Fiesta"}`))
 	if rec.Code != http.StatusOK {
 		t.Fatalf("asset valide : status=%d (attendu 200)", rec.Code)
 	}

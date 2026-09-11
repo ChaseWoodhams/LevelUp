@@ -231,7 +231,7 @@ title_slug = "synthetic_title_b"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Competitive", fr = "Compétitif" }
+labels = { en = "Competitive" }
 display_order = 10
 `)
 	assets, err := mappings.LoadAssetsFromBytes("synth_assets.toml", assetsToml)
@@ -245,7 +245,7 @@ title_slug = "synthetic_title_b"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Victory", fr = "Triomphe" }
+labels = { en = "Victory" }
 color_token = "outcome.positive"
 `)
 	outcomes, err := mappings.LoadOutcomesFromBytes("synth_outcomes.toml", outcomesToml)
@@ -261,15 +261,15 @@ color_token = "outcome.positive"
 		t.Error("Outcomes() doit pointer sur le set injecté")
 	}
 
-	// Libellés divergents préservés (titre B != HI).
+	// The title-specific English labels are preserved.
 	if got, ok := a.Assets().Get("mode", "ranked"); ok {
-		if lbl, _ := got.Label("fr"); lbl != "Compétitif" {
-			t.Errorf("titre B mode.ranked fr = %q, want Compétitif", lbl)
+		if lbl, _ := got.Label("en"); lbl != "Competitive" {
+			t.Errorf("title B mode.ranked en = %q, want Competitive", lbl)
 		}
 	}
 	if got, ok := a.Outcomes().Get("win"); ok {
-		if lbl, _ := got.Label("fr"); lbl != "Triomphe" {
-			t.Errorf("titre B outcome.win fr = %q, want Triomphe", lbl)
+		if lbl, _ := got.Label("en"); lbl != "Victory" {
+			t.Errorf("title B outcome.win en = %q, want Victory", lbl)
 		}
 	}
 }

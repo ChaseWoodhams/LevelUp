@@ -21,11 +21,7 @@ var fixtureAchievementsEN = []PlayerAchievementRaw{
 	{ID: "3", Name: "Legendary", Description: "Complete the campaign on Legendary", Gamerscore: 50, CurrentProgress: 2, TargetProgress: 4},
 }
 
-var fixtureAchievementsFR = []PlayerAchievementRaw{
-	{ID: "1", Name: "Premiers pas", Description: "Gagnez votre premier match"},
-	{ID: "2", Name: "Tireur d'élite", Description: "Tuez 10 ennemis avec des armes de précision"},
-	// ID "3" absent en FR → name_fr sera vide
-}
+var fixtureAchievementsFR = []PlayerAchievementRaw{}
 
 // ---------------------------------------------------------------------------
 // Tests unitaires (merge bilingue)
@@ -46,20 +42,20 @@ func TestMergeAchievements_BilingualMerge(t *testing.T) {
 	if a1.NameEN != "First Steps" {
 		t.Errorf("NameEN attendu 'First Steps', obtenu %q", a1.NameEN)
 	}
-	if a1.NameFR != "Premiers pas" {
-		t.Errorf("NameFR attendu 'Premiers pas', obtenu %q", a1.NameFR)
+	if a1.NameFR != "First Steps" {
+		t.Errorf("legacy NameFR should mirror English, got %q", a1.NameFR)
 	}
 	if !a1.Unlocked {
 		t.Error("Unlocked attendu true pour ID 1")
 	}
 
-	// ID "3" : absent en FR → name_fr vide
+	// Legacy columns mirror English even when no second payload is provided.
 	a3 := findAchievementByID(merged, "3")
 	if a3 == nil {
 		t.Fatal("achievement ID 3 manquant")
 	}
-	if a3.NameFR != "" {
-		t.Errorf("NameFR attendu '' pour ID 3, obtenu %q", a3.NameFR)
+	if a3.NameFR != "Legendary" {
+		t.Errorf("legacy NameFR should mirror English, got %q", a3.NameFR)
 	}
 	if a3.CurrentProgress != 2 || a3.TargetProgress != 4 {
 		t.Errorf("progression ID 3 attendue (2/4), obtenu (%d/%d)", a3.CurrentProgress, a3.TargetProgress)
@@ -79,8 +75,8 @@ func TestMergeAchievements_EmptyFR_KeepsEN(t *testing.T) {
 		t.Errorf("attendu %d résultats, obtenu %d", len(fixtureAchievementsEN), len(result))
 	}
 	for _, a := range result {
-		if a.NameFR != "" {
-			t.Errorf("NameFR attendu vide, obtenu %q pour ID %s", a.NameFR, a.AchievementID)
+		if a.NameFR != a.NameEN {
+			t.Errorf("legacy NameFR should mirror NameEN for ID %s: %q", a.AchievementID, a.NameFR)
 		}
 	}
 }

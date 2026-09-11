@@ -22,7 +22,6 @@ import (
 
 	"levelup/go-api/internal/analysis"
 	"levelup/go-api/internal/analysis/patterns"
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/games"
 )
 
@@ -87,12 +86,12 @@ func (r *PatternsRepo) ResolveMapLabels(ctx context.Context, mapIDs []string) (m
 	if len(mapIDs) == 0 || r.pdb == nil || r.pdb.Metadata == nil {
 		return nil, nil
 	}
-	langs := PreferredLangsForLocale(ctxkeys.Locale(ctx))
+	langs := PreferredAssetLanguages()
 	return NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(ctx, "map", mapIDs, langs)
 }
 
 // ResolveMapFilterKeys résout les noms de cartes avec une préférence de langue
-// FIXE fr→en (PreferredLangsForLocale("fr")), INDÉPENDANTE de la locale de la
+// FIXE fr→en (PreferredAssetLanguages()), INDÉPENDANTE de la locale de la
 // requête — la clé de filtrage stable des liens pattern→Solo (F7). Reproduit la
 // convention du pipeline de filtres (mapUI = FR-first) : en FR la résolution
 // localisée et celle-ci coïncident ; en EN elles diffèrent (le lien doit matcher
@@ -101,7 +100,7 @@ func (r *PatternsRepo) ResolveMapFilterKeys(ctx context.Context, mapIDs []string
 	if len(mapIDs) == 0 || r.pdb == nil || r.pdb.Metadata == nil {
 		return nil, nil
 	}
-	langs := PreferredLangsForLocale("fr")
+	langs := PreferredAssetLanguages()
 	return NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(ctx, "map", mapIDs, langs)
 }
 
@@ -157,7 +156,7 @@ func (r *PatternsRepo) loadShared(ctx context.Context, limit int) ([]patternShar
 SELECT
     r.match_id,
     ` + StartTimeCanonicalSQL("r") + ` AS played_at,
-    r.pair_name, r.pair_name_fr,
+    r.pair_name,
     r.game_variant_id, r.game_variant_name,
     r.map_id,
     p.outcome,
@@ -187,7 +186,7 @@ LIMIT ?`
 		var isRanked sql.NullBool
 		err := sqlRows.Scan(
 			&row.MatchID, &playedAt,
-			&src.pairName, &src.pairNameFR,
+			&src.pairName,
 			&src.variantID, &src.variantName,
 			&row.MapID,
 			&row.Outcome, &row.DurationSec,
@@ -228,7 +227,6 @@ LIMIT ?`
 // Halo 5) avant de dériver le libellé de mode UI.
 type patternModeSource struct {
 	pairName    sql.NullString
-	pairNameFR  sql.NullString
 	variantID   sql.NullString
 	variantName sql.NullString
 }
@@ -248,8 +246,8 @@ func (r *PatternsRepo) applyPatternModes(ctx context.Context, out []patternShare
 	for i := range out {
 		s := srcs[i]
 		mode := analysis.ResolveModeUIWithVariant(
-			nullStringPtr(s.pairName), nullStringPtr(s.pairNameFR),
-			nullStringPtr(s.variantName), variantModeFRFirst(s, variantNames),
+			nullStringPtr(s.pairName), nil,
+			variantModeName(s, variantNames), nil,
 		)
 		if mode != nil {
 			out[i].Mode = *mode
@@ -265,7 +263,7 @@ func collectVariantIDsNeedingName(srcs []patternModeSource) []string {
 	seen := make(map[string]struct{}, len(srcs))
 	var ids []string
 	for _, s := range srcs {
-		if strings.TrimSpace(s.pairName.String) != "" || strings.TrimSpace(s.pairNameFR.String) != "" {
+		if strings.TrimSpace(s.pairName.String) != "" {
 			continue // pair présent → mode dérivé du pair, pas du variant
 		}
 		if strings.TrimSpace(s.variantName.String) != "" {
@@ -293,7 +291,7 @@ func (r *PatternsRepo) resolveVariantModeNames(ctx context.Context, variantIDs [
 	if len(variantIDs) == 0 || r.pdb == nil || r.pdb.Metadata == nil {
 		return nil
 	}
-	langs := PreferredLangsForLocale("fr")
+	langs := PreferredAssetLanguages()
 	names, err := NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(ctx, "game_variant", variantIDs, langs)
 	if err != nil {
 		slog.WarnContext(ctx, "patterns: résolution des noms de game_variant échouée — mode by_mode dégradé", "err", err)
@@ -302,10 +300,8 @@ func (r *PatternsRepo) resolveVariantModeNames(ctx context.Context, variantIDs [
 	return names
 }
 
-// variantModeFRFirst retourne le nom de game_variant FR-first pour la dérivation
-// du mode : le nom du registry s'il est présent, sinon le nom résolu read-side
-// (asset_translations). nil si aucun.
-func variantModeFRFirst(s patternModeSource, resolved map[string]string) *string {
+// variantModeName retourne le nom de game_variant du registry ou du catalogue.
+func variantModeName(s patternModeSource, resolved map[string]string) *string {
 	if v := nullStringPtr(s.variantName); v != nil {
 		return v
 	}

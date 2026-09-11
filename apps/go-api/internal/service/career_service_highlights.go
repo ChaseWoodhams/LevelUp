@@ -83,7 +83,7 @@ func applyHighlightPoolFRTranslations(ctx context.Context, repo port.CareerRepos
 		for k := range modeENSet {
 			modeENs = append(modeENs, k)
 		}
-		if modeFR, err := repo.LoadModeTranslationsFR(ctx, modeENs); err == nil && len(modeFR) > 0 {
+		if modeFR, err := repo.LoadModeNames(ctx, modeENs); err == nil && len(modeFR) > 0 {
 			for i := range pool {
 				if fr, ok := modeFR[pool[i].ModeUI]; ok && fr != "" {
 					pool[i].ModeUI = fr

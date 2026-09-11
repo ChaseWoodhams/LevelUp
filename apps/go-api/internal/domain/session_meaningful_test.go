@@ -5,9 +5,9 @@ import "testing"
 // TestSessionData_IsMeaningful vérifie qu'une session anonyme vierge n'est pas
 // "significative" (donc non persistée), mais que tout état interactif la rend telle.
 func TestSessionData_IsMeaningful(t *testing.T) {
-	// Session vierge telle que produite par Store.New (locale fr, hints visibles).
+	// Session vierge telle que produite par Store.New (English locale, hints visibles).
 	blank := func() *SessionData {
-		return &SessionData{Locale: "fr", HintsVisible: true}
+		return &SessionData{Locale: "en", HintsVisible: true}
 	}
 
 	if blank().IsMeaningful() {
@@ -25,7 +25,6 @@ func TestSessionData_IsMeaningful(t *testing.T) {
 		"active_sync_job":      func(s *SessionData) { s.ActiveSyncJobID = &str },
 		"auth_ready":           func(s *SessionData) { s.AuthReady = true },
 		"current_title":        func(s *SessionData) { s.CurrentTitleSlug = "halo_infinite" },
-		"locale_changed":       func(s *SessionData) { s.Locale = "en" },
 		"hints_hidden":         func(s *SessionData) { s.HintsVisible = false },
 	}
 	for name, mutate := range cases {

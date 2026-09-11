@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/features/match-replay/i18n.ts
- * Origin at commit: 4cc6e4b97 — the commit that last changed it, so
+ * Origin at commit: a1520ad0c — the commit that last changed it, so
  * `git diff 4cc6e4b97 HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts
@@ -74,67 +74,6 @@ interface ReplayText {
 }
 
 export const REPLAY_TEXT: Record<ReplayLocale, ReplayText> = {
-  fr: {
-    title: 'Rejeu 2D',
-    back: 'Retour au match',
-    play: 'Lecture',
-    pause: 'Pause',
-    restart: 'Recommencer',
-    loading: 'Chargement du rejeu…',
-    empty: 'Aucun rejeu 2D disponible pour ce match.',
-    note: 'Trajectoires décodées du film (vue du dessus). Une trace = une vie : un joueur qui réapparaît repart sur une nouvelle trace, sans attribution de joueur. La lecture « 1× » suit le temps réel du match.',
-    livesSuffix: 'vies',
-    aliveSuffix: 'en jeu',
-    speed: 'Vitesse',
-    time: 'Temps de match',
-    floor: 'Étage',
-    floorAll: 'Tous',
-    floorLow: 'Bas',
-    floorMid: 'Milieu',
-    floorHigh: 'Haut',
-    propsSuffix: 'objets de décor',
-    layers: 'Calques',
-    layerAim: 'Visée',
-    layerShield: 'Bouclier',
-    layerAimHint:
-      "Direction du regard, décodée du même enregistrement que la position. Le jeu ne la retransmet que lorsqu'elle change : une mesure ancienne pâlit au lieu de disparaître, et rien n'est dessiné au-delà de cinq secondes.",
-    layerShieldHint:
-      "Bouclier lu dans le même enregistrement que la position. Une piste vide soulignée d'un trait est un bouclier BRISÉ, pas une absence de mesure.",
-    rosterEmpty:
-      "Aucune vie du film n'a pu être rattachée à un joueur : le rejeu reste anonyme.",
-    teamUnknown: 'Sans équipe',
-    unknownPlayer: 'Joueur inconnu',
-    shieldUnread: 'bouclier non transmis',
-    loadoutUnread: 'armes non lues sur cette vie',
-    loadoutAge: 'Armes lues il y a',
-    respawnIn: 'retour dans',
-    respawnUnknown: 'retour ?',
-    respawnUnknownHint:
-      "Le film ne porte aucune vie suivante pour ce joueur : le délai n'est pas lisible, et il n'est pas deviné. Le cas se produit en fin de partie, que le film ne clôt par aucun événement.",
-    inventoryAge: 'Inventaire lu il y a',
-    grenadeSelected: 'Type équipé : le seul porté, donc celui qui partira au prochain lancer.',
-    abilityUnknown: 'capacité inconnue',
-    abilityUnknownHint:
-      "La table des capacités est partielle : 4 index observés pour 11 capacités dans le jeu. Un index hors table garde son numéro plutôt que d'emprunter le nom d'une capacité voisine.",
-    ammoNone: 'aucune',
-    ammoNoneHint:
-      "Le film n'ecrit rien pour cet emplacement. Pour une arme a charge, cela veut dire PLEIN : le flux est differentiel, et le plein est la valeur par defaut, donc il n'est jamais transmis.",
-    gaugeLabel: 'charge restante',
-    ammoSlotHint:
-      "Munitions de l'emplacement portant ce numéro dans l'enregistrement. Sur les 198 appariements dont la lecture est unique, 197 concordent avec l'arme de même rang ci-dessus. Une lecture à plusieurs candidats, elle, n'est pas fiable : elle est signalée à part.",
-    coverageTitle: 'Ce qui est rattaché',
-    coverageHint:
-      "Le dénominateur est ce que LE FILM porte, pas ce que la partie a compté : le film n'enregistre que les tirs qui infligent un dégât.",
-    layerShots: 'Tirs',
-    layerGrenades: 'Lancers de grenade',
-    causeNoSlot: 'aucune trace connue pour ce joueur à cet instant',
-    causeAmbiguous: 'plusieurs traces possibles',
-    causeOutOfWindow: 'aucune position assez proche dans le temps',
-    causeUnpublished: 'trace trop courte pour être publiée',
-    bridgeRead: 'Rattachement lu dans le film',
-    bridgeNotRead: 'Rattachement incomplet — une partie des événements n’est pas publiée',
-    coverageLeak: 'Comptage incohérent : des événements manquent à l’appel',
-  },
   en: {
     title: '2D replay',
     back: 'Back to match',

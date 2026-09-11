@@ -103,8 +103,8 @@ describe('CheckboxGroup — progressive disclosure', () => {
   it('ne replie pas les options si disableCollapse=true (Experience types)', () => {
     // Liste très courte simulant Experience types : 3 valeurs dont 1 à 0.
     const exp: LabelValue[] = [
-      { label: 'PVP non classé', value: 'PVP non classé', count: 200 },
-      { label: 'PVP classé', value: 'PVP classé', count: 50 },
+      { label: 'Unranked PvP', value: 'Unranked PvP', count: 200 },
+      { label: 'Ranked PvP', value: 'Ranked PvP', count: 50 },
       { label: 'PVE', value: 'PVE', count: 0 },
     ]
     render(

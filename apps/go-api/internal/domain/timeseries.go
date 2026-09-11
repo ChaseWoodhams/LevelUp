@@ -234,7 +234,7 @@ type TimeseriesMatchRow struct {
 	// Nom de carte pour les étiquettes X compactes (timeseries.14 "Stats par minute"
 	// reprend le format `#N\nMap` de la page Contributions Squad).
 	MapName   string `json:"map_name,omitempty"`
-	MapNameFR string `json:"map_name_fr,omitempty"`
+	MapNameFR string `json:"-"`
 	// Skill rank (CSR ou LUSR) — rating brut + type + contexte playlist/saison.
 	SkillRatingValue          *float64 `json:"skill_rating_value,omitempty"`
 	SkillRatingType           string   `json:"skill_rating_type,omitempty"`

@@ -28,7 +28,7 @@ title_slug = "` + slug + `"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Frags" }
+labels = { en = "Kills" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"

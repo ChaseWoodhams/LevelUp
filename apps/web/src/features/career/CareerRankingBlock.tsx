@@ -27,7 +27,6 @@ interface Props {
 
 function csrTierLabel(
   rank: CareerCSRRank,
-  locale: ManifestLocale,
   placementLabel: string,
   unrankedLabel: string,
 ): string {
@@ -40,7 +39,7 @@ function csrTierLabel(
   }
   // rank.tier est le palier canonique EN ("Gold"/"Platinum") — composé + localisé à
   // l'affichage via la source unique (sinon « Gold IV » restait en anglais sous UI FR).
-  return composeTierLabel(rank.tier, rank.sub_tier, locale)
+  return composeTierLabel(rank.tier, rank.sub_tier)
 }
 
 function formatCSRValue(rank: CareerCSRRank): string {
@@ -163,10 +162,10 @@ export function CareerRankingBlock({ playerSlug, lusrData }: Props) {
                 {playlists.map((pl) => {
                   const prevRank = prevByPlaylist.get(pl.playlist_id)
                   const trend = csrSeasonTrend(pl.current, prevRank)
-                  const csrText = `${csrTierLabel(pl.current, locale, t('career.ranking.placement'), t('career.ranking.unranked'))}${formatCSRValue(pl.current)}`
+                  const csrText = `${csrTierLabel(pl.current, t('career.ranking.placement'), t('career.ranking.unranked'))}${formatCSRValue(pl.current)}`
                   const trendTooltip =
                     trend && prevRank
-                      ? `${t('career.ranking.vs_prev_season')} : ${csrTierLabel(prevRank, locale, t('career.ranking.placement'), t('career.ranking.unranked'))}${formatCSRValue(prevRank)}`
+                      ? `${t('career.ranking.vs_prev_season')} : ${csrTierLabel(prevRank, t('career.ranking.placement'), t('career.ranking.unranked'))}${formatCSRValue(prevRank)}`
                       : undefined
                   return (
                     <li key={pl.playlist_id} className="flex items-center gap-2">
@@ -211,7 +210,7 @@ export function CareerRankingBlock({ playerSlug, lusrData }: Props) {
               {lusrGroups.map((group) => {
                 const cp = lusrByGroup.get(group)
                 // tier_label LUSR baké en FR au sync → localisé à l'affichage.
-                const cpTierLabel = localizeTierLabel(cp?.tier_label, locale)
+                const cpTierLabel = localizeTierLabel(cp?.tier_label)
                 return (
                   <li key={group} className="flex items-center gap-2">
                     <img

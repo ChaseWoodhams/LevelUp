@@ -133,9 +133,9 @@ type milestoneDTO struct {
 	Metric      string     `json:"metric"`
 	Threshold   float64    `json:"threshold"`
 	TitleEN     string     `json:"title_en"`
-	TitleFR     string     `json:"title_fr"`
+	TitleFR     string     `json:"-"`
 	Icon        string     `json:"icon,omitempty"`
-	ConditionFR string     `json:"condition_fr,omitempty"`
+	ConditionFR string     `json:"-"`
 	ConditionEN string     `json:"condition_en,omitempty"`
 	Earned      bool       `json:"earned"`
 	EarnedAt    *time.Time `json:"earned_at,omitempty"`

@@ -44,7 +44,6 @@ const CHART_HEIGHT = 300
 
 // Libellés du toggle de source (inline FR/EN — pas de clé manifest dédiée).
 const SOURCE_LABELS: Record<Locale, { live: string; local: string; empty: string }> = {
-  fr: { live: 'En direct', local: 'Local', empty: 'Aucune donnée pour cette source.' },
   en: { live: 'Live', local: 'Local', empty: 'No data for this source.' },
 }
 
@@ -151,13 +150,13 @@ export function ExplorerCombatProfile({
           <ExplorerLiveStatusBadge status={combatLiveStatus} />
         </header>
         <p className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
-          {SOURCE_LABELS[locale === 'en' ? 'en' : 'fr'].empty}
+          {SOURCE_LABELS['en'].empty}
         </p>
       </section>
     )
   }
 
-  const lbl = SOURCE_LABELS[locale === 'en' ? 'en' : 'fr']
+  const lbl = SOURCE_LABELS['en']
   const damageColors: Record<string, SemanticToken> = {
     [damageDealtLabel]: 'divergent-pos',
     [damageTakenLabel]: 'divergent-neg',

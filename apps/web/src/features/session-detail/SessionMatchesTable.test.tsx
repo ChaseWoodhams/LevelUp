@@ -113,7 +113,7 @@ describe('SessionMatchesTable — rendu (réutilise ExplorerMatchesTable)', () =
       <SessionMatchesTable matches={[makeRow()]} playerSlug="me" variant="full" withFriends />,
     )
     expect(screen.getByTestId('explorer-matches-table')).toBeInTheDocument()
-    expect(screen.getByText('Escouade')).toBeInTheDocument() // colonne Solo/Escouade
+    expect(screen.getByText('Squad')).toBeInTheDocument() // colonne Solo/Escouade
     expect(screen.getByText('Tir réel')).toBeInTheDocument() // map_name → map_ui
   })
 
@@ -134,7 +134,7 @@ describe('SessionMatchesTable — rendu (réutilise ExplorerMatchesTable)', () =
     expect(screen.getByTestId('explorer-matches-table')).toBeInTheDocument()
     // Colonnes GARDÉES : Mode + Rang (palier) + Δ rang (injectée) restent visibles.
     expect(screen.getByText('Oddball')).toBeInTheDocument() // mode_ui
-    expect(screen.getByText('Or III')).toBeInTheDocument() // skill_tier_label = palier (comme l'Explorer)
+    expect(screen.getByText('Gold III')).toBeInTheDocument() // skill_tier_label = palier (comme l'Explorer)
     expect(screen.getByText('+25')).toBeInTheDocument() // Δ rang injecté (CSR entier signé)
     // Colonnes MASQUÉES en compact : Solo/Escouade, carte, playlist.
     expect(screen.queryByText('Escouade')).not.toBeInTheDocument() // is_with_friends masqué
@@ -149,7 +149,7 @@ describe('SessionMatchesTable — rendu (réutilise ExplorerMatchesTable)', () =
     // Contrôle : en full, les colonnes masquées en compact sont bien présentes.
     expect(screen.getByText('Tir réel')).toBeInTheDocument()
     expect(screen.getByText('Ranked Arena')).toBeInTheDocument()
-    expect(screen.getByText('Escouade')).toBeInTheDocument()
+    expect(screen.getByText('Squad')).toBeInTheDocument()
     // Δ rang injecté : présent aussi en vue session pleine (comme l'ancien preset).
     expect(screen.getByText('+25')).toBeInTheDocument()
   })
@@ -161,9 +161,9 @@ describe('SessionMatchesTable — rendu (réutilise ExplorerMatchesTable)', () =
     // rang normalement (pas de placement dessus) ; seule la colonne Rang (qui lit
     // placement_done/total indépendamment du rating_type) bascule sur le badge
     // unranked_N = floor(3*10/5) = 6 (même mapping proportionnel que l'Explorer).
-    const img = screen.getByAltText('En placement')
+    const img = screen.getByAltText('In placement')
     expect(img).toHaveAttribute('src', expect.stringContaining('unranked_6.png'))
-    expect(screen.queryByText('Or III')).not.toBeInTheDocument() // placement prime sur le palier
+    expect(screen.queryByText('Gold III')).not.toBeInTheDocument() // placement prime sur le palier
   })
 
 })
@@ -174,7 +174,7 @@ describe('SessionMatchesTable — rendu (réutilise ExplorerMatchesTable)', () =
 // SquadSynergyHistoryTable.test.tsx l'assertaient). Couverture manquante = seul
 // filet qui aurait détecté une régression de gating sur cette page spécifique.
 describe('SessionMatchesTable — colonne « Ouvrir sur Halo Waypoint » (I19, V72-09b)', () => {
-  const WAYPOINT_LABEL = 'Ouvrir sur Halo Waypoint'
+  const WAYPOINT_LABEL = 'Open on Halo Waypoint'
 
   it('vue full : lien Waypoint présent avec un href valide (capability fail-open + pref ON par défaut)', () => {
     renderWithProviders(

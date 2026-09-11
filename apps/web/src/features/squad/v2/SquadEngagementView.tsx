@@ -63,9 +63,9 @@ export interface SquadEngagementSeriesLabels {
 }
 
 const DEFAULT_SQUAD_LABELS: SquadEngagementSeriesLabels = {
-  lobby: 'Partie',
-  expected: 'Escouade attendue',
-  observed: 'Escouade réelle',
+  lobby: 'Lobby',
+  expected: 'Expected squad',
+  observed: 'Actual squad',
 }
 
 export interface SquadEngagementViewProps {

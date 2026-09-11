@@ -133,7 +133,7 @@ export interface FragWeaponBreakdownProps {
 
 export function FragWeaponBreakdown({ weapons, title, height, heightScale = 1, fillHeight, fluid, className = '', hoveredClass = null, onClassHover }: FragWeaponBreakdownProps) {
   const appLocale = useAppShellStore((s) => s.locale)
-  const numLoc = intlLocale(appLocale)
+  const numLoc = intlLocale()
   // Réactivité couleurs de la légende HTML (pied de card) au changement de palette/thème :
   // fragClassColor résout des tokens → il faut re-render pour re-résoudre (cf. FragSunburst).
   const paletteVersion = useColorPaletteVersion()

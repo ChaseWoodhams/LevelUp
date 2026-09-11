@@ -21,11 +21,8 @@ type OutcomeMapping struct {
 
 // Label retourne le libellé pour la locale demandée + fallback locale → en → key.
 func (o OutcomeMapping) Label(locale string) (label string, usedFallback bool) {
-	if v, ok := o.Labels[locale]; ok && v != "" {
-		return v, false
-	}
 	if v, ok := o.Labels[LocaleEN]; ok && v != "" {
-		return v, true
+		return v, locale != LocaleEN
 	}
 	return o.Key, true
 }

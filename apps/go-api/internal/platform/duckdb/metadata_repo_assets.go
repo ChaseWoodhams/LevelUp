@@ -322,44 +322,26 @@ func (r *MetadataRepo) loadAssetTranslationsPerLang(
 	return perAsset, nil
 }
 
-// pickAssetNameByPreferredLang choisit le nom selon preferredLangs, fallback déterministe
-// sur la première lang par ordre alphabétique.
+// pickAssetNameByPreferredLang returns the name in the first preferred language present,
+// or "" when none is. There is deliberately NO fallback to another language: with the
+// English-only preference list, the old "first language alphabetically" fallback served
+// a fr-FR row whenever an asset had no English one (a French playlist name in the career
+// CSR block, a French map name on Home). An empty result lets every caller keep the
+// canonical English name it already holds.
 func pickAssetNameByPreferredLang(langs map[string]string, preferredLangs []string) string {
 	for _, pref := range preferredLangs {
 		if n, present := langs[pref]; present {
 			return n
 		}
 	}
-	keys := make([]string, 0, len(langs))
-	for k := range langs {
-		keys = append(keys, k)
-	}
-	for i := 1; i < len(keys); i++ {
-		for j := i; j > 0 && keys[j] < keys[j-1]; j-- {
-			keys[j], keys[j-1] = keys[j-1], keys[j]
-		}
-	}
-	if len(keys) > 0 {
-		return langs[keys[0]]
-	}
 	return ""
 }
 
-// PreferredLangsForLocale retourne l'ordre de préférence linguistique standard
-// pour une locale UI courte (ex. "fr" → ["fr-FR","fr","en-US","en"]).
-// Centralise la convention pour que tous les callers (match-view, home,
-// citations…) utilisent la même cascade.
-func PreferredLangsForLocale(locale string) []string {
-	switch strings.ToLower(strings.TrimSpace(locale)) {
-	case "fr", "fr-fr", "fr_fr":
-		return []string{LangCodeFR, "fr", LangCodeEN, "en"}
-	case "en", "en-us", "en_us":
-		return []string{LangCodeEN, "en", LangCodeFR, "fr"}
-	default:
-		// Locale inconnue : préférence par défaut FR (le projet est FR-first),
-		// puis EN, puis n'importe quoi.
-		return []string{LangCodeFR, "fr", LangCodeEN, "en"}
-	}
+// PreferredAssetLanguages returns the English asset lookup order used by all
+// repositories. Historical localized rows remain readable, but active reads
+// and new ingestion use the canonical English entries.
+func PreferredAssetLanguages() []string {
+	return []string{LangCodeEN, "en"}
 }
 
 // UpsertMapImageRegistry insère ou met à jour une entrée dans map_images_registry.

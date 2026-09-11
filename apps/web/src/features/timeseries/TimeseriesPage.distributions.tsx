@@ -52,7 +52,7 @@ export function TimeseriesDistributionsTabView({
             buckets: distributions_tab.accuracy_buckets ?? [],
             reviewKey: undefined as string | undefined,
             title:
-              fieldMappings?.fields['accuracy']?.label ?? 'Précision',
+              fieldMappings?.fields['accuracy']?.label ?? 'Accuracy',
             colorToken: 'chart-series-2' as const,
             xAxisLabel: t('timeseries.distributions.accuracy_axis_x'),
             colorTokenByBucket: undefined,
@@ -152,7 +152,7 @@ export function TimeseriesDistributionsTabView({
             metricXKey: 'accuracy',
             metricYKey: 'kda',
             title: t('timeseries.distributions.accuracy_vs_kda'),
-            xLabel: `${fieldMappings?.fields['accuracy']?.label ?? 'Précision'} (%)`,
+            xLabel: `${fieldMappings?.fields['accuracy']?.label ?? 'Accuracy'} (%)`,
             yLabel: fieldMappings?.fields['kda']?.label ?? 'FDA',
           },
           {
@@ -202,8 +202,8 @@ export function TimeseriesDistributionsTabView({
           points={distributions_tab.correlation_points ?? []}
           metricXKey="mmr_team"
           metricYKey="mmr_enemy"
-          xAxisLabel={fieldMappings?.fields['team_mmr']?.label ?? 'MMR équipe'}
-          yAxisLabel={fieldMappings?.fields['enemy_mmr']?.label ?? 'MMR adverse'}
+          xAxisLabel={fieldMappings?.fields['team_mmr']?.label ?? 'Team MMR'}
+          yAxisLabel={fieldMappings?.fields['enemy_mmr']?.label ?? 'Enemy MMR'}
           outcomeLabels={outcomeLabels}
           trendLabel={t('timeseries.summary.trend')}
           height={320}

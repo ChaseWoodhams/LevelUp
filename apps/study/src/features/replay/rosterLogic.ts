@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/features/match-replay/rosterLogic.ts
- * Origin at commit: 0afd83f7e — the commit that last changed it, so
+ * Origin at commit: 677574859 — the commit that last changed it, so
  * `git diff 0afd83f7e HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts
@@ -25,7 +25,6 @@
 import type { MatchScoreboardRow } from '@/lib/api/types'
 
 import { catalogText, type CatalogLabel } from './catalogLabel'
-import type { ReplayLocale } from './i18n'
 import { heldReading, isAliveAt, trackWindow } from './replayLogic'
 import type {
   ReplayDocumentReady,
@@ -269,7 +268,6 @@ export function inventoryAt(
 export function grenadesCarried(
   state: ReplayInventoryReady,
   labels: CatalogLabel[] | undefined,
-  locale: ReplayLocale,
 ): { rank: number; name: string; count: number }[] {
   if (!state.g) return []
   const out: { rank: number; name: string; count: number }[] = []
@@ -277,7 +275,7 @@ export function grenadesCarried(
     if (count <= 0) return
     // Sans table, le RANG s'affiche tel quel : c'est ce que le document dit, et c'est
     // vrai. Inventer un nom serait pire (cf. catalogLabel.ts).
-    out.push({ rank, name: catalogText(labels?.[rank], locale) ?? `rang ${rank}`, count })
+    out.push({ rank, name: catalogText(labels?.[rank]) ?? `rang ${rank}`, count })
   })
   return out
 }

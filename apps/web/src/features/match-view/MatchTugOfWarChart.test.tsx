@@ -90,7 +90,7 @@ async function renderAndCapture(): Promise<OptionLike> {
       events={EVENTS}
       scoreboard={SCOREBOARD}
       meXUID="me"
-      t={MATCH_VIEW_TEXT.fr}
+      t={MATCH_VIEW_TEXT.en}
     />,
   )
   await waitFor(() => expect(captured.option).not.toBeNull())
@@ -108,17 +108,17 @@ describe('MatchTugOfWarChart — tooltips (W2)', () => {
     const bars = (opt.series ?? []).filter((s) => s.type === 'bar')
     expect(bars.length).toBe(2)
     const tip = bars[0].tooltip?.formatter?.({ seriesType: 'bar', dataIndex: 0 }) ?? ''
-    // combatMomentumDelta FR = 'Écart' ; bin 0 : delta +3 en faveur de « Mon équipe ».
-    expect(tip).toContain('Écart')
+    // combatMomentumDelta FR = 'Delta' ; bin 0 : delta +3 en faveur de « Mon équipe ».
+    expect(tip).toContain('Delta')
     expect(tip).toContain('+3')
-    expect(tip).toContain('Mon équipe')
+    expect(tip).toContain('My team')
     // Ce n'est PAS un tip per-kill.
     expect(tip).not.toContain('0:01')
   })
 
   it('tip per-kill au survol d’un point kill (gamertag — mm:ss)', async () => {
     const opt = await renderAndCapture()
-    const scatter = (opt.series ?? []).find((s) => s.type === 'scatter' && s.name === 'Mes kills')
+    const scatter = (opt.series ?? []).find((s) => s.type === 'scatter' && s.name === 'My kills')
     expect(scatter).toBeTruthy()
     // Pas de `trigger` par-série (ECharts l'ignore ; garde-rail anti-régression W2).
     expect(scatter?.tooltip?.trigger).toBeUndefined()
@@ -128,7 +128,7 @@ describe('MatchTugOfWarChart — tooltips (W2)', () => {
     expect(tip).toContain('0:01')
     expect(tip).toContain('—')
     // Ce n'est PAS le résumé de bin.
-    expect(tip).not.toContain('Écart')
+    expect(tip).not.toContain('Delta')
   })
 
   it('tip de vague au survol d’un segment (détail ×N)', async () => {

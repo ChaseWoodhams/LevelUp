@@ -7,7 +7,6 @@
  * - Erreurs HTTP : transformées en ApiError lisible
  */
 
-import type { Locale } from '@/lib/i18n/locale'
 
 export interface ApiError {
   code: string
@@ -164,7 +163,7 @@ function guardResolvedTitle(
     // Non gardé en DEV seulement : c'est l'UNIQUE trace d'une bascule de titre
     // pendant une écriture en vol (diagnostic d'un « j'ai cliqué sur le mauvais
     // jeu »), elle doit rester visible en production.
-    console.warn('[title-guard] mutation appliquée à un autre titre que le titre actif', {
+    console.warn('[title-guard] mutation applied to a title other than the active one', {
       path,
       method,
       resolved,
@@ -175,7 +174,7 @@ function guardResolvedTitle(
   }
 
   if (import.meta.env.DEV) {
-    console.warn('[title-guard] réponse rejetée : titre résolu divergent', {
+    console.warn('[title-guard] response rejected: resolved title differs', {
       path,
       resolved,
       active,
@@ -184,7 +183,7 @@ function guardResolvedTitle(
   }
   const err: ApiError = {
     code: TITLE_MISMATCH_CODE,
-    message: `Réponse d'un autre titre rejetée (résolu « ${resolved} », attendu « ${active} »)`,
+    message: `Response for another title rejected (resolved "${resolved}", expected "${active}")`,
     // Retryable (status 503-like) : TanStack Query re-tente → la requête repart avec
     // le header du titre courant et converge sur la bonne donnée.
     retryable: true,
@@ -204,22 +203,6 @@ function getTitleHeader(): Record<string, string> {
     return { 'X-LevelUp-Title': _currentTitleSlug }
   }
   return {}
-}
-
-/**
- * Locale courante pour les réponses API. Mis à jour par appShellStore.
- * Le backend lit ce header en priorité (fallback sur app_settings.lang) pour
- * sélectionner les labels FR/EN dans les payloads (map names, mode names…).
- */
-let _currentLocale: Locale = 'fr'
-
-/** Appelé par le store pour mettre à jour la locale courante. */
-export function setApiLocale(locale: Locale): void {
-  _currentLocale = locale
-}
-
-function getLocaleHeader(): Record<string, string> {
-  return { 'X-LevelUp-Locale': _currentLocale }
 }
 
 async function request<T>(
@@ -247,7 +230,6 @@ async function request<T>(
       'Content-Type': 'application/json',
       Accept: 'application/json',
       ...getTitleHeader(),
-      ...getLocaleHeader(),
       ...options?.headers,
     },
     body: options?.body != null ? JSON.stringify(options.body) : undefined,
@@ -262,7 +244,7 @@ async function request<T>(
     }
     const err: ApiError = {
       code: errorBody.code ?? 'unknown_error',
-      message: errorBody.message ?? `Erreur HTTP ${response.status}`,
+      message: errorBody.message ?? `HTTP error ${response.status}`,
       retryable: errorBody.retryable ?? response.status >= 500,
       details: errorBody.details,
       field_errors: errorBody.field_errors,
@@ -324,7 +306,6 @@ export const api = {
       headers: {
         Accept: 'application/json',
         ...getTitleHeader(),
-        ...getLocaleHeader(),
         // Content-Type intentionnellement absent → boundary auto
       },
       body: form,
@@ -337,7 +318,7 @@ export const api = {
       } catch { /* body non-JSON */ }
       const err: ApiError = {
         code: errorBody.code ?? 'upload_error',
-        message: errorBody.message ?? `Erreur HTTP ${response.status}`,
+        message: errorBody.message ?? `HTTP error ${response.status}`,
         retryable: errorBody.retryable ?? response.status >= 500,
         details: errorBody.details,
         field_errors: errorBody.field_errors,

@@ -86,7 +86,7 @@ func portedDTOExpectations() []struct {
 			{"setup_state", "enum", `["no_halo_link","halo_linked_no_profile","profile_ready_no_sync","ready"]`},
 			{"auth_mode", "enum", `["none","password","xbox"]`},
 			{"registration_mode", "enum", `["invite","open","closed"]`},
-			{"locale", "default", `"fr"`},
+			{"locale", "default", `"en"`},
 			{"hints_visible_default", "default", `true`},
 			{"available_titles", "desc", ""},
 			{"current_title_slug", "desc", ""},
@@ -120,8 +120,8 @@ func portedDTOExpectations() []struct {
 			{"updated_at", "desc", ""},
 		}},
 		{"SettingsResponse", reflect.TypeOf(domain.SettingsResponse{}), []portedField{
-			{"lang", "enum", `["fr","en"]`},
-			{"discord_lang", "enum", `["fr","en"]`},
+			{"lang", "enum", `["en"]`},
+			{"discord_lang", "enum", `["en"]`},
 			{"media_delete_source_after_transcode", "desc", ""},
 			{"show_progression", "desc", ""},
 		}},
@@ -130,7 +130,7 @@ func portedDTOExpectations() []struct {
 			{"db_inventory_status", "desc", ""},
 		}},
 		{"ExplorerMatchesRow", reflect.TypeOf(domain.ExplorerMatchesRow{}), []portedField{
-			{"experience_type_label", "default", `"Non classé"`},
+			{"experience_type_label", "default", `"Unranked"`},
 			{"had_bot_teammate", "desc", ""},
 		}},
 		{"GamertagSearchResult", reflect.TypeOf(domain.GamertagSearchResult{}), []portedField{

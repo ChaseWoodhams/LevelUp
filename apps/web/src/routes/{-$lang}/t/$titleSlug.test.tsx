@@ -105,7 +105,7 @@ beforeEach(() => {
   useAppShellStore.setState({
     isBootstrapped: true,
     isTitleSwitching: false,
-    locale: 'fr',
+    locale: 'en',
     currentTitleSlug: 'halo_infinite',
     availableTitles: [title('halo_infinite')],
     currentPlayer: null,
@@ -117,7 +117,7 @@ describe('TitleLayout (2f)', () => {
     setStore({ isBootstrapped: false })
     renderWithProviders(<TitleLayout />)
     expect(screen.queryByTestId('title-outlet')).toBeNull()
-    expect(screen.queryByText('Titre introuvable')).toBeNull()
+    expect(screen.queryByText('Title not found')).toBeNull()
   })
 
   it('valide + convergé → rend l’Outlet', () => {
@@ -143,28 +143,28 @@ describe('TitleLayout (2f)', () => {
     expect(await screen.findByTestId('title-outlet')).toBeInTheDocument()
   })
 
-  it('slug inconnu → écran gate « Titre introuvable » (FR)', () => {
+  it('slug inconnu → écran gate « Title not found » (FR)', () => {
     paramsRef.titleSlug = 'inexistant'
     renderWithProviders(<TitleLayout />)
-    expect(screen.getByText('Titre introuvable')).toBeInTheDocument()
+    expect(screen.getByText('Title not found')).toBeInTheDocument()
     expect(screen.queryByTestId('title-outlet')).toBeNull()
   })
 
-  it('coming_soon → écran gate « Bientôt disponible » (FR)', () => {
+  it('coming_soon → écran gate « Coming soon » (FR)', () => {
     paramsRef.titleSlug = 'halo_5'
     setStore({ availableTitles: [title('halo_infinite'), title('halo_5', 'coming_soon')] })
     renderWithProviders(<TitleLayout />)
-    expect(screen.getByText('Bientôt disponible')).toBeInTheDocument()
+    expect(screen.getByText('Coming soon')).toBeInTheDocument()
   })
 
-  it('archived → écran gate « Titre archivé » (FR)', () => {
+  it('archived → écran gate « Archived title » (FR)', () => {
     paramsRef.titleSlug = 'halo_5'
     setStore({ availableTitles: [title('halo_infinite'), title('halo_5', 'archived')] })
     renderWithProviders(<TitleLayout />)
-    expect(screen.getByText('Titre archivé')).toBeInTheDocument()
+    expect(screen.getByText('Archived title')).toBeInTheDocument()
   })
 
-  it('échec d’apply → écran switch_failed + « Réessayer » re-tente applyActiveTitle', async () => {
+  it('échec d’apply → écran switch_failed + « Retry » re-tente applyActiveTitle', async () => {
     paramsRef.titleSlug = 'halo_5'
     setStore({
       currentTitleSlug: 'halo_infinite',
@@ -173,11 +173,11 @@ describe('TitleLayout (2f)', () => {
     applyActiveTitleMock.mockImplementationOnce(() => Promise.reject(new Error('boom')))
     renderWithProviders(<TitleLayout />)
 
-    expect(await screen.findByText('Changement de titre impossible')).toBeInTheDocument()
+    expect(await screen.findByText('Cannot switch title')).toBeInTheDocument()
     expect(applyActiveTitleMock).toHaveBeenCalledTimes(1)
 
-    // « Réessayer » réarme l'état d'échec → l'effet re-tente la bascule.
-    fireEvent.click(screen.getByText('Réessayer'))
+    // « Retry » réarme l'état d'échec → l'effet re-tente la bascule.
+    fireEvent.click(screen.getByText('Retry'))
     await act(async () => {
       await Promise.resolve()
     })
@@ -205,7 +205,7 @@ describe('TitleLayout — chemin d’erreur D-6 complet (4b)', () => {
       params: { titleSlug: 'halo_infinite', playerSlug: 'jgtm' },
       replace: true,
     })
-    expect(screen.queryByText('Changement de titre impossible')).toBeNull()
+    expect(screen.queryByText('Cannot switch title')).toBeNull()
 
     // Simuler l'arrivée sur le segment du titre courant (le navigate replace, que le
     // mock n'exécute pas) : le layout reste MONTÉ, param → halo_infinite.
@@ -228,7 +228,7 @@ describe('TitleLayout — chemin d’erreur D-6 complet (4b)', () => {
     applyActiveTitleMock.mockImplementationOnce(() => Promise.reject(new Error('boom')))
     renderWithProviders(<TitleLayout />)
 
-    expect(await screen.findByText('Changement de titre impossible')).toBeInTheDocument()
+    expect(await screen.findByText('Cannot switch title')).toBeInTheDocument()
     expect(toastErrorMock).not.toHaveBeenCalled()
     expect(navigateMock).not.toHaveBeenCalled()
   })
@@ -314,87 +314,52 @@ describe('TitleLayout — course back/forward + refocus (4c)', () => {
   })
 })
 
-// setLocale RÉEL capturé avant tout override (restauré en afterEach du bloc 5a).
-const realSetLocale = useAppShellStore.getState().setLocale
-
-describe('TitleLayout — réconciliation locale←segment (5a, D-12)', () => {
-  const setLocaleSpy = vi.fn()
-
-  beforeEach(() => {
-    setLocaleSpy.mockClear()
-    // On remplace setLocale du store par un spy pour observer l'appel sans effet de
-    // bord (le spy ne met PAS à jour la locale → l'effet ne re-run pas). Le beforeEach
-    // GLOBAL ne réinitialise pas setLocale (merge Zustand) → restauration explicite.
-    useAppShellStore.setState({ setLocale: setLocaleSpy })
-  })
-  afterEach(() => {
-    useAppShellStore.setState({ setLocale: realSetLocale })
-  })
-
-  it('segment lang=en + store fr → setLocale(en) appelé', () => {
-    paramsRef.lang = 'en' // store.locale = 'fr' (beforeEach global)
-    renderWithProviders(<TitleLayout />)
-    expect(setLocaleSpy).toHaveBeenCalledWith('en')
-  })
-
-  it('segment absent (lang undefined) → setLocale JAMAIS appelé (no-op strict)', () => {
-    paramsRef.lang = undefined
-    renderWithProviders(<TitleLayout />)
-    expect(setLocaleSpy).not.toHaveBeenCalled()
-  })
-
-  it('segment lang == locale (fr) → no-op, setLocale JAMAIS appelé', () => {
-    paramsRef.lang = 'fr'
-    renderWithProviders(<TitleLayout />)
-    expect(setLocaleSpy).not.toHaveBeenCalled()
-  })
-
-  it('segment lang inconnu (bruit) → ignoré, setLocale JAMAIS appelé', () => {
-    paramsRef.lang = 'xyz'
-    renderWithProviders(<TitleLayout />)
-    expect(setLocaleSpy).not.toHaveBeenCalled()
-  })
-})
-
 describe('TitleLayout — émission du segment lang par défaut (backstop I10)', () => {
-  it('segment lang ABSENT + titre valide/convergé → history.replace vers /{locale}/t/…', () => {
-    paramsRef.lang = undefined // store.locale = 'fr' (beforeEach global)
+  it('segment lang ABSENT + valid title → history.replace to /en/t/…', () => {
+    paramsRef.lang = undefined // the only supported locale is English (beforeEach global)
     renderWithProviders(<TitleLayout />)
-    expect(historyReplaceMock).toHaveBeenCalledWith('/fr/t/halo_infinite/players/jgtm/home')
+    expect(historyReplaceMock).toHaveBeenCalledWith('/en/t/halo_infinite/players/jgtm/home')
   })
 
-  it('préserve ?search + #hash byte-exact (enveloppe ?f= share-link)', () => {
+  it('preserves ?search + #hash byte-exact (share link envelope)', () => {
     paramsRef.lang = undefined
     locationRef.pathname = '/t/halo_infinite/players/jgtm/stats/timeseries'
     locationRef.searchStr = '?f=abc123'
     locationRef.hash = 'top' // TanStack : hash SANS '#'
     renderWithProviders(<TitleLayout />)
     expect(historyReplaceMock).toHaveBeenCalledWith(
-      '/fr/t/halo_infinite/players/jgtm/stats/timeseries?f=abc123#top',
+      '/en/t/halo_infinite/players/jgtm/stats/timeseries?f=abc123#top',
     )
   })
 
-  it('locale en → history.replace vers /en/t/…', () => {
+  it('English locale → history.replace to /en/t/…', () => {
     paramsRef.lang = undefined
     setStore({ locale: 'en' })
     renderWithProviders(<TitleLayout />)
     expect(historyReplaceMock).toHaveBeenCalledWith('/en/t/halo_infinite/players/jgtm/home')
   })
 
-  it('segment lang DÉJÀ présent → aucun replace (idempotent)', () => {
-    paramsRef.lang = 'fr'
+  it('segment lang already present → no replace (idempotent)', () => {
+    paramsRef.lang = 'en'
     renderWithProviders(<TitleLayout />)
     expect(historyReplaceMock).not.toHaveBeenCalled()
   })
 
-  it('titre INVALIDE (gate unknown) → aucun replace', () => {
+  it('legacy /fr URL → redirects to the English segment', () => {
+    paramsRef.lang = 'fr'
+    locationRef.pathname = '/fr/t/halo_infinite/players/jgtm/home'
+    renderWithProviders(<TitleLayout />)
+    expect(historyReplaceMock).toHaveBeenCalledWith('/en/t/halo_infinite/players/jgtm/home')
+  })
+
+  it('invalid title gate → no replace', () => {
     paramsRef.lang = undefined
     paramsRef.titleSlug = 'inexistant'
     renderWithProviders(<TitleLayout />)
     expect(historyReplaceMock).not.toHaveBeenCalled()
   })
 
-  it('divergence segment↔store en cours → aucun replace (attend la convergence)', () => {
+  it('title divergence → no replace while converging', () => {
     paramsRef.lang = undefined
     paramsRef.titleSlug = 'halo_5'
     setStore({

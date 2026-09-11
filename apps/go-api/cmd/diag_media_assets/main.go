@@ -104,7 +104,7 @@ func main() {
 	fmt.Println("=== SHARED match_registry ===")
 	dumpQuery(shared, "Domicile (cd89b091 — match du picker) + GUID (4cb4a8d0)",
 		`SELECT match_id, COALESCE(map_id,'<NULL>') AS map_id, COALESCE(map_name,'<NULL>') AS map_name,
-		        COALESCE(map_name_fr,'<NULL>') AS map_name_fr, COALESCE(pair_name,'<NULL>') AS pair_name,
+		        COALESCE(pair_name,'<NULL>') AS pair_name,
 		        COALESCE(playlist_name,'<NULL>') AS playlist_name, COALESCE(playlist_id,'<NULL>') AS playlist_id
 		 FROM match_registry
 		 WHERE match_id IN ('cd89b091-6fb9-457d-96dd-67f11585fcfa','4cb4a8d0-962b-436e-a6fc-98c1a5e36ca9')`)

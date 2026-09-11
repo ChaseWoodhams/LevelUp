@@ -55,14 +55,14 @@ type SquadRepository interface {
 	// LoadSynthesisHeatmap charge les données heatmap carte × mode (Q33).
 	LoadSynthesisHeatmap(ctx context.Context, xuid string) ([]domain.SynthesisHeatmapRow, error)
 
-	// LoadAssetTranslationsFR retourne les traductions FR depuis metadata.asset_translations.
-	// assetType : "map" | "playlist". Retourne nil sans erreur si table absente ou IDs vides.
-	LoadAssetTranslationsFR(ctx context.Context, assetType string, assetIDs []string) (map[string]string, error)
+	// LoadAssetNames returns canonical English asset names from metadata.asset_translations.
+	// assetType: "map" | "playlist". Returns nil without error when the table is absent or IDs are empty.
+	LoadAssetNames(ctx context.Context, assetType string, assetIDs []string) (map[string]string, error)
 
-	// LoadModeTranslationsFR retourne les traductions FR des modes EN (depuis metadata.mode_name_tr).
-	// Les clés sont les noms EN normalisés (ex: "Slayer"), les valeurs les noms FR (ex: "Tueur").
-	// Retourne nil sans erreur si la table est absente ou si modeENs est vide.
-	LoadModeTranslationsFR(ctx context.Context, modeENs []string) (map[string]string, error)
+	// LoadModeNames returns canonical English mode names from metadata.mode_name_tr.
+	// Keys are normalized mode identifiers (for example, "Slayer").
+	// Returns nil without error when the table is absent or modeNames is empty.
+	LoadModeNames(ctx context.Context, modeNames []string) (map[string]string, error)
 
 	// LoadMapStatsForSquad retourne par map_id les stats historiques (wins,
 	// total, perf moyenne) du joueur principal sur les matchs où TOUS les xuids
@@ -86,11 +86,9 @@ type SquadRepository interface {
 type SynthesisRepository interface {
 	// LoadSynthesisHeatmap charge la heatmap carte×mode (Q33).
 	LoadSynthesisHeatmap(ctx context.Context, xuid string) ([]domain.SynthesisHeatmapRow, error)
-	// EnrichCanonicalAssetTranslations remplit Labels["fr"] sur les AssetReference
-	// (Map, Playlist, GameVariant, PairMode) des rows canoniques depuis
-	// metadata.asset_translations + mode_name_tr quand match_registry.{...}_name_fr
-	// est NULL en DB. Même helper que HomeRepo — réutilisé pour cohérence cross-page.
-	// Best-effort : erreurs loggées, rows mutées en place.
+	// EnrichCanonicalAssetTranslations fills the canonical English labels on
+	// AssetReference values (Map, Playlist, GameVariant, PairMode) when the
+	// registry name is missing. Best effort: errors are logged and rows are mutated in place.
 	EnrichCanonicalAssetTranslations(ctx context.Context, rows []canonical.PlayerMatchRow) error
 }
 
@@ -298,10 +296,10 @@ func (n *noopSquadRepo) LoadMainTeamParticipants(_ context.Context, _ string, _ 
 func (n *noopSquadRepo) LoadSynthesisHeatmap(_ context.Context, _ string) ([]domain.SynthesisHeatmapRow, error) {
 	return nil, nil
 }
-func (n *noopSquadRepo) LoadAssetTranslationsFR(_ context.Context, _ string, _ []string) (map[string]string, error) {
+func (n *noopSquadRepo) LoadAssetNames(_ context.Context, _ string, _ []string) (map[string]string, error) {
 	return nil, nil
 }
-func (n *noopSquadRepo) LoadModeTranslationsFR(_ context.Context, _ []string) (map[string]string, error) {
+func (n *noopSquadRepo) LoadModeNames(_ context.Context, _ []string) (map[string]string, error) {
 	return nil, nil
 }
 func (n *noopSquadRepo) LoadMapStatsForSquad(_ context.Context, _ string, _, _ []string) (map[string]domain.MapSquadStats, error) {

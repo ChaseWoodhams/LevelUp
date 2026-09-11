@@ -145,16 +145,14 @@ type asyncJobOutput struct {
 // GET /settings
 func (h *SettingsHandler) handleGetSettings(ctx context.Context, _ *struct{}) (*settingsJSONOutput, error) {
 	if h.cfg.DemoMode {
-		// Mode démo : renvoyer les settings RÉELS de la démo (app_settings.json
-		// avec lang=fr) et non Defaults() — qui renverrait lang="en" et ferait
-		// afficher la démo en anglais. Fallback Defaults+fr si lecture échoue.
+		// Demo settings remain readable, while settingsResponse forces English-only
+		// language values for the runtime API.
 		if h.settingsStore != nil {
 			if cfg, err := h.settingsStore.Load(); err == nil {
 				return &settingsJSONOutput{Body: h.settingsResponse(cfg)}, nil
 			}
 		}
 		d := settings_platform.Defaults()
-		d.Lang = "fr"
 		return &settingsJSONOutput{Body: h.settingsResponse(d)}, nil
 	}
 

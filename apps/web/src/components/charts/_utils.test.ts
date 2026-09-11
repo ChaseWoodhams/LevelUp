@@ -59,11 +59,11 @@ describe('_utils', () => {
   })
 
   describe('formatDateShort', () => {
-    it('formate Date FR DD/MM', () => {
-      expect(formatDateShort(new Date('2026-04-27'))).toBe('27/04')
+    it('formats a Date as MM/DD', () => {
+      expect(formatDateShort(new Date('2026-04-27T12:00:00'))).toBe('04/27')
     })
     it('accepte une string ISO', () => {
-      expect(formatDateShort('2026-12-01')).toBe('01/12')
+      expect(formatDateShort('2026-12-01T12:00:00')).toBe('12/01')
     })
   })
 

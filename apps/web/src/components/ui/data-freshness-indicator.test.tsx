@@ -11,26 +11,26 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { DataFreshnessIndicator } from './data-freshness-indicator'
 
-const buildLabelFR = (date: string) => `Dernière synchronisation réussie le ${date}`
+const buildLabel = (date: string) => `Last successful sync on ${date}`
 
 describe('DataFreshnessIndicator', () => {
   it('ne rend rien quand snapshotAt est null', () => {
     const { container } = render(
-      <DataFreshnessIndicator snapshotAt={null} buildLabel={buildLabelFR} locale="fr-FR" />,
+      <DataFreshnessIndicator snapshotAt={null} buildLabel={buildLabel} locale="en-US" />,
     )
     expect(container.firstChild).toBeNull()
   })
 
   it('ne rend rien quand snapshotAt est undefined', () => {
     const { container } = render(
-      <DataFreshnessIndicator snapshotAt={undefined} buildLabel={buildLabelFR} locale="fr-FR" />,
+      <DataFreshnessIndicator snapshotAt={undefined} buildLabel={buildLabel} locale="en-US" />,
     )
     expect(container.firstChild).toBeNull()
   })
 
   it('ne rend rien quand snapshotAt est une chaîne non parsable', () => {
     const { container } = render(
-      <DataFreshnessIndicator snapshotAt="pas une date" buildLabel={buildLabelFR} locale="fr-FR" />,
+      <DataFreshnessIndicator snapshotAt="pas une date" buildLabel={buildLabel} locale="en-US" />,
     )
     expect(container.firstChild).toBeNull()
   })
@@ -39,16 +39,16 @@ describe('DataFreshnessIndicator', () => {
     render(
       <DataFreshnessIndicator
         snapshotAt="2026-05-10T14:32:00Z"
-        buildLabel={buildLabelFR}
-        locale="fr-FR"
+        buildLabel={buildLabel}
+        locale="en-US"
       />,
     )
     const indicator = screen.getByTestId('data-freshness-indicator')
     expect(indicator).toBeInTheDocument()
     // Le aria-label doit contenir la phrase + une date formatée FR (jour/mois/année).
     const label = indicator.getAttribute('aria-label') ?? ''
-    expect(label).toMatch(/Dernière synchronisation réussie le /)
-    expect(label).toMatch(/10\/05\/2026/)
+    expect(label).toMatch(/Last successful sync on /)
+    expect(label).toMatch(/05\/10\/2026/)
   })
 
   it('respecte la locale EN pour le format de date', () => {
@@ -69,8 +69,8 @@ describe('DataFreshnessIndicator', () => {
     render(
       <DataFreshnessIndicator
         snapshotAt="2026-05-10T14:32:00Z"
-        buildLabel={buildLabelFR}
-        locale="fr-FR"
+        buildLabel={buildLabel}
+        locale="en-US"
         className="text-rose-500 hover:text-rose-300"
       />,
     )

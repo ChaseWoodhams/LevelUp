@@ -36,7 +36,7 @@ export function AscensionCoachingTab() {
   const playerSlug = currentPlayer?.player_slug ?? ''
   const locale = useAppShellStore((s) => s.locale)
   const t = getAscensionText(locale)
-  const coachT = getCoachStrings(locale)
+  const coachT = getCoachStrings()
   const { data: settings } = useSettings()
   // Défaut ON (DEC-2) : optimiste pendant le chargement des settings. Un opt-out
   // explicite renvoie false et le hint d'activation réapparaît.

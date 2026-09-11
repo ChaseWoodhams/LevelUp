@@ -32,10 +32,7 @@ const medalFirstEarnedRecapThreshold = 3
 // paramKeyMedalNameFR / paramKeyMedalNameEN : clés Params du nom localisé de la
 // médaille. Le serveur résout les DEUX langues (patron title_fr/title_en de
 // milestone_unlocked) ; le front choisit selon la locale. Jamais d'id brut affiché.
-const (
-	paramKeyMedalNameFR = "medal_name_fr"
-	paramKeyMedalNameEN = "medal_name_en"
-)
+const paramKeyMedalName = "medal_name_en"
 
 // medalsRouteSuffix : sous-chemin joueur de la page Médailles (cible des notifs
 // « médaille inédite »). Route front RÉELLE (career/medals.tsx) → zéro hop.
@@ -43,7 +40,6 @@ const medalsRouteSuffix = "career/medals"
 
 // medalNamePair porte le nom localisé (FR + EN) d'une médaille résolu côté serveur.
 type medalNamePair struct {
-	FR string
 	EN string
 }
 
@@ -73,16 +69,12 @@ func newMedalNamerForPDB(pdb *duckdb.PlayerDB) medalNameResolver {
 // laisse un nom vide (emitSingleMedal saute alors la médaille — jamais d'id brut).
 func (m *pdbMedalNamer) MedalNames(ctx context.Context, ids []int64) map[int64]medalNamePair {
 	out := make(map[int64]medalNamePair, len(ids))
-	fr, err := m.repo.LookupByIDs(ctx, ids, "fr")
-	if err != nil {
-		slog.WarnContext(ctx, "post_sync: medal names lookup FR", "err", err)
-	}
 	en, err := m.repo.LookupByIDs(ctx, ids, "en")
 	if err != nil {
 		slog.WarnContext(ctx, "post_sync: medal names lookup EN", "err", err)
 	}
 	for _, id := range ids {
-		out[id] = medalNamePair{FR: fr[id].Label, EN: en[id].Label}
+		out[id] = medalNamePair{EN: en[id].Label}
 	}
 	return out
 }
@@ -159,17 +151,10 @@ func emitSingleMedal(
 	id int64,
 	name medalNamePair,
 ) {
-	if name.FR == "" && name.EN == "" {
+	if name.EN == "" {
 		slog.WarnContext(ctx, "post_sync: medal_first_earned nom introuvable — émission sautée",
 			"slug", slug, "medal_id", id)
 		return
-	}
-	fr, en := name.FR, name.EN
-	if fr == "" {
-		fr = en
-	}
-	if en == "" {
-		en = fr
 	}
 	err := emitter.Emit(ctx, notifications.EmitInput{
 		Category: notifications.CategoryMedalFirstEarned,
@@ -177,8 +162,7 @@ func emitSingleMedal(
 		TitleKey: "notif.medal_first_earned.title",
 		BodyKey:  "notif.medal_first_earned.body",
 		Params: map[string]any{
-			paramKeyMedalNameFR: fr,
-			paramKeyMedalNameEN: en,
+			paramKeyMedalName: name.EN,
 		},
 		TargetRoute: notifications.PlayerTargetRoute(titleSlug, slug, medalsRouteSuffix),
 		Source:      postSyncSource,

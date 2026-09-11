@@ -136,7 +136,7 @@ export function TimeseriesProgressionTab({
           emptyMessage={emptyMsg}
           rows={data.match_rows ?? []}
           spreeLabel={t('timeseries.progression.spree_label')}
-          headshotsLabel={fieldMappings?.fields['headshot_kills']?.label ?? 'Tirs à la tête'}
+          headshotsLabel={fieldMappings?.fields['headshot_kills']?.label ?? 'Headshots'}
           perfectLabel={
             fieldMappings?.fields['perfect_kills']?.label ??
             t('timeseries.progression.perfect_kills')

@@ -19,7 +19,7 @@ import type { ChartPointScatter } from '@/components/charts/ScatterChart'
 
 // ISO weekday names (0 = Monday … 6 = Sunday). Source unique : lib/formatters/calendar
 // (CLAUDE.md n°6) ; re-export ici pour compat des imports timeseries existants.
-export { DOW_LABELS_FR, DOW_LABELS_EN } from '@/lib/formatters/calendar'
+export { DOW_LABELS_EN } from '@/lib/formatters/calendar'
 
 /**
  * Convertit un tableau de CumulativePoint en ChartSeries<ChartPoint2D>[] mono-série,

@@ -1,36 +1,30 @@
 package migrations
 
-// mode_playlist_fr.go — steps add_mode_name_tr + seed_playlist_fr_translations
-// (named-func), déplacés depuis internal/migration (Phase 1.5 b7, voie B). Ils
-// PARTAGENT les consts mode* → déplacés ensemble (sinon const inaccessibles).
-// Seeds statiques idempotents (INSERT OR IGNORE / UPDATE gardé), zéro API.
-// Les noms restent dans migration.canonicalOrder.
+// mode_playlist_fr.go contains the historical mode and playlist migration
+// hooks. The migration names remain in migration.canonicalOrder for upgrade
+// compatibility, while new catalog rows are English-only.
 
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 
 	"levelup/go-api/internal/migration"
 )
 
-// Mode canoniques (EN) — utilisés comme clés dans mode_name_tr et comme labels FR
-// identiques (Halo n'a pas de traduction officielle pour ces modes).
+// Canonical mode keys used by mode_name_tr.
 const (
 	modeAttrition  = "Attrition"
 	modeExtraction = "Extraction"
 	modeOddball    = "Oddball"
 )
 
-// Labels mode partagés entre mode_name_tr et playlist_fr.
+// Mode labels shared by the mode catalog and the historical playlist hook.
 const (
-	modeTeamSlayer    = "Team Slayer"
-	modeTeamSnipers   = "Team Snipers"
-	modeTeamSlayerFR  = "Assassin en équipe"
-	modeTeamSnipersFR = "Snipers en équipe"
+	modeTeamSlayer  = "Team Slayer"
+	modeTeamSnipers = "Team Snipers"
 )
 
-// applyModeNameTr crée et peuple mode_name_tr avec les traductions connues.
+// applyModeNameTr creates and populates mode_name_tr with English catalog rows.
 func applyModeNameTr(db *sql.DB) error {
 	if _, err := db.ExecContext(migration.BootCtx(), `
 		CREATE TABLE IF NOT EXISTS mode_name_tr (
@@ -76,38 +70,6 @@ func applyModeNameTr(db *sql.DB) error {
 		{modeTeamSnipers, "en", modeTeamSnipers},
 		{"Total Control", "en", "Total Control"},
 		{"VIP", "en", "VIP"},
-		// FR
-		{"Assault", "fr", "Assaut"},
-		{modeAttrition, "fr", modeAttrition},
-		{"CTF", "fr", "Capture du drapeau"},
-		{"CTF 3 Captures", "fr", "CDD 3 captures"},
-		{"Escalation Slayer", "fr", "Escalade"},
-		{modeExtraction, "fr", modeExtraction},
-		{"FFA Slayer", "fr", "Chacun pour soi"},
-		{"Fiesta CTF", "fr", "Fiesta CDD"},
-		{"Fiesta Slayer", "fr", "Fiesta"},
-		{"Fiesta Total Control", "fr", "Fiesta Contrôle total"},
-		{"Heroic KOTH", "fr", "Roi de la colline héroïque"},
-		{"Heroic King of the Hill", "fr", "Roi de la colline héroïque"},
-		{"King of the Hill", "fr", "Roi de la colline"},
-		{"Land Grab", "fr", "Bases"},
-		{"Legendary King of the Hill", "fr", "Roi de la colline légendaire"},
-		{"Neutral Bomb", "fr", "Bombe neutre"},
-		{"Neutral Bomb Squad", "fr", "Escouade bombe neutre"},
-		{"Neutral Flag CTF", "fr", "Drapeau neutre"},
-		{modeOddball, "fr", modeOddball},
-		{"One Bomb", "fr", "Bombe neutre"},
-		{"One Flag CTF", "fr", "Drapeau neutre"},
-		{"Sentry Defense", "fr", "Défense sentinelle"},
-		{"Shotty Snipe Slayer FFA", "fr", "Fusils snipers à grenaille FFA"},
-		{"Shotty Snipes Slayer", "fr", "Fusils snipers à grenaille"},
-		{"Slayer", "fr", "Assassin"},
-		{"Stockpile", "fr", "Stockage"},
-		{"Strongholds", "fr", "Bases"},
-		{modeTeamSlayer, "fr", modeTeamSlayerFR},
-		{modeTeamSnipers, "fr", modeTeamSnipersFR},
-		{"Total Control", "fr", "Contrôle total"},
-		{"VIP", "fr", "VIP"},
 	}
 
 	for _, r := range rows {
@@ -121,53 +83,15 @@ func applyModeNameTr(db *sql.DB) error {
 	return nil
 }
 
-// playlistFRMapping représente une correspondance canonique EN → FR pour les
-// noms de playlist Halo Infinite qui ont une localisation officielle.
-type playlistFRMapping struct {
-	en string
-	fr string
-}
+// applyPlaylistFRSeeds is retained as a historical migration hook. Existing
+// translation rows remain readable for upgrades, while new databases receive
+// English catalog rows only.
+func applyPlaylistFRSeeds(_ *sql.DB) error { return nil }
 
-// playlistFRSeeds : ordre alphabétique sur le label EN.
-var playlistFRSeeds = []playlistFRMapping{
-	{"Big Team Battle", "Grand combat en équipe"},
-	{"Big Team Battle: Refresh", "Grand combat en équipe : Renouveau"},
-	{"Big Team Heavies", "Grand combat lourd"},
-	{"Big Team Social", "Combat social en équipe"},
-	{"Bot Bootcamp", "Camp d'entraînement bots"},
-	{"Firefight", "Combat de feu"},
-	{"Firefight: Heroic King of the Hill", "Combat de feu : Roi de la colline héroïque"},
-	{"Firefight: King of the Hill", "Combat de feu : Roi de la colline"},
-	{"Firefight: Legendary King of the Hill", "Combat de feu : Roi de la colline légendaire"},
-	{"Fracture: Tenrai", "Fracture : Tenrai"},
-	{"Fracture: Tenrai - Refresh", "Fracture : Tenrai – Renouveau"},
-	{"Husky Raid", "Husky Raid"},
-	{"Quick Play", "Partie rapide"},
-	{"Quick Play: Refresh", "Partie rapide : Renouveau"},
-	{"Ranked Arena", "Arène classée"},
-	{"Ranked Doubles", "Duo classé"},
-	{"Ranked Slayer", "Assassin classé"},
-	{"Ranked Snipers", "Snipers classés"},
-	{"Rumble Pit", "Combat libre"},
-	{"Squad Battle", "Combat en escouade"},
-	{"Super Fiesta", "Méga fiesta"},
-	{"Super Husky Raid", "Super Husky Raid"},
-	{"Tactical Slayer", "Assassin tactique"},
-	{"Tactical Slayer (Snipers)", "Assassin tactique (Snipers)"},
-	{"Team Doubles", "Duo en équipe"},
-	{modeTeamSlayer, modeTeamSlayerFR},
-	{modeTeamSnipers, modeTeamSnipersFR},
-}
-
-// ReconcileMetadataSeeds ré-applique les seeds de traduction idempotents (modes +
-// playlists FR) sur la metadata.duckdb. À appeler au boot, juste après
-// RunForDB(db, TargetMetadata). Déplacé depuis internal/migration (Phase 1.5 b7) :
-// dépend de applyModeNameTr/applyPlaylistFRSeeds, désormais title-owned.
-//
-// Pourquoi (fix 2026-05-30) : les seeds sont portés par des migrations one-shot ;
-// quand de nouvelles traductions sont ajoutées APRÈS qu'une base a marqué la
-// migration "done", elle ne les reçoit jamais. Rejouer à chaque boot (strictement
-// idempotent) fait converger toute traduction ajoutée. Non destructif.
+// ReconcileMetadataSeeds reapplies the idempotent metadata hooks after the
+// migration runner. Historical migration IDs and the no-op playlist hook stay
+// in place so existing databases can upgrade without creating new non-English
+// rows.
 func ReconcileMetadataSeeds(db *sql.DB) error {
 	if db == nil {
 		return nil
@@ -176,47 +100,7 @@ func ReconcileMetadataSeeds(db *sql.DB) error {
 		return fmt.Errorf("reconcile mode_name_tr: %w", err)
 	}
 	if err := applyPlaylistFRSeeds(db); err != nil {
-		return fmt.Errorf("reconcile playlist FR: %w", err)
-	}
-	return nil
-}
-
-// applyPlaylistFRSeeds met à jour metadata.asset_translations pour les playlists
-// où la lang fr-FR (et fr) contient l'EN raw, en remplaçant par la traduction
-// canonique. Garde-fou strict : WHERE name = EN — n'écrase JAMAIS une traduction
-// FR déjà correcte. Insère aussi une ligne fr-FR si aucune n'existait (idempotent).
-func applyPlaylistFRSeeds(db *sql.DB) error {
-	for _, seed := range playlistFRSeeds {
-		if _, err := db.ExecContext(migration.BootCtx(), `
-			UPDATE asset_translations
-			SET name = ?
-			WHERE asset_type = 'playlist'
-			  AND lang IN ('fr', 'fr-FR')
-			  AND name = ?`,
-			seed.fr, seed.en,
-		); err != nil {
-			return fmt.Errorf("applyPlaylistFRSeeds UPDATE %q: %w", seed.en, err)
-		}
-
-		if _, err := db.ExecContext(migration.BootCtx(), `
-			INSERT OR IGNORE INTO asset_translations (asset_id, asset_type, lang, name)
-			SELECT en.asset_id, 'playlist', 'fr-FR', ?
-			FROM asset_translations en
-			WHERE en.asset_type = 'playlist'
-			  AND en.lang = 'en-US'
-			  AND en.name = ?
-			  AND NOT EXISTS (
-			    SELECT 1 FROM asset_translations fr
-			    WHERE fr.asset_id = en.asset_id
-			      AND fr.asset_type = 'playlist'
-			      AND fr.lang IN ('fr', 'fr-FR')
-			  )`,
-			seed.fr, seed.en,
-		); err != nil {
-			if !strings.Contains(err.Error(), "Constraint Error") {
-				return fmt.Errorf("applyPlaylistFRSeeds INSERT %q: %w", seed.en, err)
-			}
-		}
+		return fmt.Errorf("reconcile historical playlist seed: %w", err)
 	}
 	return nil
 }

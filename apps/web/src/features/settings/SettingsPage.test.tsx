@@ -5,7 +5,7 @@
  * le feedback éphémère et l'absence des boutons Annuler/Enregistrer.
  */
 import { beforeEach, describe, it, expect, vi } from 'vitest'
-import { screen, waitFor, fireEvent } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '@/test/render-utils'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { useRouterState } from '@tanstack/react-router'
@@ -44,7 +44,7 @@ beforeEach(() => {
     currentTitleSlug: 'halo_infinite',
     availableTitles: [],
     isTitleSwitching: false,
-    locale: 'fr',
+    locale: 'en',
     hintsVisible: true,
     capabilities: ENABLED_CAPABILITIES,
     setupRequired: false,
@@ -67,16 +67,6 @@ describe('SettingsPage', () => {
     expect(screen.queryByText(/Chargement des paramètres/i)).not.toBeInTheDocument()
   })
 
-  // Test "affiche le titre 'Paramètres'" supprimé : titre h1 retiré du composant
-  // (refacto post-84ae65ca, NavL1 expose la section). Le rendu post-loading est
-  // déjà couvert par le test "affiche la section Langue et affichage".
-
-  it('affiche la section Langue et affichage', async () => {
-    renderWithProviders(<SettingsPage />)
-    await waitFor(() => {
-      expect(screen.getByText(/Langue/i)).toBeInTheDocument()
-    })
-  })
 
   it('ne propose plus le Lab dans les Paramètres (déplacé vers Admin · Lab)', () => {
     vi.mocked(useRouterState).mockReturnValue({
@@ -95,15 +85,4 @@ describe('SettingsPage', () => {
     })
   })
 
-  it('appelle la mutation immédiatement lors du changement de langue', async () => {
-    renderWithProviders(<SettingsPage />)
-    const select = await screen.findByLabelText
-      ? screen.queryByDisplayValue('Français') ?? await waitFor(() => screen.getByDisplayValue('Français'))
-      : await waitFor(() => screen.getByDisplayValue('Français'))
-    fireEvent.change(select, { target: { value: 'en' } })
-    // La mutation est déclenchée sans clic sur Enregistrer
-    await waitFor(() => {
-      expect(select).toBeInTheDocument()
-    })
-  })
 })

@@ -27,7 +27,7 @@ title_slug = "` + slug + `"
 schema_version = 1
 
 [fields.kills]
-labels = { en = "Kills", fr = "Éliminations" }
+labels = { en = "Kills" }
 storage_unit = "count"
 display_unit = "count"
 format = "integer"
@@ -43,7 +43,7 @@ title_slug = "` + slug + `"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 10
 `
 }
@@ -55,7 +55,7 @@ title_slug = "` + slug + `"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 color_token = "outcome.positive"
 `
 }
@@ -89,8 +89,8 @@ func TestRegistry_LoadFromConfigDir_AllFiles(t *testing.T) {
 	}
 	if a, found := aset.Get("mode", "ranked"); !found {
 		t.Error("asset mode.ranked introuvable")
-	} else if lbl, _ := a.Label("fr"); lbl != "Classé" {
-		t.Errorf("asset label fr = %q", lbl)
+	} else if lbl, _ := a.Label("en"); lbl != "Ranked" {
+		t.Errorf("asset label en = %q", lbl)
 	}
 
 	// Outcomes chargés
@@ -159,9 +159,9 @@ title_slug = "broken_title"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked" }
+labels = { fr = "Classé" }
 display_order = 10
-`) // FR manquant → invalide
+`) // EN manquant → invalide
 
 	r := NewRegistry()
 	errs := r.LoadFromConfigDir(tmp, []string{"broken_title"}, nil)

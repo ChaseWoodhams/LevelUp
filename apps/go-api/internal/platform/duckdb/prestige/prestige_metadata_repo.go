@@ -196,7 +196,7 @@ func (r *PrestigeTemplateRepo) Replace(ctx context.Context, titleSlug string, te
 const templateSelectColumns = `
 	SELECT id, title_slug, metric, window_type, COALESCE(window_value, ''),
 	       cadence, eval_type, COALESCE(mode_filter, 'universal'),
-	       label_en, label_fr, COALESCE(description_en, ''), COALESCE(description_fr, ''),
+	       label_en, label_en, COALESCE(description_en, ''), COALESCE(description_en, ''),
 	       normal_target, heroic_target, legendary_target, mythic_target,
 	       COALESCE(lusr_components, ''), COALESCE(radar_axes, ''), COALESCE(is_long_term, FALSE),
 	       COALESCE(source, 'catalog'),
@@ -266,8 +266,8 @@ func (r *PrestigePresetArcRepo) ListByTitle(ctx context.Context, titleSlug strin
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	rows, err := r.db.QueryRecovered(ctx, `
-		SELECT id, title_slug, title_en, title_fr,
-		       COALESCE(description_en, ''), COALESCE(description_fr, ''),
+		SELECT id, title_slug, title_en, title_en,
+		       COALESCE(description_en, ''), COALESCE(description_en, ''),
 		       schema_version, updated_at
 		FROM preset_arc WHERE title_slug = ? ORDER BY id
 	`, titleSlug)
@@ -292,8 +292,8 @@ func (r *PrestigePresetArcRepo) GetByID(ctx context.Context, id string) (prestig
 	defer cancel()
 	var p prestige.PresetArc
 	rows, err := r.db.QueryRowRecovered(ctx, `
-		SELECT id, title_slug, title_en, title_fr,
-		       COALESCE(description_en, ''), COALESCE(description_fr, ''),
+		SELECT id, title_slug, title_en, title_en,
+		       COALESCE(description_en, ''), COALESCE(description_en, ''),
 		       schema_version, updated_at
 		FROM preset_arc WHERE id = ?
 	`, id)

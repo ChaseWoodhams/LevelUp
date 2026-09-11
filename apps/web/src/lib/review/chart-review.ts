@@ -29,7 +29,7 @@ export type ChartReviewStatus = 'verify' | 'new' | 'removal'
 
 export interface ChartReview {
   status: ChartReviewStatus
-  /** Note courte affichée au survol. FR + EN obligatoires (parité par typage). */
+  /** Note courte affichée au survol. */
   note: Record<Locale, string>
 }
 
@@ -44,14 +44,12 @@ export const CHART_REVIEW: Record<string, ChartReview> = {
   'timeseries.avg_life_trend': {
     status: 'verify',
     note: {
-      fr: "La courbe utilise désormais la durée de vie réelle de l'API (plus l'estimation temps joué / (morts + 1)). Les valeurs te paraissent-elles justes ?",
       en: 'This curve now uses the real average life from the API (no longer the time played / (deaths + 1) estimate). Do the values look right?',
     },
   },
   'timeseries.life_histogram': {
     status: 'verify',
     note: {
-      fr: "Histogramme rebasé sur la durée de vie réelle de l'API. Les anciens matchs sans la valeur retombent sur l'ancienne estimation : la distribution reste-t-elle cohérente ?",
       en: 'Histogram rebased on the real average life from the API. Older matches without the value fall back to the old estimate: is the distribution still coherent?',
     },
   },
@@ -60,7 +58,6 @@ export const CHART_REVIEW: Record<string, ChartReview> = {
   'timeseries.session_performance': {
     status: 'verify',
     note: {
-      fr: 'Le taux de victoire a maintenant son propre axe en pourcentage (0-100) et le MMR le sien : les deux courbes sont-elles enfin lisibles ?',
       en: 'Win rate now has its own percentage axis (0-100) and MMR its own: are both lines finally readable?',
     },
   },
@@ -69,7 +66,6 @@ export const CHART_REVIEW: Record<string, ChartReview> = {
   'squad.synergy_radar': {
     status: 'verify',
     note: {
-      fr: "Le survol affiche la valeur normalisée ET la valeur brute de chaque axe. L'axe Score te semble-t-il correctement calibré ?",
       en: 'The tooltip now shows both the normalized and the raw value of each axis. Does the Score axis look correctly calibrated?',
     },
   },
@@ -78,14 +74,12 @@ export const CHART_REVIEW: Record<string, ChartReview> = {
   'timeseries.outcome_tape': {
     status: 'new',
     note: {
-      fr: "Losange = moment fort du match (domination, remontada…), mêmes couleurs que la colonne Dominance de l'Explorateur. Utile ici ?",
       en: 'Diamond = standout match moment (domination, comeback…), same colors as the Explorer Dominance column. Useful here?',
     },
   },
   'squad.outcome_tape': {
     status: 'new',
     note: {
-      fr: "Losange = moment fort du match (domination, remontada…), mêmes couleurs que la colonne Dominance de l'Explorateur. Utile ici ?",
       en: 'Diamond = standout match moment (domination, comeback…), same colors as the Explorer Dominance column. Useful here?',
     },
   },
@@ -94,28 +88,24 @@ export const CHART_REVIEW: Record<string, ChartReview> = {
   'timeseries.fda_distribution': {
     status: 'verify',
     note: {
-      fr: "Deux lectures du FDA sur le même onglet : cette distribution et la courbe « FDA (valeur) ». Chacune apporte-t-elle quelque chose ?",
       en: 'Two readings of KDA on the same tab: this distribution and the "KDA (value)" trend. Does each of them earn its place?',
     },
   },
   'timeseries.fda_value_trend': {
     status: 'verify',
     note: {
-      fr: "Deux lectures du FDA sur le même onglet : cette courbe et la distribution. Chacune apporte-t-elle quelque chose ?",
       en: 'Two readings of KDA on the same tab: this trend and the distribution. Does each of them earn its place?',
     },
   },
   'timeseries.skill_progression': {
     status: 'verify',
     note: {
-      fr: "Deux lectures du classement sur le même onglet : cette courbe longue et « Classement + Performance ». Chacune apporte-t-elle quelque chose ?",
       en: 'Two readings of skill rank on the same tab: this long curve and "Skill rank + Performance". Does each of them earn its place?',
     },
   },
   'timeseries.skill_rank_perf': {
     status: 'verify',
     note: {
-      fr: "Deux lectures du classement sur le même onglet : ce graphe et la courbe de progression. Chacune apporte-t-elle quelque chose ?",
       en: 'Two readings of skill rank on the same tab: this chart and the progression curve. Does each of them earn its place?',
     },
   },
@@ -124,14 +114,12 @@ export const CHART_REVIEW: Record<string, ChartReview> = {
   'timeseries.intensity_profile': {
     status: 'verify',
     note: {
-      fr: "Profil médian + enveloppe P25-P75 : ce rendu a remplacé la heatmap matchs × phases. Il se lit mieux ?",
       en: 'Median profile + P25-P75 envelope: this replaced the matches × phases heatmap. Does it read better?',
     },
   },
   'squad.intensity_profile': {
     status: 'verify',
     note: {
-      fr: "Profil médian + enveloppe P25-P75 par joueur : ce rendu a remplacé la heatmap matchs × phases. Il se lit mieux ?",
       en: 'Median profile + P25-P75 envelope per player: this replaced the matches × phases heatmap. Does it read better?',
     },
   },

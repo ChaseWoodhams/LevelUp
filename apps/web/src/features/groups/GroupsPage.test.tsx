@@ -37,7 +37,7 @@ function renderPage(groups: Group[] = [GROUP]) {
 
 beforeEach(() => {
   // Owner = alice-x → boutons propriétaire visibles.
-  useAppShellStore.setState({ locale: 'fr', linkedHaloIdentity: { xuid: 'alice-x', gamertag: 'Alice' } })
+  useAppShellStore.setState({ locale: 'en', linkedHaloIdentity: { xuid: 'alice-x', gamertag: 'Alice' } })
 })
 
 describe('GroupsPage — rendu', () => {
@@ -46,15 +46,15 @@ describe('GroupsPage — rendu', () => {
     expect(screen.getByText('Famille')).toBeTruthy()
     expect(screen.getByText('Alice')).toBeTruthy()
     expect(screen.getByText('Bob')).toBeTruthy()
-    expect(screen.getByText(/propriétaire/i)).toBeTruthy()
+    expect(screen.getByText(/owner/i)).toBeTruthy()
     // Propriétaire → boutons Renommer/Supprimer présents.
-    expect(screen.getByText(/Renommer/i)).toBeTruthy()
-    expect(screen.getByText(/Supprimer/i)).toBeTruthy()
+    expect(screen.getByText(/Rename/i)).toBeTruthy()
+    expect(screen.getByText(/Delete/i)).toBeTruthy()
   })
 
   it('liste vide → message dédié', () => {
     renderPage([])
-    expect(screen.getByText(/aucun groupe/i)).toBeTruthy()
+    expect(screen.getByText(/Not in any group yet\./i)).toBeTruthy()
   })
 })
 
@@ -69,8 +69,8 @@ describe('GroupsPage — création', () => {
       http.get('/api/v1/groups', () => HttpResponse.json([GROUP])),
     )
     renderPage()
-    fireEvent.change(screen.getByPlaceholderText(/nouveau groupe/i), { target: { value: 'Amis' } })
-    fireEvent.click(screen.getByRole('button', { name: /^Créer$/i }))
+    fireEvent.change(screen.getByPlaceholderText(/New group name/i), { target: { value: 'Amis' } })
+    fireEvent.click(screen.getByRole('button', { name: /^Create$/i }))
     await waitFor(() => expect(payload).toEqual({ name: 'Amis' }))
   })
 })
@@ -85,7 +85,7 @@ describe('GroupsPage — invitation', () => {
       ),
     )
     renderPage()
-    fireEvent.click(screen.getByRole('button', { name: /Inviter un ami/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Invite a friend/i }))
     await waitFor(() => expect(writeText).toHaveBeenCalled())
     const link = writeText.mock.calls[0][0] as string
     expect(link.endsWith('/join?invite=ABC12345')).toBe(true)

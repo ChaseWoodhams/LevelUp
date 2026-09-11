@@ -87,7 +87,6 @@ func (s *TeammatesService) buildMedalDigest(
 	allSquadRows []domain.SquadMatchRow,
 	mainGamertag, mainXUID string,
 	teammates []domain.TeammateRow,
-	locale string,
 ) []domain.MedalDigestEntry {
 	if s.squadLoader == nil || len(allSquadRows) == 0 || len(teammates) == 0 {
 		return nil
@@ -119,7 +118,7 @@ func (s *TeammatesService) buildMedalDigest(
 		gamertags[i] = p.gamertag
 	}
 	emblems := s.squadLoader.LoadEmblemURLs(ctx, s.titleSlug, gamertags)
-	defs := resolveMedalDigestDefs(ctx, s.medalDefs, rows, locale)
+	defs := resolveMedalDigestDefs(ctx, s.medalDefs, rows)
 	return assembleMedalDigest(rows, players, defs, emblems, s.titleSlug)
 }
 
@@ -169,7 +168,6 @@ func resolveMedalDigestDefs(
 	ctx context.Context,
 	repo port.MedalDefinitionsRepository,
 	rows []port.MedalRow,
-	locale string,
 ) map[int64]port.MedalDefinitionRow {
 	if repo == nil {
 		return nil
@@ -182,7 +180,7 @@ func resolveMedalDigestDefs(
 			ids = append(ids, r.MedalID)
 		}
 	}
-	defs, err := repo.LookupByIDs(ctx, ids, locale)
+	defs, err := repo.LookupByIDs(ctx, ids, "en")
 	if err != nil {
 		slog.WarnContext(ctx, "teammates_medal_digest_defs_failed", "err", err)
 		return nil

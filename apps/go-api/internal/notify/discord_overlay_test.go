@@ -39,18 +39,19 @@ func TestLoadNotifyConfigForTitle(t *testing.T) {
 		t.Errorf("overlay absent != LoadNotifyConfig")
 	}
 
-	// (b) Overlay synthétique : webhook + lang surchargés, toggles hérités.
+	// (b) Overlay synthétique: webhook is overridden, language remains English,
+	// and toggles are inherited.
 	overlay := filepath.Join(dir, "overlay.json")
 	writeDiscordJSON(t, overlay, `{
 		"discord_webhook_url": "https://discord.com/api/webhooks/222/synth",
-		"discord_lang": "fr"
+		"discord_lang": "en"
 	}`)
 	o := LoadNotifyConfigForTitle(global, overlay)
 	if o.WebhookURL != "https://discord.com/api/webhooks/222/synth" {
 		t.Errorf("webhook = %q, want .../222/synth (overlay)", o.WebhookURL)
 	}
-	if o.Lang != "fr" {
-		t.Errorf("lang = %q, want fr (overlay)", o.Lang)
+	if o.Lang != "en" {
+		t.Errorf("lang = %q, want en", o.Lang)
 	}
 	if !o.NotifySync {
 		t.Error("discord_notify_sync devrait hériter du global (true)")

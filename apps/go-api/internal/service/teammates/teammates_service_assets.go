@@ -26,46 +26,46 @@ func enrichSquadMatchAssets(ctx context.Context, repo port.SquadRepository, rows
 	pairIDs := collectUniqueIDs(rows, func(r domain.SquadMatchRow) string { return r.PairID })
 	gameVariantIDs := collectUniqueIDs(rows, func(r domain.SquadMatchRow) string { return r.GameVariantID })
 
-	mapFR, err := repo.LoadAssetTranslationsFR(ctx, games.AssetKindMap, mapIDs)
+	mapNames, err := repo.LoadAssetNames(ctx, games.AssetKindMap, mapIDs)
 	if err != nil {
-		slog.WarnContext(ctx, "teammates: LoadAssetTranslationsFR map failed", "err", err)
+		slog.WarnContext(ctx, "teammates: load map names failed", "err", err)
 	}
-	playlistFR, err := repo.LoadAssetTranslationsFR(ctx, games.AssetKindPlaylist, playlistIDs)
+	playlistNames, err := repo.LoadAssetNames(ctx, games.AssetKindPlaylist, playlistIDs)
 	if err != nil {
-		slog.WarnContext(ctx, "teammates: LoadAssetTranslationsFR playlist failed", "err", err)
+		slog.WarnContext(ctx, "teammates: load playlist names failed", "err", err)
 	}
-	pairAssetFR, err := repo.LoadAssetTranslationsFR(ctx, games.AssetKindPair, pairIDs)
+	pairNames, err := repo.LoadAssetNames(ctx, games.AssetKindPair, pairIDs)
 	if err != nil {
-		slog.WarnContext(ctx, "teammates: LoadAssetTranslationsFR pair failed", "err", err)
+		slog.WarnContext(ctx, "teammates: load pair names failed", "err", err)
 	}
 	// game_variant (FR) : source du mode pour les titres SANS pair_name (Halo 5).
 	// Le mode = nom de la variante de jeu résolu depuis game_variant_id. Même
 	// résolveur que map/playlist/pair (asset_translations) — read-time, zéro
 	// backfill. Title-agnostic : Infinite a pair_name → ce fallback n'est pas
 	// consulté (squadModeUI le préfère). Un 3e titre sans pair_name en bénéficie.
-	gameVariantFR, err := repo.LoadAssetTranslationsFR(ctx, games.AssetKindGameVariant, gameVariantIDs)
+	gameVariantNames, err := repo.LoadAssetNames(ctx, games.AssetKindGameVariant, gameVariantIDs)
 	if err != nil {
-		slog.WarnContext(ctx, "teammates: LoadAssetTranslationsFR game_variant failed", "err", err)
+		slog.WarnContext(ctx, "teammates: load game variant names failed", "err", err)
 	}
 	// mode_name_tr (FR) des modes EN normalisés — dérivés du pair_name brut ET
 	// des noms d'asset résolus, pour couvrir le cas pair_name=UUID. Même cascade
 	// canonique que match_history (applyMatchHistoryFRTranslations).
-	modeFR := loadSquadModeFR(ctx, repo, rows, pairAssetFR)
+	modeNames := loadSquadModeNames(ctx, repo, rows, pairNames)
 
 	for i := range rows {
-		if fr := strings.TrimSpace(mapFR[rows[i].MapID]); fr != "" {
-			rows[i].MapUI = fr
+		if name := strings.TrimSpace(mapNames[rows[i].MapID]); name != "" {
+			rows[i].MapUI = name
 		}
-		if fr := strings.TrimSpace(playlistFR[rows[i].PlaylistID]); fr != "" {
-			rows[i].PlaylistName = fr
+		if name := strings.TrimSpace(playlistNames[rows[i].PlaylistID]); name != "" {
+			rows[i].PlaylistName = name
 		}
-		if fr := strings.TrimSpace(gameVariantFR[rows[i].GameVariantID]); fr != "" {
-			rows[i].GameVariantNameFR = fr
+		if name := strings.TrimSpace(gameVariantNames[rows[i].GameVariantID]); name != "" {
+			rows[i].GameVariantNameFR = name
 		}
 		// Résolution canonique du libellé FR du mode (source unique partagée avec
 		// home / historique / filtres). Gère pair_name brut, vide ou UUID.
-		rows[i].PairNameFR = analysis.ResolvePairNameFR(
-			rows[i].PairName, rows[i].PairNameFR, pairAssetFR[rows[i].PairID], modeFR)
+		rows[i].PairNameFR = analysis.ResolvePairName(
+			rows[i].PairName, rows[i].PairNameFR, pairNames[rows[i].PairID], modeNames)
 	}
 }
 
@@ -73,11 +73,11 @@ func enrichSquadMatchAssets(ctx context.Context, repo port.SquadRepository, rows
 // des pair_name bruts ET des noms d'asset résolus (pair_id). Miroir de
 // match_history : nécessaire car un pair_name brut peut être un UUID, auquel cas
 // le nom EN exploitable vient de asset_translations[pair_id].
-func loadSquadModeFR(
+func loadSquadModeNames(
 	ctx context.Context,
 	repo port.SquadRepository,
 	rows []domain.SquadMatchRow,
-	pairAssetFR map[string]string,
+	pairNames map[string]string,
 ) map[string]string {
 	seen := make(map[string]struct{}, 16)
 	modeENs := make([]string, 0, 16)
@@ -92,17 +92,17 @@ func loadSquadModeFR(
 	for _, r := range rows {
 		add(r.PairName)
 		if r.PairID != "" {
-			add(pairAssetFR[r.PairID])
+			add(pairNames[r.PairID])
 		}
 	}
 	if len(modeENs) == 0 {
 		return nil
 	}
-	modeFR, err := repo.LoadModeTranslationsFR(ctx, modeENs)
+	modeNames, err := repo.LoadModeNames(ctx, modeENs)
 	if err != nil {
-		slog.WarnContext(ctx, "teammates: LoadModeTranslationsFR failed", "err", err)
+		slog.WarnContext(ctx, "teammates: load mode names failed", "err", err)
 	}
-	return modeFR
+	return modeNames
 }
 
 func collectUniqueIDs(rows []domain.SquadMatchRow, idOf func(domain.SquadMatchRow) string) []string {

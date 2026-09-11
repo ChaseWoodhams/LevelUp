@@ -33,14 +33,14 @@ import { TimeseriesLineChart } from '@/components/charts/TimeseriesLineChart'
 
 import { TimeseriesKdaBars } from '@/features/timeseries/TimeseriesKdaBars'
 import type { TimeseriesMatchRow } from '@/lib/api/types'
-import { DOW_LABELS_FR } from '@/lib/formatters'
+import { DOW_LABELS_EN } from '@/lib/formatters'
 
 // ─── Sample data ───────────────────────────────────────────────────────────
 
 const TIMESERIES_LINE_SERIES = [
   {
     key: 'demo.kd',
-    meta: { gamertag: 'K/D cumulé' },
+    meta: { gamertag: 'Cumulative K/D' },
     datapoints: Array.from({ length: 12 }, (_, i) => ({
       x: new Date(2026, 0, 1 + i * 2).toISOString(),
       y: 0.8 + Math.sin(i / 2) * 0.4 + i * 0.05,
@@ -87,9 +87,9 @@ const DONUT_SERIES = [
     key: 'demo.donut',
     meta: { gamertag: 'donut' },
     datapoints: [
-      { name: 'Victoires', value: 12 },
-      { name: 'Défaites', value: 5 },
-      { name: 'Égalités', value: 2 },
+      { name: 'Wins', value: 12 },
+      { name: 'Losses', value: 5 },
+      { name: 'Ties', value: 2 },
     ],
   },
 ]
@@ -112,7 +112,7 @@ const HEATMAP_SERIES = [
       const value = 0.5 + 0.2 * Math.sin((hour / 12) * Math.PI * 2 + day)
       return {
         x: String(hour + 8).padStart(2, '0'),
-        y: DOW_LABELS_FR[day],
+        y: DOW_LABELS_EN[day],
         value: Math.round(value * 1000) / 1000,
         detail: { count: 3 + ((hour * 5 + day * 3) % 18) },
       }
@@ -138,7 +138,7 @@ const HISTOGRAM_SERIES = [
 const SCATTER_SERIES = [
   {
     key: 'outcome.win',
-    meta: { gamertag: 'Victoires' },
+    meta: { gamertag: 'Wins' },
     datapoints: [
       { x: 8, y: 1.6 },
       { x: 12, y: 2.4 },
@@ -148,7 +148,7 @@ const SCATTER_SERIES = [
   },
   {
     key: 'outcome.loss',
-    meta: { gamertag: 'Défaites' },
+    meta: { gamertag: 'Losses' },
     datapoints: [
       { x: 3, y: 0.6 },
       { x: 5, y: 0.8 },
@@ -160,7 +160,7 @@ const SCATTER_SERIES = [
 const RADAR_SERIES = [
   {
     key: 'demo.player_a',
-    meta: { gamertag: 'Joueur A' },
+    meta: { gamertag: 'Player A' },
     axes: [
       { axis: 'Combat', value: 78, raw: 78 },
       { axis: 'Survie', value: 62, raw: 62 },
@@ -172,7 +172,7 @@ const RADAR_SERIES = [
   },
   {
     key: 'demo.player_b',
-    meta: { gamertag: 'Joueur B' },
+    meta: { gamertag: 'Player B' },
     axes: [
       { axis: 'Combat', value: 65, raw: 65 },
       { axis: 'Survie', value: 80, raw: 80 },
@@ -311,14 +311,14 @@ export function ChartsShowcasePage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ShowcaseSection
           title="TimeseriesLineChart"
-          description="Multi-séries temporelles avec axe X time/category/value"
+          description="Multi-series time chart with a time/category/value X axis"
         >
           <TimeseriesLineChart series={TIMESERIES_LINE_SERIES} height={260} xAxisType="time" />
         </ShowcaseSection>
 
         <ShowcaseSection
           title="BarStackedChart"
-          description="Barres empilées avec couleurs par composante"
+          description="Stacked bars colored by component"
         >
           <BarStackedChart
             series={BAR_STACKED_SERIES}
@@ -334,19 +334,19 @@ export function ChartsShowcasePage() {
 
         <ShowcaseSection
           title="BarGroupedChart"
-          description="Barres groupées (côte-à-côte)"
+          description="Grouped bars (side by side)"
         >
           <BarGroupedChart
             series={BAR_GROUPED_SERIES}
             height={260}
             componentColors={{ Filtré: 'chart-series-1', Total: 'chart-series-3' }}
-            componentOrder={['Filtré', 'Total']}
+            componentOrder={['Filtered', 'Total']}
           />
         </ShowcaseSection>
 
         <ShowcaseSection
           title="DonutChart"
-          description="Pie/donut avec couleurs par slice"
+          description="Pie/donut colored by slice"
         >
           <DonutChart
             series={DONUT_SERIES}
@@ -361,7 +361,7 @@ export function ChartsShowcasePage() {
 
         <ShowcaseSection
           title="Heatmap2DChart"
-          description="Heatmap 2D avec gradient sequential"
+          description="2D heatmap with a sequential gradient"
         >
           <Heatmap2DChart series={HEATMAP_SERIES} height={260} paletteMode="sequential" />
         </ShowcaseSection>
@@ -380,7 +380,7 @@ export function ChartsShowcasePage() {
 
         <ShowcaseSection
           title="ScatterChart"
-          description="Scatter multi-séries avec couleurs par série"
+          description="Multi-series scatter colored by series"
         >
           <ScatterChart
             series={SCATTER_SERIES}
@@ -396,7 +396,7 @@ export function ChartsShowcasePage() {
 
         <ShowcaseSection
           title="RadarChart"
-          description="Radar 6 axes multi-joueurs (0..100 normalisés)"
+          description="6-axis multi-player radar (normalized 0..100)"
         >
           <RadarChart series={RADAR_SERIES} height={280} />
         </ShowcaseSection>
@@ -413,14 +413,14 @@ export function ChartsShowcasePage() {
 
         <ShowcaseSection
           title="FirstBloodLanes"
-          description="Bandes par joueur : nuages premier frag / première mort + fenêtre d'avance médiane (custom + scatter)"
+          description="Per-player lanes: first kill / first death clouds + median advance window (custom + scatter)"
         >
           <FirstBloodLanes data={FIRST_BLOOD_SERIES} />
         </ShowcaseSection>
 
         <ShowcaseSection
           title="TimeseriesKdaBars"
-          description="Bars K colorées par outcome + bars D négatives + line K/D"
+          description="K bars colored by outcome + negative D bars + K/D line"
         >
           <TimeseriesKdaBars
             rows={KDA_ROWS}

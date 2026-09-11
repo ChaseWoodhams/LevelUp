@@ -310,7 +310,7 @@ func TestGetChallenges_LiveOK(t *testing.T) {
 	if len(resp.Items) != 3 {
 		t.Fatalf("expected 3 active items, got %d", len(resp.Items))
 	}
-	if resp.Items[0].Title != "Défi avancé" || resp.Items[1].Title != "Défi en cours" || resp.Items[2].Title != "Défi pas commencé" {
+	if resp.Items[0].Title != "Advanced Challenge" || resp.Items[1].Title != "In Progress Challenge" || resp.Items[2].Title != "Not Started Challenge" {
 		t.Fatalf("unexpected item order: %#v", resp.Items)
 	}
 	if resp.Items[0].ProgressPercent == nil || int(*resp.Items[0].ProgressPercent) != 70 {

@@ -23,7 +23,7 @@ func (m *augmentStubClient) GetPlaylistCsr(_ context.Context, playlistID, _, _ s
 // TestAugmentWithActiveRankedCSRs vérifie que le fetch par-playlist complète les
 // playlists classées actives manquantes (avec nom de la référence), ne re-fetch
 // pas celles déjà présentes (player-level), et ignore celles sans réponse API
-// (laissées à la synthèse catalogue-first "Non classé").
+// (laissées à la synthèse catalogue-first "Unranked").
 func TestAugmentWithActiveRankedCSRs(t *testing.T) {
 	active := rankedplaylists.Active()
 	if len(active) < 2 {

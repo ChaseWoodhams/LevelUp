@@ -91,7 +91,7 @@ export function HomeAscensionWidget({ playerSlug, locale }: HomeAscensionWidgetP
           params={{ titleSlug, playerSlug }}
           className="mt-auto text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
-          {locale === 'en' ? 'View all →' : 'Voir tout →'}
+          {'View all →'}
         </Link>
       </CardContent>
       </Card>

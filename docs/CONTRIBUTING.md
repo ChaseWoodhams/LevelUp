@@ -1,7 +1,5 @@
 # Contributing to LevelUp
 
-French version: [FR/CONTRIBUTING.md](FR/CONTRIBUTING.md)
-
 Thank you for your interest in contributing to LevelUp! This document explains how to participate in the project.
 
 ## Table of Contents
@@ -35,7 +33,7 @@ LevelUp is a Go backend + React frontend monorepo. The two applications live und
 |------|-------|------|
 | `apps/go-api/` | Go (CGO + DuckDB) | HTTP API, sync engine, analysis, CLI tooling |
 | `apps/web/` | React 19 / Vite / TypeScript | Dashboard frontend |
-| `docs/` | Markdown | English documentation (`docs/FR/` = French mirror) |
+| `docs/` | Markdown | Project documentation |
 | `data/` | DuckDB / Parquet / JSON | Warehouses, per-player DBs, auth token store, config |
 | `.ai/` | Markdown | Agent working memory (project map, thought log, plans) |
 | `.claude/skills/` | Markdown | Agent skills (architecture rules, conventions) |
@@ -257,7 +255,6 @@ Before submitting a PR, verify:
 - [ ] Frontend: `npm run typecheck`, `npm run lint`, `npm run test:run` pass
 - [ ] No raw hex / Tailwind color classes in `features/` or `components/`
 - [ ] FR + EN i18n strings provided for new UI text
-- [ ] `docs/FR/` mirror updated if a `docs/` file changed
 - [ ] `.ai/thought_log.md` entry added
 - [ ] Commit messages follow Conventional Commits
 

@@ -13,10 +13,9 @@
  * viewer that cannot be looked at without a captured film and a running server is a viewer
  * nobody can review.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 
-import { Toggle } from '@/components/ui/controls'
-import { KNOWN_LOCALES, type Locale } from '@/lib/i18n/locale'
+import type { Locale } from '@/lib/i18n/locale'
 
 import { HomeScreen } from './app/HomeScreen'
 import { SHELL_TEXT } from './app/i18n'
@@ -28,9 +27,9 @@ import { normalizeReplayDocument } from './features/replay/replayNormalize'
 import { ReplayViewer } from './features/viewer/ReplayViewer'
 
 export function App() {
-  const [locale, setLocale] = useState<Locale>('fr')
+  const locale: Locale = 'en'
   const route = useRoute()
-  const t = SHELL_TEXT[locale]
+  const t = SHELL_TEXT.en
 
   // The document itself speaks the chosen language, title and `lang` included. Leaving
   // `lang` frozen at the value in index.html would tell a screen reader to pronounce
@@ -50,14 +49,6 @@ export function App() {
               {t.back}
             </a>
           )}
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="mr-1 text-xs text-muted-foreground">{t.localeLabel}</span>
-          {KNOWN_LOCALES.map((l) => (
-            <Toggle key={l} on={locale === l} onClick={() => setLocale(l)} label={l}>
-              {l.toUpperCase()}
-            </Toggle>
-          ))}
         </div>
       </header>
 

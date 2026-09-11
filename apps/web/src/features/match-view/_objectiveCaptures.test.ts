@@ -84,8 +84,8 @@ describe('extractCtfCaptures', () => {
   it('fallback xuid masqué quand le scorer est hors scoreboard', () => {
     const events = [flagCapture({ teamId: 0, timeMs: 1000, players: [{ xuid: '2533274801234567', role: 'scorer' }] })]
     const out = extractCtfCaptures(events, SCOREBOARD, 'me')
-    // displayPlayerName masque un xuid brut (>=15 chiffres) → "Joueur 4567"
-    expect(out[0].scorer).toBe('Joueur 4567')
+    // displayPlayerName masque un xuid brut (>=15 chiffres) → "Player 4567"
+    expect(out[0].scorer).toBe('Player 4567')
   })
 
   it('ignore les events sans timeMs ou sans teamId', () => {

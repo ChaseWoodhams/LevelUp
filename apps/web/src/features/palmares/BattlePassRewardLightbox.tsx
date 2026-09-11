@@ -138,7 +138,7 @@ export function BattlePassRewardLightbox({
   const rankLabel = current.rank == null ? null : `#${current.rank}`
   const rarityTier = normalizeRarity(current.quality)
   const rarityStyles = rarityStyle(rarityTier)
-  const typeLabel = itemTypeLabel(current.itemType, locale)
+  const typeLabel = itemTypeLabel(current.itemType)
   const subtitle = [rankLabel, typeLabel].filter(Boolean).join(' · ')
 
   return (
@@ -185,7 +185,7 @@ export function BattlePassRewardLightbox({
               type="button"
               onClick={onClose}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xl leading-none text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Fermer"
+              aria-label="Close"
             >
               ×
             </button>
@@ -221,7 +221,7 @@ export function BattlePassRewardLightbox({
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${rarityStyles.badge}`}
                     data-testid="battle-pass-reward-lightbox-rarity"
                   >
-                    {rarityLabel(rarityTier, locale)}
+                    {rarityLabel(rarityTier)}
                   </span>
                 )}
                 {current.badges?.map((badge, i) => (

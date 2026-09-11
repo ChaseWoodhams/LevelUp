@@ -86,24 +86,18 @@ func NewVehicleCommendationStatsRepo(pdb *PlayerDB) *VehicleCommendationStatsRep
 	return &VehicleCommendationStatsRepo{pdb: pdb}
 }
 
-// vehicleCommendationResolveQuery résout les UUID des commendations « véhicule
-// détruit » par NOM (locale-agnostic : matche name_en OU name_fr, robuste au seed
-// FR/EN). Le motif FR « Destructeur % » (espace) capture aussi « Destructeur
-// d'apparitions » (wraith) ; le motif EN « % Destroyer » capture « Banshee
-// Destroyer », etc. Le garde-fou NOT exclut un éventuel badge agrégé.
+// vehicleCommendationResolveQuery résout les UUID des commendations de véhicule
+// détruit par leur nom anglais. Le motif « % Destroyer » couvre les véhicules
+// concernés et le garde-fou NOT exclut un éventuel badge agrégé.
 //
 // Ne résout PLUS « Grand Theft »/« Vol à la tire » (hijack) : cette commendation
 // n'existe pas dans le référentiel Halo 5 (cf. package doc) — le hijack est résolu
 // séparément depuis medal_definitions/medals_earned (resolveHijackMedalIDs).
 const vehicleCommendationResolveQuery = `
 SELECT commendation_id,
-       COALESCE(name_en, '') AS name_en,
-       COALESCE(name_fr, '') AS name_fr
+       COALESCE(name_en, '') AS name_en
 FROM commendation_definitions
-WHERE (
-        name_en LIKE '% Destroyer'
-     OR name_fr LIKE 'Destructeur %'
-      )
+WHERE name_en LIKE '% Destroyer'
   AND name_en <> 'Vehicle Destroyer'
   AND name_en <> 'Vehicle Mastery'`
 
@@ -125,12 +119,12 @@ func (r *VehicleCommendationStatsRepo) resolve(ctx context.Context) map[string]s
 		defer rows.Close()
 		var vehicleNames []string
 		for rows.Next() {
-			var id, nameEN, nameFR string
-			if err := rows.Scan(&id, &nameEN, &nameFR); err != nil {
+			var id, nameEN string
+			if err := rows.Scan(&id, &nameEN); err != nil {
 				continue
 			}
 			r.vehicleIDs[id] = struct{}{}
-			vehicleNames = append(vehicleNames, pickName(nameFR, nameEN))
+			vehicleNames = append(vehicleNames, nameEN)
 		}
 		if err := rows.Err(); err != nil {
 			slog.WarnContext(ctx, "vehicle commendations: itération référentiel", "err", err)
@@ -328,12 +322,4 @@ FROM medals_earned
 WHERE xuid = ?
   AND match_id IN (` + Placeholders(nMatch) + `)
   AND medal_name_id IN (` + Placeholders(nIDs) + `)`
-}
-
-// pickName retourne le nom FR s'il est non vide, sinon l'EN (log auditable lisible).
-func pickName(nameFR, nameEN string) string {
-	if strings.TrimSpace(nameFR) != "" {
-		return nameFR
-	}
-	return nameEN
 }

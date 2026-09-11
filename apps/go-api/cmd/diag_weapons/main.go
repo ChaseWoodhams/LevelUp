@@ -54,7 +54,7 @@ func main() {
 	fmt.Println("\nWeapon labels from metadata:")
 	for _, wid := range weaponIDs {
 		var label sql.NullString
-		meta.QueryRow(`SELECT COALESCE(name_fr, name_en) FROM weapon_labels WHERE weapon_id = ?`, wid).Scan(&label)
+		meta.QueryRow(`SELECT COALESCE(name_en, '') FROM weapon_labels WHERE weapon_id = ?`, wid).Scan(&label)
 		lbl := "NOT FOUND"
 		if label.Valid {
 			lbl = label.String
@@ -98,7 +98,7 @@ func main() {
 	if len(weaponIDs) > 0 {
 		// Get label for top weapon
 		var topLabel sql.NullString
-		meta.QueryRow(`SELECT COALESCE(name_fr, name_en) FROM weapon_labels WHERE weapon_id = ?`, weaponIDs[0]).Scan(&topLabel)
+		meta.QueryRow(`SELECT COALESCE(name_en, '') FROM weapon_labels WHERE weapon_id = ?`, weaponIDs[0]).Scan(&topLabel)
 		lbl := fmt.Sprintf("%d", weaponIDs[0])
 		if topLabel.Valid {
 			lbl = topLabel.String

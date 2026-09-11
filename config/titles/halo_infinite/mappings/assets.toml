@@ -7,7 +7,7 @@
 # Lue au boot par internal/games/mappings/loader_assets.go.
 #
 # Convention : sections [assets.{kind}.{id}].
-# Champs obligatoires : labels.en, labels.fr, display_order.
+# Champs obligatoires : labels.en, display_order.
 # Champs optionnels : color_token, icon.
 #
 # Toute modification breaking incrémente schema_version (cf. tools/mappings/CHANGELOG.md).
@@ -24,35 +24,35 @@ schema_version = 1
 # =============================================================================
 
 [assets.mode.Assassin]
-labels = { en = "Slayer", fr = "Slayer" }
+labels = { en = "Slayer" }
 display_order = 10
 
 [assets.mode.Fiesta]
-labels = { en = "Fiesta", fr = "Fiesta" }
+labels = { en = "Fiesta" }
 display_order = 20
 
 [assets.mode."Super Fiesta"]
-labels = { en = "Super Fiesta", fr = "Super Fiesta" }
+labels = { en = "Super Fiesta" }
 display_order = 25
 
 [assets.mode."Husky Raid"]
-labels = { en = "Husky Raid", fr = "Husky Raid" }
+labels = { en = "Husky Raid" }
 display_order = 30
 
 [assets.mode.BTB]
-labels = { en = "Big Team Battle", fr = "Grande bataille en équipe" }
+labels = { en = "Big Team Battle" }
 display_order = 40
 
 [assets.mode.Ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 50
 
 [assets.mode.Firefight]
-labels = { en = "Firefight", fr = "Baptême du feu" }
+labels = { en = "Firefight" }
 display_order = 60
 
 [assets.mode.Other]
-labels = { en = "Other", fr = "Autre" }
+labels = { en = "Other" }
 display_order = 99
 
 # =============================================================================
@@ -60,22 +60,22 @@ display_order = 99
 # =============================================================================
 
 [assets.challenge_tier.normal]
-labels = { en = "Normal", fr = "Normal" }
+labels = { en = "Normal" }
 color_token = "challenge.normal"
 display_order = 10
 
 [assets.challenge_tier.heroic]
-labels = { en = "Heroic", fr = "Héroïque" }
+labels = { en = "Heroic" }
 color_token = "challenge.heroic"
 display_order = 20
 
 [assets.challenge_tier.legendary]
-labels = { en = "Legendary", fr = "Légendaire" }
+labels = { en = "Legendary" }
 color_token = "challenge.legendary"
 display_order = 30
 
 [assets.challenge_tier.mythic]
-labels = { en = "Mythic", fr = "Mythique" }
+labels = { en = "Mythic" }
 color_token = "challenge.mythic"
 display_order = 40
 
@@ -84,19 +84,19 @@ display_order = 40
 # =============================================================================
 
 [assets.cadence.daily]
-labels = { en = "Daily", fr = "Quotidien" }
+labels = { en = "Daily" }
 display_order = 10
 
 [assets.cadence.weekly]
-labels = { en = "Weekly", fr = "Hebdomadaire" }
+labels = { en = "Weekly" }
 display_order = 20
 
 [assets.cadence.monthly]
-labels = { en = "Monthly", fr = "Mensuel" }
+labels = { en = "Monthly" }
 display_order = 30
 
 [assets.cadence.free]
-labels = { en = "Free", fr = "Libre" }
+labels = { en = "Free" }
 display_order = 40
 
 # =============================================================================
@@ -104,23 +104,23 @@ display_order = 40
 # =============================================================================
 
 [assets.challenge_status.draft]
-labels = { en = "Draft", fr = "Brouillon" }
+labels = { en = "Draft" }
 display_order = 10
 
 [assets.challenge_status.active]
-labels = { en = "Active", fr = "Actif" }
+labels = { en = "Active" }
 display_order = 20
 
 [assets.challenge_status.completed]
-labels = { en = "Completed", fr = "Terminé" }
+labels = { en = "Completed" }
 display_order = 30
 
 [assets.challenge_status.expired]
-labels = { en = "Expired", fr = "Expiré" }
+labels = { en = "Expired" }
 display_order = 40
 
 [assets.challenge_status.abandoned]
-labels = { en = "Abandoned", fr = "Abandonné" }
+labels = { en = "Abandoned" }
 display_order = 50
 
 # =============================================================================
@@ -129,27 +129,27 @@ display_order = 50
 # =============================================================================
 
 [assets.prestige_level."0"]
-labels = { en = "Recruit", fr = "Recrue" }
+labels = { en = "Recruit" }
 display_order = 10
 
 [assets.prestige_level."1"]
-labels = { en = "Soldier", fr = "Soldat" }
+labels = { en = "Soldier" }
 display_order = 20
 
 [assets.prestige_level."2"]
-labels = { en = "Veteran", fr = "Vétéran" }
+labels = { en = "Veteran" }
 display_order = 30
 
 [assets.prestige_level."3"]
-labels = { en = "Specialist", fr = "Spécialiste" }
+labels = { en = "Specialist" }
 display_order = 40
 
 [assets.prestige_level."4"]
-labels = { en = "Elite", fr = "Élite" }
+labels = { en = "Elite" }
 display_order = 50
 
 [assets.prestige_level."5"]
-labels = { en = "Legendary", fr = "Légendaire" }
+labels = { en = "Legendary" }
 display_order = 60
 
 # =============================================================================
@@ -158,22 +158,22 @@ display_order = 60
 # =============================================================================
 
 [assets.medal_tier.bronze]
-labels = { en = "Bronze", fr = "Bronze" }
+labels = { en = "Bronze" }
 color_token = "medal.bronze"
 display_order = 10
 
 [assets.medal_tier.silver]
-labels = { en = "Silver", fr = "Argent" }
+labels = { en = "Silver" }
 color_token = "medal.silver"
 display_order = 20
 
 [assets.medal_tier.gold]
-labels = { en = "Gold", fr = "Or" }
+labels = { en = "Gold" }
 color_token = "medal.gold"
 display_order = 30
 
 [assets.medal_tier.mythic]
-labels = { en = "Mythic", fr = "Mythique" }
+labels = { en = "Mythic" }
 color_token = "medal.mythic"
 display_order = 40
 
@@ -196,49 +196,49 @@ display_order = 40
 # =============================================================================
 
 [assets.map.Aquarius]
-labels = { en = "Aquarius", fr = "Aquarius" }
+labels = { en = "Aquarius" }
 display_order = 10
 
 [assets.map.Bazaar]
-labels = { en = "Bazaar", fr = "Bazaar" }
+labels = { en = "Bazaar" }
 display_order = 20
 
 [assets.map.Catalyst]
-labels = { en = "Catalyst", fr = "Catalyst" }
+labels = { en = "Catalyst" }
 display_order = 30
 
 [assets.map."Live Fire"]
-labels = { en = "Live Fire", fr = "Live Fire" }
+labels = { en = "Live Fire" }
 display_order = 40
 
 [assets.map.Recharge]
-labels = { en = "Recharge", fr = "Recharge" }
+labels = { en = "Recharge" }
 display_order = 50
 
 [assets.map.Streets]
-labels = { en = "Streets", fr = "Streets" }
+labels = { en = "Streets" }
 display_order = 60
 
 [assets.map.Empyrean]
-labels = { en = "Empyrean", fr = "Empyrean" }
+labels = { en = "Empyrean" }
 display_order = 70
 
 [assets.map.Solitude]
-labels = { en = "Solitude", fr = "Solitude" }
+labels = { en = "Solitude" }
 display_order = 80
 
 [assets.map.Argyle]
-labels = { en = "Argyle", fr = "Argyle" }
+labels = { en = "Argyle" }
 display_order = 90
 
 [assets.map.Forbidden]
-labels = { en = "Forbidden", fr = "Forbidden" }
+labels = { en = "Forbidden" }
 display_order = 100
 
 # Exemple multi-titres : libellé FR différent de EN — démontre que le pipeline
 # d'asset labels passe bien par TOML pour toute string title-bound.
 [assets.map.Unknown]
-labels = { en = "Unknown", fr = "Inconnue" }
+labels = { en = "Unknown" }
 display_order = 999
 
 # =============================================================================
@@ -269,21 +269,21 @@ display_order = 999
 # =============================================================================
 
 [assets.season.season1]
-labels = { en = "Heroes of Reach", fr = "Heroes of Reach" }
+labels = { en = "Heroes of Reach" }
 display_order = 10
 start_date = "2021-12-08T17:00:00Z"
 end_date   = "2022-05-03T17:00:00Z"
 extra = { csr_season_id = "CsrSeason1", short_label = "S1" }
 
 [assets.season.season2]
-labels = { en = "Lone Wolves", fr = "Loups solitaires" }
+labels = { en = "Lone Wolves" }
 display_order = 20
 start_date = "2022-05-03T17:00:00Z"
 end_date   = "2022-11-08T17:00:00Z"
 extra = { csr_season_id = "CsrSeason2", short_label = "S2" }
 
 [assets.season.season_winter_22]
-labels = { en = "Winter Update", fr = "Mise à jour hivernale" }
+labels = { en = "Winter Update" }
 display_order = 25
 start_date = "2022-11-08T17:00:00Z"
 end_date   = "2023-03-07T17:00:00Z"
@@ -293,77 +293,77 @@ end_date   = "2023-03-07T17:00:00Z"
 extra = { csr_season_id = "CsrSeason2-2", short_label = "Winter 22", matchmade_path = "Seasons/Season-Winter-Break-22.json" }
 
 [assets.season.season3]
-labels = { en = "Echoes Within", fr = "Échos intérieurs" }
+labels = { en = "Echoes Within" }
 display_order = 30
 start_date = "2023-03-07T17:00:00Z"
 end_date   = "2023-06-20T17:00:00Z"
 extra = { csr_season_id = "CsrSeason3-1", short_label = "S3" }
 
 [assets.season.season4]
-labels = { en = "Infection", fr = "Infection" }
+labels = { en = "Infection" }
 display_order = 40
 start_date = "2023-06-20T17:00:00Z"
 end_date   = "2023-10-17T17:00:00Z"
 extra = { csr_season_id = "CsrSeason4-1", short_label = "S4" }
 
 [assets.season.season5]
-labels = { en = "Reckoning", fr = "Reckoning" }
+labels = { en = "Reckoning" }
 display_order = 50
 start_date = "2023-10-17T17:00:00Z"
 end_date   = "2024-01-30T18:00:00Z"
 extra = { csr_season_id = "CsrSeason5-1", short_label = "S5" }
 
 [assets.season.season6]
-labels = { en = "Spirit of Fire", fr = "Spirit of Fire" }
+labels = { en = "Spirit of Fire" }
 display_order = 60
 start_date = "2024-01-30T18:00:00Z"
 end_date   = "2024-04-30T18:00:00Z"
 extra = { csr_season_id = "CsrSeason6-1", short_label = "S6" }
 
 [assets.season.season7]
-labels = { en = "Banished Honor", fr = "Honneur Banished" }
+labels = { en = "Banished Honor" }
 display_order = 70
 start_date = "2024-04-30T18:00:00Z"
 end_date   = "2024-07-30T18:00:00Z"
 extra = { csr_season_id = "CsrSeason7-1", short_label = "S7" }
 
 [assets.season.season8]
-labels = { en = "Fleetcom", fr = "Fleetcom" }
+labels = { en = "Fleetcom" }
 display_order = 80
 start_date = "2024-07-30T18:00:00Z"
 end_date   = "2024-11-05T18:00:00Z"
 extra = { csr_season_id = "CsrSeason8-1", short_label = "S8" }
 
 [assets.season.season9]
-labels = { en = "Great Journey", fr = "Grand Voyage" }
+labels = { en = "Great Journey" }
 display_order = 90
 start_date = "2024-11-05T18:00:00Z"
 end_date   = "2025-02-04T18:00:00Z"
 extra = { csr_season_id = "CsrSeason9-1", short_label = "S9" }
 
 [assets.season.season10]
-labels = { en = "Frontlines", fr = "Lignes de front" }
+labels = { en = "Frontlines" }
 display_order = 100
 start_date = "2025-02-04T18:00:00Z"
 end_date   = "2025-05-06T18:00:00Z"
 extra = { csr_season_id = "CsrSeason10-1", short_label = "S10" }
 
 [assets.season.season11]
-labels = { en = "Last Stand", fr = "Dernier rempart" }
+labels = { en = "Last Stand" }
 display_order = 110
 start_date = "2025-05-06T18:00:00Z"
 end_date   = "2025-08-05T18:00:00Z"
 extra = { csr_season_id = "CsrSeason11-1", short_label = "S11" }
 
 [assets.season.season12]
-labels = { en = "Shadows", fr = "Ombres" }
+labels = { en = "Shadows" }
 display_order = 120
 start_date = "2025-08-05T18:00:00Z"
 end_date   = "2025-11-18T18:00:00Z"
 extra = { csr_season_id = "CsrSeason12-1", short_label = "S12" }
 
 [assets.season.season13]
-labels = { en = "Infinite", fr = "Infinite" }
+labels = { en = "Infinite" }
 display_order = 130
 start_date = "2025-11-18T18:00:00Z"
 extra = { csr_season_id = "CsrSeason13-1", short_label = "S13" }

@@ -67,7 +67,7 @@ export function evaluateDiagnostics(input: DiagnosticsInput): Verdict[] {
       out.push({
         level: 'warn',
         titleKey: 'admin.diag.contention',
-        evidence: `max ${contention.max_blocked_ms} ms · échecs swap ${contention.swap_failures}`,
+        evidence: `max ${contention.max_blocked_ms} ms · swap failures ${contention.swap_failures}`,
         to: '/admin/system',
       })
     }
@@ -167,7 +167,7 @@ function evaluateSchedulerRules(
       out.push({
         level: 'warn',
         titleKey: apiBound ? 'admin.diag.blocked_api_bound' : 'admin.diag.blocked_write_bound',
-        evidence: `${Math.round(last.blocked_ms / 1000)} s (${blockedPct}% du cycle) · écritures ${writeShare}%`,
+        evidence: `${Math.round(last.blocked_ms / 1000)} s (${blockedPct}% of cycle) · writes ${writeShare}%`,
         to: '/admin/sync',
       })
     }

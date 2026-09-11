@@ -41,7 +41,7 @@ describe('HomePage', () => {
     // les libellés locaux kpi.i18n.ts (pas la clé brute).
     renderWithProviders(<HomePage />)
     await waitFor(() => {
-      expect(screen.getByText('Taux de victoire')).toBeInTheDocument()
+      expect(screen.getByText('Win rate')).toBeInTheDocument()
     })
   })
 
@@ -291,9 +291,9 @@ describe('HomePage', () => {
     await waitFor(() => {
       expect(screen.getByText('Operation Alpha')).toBeInTheDocument()
       // alt localisé via la clé i18n home.battle_pass.image_alt (Lot D : plus d'alt FR
-      // figé). Le harness rend ici en FR (le store retombe sur 'fr' au render), d'où le
+      // figé). Le harness rend ici en FR (le store retombe sur 'en' au render), d'où le
       // libellé français attendu — en EN la clé produirait « Illustration of … ».
-      expect(screen.getByAltText('Illustration de Operation Alpha')).toBeInTheDocument()
+      expect(screen.getByAltText('Illustration of Operation Alpha')).toBeInTheDocument()
       expect(screen.getAllByText('Récompense 13').length).toBeGreaterThan(0)
     })
 
@@ -306,7 +306,7 @@ describe('HomePage', () => {
     expect(tierCards[1]).toHaveAttribute('data-current', 'true')
     expect(screen.getByTestId('home-battle-pass-active-tier-progress-fill')).toHaveStyle({ width: '30%' })
     expect(screen.getByTestId('home-battle-pass-active-tier-progress-current')).toHaveTextContent('300 XP')
-    expect(screen.getByTestId('home-battle-pass-active-tier-progress-target')).toHaveTextContent('1 000 XP')
+    expect(screen.getByTestId('home-battle-pass-active-tier-progress-target')).toHaveTextContent('1,000 XP')
     } finally {
       Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
         configurable: true,
@@ -405,11 +405,11 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Défis actifs/i)).toBeInTheDocument()
-      expect(screen.getByTestId('home-challenges-completed')).toHaveTextContent('0 / 3 complétés')
+      expect(screen.getByText(/Active challenges/i)).toBeInTheDocument()
+      expect(screen.getByTestId('home-challenges-completed')).toHaveTextContent('0 / 3 completed')
       expect(screen.getByTestId('home-challenges-card')).toHaveClass('min-h-[14rem]')
       expect(
-        screen.getByText((content) => content.replace(/\s+/g, ' ').includes('4 500 XP disponibles')),
+        screen.getByText((content) => content.replace(/\s+/g, ' ').includes('4,500 XP available')),
       ).toBeInTheDocument()
     })
 
@@ -502,12 +502,12 @@ describe('HomePage', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('home-challenges-card')).toHaveClass('min-h-[14rem]')
-      expect(screen.getByText('Aucun défi actif')).toBeInTheDocument()
-      expect(screen.getByText(/Tous les défis visibles sont terminés/i)).toBeInTheDocument()
+      expect(screen.getByText('No active challenge')).toBeInTheDocument()
+      expect(screen.getByText(/All visible challenges are complete/i)).toBeInTheDocument()
     })
 
     expect(screen.queryByTestId('home-challenge-item')).not.toBeInTheDocument()
-    expect(screen.getByTestId('home-challenges-completed')).toHaveTextContent('5 / 5 complétés')
+    expect(screen.getByTestId('home-challenges-completed')).toHaveTextContent('5 / 5 completed')
   })
 
   it('affiche les KPIs globaux (libellés locaux fallback quand TOML absent)', async () => {
@@ -516,8 +516,8 @@ describe('HomePage', () => {
     // locaux kpi.i18n.ts — JAMAIS la clé brute.
     renderWithProviders(<HomePage />)
     await waitFor(() => {
-      expect(screen.getByText('Matchs')).toBeInTheDocument()
-      expect(screen.getByText('Taux de victoire')).toBeInTheDocument()
+      expect(screen.getByText('Matches')).toBeInTheDocument()
+      expect(screen.getByText('Win rate')).toBeInTheDocument()
       expect(screen.getByText('KDA')).toBeInTheDocument()
     })
   })
@@ -532,9 +532,9 @@ describe('HomePage', () => {
   it('affiche des messages explicites pour les sections vides', async () => {
     renderWithProviders(<HomePage />)
     await waitFor(() => {
-      expect(screen.getByText(/Aucune session récente disponible/i)).toBeInTheDocument()
-      expect(screen.getByText(/Aucun point saillant disponible/i)).toBeInTheDocument()
-      expect(screen.getByText(/Aucun média récent disponible/i)).toBeInTheDocument()
+      expect(screen.getByText(/No recent session available/i)).toBeInTheDocument()
+      expect(screen.getByText(/No highlight available/i)).toBeInTheDocument()
+      expect(screen.getByText(/No recent media available/i)).toBeInTheDocument()
     })
   })
 
@@ -640,7 +640,7 @@ describe('HomePage', () => {
       // La lightbox CoverFlowModal expose un bouton "Fermer" — assertion minimale
       // que le clic sur la card a bien ouvert la lightbox. Le lien "Voir le match"
       // n'est plus rendu dans la lightbox actuelle.
-      expect(screen.getByRole('button', { name: /Fermer/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Close/i })).toBeInTheDocument()
     })
   })
 
@@ -652,7 +652,7 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />)
 
     await waitFor(() => {
-      expect(screen.getByText(/Accueil vide/i)).toBeInTheDocument()
+      expect(screen.getByText(/Empty home/i)).toBeInTheDocument()
     })
   })
 })

@@ -30,7 +30,6 @@ export function useNavPrefetch(playerSlug: string) {
       queryKey: queryKeys.home(
         playerSlug,
         useAppShellStore.getState().currentTitleSlug,
-        useAppShellStore.getState().locale,
       ),
       queryFn: () => api.get<HomePageResponse>(`/players/${playerSlug}/pages/home`),
       staleTime: PREFETCH_STALE_MS,

@@ -84,9 +84,7 @@ cadence = "weekly"
 eval_type = "sum"
 mode_filter = "universal"
 label_en = "Weekly Kills"
-label_fr = "Eliminations hebdo"
 description_en = "Kills over a week"
-description_fr = "Eliminations sur une semaine"
 normal_target = 50.0
 heroic_target = 100.0
 legendary_target = 200.0
@@ -100,9 +98,7 @@ window_value = ""
 cadence = "season"
 eval_type = "sum"
 label_en = "Ranked Wins"
-label_fr = "Victoires classees"
 description_en = "Wins in ranked"
-description_fr = "Victoires en classe"
 normal_target = 10.0
 heroic_target = 25.0
 legendary_target = 50.0
@@ -162,13 +158,13 @@ func TestSeedPrestigeFromTOML_Populates(t *testing.T) {
 	assertCount(t, db, "preset_arc", 1)
 	assertCount(t, db, "preset_arc_step", 2)
 
-	var labelFR, modeFilter string
-	if err := db.QueryRow(`SELECT label_fr, mode_filter FROM challenge_template WHERE id = 'kills_weekly'`).
-		Scan(&labelFR, &modeFilter); err != nil {
+	var labelEN, labelLegacy, modeFilter string
+	if err := db.QueryRow(`SELECT label_en, label_fr, mode_filter FROM challenge_template WHERE id = 'kills_weekly'`).
+		Scan(&labelEN, &labelLegacy, &modeFilter); err != nil {
 		t.Fatalf("query template: %v", err)
 	}
-	if labelFR != "Eliminations hebdo" {
-		t.Errorf("label_fr = %q", labelFR)
+	if labelEN != "Weekly Kills" || labelLegacy != "Weekly Kills" {
+		t.Errorf("labels = %q/%q, want Weekly Kills/Weekly Kills", labelEN, labelLegacy)
 	}
 	// mode_filter vide dans le TOML (wins_ranked) → défaut 'universal'.
 	var winsMode string

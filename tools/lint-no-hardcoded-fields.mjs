@@ -3,7 +3,7 @@
  * Lint custom — anti-hardcode des libellés FieldKey côté React.
  *
  * Phase D du plan multi-titres : détecte les littéraux strings qui
- * correspondent **exactement** aux labels FR ou EN d'un FieldKey canonique
+ * correspondent **exactement** aux labels EN d'un FieldKey canonique
  * (extraits de config/titles/halo_infinite/mappings/fields.toml) en dehors
  * des fichiers autorisés.
  *
@@ -48,17 +48,16 @@ const OUTCOMES_TOML_PATH = join(
   'config/titles/halo_infinite/mappings/outcomes.toml',
 )
 
-// ─── 1. Extraction des labels FR + EN depuis le TOML HI ──────────────────────
+// ─── 1. English labels extracted from the HI TOML ────────────────────────────
 
 function extractLabelsFromTOML(content) {
-  // Parse simple : on récupère toutes les lignes `labels = { en = "X", fr = "Y" }`
+  // Simple parse: collect every `labels = { en = "X" }` line (the mappings are English-only).
   // Suffisant pour ce lint, pas besoin de parser TOML complet.
   const labels = new Set()
-  const re = /labels\s*=\s*\{\s*en\s*=\s*"([^"]+)"\s*,\s*fr\s*=\s*"([^"]+)"\s*\}/g
+  const re = /labels\s*=\s*\{\s*en\s*=\s*"([^"]+)"\s*\}/g
   let m
   while ((m = re.exec(content)) !== null) {
-    labels.add(m[1]) // EN
-    labels.add(m[2]) // FR
+    labels.add(m[1])
   }
   return labels
 }
@@ -215,7 +214,7 @@ function main() {
   }
 
   // Phase 4.3 plan finition multi-titres : étendre le scan aux assets et outcomes.
-  // Un libellé d'asset (ex : "Héroïque") ou d'outcome (ex : "Victoire") hardcodé
+  // Un libellé d'asset (ex : "Heroic") ou d'outcome (ex : "Win") hardcodé
   // dans un composant React est tout aussi problématique qu'un libellé de FieldKey.
   const assetsTOML = readTOMLOrEmpty(ASSETS_TOML_PATH)
   if (assetsTOML) {
@@ -230,7 +229,7 @@ function main() {
     }
   }
 
-  console.log(`lint-no-hardcoded-fields: ${labels.size} labels FR+EN à vérifier.`)
+  console.log(`lint-no-hardcoded-fields: ${labels.size} labels to check.`)
 
   let totalViolations = 0
   let filesScanned = 0

@@ -41,7 +41,6 @@ export interface EngagementSnapshot {
 
 export interface SkillRatingSnapshot {
   tier_name: string
-  tier_name_fr: string
   sub_tier: number
   label: string
   mu: number
@@ -101,9 +100,7 @@ export interface SuggestedChallenge {
   arc_id?: string
   // V2 §3 : hydratés côté backend depuis le template prestige. Permettent
   // à l'UI d'afficher un libellé humain sans charger le catalogue séparément.
-  label_fr?: string
   label_en?: string
-  description_fr?: string
   description_en?: string
 }
 

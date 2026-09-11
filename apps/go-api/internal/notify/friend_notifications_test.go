@@ -18,7 +18,7 @@ func TestNotifyFriendAdded_NoOpWhenWebhookEmpty(t *testing.T) {
 	// Pas de webhook → pas de panic, pas d'envoi.
 	cfg := NotifyConfig{
 		WebhookURL:    "",
-		Lang:          "fr",
+		Lang:          "en",
 		NotifyFriends: true,
 	}
 	NotifyFriendAdded(cfg, "FriendOne") // ne doit pas paniquer
@@ -28,7 +28,7 @@ func TestNotifyFriendAdded_NoOpWhenFriendsOff(t *testing.T) {
 	// NotifyFriends=false → no-op.
 	cfg := NotifyConfig{
 		WebhookURL:    "https://discord.com/api/webhooks/fake/url",
-		Lang:          "fr",
+		Lang:          "en",
 		NotifyFriends: false,
 	}
 	NotifyFriendAdded(cfg, "FriendOne")
@@ -38,7 +38,7 @@ func TestNotifyFriendSyncCompleted_NoOpWhenPromotedZero(t *testing.T) {
 	// promoted=0 → no-op (recompute no-op, pas de notif inutile).
 	cfg := NotifyConfig{
 		WebhookURL:    "https://discord.com/api/webhooks/fake/url",
-		Lang:          "fr",
+		Lang:          "en",
 		NotifyFriends: true,
 	}
 	NotifyFriendSyncCompleted(cfg, "test-player", 0)
@@ -47,36 +47,29 @@ func TestNotifyFriendSyncCompleted_NoOpWhenPromotedZero(t *testing.T) {
 func TestNotifyFriendSyncCompleted_NoOpWhenFriendsOff(t *testing.T) {
 	cfg := NotifyConfig{
 		WebhookURL:    "https://discord.com/api/webhooks/fake/url",
-		Lang:          "fr",
+		Lang:          "en",
 		NotifyFriends: false,
 	}
 	NotifyFriendSyncCompleted(cfg, "test-player", 5)
 }
 
-func TestNotifyFriendSyncCompleted_DescSelectionFR(t *testing.T) {
-	// Vérifie le switch singular/plural FR via T (sans envoyer).
-	descOne := T("discord_friend_sync_desc_one", "fr", "promoted", 1, "slug", "x")
+func TestNotifyFriendSyncCompleted_DescSelectionEnglish(t *testing.T) {
+	// Verify singular/plural English templates without sending a webhook.
+	descOne := T("discord_friend_sync_desc_one", "en", "promoted", 1, "slug", "x")
 	if descOne == "" {
-		t.Fatal("expected non-empty desc one FR")
+		t.Fatal("expected non-empty English singular description")
 	}
 	if !contains(descOne, "1 match") {
-		t.Errorf("expected FR singular '1 match' in %q", descOne)
+		t.Errorf("expected English singular '1 match' in %q", descOne)
 	}
 
-	descMany := T("discord_friend_sync_desc_many", "fr", "promoted", 7, "slug", "x")
-	if !contains(descMany, "7 matchs") {
-		t.Errorf("expected FR plural '7 matchs' in %q", descMany)
-	}
-}
-
-func TestNotifyFriendAdded_TitleFR(t *testing.T) {
-	title := T("discord_friend_added_title", "fr")
-	if !contains(title, "ami") {
-		t.Errorf("expected FR title to contain 'ami', got %q", title)
+	descMany := T("discord_friend_sync_desc_many", "en", "promoted", 7, "slug", "x")
+	if !contains(descMany, "7 matches") {
+		t.Errorf("expected English plural '7 matches' in %q", descMany)
 	}
 }
 
-func TestNotifyFriendAdded_TitleEN(t *testing.T) {
+func TestNotifyFriendAdded_TitleEnglish(t *testing.T) {
 	title := T("discord_friend_added_title", "en")
 	if !contains(title, "friend") {
 		t.Errorf("expected EN title to contain 'friend', got %q", title)

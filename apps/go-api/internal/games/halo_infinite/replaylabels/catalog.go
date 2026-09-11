@@ -59,7 +59,7 @@ func Load(repoRoot, titleSlug string) (replay.LabelCatalog, error) {
 func weaponNames(in map[string]mappings.WeaponName) map[string]replay.Label {
 	out := make(map[string]replay.Label, len(in))
 	for k, v := range in {
-		out[k] = replay.Label{En: v.En, Fr: v.Fr}
+		out[k] = replay.Label{En: v.En}
 	}
 	return out
 }
@@ -72,7 +72,7 @@ func toLabels(in []mappings.BilingualLabel) []replay.Label {
 	}
 	out := make([]replay.Label, 0, len(in))
 	for _, l := range in {
-		out = append(out, replay.Label{En: l.En, Fr: l.Fr})
+		out = append(out, replay.Label{En: l.En})
 	}
 	return out
 }
@@ -83,7 +83,7 @@ func abilitiesByIndex(in map[int]mappings.BilingualLabel) map[int]replay.Label {
 	}
 	out := make(map[int]replay.Label, len(in))
 	for idx, l := range in {
-		out[idx] = replay.Label{En: l.En, Fr: l.Fr}
+		out[idx] = replay.Label{En: l.En}
 	}
 	return out
 }

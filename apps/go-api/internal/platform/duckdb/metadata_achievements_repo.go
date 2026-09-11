@@ -29,7 +29,7 @@ func (r *MetadataRepo) GetAchievementDefinitions(ctx context.Context, titleSlug 
 	defer cancel()
 
 	rows, err := r.meta.Query(ctx, `
-		SELECT achievement_id, name_en, name_fr, description_en, description_fr,
+		SELECT achievement_id, name_en, name_en, description_en, description_en,
 		       locked_desc_en, locked_desc_fr, gamerscore, image_url, is_secret,
 		       rarity_category, rarity_percent, xbox_title_id, service_config_id
 		FROM xbox_achievement_definitions

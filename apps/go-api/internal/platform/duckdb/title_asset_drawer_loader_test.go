@@ -42,7 +42,7 @@ func TestLoadTeamColorNames_ReadsColor(t *testing.T) {
 		t.Errorf("team 2 color (NULL) = %q, want \"\"", got)
 	}
 	// Les noms restent lus en parallèle (non-régression).
-	if m[0].NameFR != "Rouge" || m[0].NameEN != "Red" {
-		t.Errorf("team 0 names = %q/%q, want Red/Rouge", m[0].NameEN, m[0].NameFR)
+	if m[0].NameFR != "Red" || m[0].NameEN != "Red" {
+		t.Errorf("team 0 names = %q/%q, want Red/Red", m[0].NameEN, m[0].NameFR)
 	}
 }

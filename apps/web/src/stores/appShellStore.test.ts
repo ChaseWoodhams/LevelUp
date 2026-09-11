@@ -27,7 +27,7 @@ const BOOTSTRAP_READY = {
   available_titles: [
     { slug: 'halo_infinite', name: 'Halo Infinite', status: 'active' as const, capabilities: ['matchmaking'], is_default: true, effective_hp_to_kill: 225, provides_damage_taken: true, provides_team_mmr: true, provides_max_killing_spree: true, offensive_conversion_p80: 0.9, defensive_resistance_p80: 1.65 },
   ],
-  locale: 'fr',
+  locale: 'en',
   hints_visible_default: true,
   feature_flags: {
     v7_enabled: true,
@@ -48,7 +48,7 @@ const BOOTSTRAP_READY = {
     can_manage_instance: true,
   },
   settings_excerpt: {
-    lang: 'fr',
+    lang: 'en',
     user_timezone: 'UTC',
     show_records: true,
     normalize_mode_labels: true,
@@ -73,7 +73,7 @@ describe('AppShellStore', () => {
       availablePlayers: [],
       currentTitleSlug: 'halo_infinite',
       availableTitles: [],
-      locale: 'fr',
+      locale: 'en',
       hintsVisible: true,
       capabilities: null,
       setupRequired: false,
@@ -120,10 +120,6 @@ describe('AppShellStore', () => {
     expect(useAppShellStore.getState().currentPlayer?.player_slug).toBe('other-player')
   })
 
-  it('setLocale change la locale', () => {
-    useAppShellStore.getState().setLocale('en')
-    expect(useAppShellStore.getState().locale).toBe('en')
-  })
 
   it('capabilities peuplées depuis bootstrap', () => {
     useAppShellStore.getState().hydrateFromBootstrap(BOOTSTRAP_READY)

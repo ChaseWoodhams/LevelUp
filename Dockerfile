@@ -182,8 +182,8 @@ COPY config /app/config
 # pas dans le conteneur → 404 sur tout /static/* (prod + demo).
 COPY static /app/static
 
-# Docs (RELEASE_NOTES.md, CHANGELOG.md, FR/) — lus au runtime par
-# release_notes_service.go (docs/FR/RELEASE_NOTES.md) et changelog.go
+# Docs (RELEASE_NOTES.md, CHANGELOG.md) — lus au runtime by
+# release_notes_service.go and changelog.go
 # (docs/CHANGELOG.md). Sans ce COPY, /app/docs n'existe pas dans le conteneur →
 # la page "Notes de version" (/help) renvoie 500 et /changelog 404 (les deux
 # titres). Note : docs/ embarque aussi les captures d'écran (docs/screenshots/,

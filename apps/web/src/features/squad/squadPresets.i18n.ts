@@ -5,22 +5,6 @@
  * de useSquadPresets, hors scan FieldKey (lint-no-hardcoded-fields).
  */
 export const SQUAD_PRESETS_STRINGS = {
-  fr: {
-    squadsHeader: 'Mes escouades',
-    groupsHeader: 'Mes groupes',
-    save: 'Enregistrer la compo',
-    saving: 'Enregistrement…',
-    saved: 'Compo déjà enregistrée',
-    saveSuccess: 'Escouade enregistrée',
-    saveError: "Échec de l'enregistrement",
-    manage: 'Gérer',
-    done: 'Terminé',
-    rename: 'Renommer',
-    ok: 'OK',
-    del: 'Suppr.',
-    confirmDelete: 'Confirmer ?',
-    usualPrefix: 'surtout',
-  },
   en: {
     squadsHeader: 'My squads',
     groupsHeader: 'My groups',
@@ -39,4 +23,4 @@ export const SQUAD_PRESETS_STRINGS = {
   },
 }
 
-export type SquadPresetsStrings = (typeof SQUAD_PRESETS_STRINGS)['fr']
+export type SquadPresetsStrings = (typeof SQUAD_PRESETS_STRINGS)['en']

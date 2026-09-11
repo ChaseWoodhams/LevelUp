@@ -22,7 +22,6 @@ vi.mock('@/lib/api/client', () => ({
   },
   setApiTitleSlug: (slug: string | null) => setApiTitleSlug(slug),
   getApiTitleSlug: () => 'halo_infinite',
-  setApiLocale: vi.fn(),
 }))
 
 vi.mock('@/app/queryClient', () => ({
@@ -46,7 +45,7 @@ const BOOTSTRAP_H5 = {
   current_player: PLAYER,
   available_players: [PLAYER],
   available_titles: [],
-  locale: 'fr',
+  locale: 'en',
   hints_visible_default: true,
 } as unknown as BootstrapResponse
 

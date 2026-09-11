@@ -291,12 +291,8 @@ func (s *Store) Save(cfg *AppSettings) error {
 //
 //nolint:funlen // série de N if-else parallèle pour chaque champ optionnel — découpage prématuré
 func Apply(cfg *AppSettings, req *domain.UpdateSettingsRequest) {
-	if req.Lang != nil {
-		cfg.Lang = *req.Lang
-	}
-	if req.DiscordLang != nil {
-		cfg.DiscordLang = *req.DiscordLang
-	}
+	// Keep historical language fields readable for upgrades, but ignore language
+	// changes from API requests. Responses are normalized by ToResponse.
 	if req.UserTimezone != nil {
 		cfg.UserTimezone = *req.UserTimezone
 	}
@@ -429,8 +425,8 @@ func Apply(cfg *AppSettings, req *domain.UpdateSettingsRequest) {
 // ToResponse convertit AppSettings en SettingsResponse (sans discord_webhook_url).
 func ToResponse(cfg *AppSettings) *domain.SettingsResponse {
 	return &domain.SettingsResponse{
-		Lang:                 cfg.Lang,
-		DiscordLang:          cfg.DiscordLang,
+		Lang:                 "en",
+		DiscordLang:          "en",
 		UserTimezone:         cfg.UserTimezone,
 		NormalizeModeLabels:  cfg.NormalizeModeLabels,
 		ShowRecords:          cfg.ShowRecords,
@@ -493,7 +489,7 @@ func Defaults() *AppSettings {
 func defaultSettings() *AppSettings {
 	return &AppSettings{
 		Lang:                "en",
-		DiscordLang:         "fr",
+		DiscordLang:         "en",
 		UserTimezone:        "Europe/Paris",
 		MediaBufferMinutes:  2,
 		CanSelfProvision:    true,

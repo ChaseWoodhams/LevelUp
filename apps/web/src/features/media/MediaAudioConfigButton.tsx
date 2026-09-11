@@ -7,7 +7,6 @@
  */
 import { useEffect, useState } from 'react'
 import { Select } from '@/components/ui/select'
-import { useAppShellStore } from '@/stores/appShellStore'
 import { apiErrorMessage } from '@/lib/api/client'
 import { getMediaAudioConfigText, type MediaAudioConfigText } from './i18n-audio-config'
 import {
@@ -30,8 +29,7 @@ interface MediaAudioConfigButtonProps {
 
 export function MediaAudioConfigButton({ playerSlug }: MediaAudioConfigButtonProps) {
   const [open, setOpen] = useState(false)
-  const locale = useAppShellStore((s) => s.locale)
-  const text = getMediaAudioConfigText(locale)
+  const text = getMediaAudioConfigText()
 
   return (
     <>

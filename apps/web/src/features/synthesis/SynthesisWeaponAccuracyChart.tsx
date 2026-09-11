@@ -41,7 +41,7 @@ function buildWeaponAccuracyOption(
   hoveredClass?: string | null,
 ): EChartsCoreOption {
   const tc = getEChartsThemeColors()
-  const numLoc = intlLocale(locale)
+  const numLoc = intlLocale()
   // L'axe catégoriel ECharts empile de bas en haut → reverse pour afficher la meilleure
   // précision EN HAUT (les datapoints arrivent triés desc côté Go).
   const data = [...(series[0]?.datapoints ?? [])].reverse()

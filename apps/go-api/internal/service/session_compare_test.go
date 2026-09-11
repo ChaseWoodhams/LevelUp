@@ -388,13 +388,13 @@ func TestBuildSessionDetailRows_EnrichedFields(t *testing.T) {
 		DamageTaken:       &dt,
 		Rank:              &rk,
 	}
-	out := buildSessionDetailRows([]legacymatch.StatsMatchRow{row}, nil, "fr", nil, nil)
+	out := buildSessionDetailRows([]legacymatch.StatsMatchRow{row}, nil, "en", nil, nil)
 	if len(out) != 1 {
 		t.Fatalf("expected 1 row, got %d", len(out))
 	}
 	r := out[0]
-	if r.MapName != "Tir réel" {
-		t.Fatalf("MapName: want FR-preferred 'Tir réel', got %q", r.MapName)
+	if r.MapName != "Live Fire" {
+		t.Fatalf("MapName: want English label 'Live Fire', got %q", r.MapName)
 	}
 	wantMode := derefString(analysis.ResolveModeUI(&row.PairName, &row.PairNameFR))
 	if wantMode == "" || r.ModeUI != wantMode {
@@ -454,11 +454,11 @@ func TestBuildSessionDetailRows_Locale(t *testing.T) {
 	}
 
 	fr := buildSessionDetailRows([]legacymatch.StatsMatchRow{row}, nil, "fr", nil, nil)[0]
-	if fr.MapName != "Tir réel" {
-		t.Fatalf("FR MapName: want 'Tir réel', got %q", fr.MapName)
+	if fr.MapName != "Live Fire" {
+		t.Fatalf("legacy locale MapName: want 'Live Fire', got %q", fr.MapName)
 	}
-	if fr.PlaylistName != "Arène classée" {
-		t.Fatalf("FR PlaylistName: want 'Arène classée', got %q", fr.PlaylistName)
+	if fr.PlaylistName != "Ranked Arena" {
+		t.Fatalf("legacy locale PlaylistName: want 'Ranked Arena', got %q", fr.PlaylistName)
 	}
 	if want := derefString(analysis.ResolveModeUI(&row.PairName, &row.PairNameFR)); fr.ModeUI != want {
 		t.Fatalf("FR ModeUI: want %q, got %q", want, fr.ModeUI)

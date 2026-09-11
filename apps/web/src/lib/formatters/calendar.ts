@@ -10,12 +10,11 @@
  */
 import type { ManifestLocale } from '@/lib/i18n/format'
 
-export const DOW_LABELS_FR = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'] as const
 export const DOW_LABELS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
 
 /** Abréviations des 7 jours (lundi-first, aligné sur l'index `dow` backend). */
-export function dowLabels(locale: ManifestLocale): readonly string[] {
-  return locale === 'en' ? DOW_LABELS_EN : DOW_LABELS_FR
+export function dowLabels(): readonly string[] {
+  return DOW_LABELS_EN
 }
 
 /** Étiquettes des 24 heures ("00h".."23h") — notation 24 h commune FR/EN. */
@@ -35,15 +34,6 @@ interface CalendarChartText {
 }
 
 const CALENDAR_CHART_TEXT: Record<ManifestLocale, CalendarChartText> = {
-  fr: {
-    hourAxis: 'Heure',
-    dayAxis: 'Jour',
-    winRate: 'Taux de victoire',
-    wins: 'Victoires',
-    matches: 'Matchs',
-    commonMatches: 'Matchs communs',
-    noCommonMatch: 'Aucun match commun',
-  },
   en: {
     hourAxis: 'Hour',
     dayAxis: 'Day',
@@ -57,5 +47,5 @@ const CALENDAR_CHART_TEXT: Record<ManifestLocale, CalendarChartText> = {
 
 /** Textes localisés des axes + tooltips des heatmaps activité (heure × jour). */
 export function calendarChartText(locale: ManifestLocale): CalendarChartText {
-  return CALENDAR_CHART_TEXT[locale] ?? CALENDAR_CHART_TEXT.fr
+  return CALENDAR_CHART_TEXT[locale] ?? CALENDAR_CHART_TEXT.en
 }

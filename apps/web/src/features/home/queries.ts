@@ -11,11 +11,10 @@ export function useHomePage(playerSlug: string) {
   // Le titre courant scope la clé : au switch de titre, la clé change → refetch
   // des données du bon titre (plus de Spartan ID / playlists périmées).
   const titleSlug = useAppShellStore((s) => s.currentTitleSlug)
-  // La locale scope aussi la clé : les libellés (titres de défis, map/mode) sont
-  // bakés serveur selon X-LevelUp-Locale au fetch → refetch à la bascule de langue.
-  const locale = useAppShellStore((s) => s.locale)
+  // English-only API responses are canonical; title changes scope the cache key.
+  // English-only API responses are canonical; title changes scope the cache key.
   return useQuery({
-    queryKey: queryKeys.home(playerSlug, titleSlug, locale),
+    queryKey: queryKeys.home(playerSlug, titleSlug),
     queryFn: () => api.get<HomePageResponse>(`/players/${playerSlug}/pages/home`),
     enabled: !!playerSlug,
     staleTime: 5 * 60 * 1000,
@@ -35,11 +34,10 @@ export function useHomePage(playerSlug: string) {
  * neutres — les consommateurs doivent gérer l'absence de `seasonPass`.
  */
 export function useSeasonPassPreview(playerSlug: string, enabled = true) {
-  // Locale dans la clé : libellés du pass bakés serveur selon X-LevelUp-Locale.
-  const locale = useAppShellStore((s) => s.locale)
+  // English-only API responses are canonical; title changes scope the cache key.
   const titleSlug = useAppShellStore((s) => s.currentTitleSlug)
   return useQuery({
-    queryKey: queryKeys.seasonPass(playerSlug, titleSlug, locale),
+    queryKey: queryKeys.seasonPass(playerSlug, titleSlug),
     queryFn: () => api.get<SeasonPassPageResponse>(`/players/${playerSlug}/pages/palmares/season-pass`),
     enabled: !!playerSlug && enabled,
     staleTime: 5 * 60 * 1000,

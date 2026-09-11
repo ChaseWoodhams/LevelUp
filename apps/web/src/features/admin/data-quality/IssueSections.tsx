@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import { EmptyStateNotice } from '@/components/ui/empty-state'
 import { apiErrorMessage } from '@/lib/api/client'
 import type { AdminDataQualityIssue, DataQualityIssueKind } from '@/lib/api/types'
-import { DATA_QUALITY_LOCALE, useDataQualityIssues } from './queries'
+import { useDataQualityIssues } from './queries'
 import { useResolveAssetTranslation, useResolveModeTranslation } from './mutations'
 import { InlineResolveForm } from './InlineResolveForm'
 import { IssueTable, type IssueColumn } from './IssueTable'
@@ -90,7 +90,7 @@ export function UntranslatedModesSection() {
   // défaut fr) apparaît dans le titre — « Modes sans traduction (fr) ».
   return (
     <SectionShell
-      title={`${tA('admin.dq.modes_section')} (${data?.locale ?? DATA_QUALITY_LOCALE})`}
+      title={tA('admin.dq.modes_section')}
       kind="untranslated_modes"
       emptyTitle={tA('admin.dq.modes_empty_title')}
       emptyDesc={tA('admin.dq.modes_empty_desc')}
@@ -107,14 +107,14 @@ export function UntranslatedModesSection() {
         renderForm={(i) => (
           <InlineResolveForm
             subject={i.id}
-            fields={[{ key: 'name_fr', label: tA('admin.dq.form_name_fr'), placeholder: i.id }]}
+            fields={[{ key: 'name_en', label: tA('admin.dq.form_name_en'), placeholder: i.id }]}
             busy={resolve.isPending}
             onCancel={() => setOpenID(null)}
             onSubmit={(values) => {
-              const nameFR = values.name_fr?.trim()
-              if (!nameFR) return
+              const nameEN = values.name_en?.trim()
+              if (!nameEN) return
               resolve.mutate(
-                { mode_en: i.id, name_fr: nameFR },
+                { mode_en: i.id, name_en: nameEN },
                 {
                   onSuccess: (res) => {
                     toastResolve(res.action, tA)
@@ -196,16 +196,14 @@ function AssetResolveForm({
       subject={`${kind} · ${issue.id}`}
       fields={[
         { key: 'name_en', label: tA('admin.dq.form_name_en'), initial: '' },
-        { key: 'name_fr', label: tA('admin.dq.form_name_fr'), initial: '' },
       ]}
       busy={resolve.isPending}
       onCancel={onDone}
       onSubmit={(values) => {
         const nameEN = values.name_en?.trim() ?? ''
-        const nameFR = values.name_fr?.trim() ?? ''
-        if (!nameEN && !nameFR) return
+        if (!nameEN) return
         resolve.mutate(
-          { asset_kind: kind, asset_id: issue.id, name_en: nameEN || undefined, name_fr: nameFR || undefined },
+          { asset_kind: kind, asset_id: issue.id, name_en: nameEN },
           {
             onSuccess: (res) => {
               toastResolve(res.action, tA)

@@ -13,7 +13,7 @@ title_slug     = "halo_5"
 schema_version = 3
 
 [fields.kills]
-labels        = { en = "Kills", fr = "Frags" }
+labels        = { en = "Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -80,7 +80,7 @@ func TestGenericSemanticAdapter_PassThrough(t *testing.T) {
 
 func TestGenericSemanticAdapter_RanksPassThrough(t *testing.T) {
 	custom := mappings.NewRankCatalog("halo_5", []mappings.RankEntry{
-		{ID: 1, Title: map[string]string{"en": "Diamond 5", "fr": "Diamant 5"}},
+		{ID: 1, Title: map[string]string{"en": "Diamond 5"}},
 	})
 	a := NewGenericSemanticAdapter("halo_5", loadGenericFields(t), custom, nil, nil)
 	if a.Ranks() != custom {

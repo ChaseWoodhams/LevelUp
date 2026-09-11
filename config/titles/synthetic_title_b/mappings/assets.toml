@@ -9,46 +9,46 @@ schema_version = 1
 
 # Modes — vocabulaire alternatif (Frags, Brawl, etc.)
 [assets.mode.assassin]
-labels = { en = "Frags", fr = "Frags" }
+labels = { en = "Frags" }
 display_order = 10
 
 [assets.mode.fiesta]
-labels = { en = "Brawl", fr = "Mêlée" }
+labels = { en = "Brawl" }
 display_order = 20
 
 [assets.mode.btb]
-labels = { en = "Massive Battle", fr = "Bataille massive" }
+labels = { en = "Massive Battle" }
 display_order = 40
 
 [assets.mode.ranked]
-labels = { en = "Competitive", fr = "Compétitif" }
+labels = { en = "Competitive" }
 display_order = 50
 
 [assets.mode.firefight]
-labels = { en = "Survival", fr = "Survie" }
+labels = { en = "Survival" }
 display_order = 60
 
 [assets.mode.other]
-labels = { en = "Misc", fr = "Divers" }
+labels = { en = "Misc" }
 display_order = 99
 
 # Tiers de défi — autre nomenclature
 [assets.challenge_tier.normal]
-labels = { en = "Standard", fr = "Standard" }
+labels = { en = "Standard" }
 color_token = "challenge.normal"
 display_order = 10
 
 [assets.challenge_tier.heroic]
-labels = { en = "Hard", fr = "Difficile" }
+labels = { en = "Hard" }
 color_token = "challenge.heroic"
 display_order = 20
 
 [assets.challenge_tier.legendary]
-labels = { en = "Epic", fr = "Épique" }
+labels = { en = "Epic" }
 color_token = "challenge.legendary"
 display_order = 30
 
 [assets.challenge_tier.mythic]
-labels = { en = "Insane", fr = "Démentiel" }
+labels = { en = "Insane" }
 color_token = "challenge.mythic"
 display_order = 40

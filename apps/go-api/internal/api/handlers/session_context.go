@@ -92,7 +92,7 @@ func (h *SessionHandler) handlePostContext(ctx context.Context, in *sessionConte
 		}
 	}
 	if req.Locale != nil {
-		sess.Locale = *req.Locale
+		sess.Locale = "en"
 	}
 
 	if err := h.store.Save(sess); err != nil {

@@ -104,9 +104,9 @@ func TestCatalogRefreshFromRegistry_PopulatesAndIsIdempotent(t *testing.T) {
 			t.Errorf("%s = %d lignes, want 1 (idempotent)", tbl, got)
 		}
 	}
-	// Labels EN + FR de la paire.
-	if got := countRows(t, meta, "pair_mode_label_translations"); got != 2 {
-		t.Errorf("pair_mode_label_translations = %d, want 2 (en + fr)", got)
+	// English label for the pair.
+	if got := countRows(t, meta, "pair_mode_label_translations"); got != 1 {
+		t.Errorf("pair_mode_label_translations = %d, want 1", got)
 	}
 
 	// Valeurs upsertées correctement.

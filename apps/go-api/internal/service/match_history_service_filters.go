@@ -201,7 +201,7 @@ func filterByExplorerMapNames(rows []domain.MatchHistoryRawRow, maps []string) [
 	set := stringSliceToSet(maps)
 	out := rows[:0:0]
 	for _, r := range rows {
-		if _, ok := set[coalesceStr(r.MapNameFR, r.MapName)]; ok {
+		if _, ok := set[derefStr(r.MapName)]; ok {
 			out = append(out, r)
 		}
 	}
@@ -314,7 +314,7 @@ func computeExplorerAvailableOptions(rows []domain.MatchHistoryRawRow) (expTypes
 		if pl := derefStr(r.PlaylistName); pl != "" {
 			plSet[pl] = struct{}{}
 		}
-		if m := coalesceStr(r.MapNameFR, r.MapName); m != "" {
+		if m := derefStr(r.MapName); m != "" {
 			mapSet[m] = struct{}{}
 		}
 		// Pair prioritaire, sinon fallback game_variant (titres sans pair, ex. H5) —

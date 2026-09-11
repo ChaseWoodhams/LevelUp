@@ -12,7 +12,6 @@ export function useSessionDetailPage(
   sessionLabel: string,
   compareSessionLabel: string,
   enableCompare: boolean,
-  locale: string,
 ) {
   const titleSlug = useAppShellStore((s) => s.currentTitleSlug)
   return useQuery({
@@ -23,7 +22,6 @@ export function useSessionDetailPage(
       sessionLabel,
       compareSessionLabel,
       enableCompare,
-      locale,
     ),
     queryFn: () =>
       api.post<SessionPageResponse>(

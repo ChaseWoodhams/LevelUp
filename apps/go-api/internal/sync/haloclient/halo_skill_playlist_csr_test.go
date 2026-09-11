@@ -31,7 +31,7 @@ func TestParsePlaylistCSR_Ranked(t *testing.T) {
 }
 
 // TestParsePlaylistCSR_NoEntry : aucune entrée pour le xuid → (nil, nil), la
-// lecture catalogue-first synthétisera "Non classé".
+// lecture catalogue-first synthétisera "Unranked".
 func TestParsePlaylistCSR_NoEntry(t *testing.T) {
 	body := []byte(`{"Value":[{"Id":"xuid(999)","ResultCode":0,"Result":{"Current":{"Tier":"Onyx"}}}]}`)
 	csr, err := parsePlaylistCSR(body, "pl-arena", "123")

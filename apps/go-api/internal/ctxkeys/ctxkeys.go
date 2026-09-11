@@ -21,19 +21,18 @@ const (
 	gamertagLiveSearchKey contextKey = "gamertag_live_search"
 )
 
-// WithLocale place la locale UI ("fr"/"en") dans le contexte. Utilisée par les
-// services qui localisent des libellés (médailles, etc.) sans avoir à threader
-// la locale dans chaque signature.
+// WithLocale places the UI locale in the context. The application is English only;
+// the value remains in the context for callers that still accept a locale seam.
 func WithLocale(ctx context.Context, locale string) context.Context {
 	return context.WithValue(ctx, localeKey, locale)
 }
 
-// Locale extrait la locale depuis le contexte. Retourne "fr" si absente.
+// Locale extracts the locale from the context. It returns English when absent.
 func Locale(ctx context.Context) string {
 	if v, ok := ctx.Value(localeKey).(string); ok && v != "" {
 		return v
 	}
-	return "fr"
+	return "en"
 }
 
 // WithTitleSlug place le slug du titre dans le contexte.

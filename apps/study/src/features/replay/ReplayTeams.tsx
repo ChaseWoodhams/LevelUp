@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/features/match-replay/ReplayTeams.tsx
- * Origin at commit: 0afd83f7e — the commit that last changed it, so
+ * Origin at commit: 677574859 — the commit that last changed it, so
  * `git diff 0afd83f7e HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts
@@ -200,9 +200,9 @@ function InventoryRow({
   const read = inventoryAt(doc, slot, frame)
   if (!read) return null
   const { state } = read
-  const grenades = grenadesCarried(state, doc.grenadeLabels, locale)
+  const grenades = grenadesCarried(state, doc.grenadeLabels)
   const selected = selectedGrenadeRank(state)
-  const ability = abilityText(doc, state.a, t.abilityUnknown, locale)
+  const ability = abilityText(doc, state.a, t.abilityUnknown)
   const ammo = state.am ?? []
   if (grenades.length === 0 && !ability && ammo.length === 0) return null
 
@@ -254,10 +254,9 @@ function abilityText(
   doc: ReplayDocumentReady,
   index: number | undefined,
   unknownLabel: string,
-  locale: ReplayLocale,
 ): { text: string; known: boolean } | null {
   if (index === undefined) return null
-  const name = catalogText(doc.abilityLabels?.[String(index)], locale)
+  const name = catalogText(doc.abilityLabels?.[String(index)])
   if (name) return { text: name, known: true }
   return { text: `${unknownLabel} (${index})`, known: false }
 }
@@ -462,7 +461,7 @@ function WeaponsRow({
       {read.weapons.map((id) => {
         // Le tag brut reste À CÔTÉ du libellé, jamais à sa place : une arme hors
         // catalogue garde son hexadécimal, souligné en pointillés pour le dire.
-        const name = catalogText(doc.weaponLabels?.[id], locale)
+        const name = catalogText(doc.weaponLabels?.[id])
         return (
           <span key={id} className={name ? '' : 'border-b border-dashed border-border'}>
             {name ?? id}

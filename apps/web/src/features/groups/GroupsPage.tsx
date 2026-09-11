@@ -35,7 +35,7 @@ export function GroupsPage() {
     if (!name) return
     createGroup.mutate(name, {
       onSuccess: () => setNewName(''),
-      onError: (err) => toast.error(err instanceof Error ? err.message : 'Erreur'),
+      onError: (err) => toast.error(err instanceof Error ? err.message : 'Error'),
     })
   }
 

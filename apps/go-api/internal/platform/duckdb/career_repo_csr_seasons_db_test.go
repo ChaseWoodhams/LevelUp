@@ -101,32 +101,39 @@ func TestAvailableCSRSeasons_FromMatchCSRs(t *testing.T) {
 	}
 }
 
-// TestEnrichCSRPlaylistNames_LocaleAware prouve GH2-B3 : la lecture des snapshots
-// CSR persistés résout le nom de playlist par locale de requête. Le nom persisté est
-// le canonique EN ; sous FR, la traduction asset_translations prime ; sous EN, le nom
-// persisté EN est conservé (jamais du FR sous UI EN — symétrique de GH-8).
-func TestEnrichCSRPlaylistNames_LocaleAware(t *testing.T) {
+// TestEnrichCSRPlaylistNames_EnglishOnly: reading persisted CSR snapshots resolves the
+// playlist name from asset_translations in English only. A playlist whose only
+// translation is fr-FR keeps its persisted English name, whatever the request locale;
+// an en-US translation replaces it.
+func TestEnrichCSRPlaylistNames_EnglishOnly(t *testing.T) {
 	pdb := newTestPlayerDB(t)
 	ctx := context.Background()
-	// asset_translations FR pour la playlist (le nom persisté "Ranked Arena" sert d'EN).
-	if _, err := pdb.Metadata.Exec(ctx,
-		`INSERT INTO asset_translations (asset_id, asset_type, lang, name)
-		 VALUES ('pl-ranked', 'playlist', 'fr-FR', 'Arène classée')`,
-	); err != nil {
-		t.Fatalf("seed asset_translations: %v", err)
+	for _, row := range [][3]string{
+		{"pl-ranked", "fr-FR", "Arène classée"},
+		{"pl-quick", "en-US", "Quick Play"},
+		{"pl-quick", "fr-FR", "Partie rapide"},
+	} {
+		if _, err := pdb.Metadata.Exec(ctx,
+			`INSERT INTO asset_translations (asset_id, asset_type, lang, name) VALUES (?, 'playlist', ?, ?)`,
+			row[0], row[1], row[2],
+		); err != nil {
+			t.Fatalf("seed asset_translations %v: %v", row, err)
+		}
 	}
 	repo := NewCareerRepo(pdb)
 
-	frRows := []domain.CareerPlaylistCSR{{PlaylistID: "pl-ranked", PlaylistName: "Ranked Arena"}}
-	repo.enrichCSRPlaylistNames(ctxkeys.WithLocale(ctx, "fr"), frRows)
-	if frRows[0].PlaylistName != "Arène classée" {
-		t.Errorf("FR name = %q, want 'Arène classée'", frRows[0].PlaylistName)
-	}
-
-	enRows := []domain.CareerPlaylistCSR{{PlaylistID: "pl-ranked", PlaylistName: "Ranked Arena"}}
-	repo.enrichCSRPlaylistNames(ctxkeys.WithLocale(ctx, "en"), enRows)
-	if enRows[0].PlaylistName != "Ranked Arena" {
-		t.Errorf("EN name = %q, want 'Ranked Arena' (jamais du FR sous UI EN)", enRows[0].PlaylistName)
+	for _, locale := range []string{"fr", "en"} {
+		rows := []domain.CareerPlaylistCSR{
+			{PlaylistID: "pl-ranked", PlaylistName: "Ranked Arena"},
+			{PlaylistID: "pl-quick", PlaylistName: "quick play (raw)"},
+		}
+		repo.enrichCSRPlaylistNames(ctxkeys.WithLocale(ctx, locale), rows)
+		if rows[0].PlaylistName != "Ranked Arena" {
+			t.Errorf("locale %s: fr-FR-only playlist = %q, want the persisted 'Ranked Arena'", locale, rows[0].PlaylistName)
+		}
+		if rows[1].PlaylistName != "Quick Play" {
+			t.Errorf("locale %s: playlist with en-US row = %q, want 'Quick Play'", locale, rows[1].PlaylistName)
+		}
 	}
 }
 

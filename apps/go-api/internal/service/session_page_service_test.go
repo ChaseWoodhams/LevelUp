@@ -722,8 +722,8 @@ func TestBuildSessionDetailRows_SkillTierLabel(t *testing.T) {
 		MatchID: "m1", StartTime: start, Outcome: &win, Kills: 1, Deaths: 1, SessionLabel: &label,
 		SkillRatingType: "csr", SkillTierCode: &gold, SkillTierCodeFR: &goldFR, SkillSubTier: &sub,
 	}}
-	if got := deref(buildSessionDetailRows(ranked, nil, "fr", nil, nil)); got != "Or III" {
-		t.Fatalf("FR SkillTierLabel = %q, want %q", got, "Or III")
+	if got := deref(buildSessionDetailRows(ranked, nil, "fr", nil, nil)); got != "Gold III" {
+		t.Fatalf("legacy locale SkillTierLabel = %q, want %q", got, "Gold III")
 	}
 	if got := deref(buildSessionDetailRows(ranked, nil, "en", nil, nil)); got != "Gold III" {
 		t.Fatalf("EN SkillTierLabel = %q, want %q", got, "Gold III")
@@ -755,8 +755,8 @@ func TestBuildSessionDetailRows_ModeUILocale(t *testing.T) {
 		MatchID: "m1", StartTime: start, Outcome: &win, Kills: 10, Deaths: 8,
 		PairName: "Arena:Team Slayer on Live Fire", PairNameFR: "Slayer en équipe", SessionLabel: &label,
 	}}
-	if got := modeUIOf(buildSessionDetailRows(withFR, nil, "fr", nil, nil)); got != "Slayer en équipe" {
-		t.Fatalf("FR ModeUI = %q, want %q", got, "Slayer en équipe")
+	if got := modeUIOf(buildSessionDetailRows(withFR, nil, "fr", nil, nil)); got != "Team Slayer" {
+		t.Fatalf("legacy locale ModeUI = %q, want %q", got, "Team Slayer")
 	}
 	if got := modeUIOf(buildSessionDetailRows(withFR, nil, "en", nil, nil)); got != "Team Slayer" {
 		t.Fatalf("EN ModeUI = %q, want %q (trad FR ignorée en EN)", got, "Team Slayer")
@@ -781,8 +781,8 @@ func TestBuildSessionDetailRows_ModeUILocale(t *testing.T) {
 		GameVariantName: "Team Slayer:Arena", GameVariantNameFR: "Assassin en équipe : Arène",
 		SessionLabel: &label,
 	}}
-	if got := modeUIOf(buildSessionDetailRows(variantFR, nil, "fr", nil, nil)); got != "Assassin en équipe" {
-		t.Fatalf("FR repli GameVariant : ModeUI = %q, want %q", got, "Assassin en équipe")
+	if got := modeUIOf(buildSessionDetailRows(variantFR, nil, "fr", nil, nil)); got != "Team Slayer" {
+		t.Fatalf("legacy locale GameVariant fallback: ModeUI = %q, want %q", got, "Team Slayer")
 	}
 	// En EN, le repli FR ne s'applique jamais → sous-mode normalisé EN du pair.
 	if got := modeUIOf(buildSessionDetailRows(variantFR, nil, "en", nil, nil)); got != "Team Slayer" {

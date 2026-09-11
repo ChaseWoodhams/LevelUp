@@ -1,5 +1,5 @@
 /**
- * ExperienceDropdown — single-select dropdown (Tous / Classé / Non classé).
+ * ExperienceDropdown — single-select dropdown (Tous / Classé / Unranked).
  *
  * Composant partagé extrait de CareerHighlightMatchesSection. Réutilisé par
  * la page Synthesis (filtres cascade locaux). Visuellement aligné sur

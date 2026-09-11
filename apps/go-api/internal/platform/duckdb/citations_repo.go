@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 )
 
@@ -33,7 +32,6 @@ func (r *CitationsRepo) LoadCitationMappings(ctx context.Context) ([]domain.Cita
 	}
 	defer rows.Close()
 
-	enLocale := ctxkeys.Locale(ctx) == "en"
 	var result []domain.CitationMappingRow
 	for rows.Next() {
 		var row domain.CitationMappingRow
@@ -58,16 +56,14 @@ func (r *CitationsRepo) LoadCitationMappings(ctx context.Context) ([]domain.Cita
 		// masquée (nom seul, pointeur nil), jamais le FR (principe GH-5b). Les citations
 		// Infinite étant copiées de H5, leur EN vient du seed — cf. ops.citationDisplayEN
 		// / citationDescriptionEN.
-		if enLocale {
-			if displayEN != "" {
-				row.NameDisplay = displayEN
-			}
-			if descriptionEN != "" {
-				enDesc := descriptionEN
-				row.Description = &enDesc
-			} else {
-				row.Description = nil
-			}
+		if displayEN != "" {
+			row.NameDisplay = displayEN
+		}
+		if descriptionEN != "" {
+			enDesc := descriptionEN
+			row.Description = &enDesc
+		} else {
+			row.Description = nil
 		}
 		result = append(result, row)
 	}
@@ -424,7 +420,6 @@ func (r *CitationsRepo) loadCitationMappingMeta(ctx context.Context, norms []str
 		return result
 	}
 	defer rows.Close()
-	enLocale := ctxkeys.Locale(ctx) == "en"
 	for rows.Next() {
 		var norm, display, displayEN, imagePath, tierTargets, description, descriptionEN string
 		if err := rows.Scan(&norm, &display, &displayEN, &imagePath, &tierTargets, &description, &descriptionEN); err == nil {
@@ -432,12 +427,10 @@ func (r *CitationsRepo) loadCitationMappingMeta(ctx context.Context, norms []str
 			// et la description EN (description_en, source commendations H5 officielles +
 			// trad Infinite) prime. Si description_en est absente → nom seul (masquée) :
 			// principe GH-5b « EN n'injecte jamais de FR ».
-			if enLocale {
-				if displayEN != "" {
-					display = displayEN
-				}
-				description = descriptionEN
+			if displayEN != "" {
+				display = displayEN
 			}
+			description = descriptionEN
 			result[norm] = citationMappingMeta{
 				display:     display,
 				imagePath:   imagePath,

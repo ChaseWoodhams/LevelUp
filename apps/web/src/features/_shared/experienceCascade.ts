@@ -8,17 +8,14 @@
  */
 import type { Experience } from '@/features/_shared/ExperienceDropdown'
 
-// Mapping experience → cascade.experience_types. Utilise les VALUES canoniques
-// backend « PVP classé » / « PVP non classé »
+// Mapping experience → cascade.experience_types. Values match the backend
+// experience categories.
 // (service/filters_service.go::experienceLabels). 'all' → [] = pas de filtre.
 // CONTRAT (GH5-2) : ces littéraux sont des VALUES, PAS des labels d'affichage.
-// La Value reste FR même quand le backend localise le LABEL des options
-// (Ranked PvP / Unranked PvP sous UI EN) — NE PAS traduire ces chaînes ici, sinon
-// la cascade ne matche plus les options renvoyées par /filters/preview.
 export const EXPERIENCE_TO_CASCADE: Record<Experience, string[]> = {
   all: [],
-  ranked: ['PVP classé'],
-  unranked: ['PVP non classé'],
+  ranked: ['Ranked PvP'],
+  unranked: ['Unranked PvP'],
 }
 
 // setsEqual — égalité ordre-insensible de deux Set<string>.

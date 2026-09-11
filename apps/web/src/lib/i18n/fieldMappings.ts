@@ -4,14 +4,14 @@
  * Charge depuis le backend les libellés/format/group de chaque FieldKey
  * canonique et les expose via TanStack Query + un hook useFieldLabel.
  *
- * - L'endpoint backend est /api/v1/titles/{slug}/field-mappings?locale=...
+ * - L'endpoint backend est /api/v1/titles/{slug}/field-mappings
  *   Il est monté SANS CONDITION depuis le 2026-08-02 (v7.3 lot 2, item 3.3 : le
  *   flag de rollout MULTI_TITLE_API_ENABLED a été supprimé). Ces libellés sont
  *   désormais la source unique — il n'existe plus de dictionnaire de repli côté
  *   TS. Si la réponse manque (réseau, titre sans la clé), le hook rend la clé
  *   elle-même ; useMetricLabel l'humanise alors (lib/i18n/metricLabel.ts).
  *
- * - Une seule requête par couple (slug, locale) au boot, cache infini :
+ * - Une seule requête par titre au boot, cache infini :
  *   la couche sémantique est versionnée Git, pas de hot-reload prod.
  *
  * - Voir AUDIT_I18N_REACT_2026-04-25.md pour la stratégie de migration des
@@ -23,7 +23,6 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
 import { api } from '@/lib/api/client'
 import { useAppShellStore } from '@/stores/appShellStore'
-import type { Locale } from '@/lib/i18n/locale'
 
 /** Forme d'un FieldMapping retourné par l'endpoint backend. */
 export interface FieldMappingDTO {
@@ -76,8 +75,8 @@ export interface FieldMappingsResponse {
  * staleTime infini car la couche sémantique ne change pas en prod sans
  * redéploiement (cf. PLAN §7.3).
  */
-export function fieldMappingsQueryKey(slug: string, locale: Locale) {
-  return ['field-mappings', slug, locale] as const
+export function fieldMappingsQueryKey(slug: string) {
+	return ['field-mappings', slug] as const
 }
 
 /**
@@ -89,16 +88,15 @@ export function fieldMappingsQueryKey(slug: string, locale: Locale) {
  */
 export async function fetchFieldMappings(
   slug: string,
-  locale: Locale,
 ): Promise<FieldMappingsResponse> {
   try {
     return await api.get<FieldMappingsResponse>(
-      `/titles/${encodeURIComponent(slug)}/field-mappings?locale=${encodeURIComponent(locale)}`,
+      `/titles/${encodeURIComponent(slug)}/field-mappings`,
     )
   } catch (err) {
     const status = (err as { status?: number })?.status
     if (status === 404) {
-      return { title_slug: slug, schema_version: 0, locale, fields: {} }
+      return { title_slug: slug, schema_version: 0, locale: 'en', fields: {} }
     }
     throw err
   }
@@ -115,22 +113,21 @@ export function useFieldMappings(
   options?: Omit<UseQueryOptions<FieldMappingsResponse>, 'queryKey' | 'queryFn'>,
 ) {
   const slug = useAppShellStore((s) => s.currentTitleSlug)
-  const locale = useAppShellStore((s) => s.locale)
   const isBootstrapped = useAppShellStore((s) => s.isBootstrapped)
   const callerEnabled = options?.enabled ?? true
 
   // Gate `isBootstrapped` (G8) : avant l'hydratation du bootstrap, currentTitleSlug
-  // et locale valent leurs défauts store ('halo_infinite' / 'fr' — appShellStore.ts),
+  // et locale valent leurs défauts store ('halo_infinite' / 'en' — appShellStore.ts),
   // pas la session réelle. __root.tsx rend l'Outlet NU pendant cette fenêtre (une
   // passe de rendu avant que hydrateFromBootstrap commit isBootstrapped=true), donc
   // ce hook peut monter avec des valeurs encore par défaut puis, une fois hydraté,
-  // avec les vraies valeurs — deux clés distinctes si locale/titre diffèrent des
+  // avec le vrai titre — deux clés distinctes si titre diffère des
   // défauts (ex. session/démo en 'en') = 2 requêtes pour la même donnée. On attend
-  // la locale/le titre résolus avant d'activer la query (même patron que
+  // le titre résolu avant d'activer la query (même patron que
   // isBootstrapped ailleurs : players/$.tsx, LoginPage, SetupPage).
   const query = useQuery<FieldMappingsResponse>({
-    queryKey: fieldMappingsQueryKey(slug, locale),
-    queryFn: () => fetchFieldMappings(slug, locale),
+    queryKey: fieldMappingsQueryKey(slug),
+    queryFn: () => fetchFieldMappings(slug),
     staleTime: Infinity,
     gcTime: Infinity,
     retry: false,

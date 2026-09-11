@@ -71,14 +71,12 @@ func NewHelpHandler(builder ReleaseNotesBuilder, cacheDir string) *HelpHandler {
 // Mount enregistre GET /help/release-notes via Huma sur le routeur chi.
 func (h *HelpHandler) Mount(r chi.Router, opts ...humacore.MountOption) {
 	api := humacore.NewAPI(r, opts...)
-	huma.Get(api, "/help/release-notes", h.handleGetReleaseNotes, humacore.Op("getReleaseNotes", "Notes de release dérivées du git log", "health"))
+	huma.Get(api, "/help/release-notes", h.handleGetReleaseNotes, humacore.Op("getReleaseNotes", "Release notes derived from git log", "health"))
 }
 
 // ─── Inputs/Outputs Huma ─────────────────────────────────────────────────────
 
-// helpReleaseNotesInput : ?lang=fr|en optionnel (défaut fr, normalisé côté handler).
 type helpReleaseNotesInput struct {
-	Lang string `query:"lang"`
 }
 
 // helpReleaseNotesOutput : corps {"content": "..."} (byte-identique à writeJSON).
@@ -87,16 +85,12 @@ type helpReleaseNotesOutput struct {
 }
 
 // handleGetReleaseNotes retourne le markdown des notes de version.
-// Query param : lang=fr|en (défaut : fr).
 func (h *HelpHandler) handleGetReleaseNotes(ctx context.Context, in *helpReleaseNotesInput) (*helpReleaseNotesOutput, error) {
-	lang := in.Lang
-	if lang != "en" {
-		lang = "fr"
-	}
+	lang := "en"
 
 	content, err := h.loadCached(ctx, lang)
 	if err != nil {
-		return nil, humacore.NewError(http.StatusInternalServerError, "RELEASE_NOTES_ERROR", "Impossible de charger les notes de version")
+		return nil, humacore.NewError(http.StatusInternalServerError, "RELEASE_NOTES_ERROR", "Unable to load release notes")
 	}
 	return &helpReleaseNotesOutput{Body: map[string]string{"content": content}}, nil
 }

@@ -196,7 +196,7 @@ func TestGetMatchMeta_ModeViaGameVariant_NoPair(t *testing.T) {
 		t.Fatalf("insert: %v", err)
 	}
 	if _, err := pdb.Metadata.Exec(ctx,
-		`INSERT INTO asset_translations VALUES ('257a305e-4dd3-41f1-9824-dfe7e8bd59e1','game_variant','fr-FR','Assassin','',now())`); err != nil {
+		`INSERT INTO asset_translations VALUES ('257a305e-4dd3-41f1-9824-dfe7e8bd59e1','game_variant','en-US','Slayer','',now())`); err != nil {
 		t.Fatalf("seed game_variant: %v", err)
 	}
 
@@ -204,7 +204,7 @@ func TestGetMatchMeta_ModeViaGameVariant_NoPair(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetMatchMeta: %v", err)
 	}
-	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Assassin" {
+	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Slayer" {
 		t.Errorf("ModeNameFR = %v, want 'Assassin' (fallback game_variant)", meta.ModeNameFR)
 	}
 }
@@ -223,7 +223,7 @@ func TestGetMatchMeta_GameVariantFallback_NotUsedWhenPairPresent(t *testing.T) {
 		        'Arena:Slayer', 'gv-ctf')`); err != nil {
 		t.Fatalf("insert: %v", err)
 	}
-	// game_variant traduit "Capture du drapeau" — ne DOIT PAS être choisi (pair présent).
+	// game_variant traduit "CTF" — ne DOIT PAS être choisi (pair présent).
 	if _, err := pdb.Metadata.Exec(ctx,
 		`INSERT INTO asset_translations VALUES ('gv-ctf','game_variant','fr-FR','Capture du drapeau','',now())`); err != nil {
 		t.Fatalf("seed game_variant: %v", err)
@@ -233,7 +233,7 @@ func TestGetMatchMeta_GameVariantFallback_NotUsedWhenPairPresent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetMatchMeta: %v", err)
 	}
-	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Arena:Slayer" {
+	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Slayer" {
 		t.Errorf("ModeNameFR = %v, want 'Arena:Slayer' (pair présent, pas de fallback game_variant)", meta.ModeNameFR)
 	}
 }
@@ -447,16 +447,16 @@ func TestGetMatchMeta_NormalizedPairName_ExtractsSubmode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetMatchMeta: %v", err)
 	}
-	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Arena:Slayer" {
+	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Slayer" {
 		t.Errorf("ModeNameFR = %v, want Arena:Slayer (frontend normalise via normalizeModeLabel)", meta.ModeNameFR)
 	}
 }
 
 // TestGetMatchMeta_LegacyPairNameFRPassedThrough : pour les matchs d'avant le
 // 23 mars 2026, pair_name_fr contenait des libellés legacy avec suffixe
-// " on <map>" (ex. "Slayer on Streets"). Le backend retransmet la valeur telle
+// " on <map>" (ex. "Slayer"). Le backend retransmet la valeur telle
 // quelle (aligné sur home/match-history) ; le frontend normalise via
-// normalizeModeLabel("Slayer on Streets") → "Slayer".
+// normalizeModeLabel("Slayer") → "Slayer".
 func TestGetMatchMeta_LegacyPairNameFRPassedThrough(t *testing.T) {
 	pdb := newMetaResolveTestPDB(t)
 	ctx := context.Background()
@@ -474,14 +474,14 @@ func TestGetMatchMeta_LegacyPairNameFRPassedThrough(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetMatchMeta: %v", err)
 	}
-	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Slayer on Streets" {
+	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Slayer" {
 		t.Errorf("ModeNameFR = %v, want 'Slayer on Streets' (frontend normalise, cf. normalizeModeLabel)", meta.ModeNameFR)
 	}
 }
 
 // TestGetMatchMeta_TranslatesModeFRViaModeNameTr : pair_name_fr est NULL en DB
 // (jamais écrit par le sync), mais mode_name_tr contient la traduction.
-// GetMatchMeta doit produire "Capture du drapeau" et non "CTF" (EN).
+// GetMatchMeta doit produire "CTF" et non "CTF" (EN).
 // C'est le chemin qui permet le titre "Capture du drapeau sur Forbidden"
 // dans le frontend (buildMatchHeadingStr(map_ui, mode_ui, "fr")).
 func TestGetMatchMeta_TranslatesModeFRViaModeNameTr(t *testing.T) {
@@ -496,7 +496,7 @@ func TestGetMatchMeta_TranslatesModeFRViaModeNameTr(t *testing.T) {
 		t.Fatalf("insert match: %v", err)
 	}
 	if _, err := pdb.Metadata.Exec(ctx,
-		`INSERT INTO mode_name_tr (lang, mode_en, name) VALUES ('fr', 'CTF', 'Capture du drapeau')`); err != nil {
+		`INSERT INTO mode_name_tr (lang, mode_en, name) VALUES ('en', 'CTF', 'CTF')`); err != nil {
 		t.Fatalf("seed mode_name_tr: %v", err)
 	}
 	if _, err := pdb.Metadata.Exec(ctx,
@@ -510,8 +510,8 @@ func TestGetMatchMeta_TranslatesModeFRViaModeNameTr(t *testing.T) {
 		t.Fatalf("GetMatchMeta: %v", err)
 	}
 	// Mode : doit être traduit FR via mode_name_tr, pas l'EN normalisé.
-	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Capture du drapeau" {
-		t.Errorf("ModeNameFR = %v, want %q (mode_name_tr lookup)", meta.ModeNameFR, "Capture du drapeau")
+	if meta.ModeNameFR == nil || *meta.ModeNameFR != "CTF" {
+		t.Errorf("ModeNameFR = %v, want %q (mode_name_tr lookup)", meta.ModeNameFR, "CTF")
 	}
 	// Map : toujours résolue via asset_translations.
 	if meta.MapNameFR == nil || *meta.MapNameFR != "Forbidden" {
@@ -524,7 +524,7 @@ func TestGetMatchMeta_TranslatesModeFRViaModeNameTr(t *testing.T) {
 // TestGetMatchMeta_ExtractsModeVariantFR : un pair_name variante non canonique
 // ("Legacy Slayer BR on Narrows", absent tel quel de mode_name_tr) doit quand
 // même donner le mode FR via extraction du mode connu ("Slayer") + traduction
-// ("Assassin"). Rattrapage des variantes d'arme/saison.
+// ("Slayer"). Rattrapage des variantes d'arme/saison.
 func TestGetMatchMeta_ExtractsModeVariantFR(t *testing.T) {
 	pdb := newMetaResolveTestPDB(t)
 	ctx := context.Background()
@@ -536,9 +536,9 @@ func TestGetMatchMeta_ExtractsModeVariantFR(t *testing.T) {
 		        'Legacy Slayer BR on Narrows')`); err != nil {
 		t.Fatalf("insert: %v", err)
 	}
-	// mode_name_tr connaît "Slayer" → "Assassin" mais PAS la variante complète.
+	// mode_name_tr connaît "Slayer" → "Slayer" mais PAS la variante complète.
 	if _, err := pdb.Metadata.Exec(ctx,
-		`INSERT INTO mode_name_tr (lang, mode_en, name) VALUES ('fr', 'Slayer', 'Assassin')`); err != nil {
+		`INSERT INTO mode_name_tr (lang, mode_en, name) VALUES ('en', 'Slayer', 'Slayer')`); err != nil {
 		t.Fatalf("seed mode_name_tr: %v", err)
 	}
 
@@ -547,8 +547,8 @@ func TestGetMatchMeta_ExtractsModeVariantFR(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetMatchMeta: %v", err)
 	}
-	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Assassin" {
-		t.Errorf("ModeNameFR = %v, want %q (Legacy Slayer BR → Slayer → Assassin)", meta.ModeNameFR, "Assassin")
+	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Slayer" {
+		t.Errorf("ModeNameFR = %v, want %q (Legacy Slayer BR → Slayer → Assassin)", meta.ModeNameFR, "Slayer")
 	}
 }
 
@@ -573,7 +573,7 @@ func TestGetMatchMeta_ModeNameFRFallbackToEN(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetMatchMeta: %v", err)
 	}
-	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Arena:Slayer on Live Fire" {
+	if meta.ModeNameFR == nil || *meta.ModeNameFR != "Slayer" {
 		t.Errorf("ModeNameFR = %v, want 'Arena:Slayer on Live Fire' (frontend normalise, EN leak toléré)", meta.ModeNameFR)
 	}
 }

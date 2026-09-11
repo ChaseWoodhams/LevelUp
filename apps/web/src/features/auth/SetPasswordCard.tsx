@@ -15,13 +15,14 @@ import { formatMessage } from '@/lib/i18n/format'
 import { commonManifest, type CommonManifestKey } from '@/lib/i18n/generated/common'
 
 const LABELS = {
-  title: 'Définir un mot de passe',
-  desc: 'Optionnel — permet de te reconnecter rapidement sans repasser par Xbox.',
-  changeTitle: 'Changer ton mot de passe',
-  submit: 'Enregistrer',
-  saved: 'Mot de passe enregistré ✓',
-  mismatch: 'Les mots de passe ne correspondent pas.',
-  tooShort: 'Le mot de passe doit faire au moins 8 caractères.',
+  title: 'Set a password',
+  desc: 'Optional — lets you sign back in quickly without going through Xbox again.',
+  changeTitle: 'Change your password',
+  submit: 'Save',
+  saved: 'Password saved ✓',
+  mismatch: 'Passwords do not match.',
+  tooShort: 'Password must be at least 8 characters.',
+  error: 'Error',
 }
 
 interface SetPasswordCardProps {
@@ -58,7 +59,7 @@ export function SetPasswordCard({ onSaved }: SetPasswordCardProps) {
         setConfirm('')
         onSaved?.()
       },
-      onError: (err) => setError(apiErrorMessage(err) ?? 'Erreur'),
+      onError: (err) => setError(apiErrorMessage(err) ?? LABELS.error),
     })
   }
 

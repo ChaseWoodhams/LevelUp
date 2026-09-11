@@ -485,7 +485,7 @@ func (r *duckdbRepo) listTemplatesByLUSRComponents(ctx context.Context, titleSlu
 	rows, err := r.db.Query(ctx, `
 		SELECT id, title_slug, metric, window_type, COALESCE(window_value, ''),
 		       cadence, eval_type, COALESCE(mode_filter, 'universal'),
-		       label_en, label_fr, COALESCE(description_en, ''), COALESCE(description_fr, ''),
+		       label_en, label_en, COALESCE(description_en, ''), COALESCE(description_en, ''),
 		       normal_target, heroic_target, legendary_target, mythic_target,
 		       COALESCE(lusr_components, ''), COALESCE(radar_axes, ''),
 		       COALESCE(is_long_term, FALSE),

@@ -1,11 +1,13 @@
 //go:build integration
 
-// home_repo_fr_translations_test.go — tests d'intégration de
-// enrichHomeMatchTranslations et EnrichCanonicalAssetTranslations.
+// home_repo_fr_translations_test.go — integration tests for
+// enrichHomeMatchTranslations and EnrichCanonicalAssetTranslations.
 //
-// Couvre les mêmes scénarios de corruption que match_history_fr_translations_test.go
-// (asset_translations[fr-FR] == EN raw) appliqués au chemin Home/canonical,
-// plus la résolution des playlists depuis asset_translations.
+// Covers the same corruption scenarios as match_history_fr_translations_test.go
+// (asset_translations[fr-FR] == raw EN) on the Home/canonical path, plus playlist
+// resolution from asset_translations. The product is English-only: the legacy *FR
+// fields mirror the resolved English name, and the French rows seeded below must
+// never surface.
 package duckdb
 
 import (
@@ -16,8 +18,9 @@ import (
 	"levelup/go-api/internal/legacymatch"
 )
 
-// seedHomeFRFixtures peuple mode_name_tr + asset_translations dans une meta DB
-// de test. Réutilise newHomeRepoTestMetaDB (même package).
+// seedHomeFRFixtures fills mode_name_tr + asset_translations in a test meta DB,
+// including French rows that the English reader must ignore. Reuses
+// newHomeRepoTestMetaDB (same package).
 func seedHomeFRFixtures(t *testing.T, meta *DB) {
 	t.Helper()
 	ctx := context.Background()
@@ -35,7 +38,7 @@ func seedHomeFRFixtures(t *testing.T, meta *DB) {
 		}
 	}
 
-	// Pair corrompu : toutes les langues retournent l'EN raw.
+	// Corrupted pair: every language returns the raw EN.
 	for _, lang := range []string{"en-US", "fr-FR", "fr"} {
 		if _, err := meta.Exec(ctx,
 			`INSERT INTO asset_translations VALUES (?, 'pair', ?, ?, '', now())`,
@@ -45,7 +48,7 @@ func seedHomeFRFixtures(t *testing.T, meta *DB) {
 		}
 	}
 
-	// Playlist Quick Play : fr-FR correct, en-US correct.
+	// Quick Play playlist: correct fr-FR and en-US rows.
 	for _, row := range [][3]string{
 		{"qp-playlist-id", "en-US", "Quick Play"},
 		{"qp-playlist-id", "fr-FR", "Partie rapide"},
@@ -58,7 +61,7 @@ func seedHomeFRFixtures(t *testing.T, meta *DB) {
 		}
 	}
 
-	// Map Aquarius : même nom FR (maps souvent identiques).
+	// Aquarius map: same name in both languages.
 	for _, row := range [][3]string{
 		{"aquarius-map-id", "en-US", "Aquarius"},
 		{"aquarius-map-id", "fr-FR", "Aquarius"},
@@ -74,10 +77,10 @@ func seedHomeFRFixtures(t *testing.T, meta *DB) {
 
 // ── enrichHomeMatchTranslations ───────────────────────────────────────────────
 
-// TestEnrichHomeMatchTranslations_CorruptedPairNameFR : pair_name stocké en DB
-// mais pair_name_fr == pair_name (EN raw) — le chemin home doit produire "Capture
-// du drapeau" via mode_name_tr sans dépendre du cache serveur.
-func TestEnrichHomeMatchTranslations_CorruptedPairNameFR(t *testing.T) {
+// TestEnrichHomeMatchTranslations_CorruptedPairName: pair_name stored, but the legacy
+// pair_name_fr holds the raw EN pair ("Arena:CTF on Shiro") — the home path must
+// normalise it to the mode name "CTF", never keep the raw pair string.
+func TestEnrichHomeMatchTranslations_CorruptedPairName(t *testing.T) {
 	meta := newHomeRepoTestMetaDB(t)
 	seedHomeFRFixtures(t, meta)
 
@@ -87,19 +90,19 @@ func TestEnrichHomeMatchTranslations_CorruptedPairNameFR(t *testing.T) {
 			MatchID:    "m1",
 			PairID:     "corrupted-pair-id",
 			PairName:   "Arena:CTF on Shiro",
-			PairNameFR: "Arena:CTF on Shiro", // FR == EN raw → corruption détectée
+			PairNameFR: "Arena:CTF on Shiro",
 		},
 	}
 	repo.enrichHomeMatchTranslations(context.Background(), matches)
 
-	if got := matches[0].PairNameFR; got != "Capture du drapeau" {
-		t.Errorf("PairNameFR = %q, want %q", got, "Capture du drapeau")
+	if got := matches[0].PairNameFR; got != "CTF" {
+		t.Errorf("PairNameFR = %q, want %q", got, "CTF")
 	}
 }
 
-// TestEnrichHomeMatchTranslations_NullPairNameResolvedViaPairID : pair_name NULL
-// en DB (pair_name_fr NULL aussi) — home doit résoudre via pair_id →
-// asset_translations → re-normaliser → mode_name_tr.
+// TestEnrichHomeMatchTranslations_NullPairNameResolvedViaPairID: pair_name NULL in DB
+// (legacy pair_name_fr NULL too) — home must resolve via pair_id →
+// asset_translations → re-normalise to the mode name.
 func TestEnrichHomeMatchTranslations_NullPairNameResolvedViaPairID(t *testing.T) {
 	meta := newHomeRepoTestMetaDB(t)
 	seedHomeFRFixtures(t, meta)
@@ -109,21 +112,20 @@ func TestEnrichHomeMatchTranslations_NullPairNameResolvedViaPairID(t *testing.T)
 		{
 			MatchID:    "m2",
 			PairID:     "corrupted-pair-id",
-			PairName:   "", // NULL en DB
-			PairNameFR: "", // NULL en DB
+			PairName:   "", // NULL in DB
+			PairNameFR: "", // NULL in DB
 		},
 	}
 	repo.enrichHomeMatchTranslations(context.Background(), matches)
 
-	if got := matches[0].PairNameFR; got != "Capture du drapeau" {
-		t.Errorf("PairNameFR = %q, want %q", got, "Capture du drapeau")
+	if got := matches[0].PairNameFR; got != "CTF" {
+		t.Errorf("PairNameFR = %q, want %q", got, "CTF")
 	}
 }
 
-// TestEnrichHomeMatchTranslations_PlaylistFR : playlist dont FR == EN (non traduit
-// côté API) — home doit résoudre "Quick Play" → "Partie rapide" via
-// asset_translations[fr-FR].
-func TestEnrichHomeMatchTranslations_PlaylistFR(t *testing.T) {
+// TestEnrichHomeMatchTranslations_PlaylistEnglish: the playlist keeps its English name
+// even though a fr-FR translation exists.
+func TestEnrichHomeMatchTranslations_PlaylistEnglish(t *testing.T) {
 	meta := newHomeRepoTestMetaDB(t)
 	seedHomeFRFixtures(t, meta)
 
@@ -133,20 +135,19 @@ func TestEnrichHomeMatchTranslations_PlaylistFR(t *testing.T) {
 			MatchID:        "m3",
 			PlaylistID:     "qp-playlist-id",
 			PlaylistName:   "Quick Play",
-			PlaylistNameFR: "Quick Play", // EN raw — doit être remplacé
+			PlaylistNameFR: "Quick Play",
 		},
 	}
 	repo.enrichHomeMatchTranslations(context.Background(), matches)
 
-	if got := matches[0].PlaylistNameFR; got != "Partie rapide" {
-		t.Errorf("PlaylistNameFR = %q, want %q", got, "Partie rapide")
+	if got := matches[0].PlaylistNameFR; got != "Quick Play" {
+		t.Errorf("PlaylistNameFR = %q, want %q", got, "Quick Play")
 	}
 }
 
-// TestEnrichHomeMatchTranslations_AlreadyTranslatedPreserved : un label FR déjà
-// correct ne doit pas être écrasé, même si asset_translations a une valeur
-// différente.
-func TestEnrichHomeMatchTranslations_AlreadyTranslatedPreserved(t *testing.T) {
+// TestEnrichHomeMatchTranslations_StaleFrenchLabelReplaced: a French label left in the
+// legacy column ("Assassin") is replaced by the English mode name.
+func TestEnrichHomeMatchTranslations_StaleFrenchLabelReplaced(t *testing.T) {
 	meta := newHomeRepoTestMetaDB(t)
 	seedHomeFRFixtures(t, meta)
 
@@ -156,22 +157,22 @@ func TestEnrichHomeMatchTranslations_AlreadyTranslatedPreserved(t *testing.T) {
 			MatchID:    "m4",
 			PairID:     "corrupted-pair-id",
 			PairName:   "Arena:Slayer on Live Fire",
-			PairNameFR: "Assassin", // déjà traduit correctement — ne pas toucher
+			PairNameFR: "Assassin",
 		},
 	}
 	repo.enrichHomeMatchTranslations(context.Background(), matches)
 
-	if got := matches[0].PairNameFR; got != "Assassin" {
-		t.Errorf("PairNameFR = %q, want %q (label FR correct ne doit pas être écrasé)", got, "Assassin")
+	if got := matches[0].PairNameFR; got != "Slayer" {
+		t.Errorf("PairNameFR = %q, want %q", got, "Slayer")
 	}
 }
 
 // ── EnrichCanonicalAssetTranslations ─────────────────────────────────────────
 
-// TestEnrichCanonicalAssetTranslations_PairModeFRFromModeNameTr : PairMode avec
-// DefaultLabel = EN raw corrompu et ID = pair corrompu — Labels["fr"] doit être
-// résolu via re-normalisation + mode_name_tr.
-func TestEnrichCanonicalAssetTranslations_PairModeFRFromModeNameTr(t *testing.T) {
+// TestEnrichCanonicalAssetTranslations_PairModeFromCorruptedPair: PairMode whose
+// DefaultLabel is the raw corrupted EN pair — the resolved label is the normalised
+// mode name, never the French translation.
+func TestEnrichCanonicalAssetTranslations_PairModeFromCorruptedPair(t *testing.T) {
 	meta := newHomeRepoTestMetaDB(t)
 	seedHomeFRFixtures(t, meta)
 
@@ -193,15 +194,14 @@ func TestEnrichCanonicalAssetTranslations_PairModeFRFromModeNameTr(t *testing.T)
 	}
 
 	got := rows[0].Summary.PairMode.Labels["fr"]
-	if got != "Capture du drapeau" {
-		t.Errorf("Labels[fr] = %q, want %q", got, "Capture du drapeau")
+	if got != "CTF" {
+		t.Errorf("Labels[fr] = %q, want %q", got, "CTF")
 	}
 }
 
-// TestEnrichCanonicalAssetTranslations_PlaylistFRFromAssetTranslations : Playlist
-// avec DefaultLabel EN et fr-FR dans asset_translations — Labels["fr"] doit être
-// "Partie rapide".
-func TestEnrichCanonicalAssetTranslations_PlaylistFRFromAssetTranslations(t *testing.T) {
+// TestEnrichCanonicalAssetTranslations_PlaylistEnglish: a playlist with a fr-FR row in
+// asset_translations still resolves to its English name.
+func TestEnrichCanonicalAssetTranslations_PlaylistEnglish(t *testing.T) {
 	meta := newHomeRepoTestMetaDB(t)
 	seedHomeFRFixtures(t, meta)
 
@@ -223,13 +223,13 @@ func TestEnrichCanonicalAssetTranslations_PlaylistFRFromAssetTranslations(t *tes
 	}
 
 	got := rows[0].Summary.Playlist.Labels["fr"]
-	if got != "Partie rapide" {
-		t.Errorf("Labels[fr] = %q, want %q", got, "Partie rapide")
+	if got != "Quick Play" {
+		t.Errorf("Labels[fr] = %q, want %q", got, "Quick Play")
 	}
 }
 
-// TestEnrichCanonicalAssetTranslations_NilMetadataNoOp : sans metadata DB, la
-// fonction doit retourner nil et laisser les rows intactes.
+// TestEnrichCanonicalAssetTranslations_NilMetadataNoOp: without a metadata DB the
+// function returns nil and leaves the rows untouched.
 func TestEnrichCanonicalAssetTranslations_NilMetadataNoOp(t *testing.T) {
 	repo := NewHomeRepo(&PlayerDB{}) // Metadata = nil
 	rows := []canonical.PlayerMatchRow{
@@ -248,6 +248,6 @@ func TestEnrichCanonicalAssetTranslations_NilMetadataNoOp(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if got := rows[0].Summary.PairMode.Labels["fr"]; got != "" {
-		t.Errorf("Labels[fr] = %q, want empty (nil metadata doit être no-op)", got)
+		t.Errorf("Labels[fr] = %q, want empty (nil metadata must be a no-op)", got)
 	}
 }

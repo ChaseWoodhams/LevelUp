@@ -77,7 +77,7 @@ function buildOption(
     data: [],
     silent: true,
     legendHoverLink: false,
-    markArea: buildSkillTierMarkArea(locale, yMin, yMax, grid, tc),
+    markArea: buildSkillTierMarkArea(yMin, yMax, grid, tc),
   }
 
   const echartsSeriesList: object[] = [ghostSeries]

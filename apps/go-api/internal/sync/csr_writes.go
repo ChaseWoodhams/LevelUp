@@ -59,9 +59,6 @@ var tierENtoFR = map[string]string{
 // translateTierFR retourne la traduction FR du tier EN ; retourne le tier EN
 // inchangé si non reconnu (forward-compat : si Microsoft ajoute un tier).
 func translateTierFR(tierEN string) string {
-	if fr, ok := tierENtoFR[tierEN]; ok {
-		return fr
-	}
 	return tierEN
 }
 

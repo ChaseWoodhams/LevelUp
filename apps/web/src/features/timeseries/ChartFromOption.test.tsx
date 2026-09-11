@@ -33,7 +33,7 @@ describe('ChartFromOption', () => {
   it('option=null sans emptyMessage → défaut ChartCard', async () => {
     render(<ChartFromOption title="T" option={null} height={240} />)
     expect(await screen.findByTestId('chart-card-empty')).toHaveTextContent(
-      'Aucune donnée à afficher',
+      'No data to display',
     )
   })
 

@@ -205,11 +205,11 @@ func TestAbilityLabelsUsedNamesOnlyWhatItKnows(t *testing.T) {
 	// certitude.
 	// Le catalogue vient du TITRE (replay_labels.toml) et non plus d'une table Go : le
 	// test l'injecte, comme le fait cmd/replay-build.
-	catalogue := map[int]Label{4: {En: "Grappleshot", Fr: "grappin"}}
+	catalogue := map[int]Label{4: {En: "Grappleshot"}}
 	known, unknown := 4, 9
 	got := abilityLabelsUsed([]Inventory{{A: &known}, {A: &unknown}, {}}, catalogue)
-	if got["4"].Fr != "grappin" || got["4"].En != "Grappleshot" {
-		t.Errorf("index connu non nomme dans les deux langues : %+v", got)
+	if got["4"].En != "Grappleshot" {
+		t.Errorf("index connu non nommé : %+v", got)
 	}
 	if _, named := got["9"]; named {
 		t.Error("un index hors table ne doit PAS etre nomme")

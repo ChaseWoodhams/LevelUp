@@ -58,7 +58,6 @@ function PlayerTimeline({
   segments,
   slowestLabel,
   totalLabel,
-  locale,
 }: {
   gamertag: string
   totalMs: number
@@ -73,7 +72,7 @@ function PlayerTimeline({
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-sm font-medium text-foreground">{gamertag}</span>
         <span className="font-mono text-xs tabular-nums text-muted-foreground">
-          {formatDurationMs(totalMs, locale)} {totalLabel}
+          {formatDurationMs(totalMs)} {totalLabel}
         </span>
       </div>
       <div className="flex h-4 w-full overflow-hidden border border-border" role="img" aria-label={gamertag}>
@@ -85,14 +84,14 @@ function PlayerTimeline({
               width: `${Math.max(s.pct, 0.5)}%`,
               backgroundColor: tokenCssVar(s.token),
             }}
-            title={`${s.step} — ${formatDurationMs(s.durationMs, locale)} (${s.pct}%)${s.items > 0 ? ` — ${s.items} items` : ''}`}
+            title={`${s.step} — ${formatDurationMs(s.durationMs)} (${s.pct}%)${s.items > 0 ? ` — ${s.items} items` : ''}`}
           />
         ))}
       </div>
       <p className="font-mono text-[11px] text-muted-foreground">
         {slowestLabel} :{' '}
         {top
-          .map((s) => `${s.step} ${formatDurationMs(s.durationMs, locale)} (${s.pct}%)`)
+          .map((s) => `${s.step} ${formatDurationMs(s.durationMs)} (${s.pct}%)`)
           .join(' · ')}
       </p>
     </div>

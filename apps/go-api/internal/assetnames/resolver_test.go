@@ -44,9 +44,8 @@ func (m *mockStore) Upsert(_ context.Context, assetType, assetID, lang, name str
 	return nil
 }
 
-func TestResolve_MultiLangUpsert(t *testing.T) {
+func TestResolve_EnglishUpsert(t *testing.T) {
 	f := &mockFetcher{names: map[string]string{
-		"pl1|fr-FR": "Partie rapide",
 		"pl1|en-US": "Quick Play",
 	}}
 	s := newMockStore()
@@ -58,16 +57,13 @@ func TestResolve_MultiLangUpsert(t *testing.T) {
 	if res.Requested != 1 || res.Resolved != 1 {
 		t.Fatalf("compteurs: %+v", res)
 	}
-	if got := s.upserts["playlist|pl1|fr-FR"]; got != "Partie rapide" {
-		t.Errorf("upsert fr-FR = %q", got)
-	}
 	if got := s.upserts["playlist|pl1|en-US"]; got != "Quick Play" {
 		t.Errorf("upsert en-US = %q", got)
 	}
 }
 
 func TestResolve_Dedup(t *testing.T) {
-	f := &mockFetcher{names: map[string]string{"m1|fr-FR": "Aquarius", "m1|en-US": "Aquarius"}}
+	f := &mockFetcher{names: map[string]string{"m1|en-US": "Aquarius"}}
 	s := newMockStore()
 	refs := []AssetRef{
 		{AssetType: "map", AssetID: "m1"},
@@ -77,15 +73,14 @@ func TestResolve_Dedup(t *testing.T) {
 	if res.Requested != 1 {
 		t.Fatalf("dedup: Requested = %d, want 1", res.Requested)
 	}
-	if f.calls != 2 { // 1 asset × 2 langs
-		t.Fatalf("dedup: fetch calls = %d, want 2", f.calls)
+	if f.calls != 1 {
+		t.Fatalf("dedup: fetch calls = %d, want 1", f.calls)
 	}
 }
 
 func TestResolve_SkipFresh(t *testing.T) {
 	f := &mockFetcher{names: map[string]string{}}
 	s := newMockStore()
-	s.fresh["playlist|pl1|fr-FR"] = true
 	s.fresh["playlist|pl1|en-US"] = true
 	res, _ := Resolve(context.Background(), f, s,
 		[]AssetRef{{AssetType: "playlist", AssetID: "pl1"}}, Config{TitleID: "hi"})
@@ -114,7 +109,7 @@ func TestResolve_Cap(t *testing.T) {
 func TestResolve_BestEffortFetchError(t *testing.T) {
 	// 1 asset résout, l'autre échoue au fetch → erreurs comptées, pas de panic.
 	f := &mockFetcher{
-		names: map[string]string{"ok|fr-FR": "Bon", "ok|en-US": "Good"},
+		names: map[string]string{"ok|en-US": "Good"},
 		err:   nil,
 	}
 	s := newMockStore()
@@ -156,7 +151,7 @@ func TestResolve_NilDeps(t *testing.T) {
 }
 
 func TestResolve_FreshErrorCountsAsError(t *testing.T) {
-	f := &mockFetcher{names: map[string]string{"m1|fr-FR": "X", "m1|en-US": "X"}}
+	f := &mockFetcher{names: map[string]string{"m1|en-US": "X"}}
 	s := newMockStore()
 	s.freshErr = errors.New("db down")
 	res, _ := Resolve(context.Background(), f, s,

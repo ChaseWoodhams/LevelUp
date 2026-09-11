@@ -14,22 +14,22 @@
  * pas produire « 3–12 mars 2025 » (mois/année communs affichés une seule fois).
  */
 
-/** Locale BCP-47 (ex: 'fr-FR', 'en-US'). */
+/** Locale BCP-47 (ex: 'en-US', 'en-US'). */
 export type Locale = string
 
 /**
  * Formate une date ISO en chaîne lisible selon la locale.
  *
  * @param value    Date | string ISO | timestamp ms | null/undefined
- * @param locale   BCP-47 (ex: 'fr-FR')
+ * @param locale   BCP-47 (ex: 'en-US')
  * @param opts     Intl.DateTimeFormatOptions (défaut : dateStyle='medium')
  * @param fallback chaîne renvoyée si value invalide (défaut "—")
  *
  * @example
- *   formatDate('2026-04-29T12:00:00Z', 'fr-FR')      // "29 avr. 2026"
- *   formatDate('2026-04-29T12:00:00Z', 'fr-FR', { dateStyle: 'short' })
+ *   formatDate('2026-04-29T12:00:00Z', 'en-US')      // "29 avr. 2026"
+ *   formatDate('2026-04-29T12:00:00Z', 'en-US', { dateStyle: 'short' })
  *                                                      // "29/04/2026"
- *   formatDate(null, 'fr-FR')                        // "—"
+ *   formatDate(null, 'en-US')                        // "—"
  */
 export function formatDate(
   value: Date | string | number | null | undefined,
@@ -50,14 +50,14 @@ export function formatDate(
  *
  * @param start    borne de début (Date | ISO | ms | null/undefined)
  * @param end      borne de fin ; si absente, invalide ou égale à start → date simple
- * @param locale   BCP-47 (ex: 'fr-FR')
+ * @param locale   BCP-47 (ex: 'en-US')
  * @param fallback chaîne renvoyée si start invalide (défaut "—")
  *
  * @example
- *   formatDateRange('2025-03-03', '2025-03-12', 'fr-FR')  // "3–12 mars 2025"
- *   formatDateRange('2024-03-03', '2025-01-12', 'fr-FR')  // "3 mars 2024 – 12 janv. 2025"
- *   formatDateRange('2025-03-03', '2025-03-03', 'fr-FR')  // "3 mars 2025"
- *   formatDateRange('2025-03-03', null, 'fr-FR')          // "3 mars 2025"
+ *   formatDateRange('2025-03-03', '2025-03-12', 'en-US')  // "3–12 mars 2025"
+ *   formatDateRange('2024-03-03', '2025-01-12', 'en-US')  // "3 mars 2024 – 12 janv. 2025"
+ *   formatDateRange('2025-03-03', '2025-03-03', 'en-US')  // "3 mars 2025"
+ *   formatDateRange('2025-03-03', null, 'en-US')          // "3 mars 2025"
  */
 export function formatDateRange(
   start: Date | string | number | null | undefined,
@@ -82,7 +82,7 @@ export function formatDateRange(
 /**
  * Format date court DD/MM pour les axes de chart timeseries.
  *
- * VERROU 'fr-FR' DÉLIBÉRÉ (décision I2b, 2026-07-04 ; DETTE_ASSUMEE §2 I2b ; revu
+ * VERROU 'en-US' DÉLIBÉRÉ (décision I2b, 2026-07-04 ; DETTE_ASSUMEE §2 I2b ; revu
  * V7d/VF-14 2026-07-07 — maintenu). Le rendu est NUMÉRIQUE PUR `DD/MM` (day+month
  * en 2-digit, sans nom de mois) : identique en FR et EN (`29/04` dans les deux
  * locales), donc locale-invariant à l'affichage. On fige explicitement pour
@@ -96,14 +96,14 @@ export function formatDateRange(
  */
 export function formatDateShort(value: Date | string | number): string {
   const d = value instanceof Date ? value : new Date(value)
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+  return d.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' })
 }
 
 /**
  * Format date+time complet selon la locale (toLocaleString avec defaults).
  *
  * @example
- *   formatDateTime('2026-04-29T20:30:00Z', 'fr-FR')  // "29/04/2026 22:30:00"
+ *   formatDateTime('2026-04-29T20:30:00Z', 'en-US')  // "29/04/2026 22:30:00"
  */
 export function formatDateTime(
   value: Date | string | number | null | undefined,

@@ -19,7 +19,7 @@ export function ActionLastRun({ action }: { action: string }) {
     return <p className="text-xs text-muted-foreground/70">{tA('admin.actions.never_run')}</p>
   }
   return (
-    <p className="text-xs text-muted-foreground" title={adminAbsoluteTime(display.at, locale)}>
+    <p className="text-xs text-muted-foreground" title={adminAbsoluteTime(display.at)}>
       {tA('admin.actions.last_run')} : {adminRelativeTime(display.at, locale)} · {tA(display.triggerKey)}
       {display.failed && (
         <span className="ml-1 font-medium" style={{ color: tokenCssVar('destructive') }}>

@@ -120,6 +120,8 @@ func seedTemplates(db *sql.DB, path string) error {
 		if modeFilter == "" {
 			modeFilter = "universal"
 		}
+		labelFR := t.LabelEN
+		descriptionFR := t.DescriptionEN
 		_, err := db.ExecContext(migration.BootCtx(), `
 			INSERT INTO challenge_template (
 				id, title_slug, metric, window_type, window_value, cadence, eval_type,
@@ -147,7 +149,7 @@ func seedTemplates(db *sql.DB, path string) error {
 				updated_at       = excluded.updated_at`,
 			t.ID, doc.Meta.TitleSlug, t.Metric, t.WindowType, t.WindowValue,
 			t.Cadence, t.EvalType, modeFilter,
-			t.LabelEN, t.LabelFR, t.DescriptionEN, t.DescriptionFR,
+			t.LabelEN, labelFR, t.DescriptionEN, descriptionFR,
 			t.NormalTarget, t.HeroicTarget, t.LegendaryTarget, t.MythicTarget,
 			now,
 		)
@@ -172,6 +174,8 @@ func seedPresets(db *sql.DB, path string) error {
 	}
 	now := time.Now().UTC()
 	for _, a := range doc.Arcs {
+		titleFR := a.TitleEN
+		descriptionFR := a.DescriptionEN
 		_, err := db.ExecContext(migration.BootCtx(), `
 			INSERT INTO preset_arc (id, title_slug, title_en, title_fr,
 			                       description_en, description_fr, schema_version, updated_at)
@@ -184,8 +188,8 @@ func seedPresets(db *sql.DB, path string) error {
 				description_fr = excluded.description_fr,
 				schema_version = excluded.schema_version,
 				updated_at     = excluded.updated_at`,
-			a.ID, doc.Meta.TitleSlug, a.TitleEN, a.TitleFR,
-			a.DescriptionEN, a.DescriptionFR, now,
+			a.ID, doc.Meta.TitleSlug, a.TitleEN, titleFR,
+			a.DescriptionEN, descriptionFR, now,
 		)
 		if err != nil {
 			return fmt.Errorf("seed presets: upsert arc %s: %w", a.ID, err)

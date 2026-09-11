@@ -64,58 +64,6 @@ export interface MediaModalsText {
   coverFlow: CoverFlowText
 }
 
-const FR: MediaModalsText = {
-  matchPicker: {
-    title: 'Réassocier ce média',
-    titleAssociate: 'Associer ce média',
-    capturePrefix: 'Capture :',
-    closeAriaLabel: 'Fermer',
-    windowLabel: 'Fenêtre :',
-    matchesFound: (count) => `${count} match${count > 1 ? 's' : ''} trouvé${count > 1 ? 's' : ''}`,
-    loading: 'Chargement…',
-    error: 'Erreur de chargement',
-    noMatchesFound: 'Aucun match trouvé dans cette fenêtre. Élargis la recherche.',
-    lobbyUnavailable: 'Lobby indisponible',
-    currentBadge: 'actuel',
-    confirmTitle: 'Confirmer la réassociation ?',
-    confirmTitleAssociate: "Confirmer l'association ?",
-    cancel: 'Annuler',
-    confirm: 'Confirmer',
-    applying: 'Application…',
-    deltaUnder1Min: '< 1 min',
-    deltaMinFormat: (m) => `±${m} min`,
-    spectators: 'Spectateurs',
-    teamLabel: (n) => `Équipe ${n}`,
-  },
-  coverFlow: {
-    reassociateButton: 'Réassocier',
-    reassociateTitle: 'Réassocier ce média à un autre match',
-    associateButton: 'Associer',
-    associateTitle: 'Associer ce média à un match',
-    viewMatchButton: 'Voir le match →',
-    viewMatchTitle: 'Ouvrir la page du match associé',
-    chainButton: 'Enchaîner',
-    enableChaining: 'Activer enchaînement',
-    disableChaining: 'Désactiver enchaînement',
-    closeAriaLabel: 'Fermer',
-    audioGame: 'Jeu',
-    audioVoice: 'Voix',
-    audioGroupLabel: 'Pistes audio',
-    enterFullscreen: 'Plein écran',
-    exitFullscreen: 'Quitter le plein écran',
-    deleteButton: 'Supprimer',
-    deleteTitle: 'Supprimer définitivement ce média',
-    deleteConfirmTitle: 'Supprimer ce média ?',
-    deleteConfirmBody:
-      'Le fichier sera effacé du serveur et ne pourra pas être récupéré. '
-      + 'Le média disparaîtra de la galerie et des pages de match.',
-    deleteConfirmLabel: 'Supprimer définitivement',
-    deleteCancelLabel: 'Annuler',
-    deleteSuccess: 'Média supprimé.',
-    deleteError: 'Impossible de supprimer ce média.',
-  },
-}
-
 const EN: MediaModalsText = {
   matchPicker: {
     title: 'Reassociate this media',
@@ -168,8 +116,8 @@ const EN: MediaModalsText = {
   },
 }
 
-const TEXT: Record<Locale, MediaModalsText> = { fr: FR, en: EN }
+const TEXT: Record<Locale, MediaModalsText> = { en: EN }
 
-export function getMediaModalsText(locale?: string | null): MediaModalsText {
-  return TEXT[locale === 'en' ? 'en' : 'fr']
+export function getMediaModalsText(): MediaModalsText {
+  return TEXT['en']
 }

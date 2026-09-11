@@ -34,23 +34,16 @@ interface Texts {
   alreadyFriend: string
 }
 
-function getTexts(locale: string): Texts {
-  const isFr = locale === 'fr'
+function getTexts(): Texts {
   return {
-    title: (gt) => isFr ? `Ajouter ${gt} comme ami ?` : `Add ${gt} as a friend?`,
-    confirmDescription: isFr
-      ? 'Le coéquipier sera ajouté à la liste d\'amis et apparaîtra dans le sélecteur Escouade.'
-      : 'The teammate will be added to the friends list and shown in the Squad selector.',
-    syncWarning: isFr
-      ? 'Les matchs historiques joués ensemble seront re-classés en escouade en arrière-plan (peut prendre plusieurs minutes selon la taille du corpus).'
-      : 'Historical matches played together will be reclassified as squad in the background (may take a few minutes for large corpora).',
-    cancel:  isFr ? 'Annuler' : 'Cancel',
-    confirm: isFr ? 'Ajouter' : 'Add',
-    successToast: (gt) => isFr
-      ? `${gt} ajouté aux amis. Recalcul des sessions en cours…`
-      : `${gt} added to friends. Recomputing sessions…`,
-    errorToast:  (gt, msg) => isFr ? `Impossible d'ajouter ${gt} : ${msg}` : `Failed to add ${gt}: ${msg}`,
-    alreadyFriend: isFr ? 'Déjà en amis' : 'Already friends',
+    title: (gt) => "Add " + gt + " as a friend?",
+    confirmDescription: "The teammate will be added to the friends list and shown in the Squad selector.",
+    syncWarning: "Historical matches played together will be reclassified as squad in the background (may take a few minutes for large corpora).",
+    cancel: "Cancel",
+    confirm: "Add",
+    successToast: (gt) => gt + " added to friends. Recomputing sessions…",
+    errorToast: (gt, msg) => "Failed to add " + gt + ": " + msg,
+    alreadyFriend: "Already friends",
   }
 }
 
@@ -62,8 +55,8 @@ function getTexts(locale: string): Texts {
  * sur diff (§4). Invalide les queries Squad pour rafraîchir le dropdown.
  */
 // eslint-disable-next-line react-refresh/only-export-components
-export function useAddFriend(locale: string = 'fr') {
-  const t = getTexts(locale)
+export function useAddFriend() {
+  const t = getTexts()
   const { data: settings } = useSettings()
   const update = useUpdateSettings()
   const qc = useQueryClient()
@@ -104,15 +97,13 @@ export interface AddFriendModalProps {
   open: boolean
   /** Appelé après confirmation OK ou annulation. */
   onClose: () => void
-  /** Locale UI (fr | en). */
-  locale: string
   /** Callback optionnel après ajout réussi. */
   onSuccess?: (gamertag: string) => void
 }
 
-export function AddFriendModal({ gamertag, open, onClose, locale, onSuccess }: AddFriendModalProps) {
-  const t = getTexts(locale)
-  const { addFriend, isAdding } = useAddFriend(locale)
+export function AddFriendModal({ gamertag, open, onClose, onSuccess }: AddFriendModalProps) {
+  const t = getTexts()
+  const { addFriend, isAdding } = useAddFriend()
   const [submitted, setSubmitted] = useState(false)
 
   if (!open) return null

@@ -15,10 +15,10 @@ import { MATCH_VIEW_TEXT, type MatchViewLocale } from './i18n'
  * FR : `07/05/26 à 21:30` · EN : `07/05/26 at 21:30`.
  * Si `withTime=false`, seule la date est rendue (descriptor `period`).
  */
-function fmtShortDateTime(iso: string, locale: MatchViewLocale, withTime: boolean): string {
+function fmtShortDateTime(iso: string, _locale: MatchViewLocale, withTime: boolean): string {
   const d = new Date(iso)
   if (isNaN(d.getTime())) return iso
-  const intlLocale = locale === 'en' ? 'en-GB' : 'fr-FR'
+  const intlLocale = 'en-US'
   const dateStr = new Intl.DateTimeFormat(intlLocale, {
     day: '2-digit',
     month: '2-digit',
@@ -29,7 +29,7 @@ function fmtShortDateTime(iso: string, locale: MatchViewLocale, withTime: boolea
     hour: '2-digit',
     minute: '2-digit',
   }).format(d)
-  return locale === 'en' ? `${dateStr} at ${timeStr}` : `${dateStr} à ${timeStr}`
+  return dateStr + ' at ' + timeStr
 }
 
 /**

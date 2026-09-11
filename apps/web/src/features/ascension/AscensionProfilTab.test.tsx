@@ -18,7 +18,7 @@ const mockShellState = {
   currentPlayer: { player_slug: 'demo-player', gamertag: 'DemoPlayer' } as
     | { player_slug: string; gamertag: string }
     | null,
-  locale: 'fr' as 'fr' | 'en',
+  locale: 'en' as 'en' | 'en',
 }
 
 vi.mock('@/stores/appShellStore', () => ({
@@ -62,13 +62,13 @@ describe('AscensionProfilTab — composition (couche Profil)', () => {
       player_slug: 'demo-player',
       gamertag: 'DemoPlayer',
     }
-    mockShellState.locale = 'fr'
+    mockShellState.locale = 'en'
     mockPatterns.current = null
   })
 
   it('renders the Profil LayerSection header', () => {
     render(<AscensionProfilTab />)
-    expect(screen.getByText(/Profil de jeu/i)).toBeInTheDocument()
+    expect(screen.getByText(/Play profile/i)).toBeInTheDocument()
   })
 
   it('renders PlayerProfileV3', () => {
@@ -119,7 +119,7 @@ describe('AscensionProfilTab — composition (couche Profil)', () => {
     mockShellState.currentPlayer = null
     render(<AscensionProfilTab />)
     expect(
-      screen.getByText(/Sélectionne un joueur pour voir les objectifs/i),
+      screen.getByText(/Select a player to view objectives/i),
     ).toBeInTheDocument()
   })
 })

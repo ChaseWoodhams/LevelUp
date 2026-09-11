@@ -9,990 +9,754 @@
 # ─── Tabs mode ─────────────────────────────────────────────────────────────
 
 [explorer.mode.matches]
-fr = "Matchs"
 en = "Matches"
 
 [explorer.mode.player]
-fr = "Joueur"
 en = "Player"
 
 # ─── Mode Joueur ───────────────────────────────────────────────────────────
 
 [explorer.player.no_selection_title]
-fr = "Aucun joueur sélectionné"
 en = "No player selected"
 
 [explorer.player.no_selection_description]
-fr = "Recherche un gamertag pour afficher les matchs communs et le bilan face à ce joueur."
 en = "Search a gamertag to view shared matches and head-to-head record."
 
 [explorer.player.searching]
-fr = "Recherche en cours…"
 en = "Searching…"
 
 [explorer.player.error_title]
-fr = "Recherche indisponible"
 en = "Search unavailable"
 
 [explorer.player.error_description]
-fr = "Le backend n'a pas pu renvoyer les informations de ce joueur. Réessaie avec un autre gamertag ou relance la requête."
 en = "Backend could not return information for this player. Try another gamertag or retry."
 
 [explorer.player.empty_title]
-fr = "Aucun résultat joueur"
 en = "No player result"
 
 [explorer.player.empty_description]
-fr = "La recherche n'a renvoyé aucune charge utile exploitable pour ce gamertag."
 en = "Search returned no exploitable payload for this gamertag."
 
 [explorer.player.head_to_head]
-fr = "Face-à-face"
 en = "Head-to-head"
 
 [explorer.player.activity_heatmap_title]
-fr = "Heatmap d'activité commune"
 en = "Shared activity heatmap"
 
 [explorer.player.matches_together]
-fr = "Matchs ensemble"
 en = "Matches together"
 
 [explorer.player.wins_together]
-fr = "Victoires"
 en = "Wins"
 
 [explorer.player.losses_together]
-fr = "Défaites"
 en = "Losses"
 
 [explorer.player.recent_common_matches]
-fr = "Matchs communs récents"
 en = "Recent shared matches"
 
 [explorer.player.no_common_matches_title]
-fr = "Aucun match commun récent"
 en = "No recent shared match"
 
 [explorer.player.no_common_matches_description]
-fr = "Ce joueur n'a aucun match commun visible avec le scope actuel."
 en = "This player has no visible shared match with the current scope."
 
 [explorer.player.history_title]
-fr = "Historique complet"
 en = "Full history"
 
 [explorer.player.prev_page]
-fr = "Précédent"
 en = "Previous"
 
 [explorer.player.next_page]
-fr = "Suivant"
 en = "Next"
 
 [explorer.player.page_info]
-fr = "Page {page} / {total}"
 en = "Page {page} of {total}"
 
 [explorer.player.were_teammates]
-fr = "Coéquipiers"
 en = "Teammates"
 
 [explorer.player.were_enemies]
-fr = "Adversaires"
 en = "Enemies"
 
 # ─── Mode Matchs - Filtres ─────────────────────────────────────────────────
 
 [explorer.filters.date_from]
-fr = "Depuis"
 en = "From"
 
 [explorer.filters.date_to]
-fr = "Jusqu'à"
 en = "To"
 
 [explorer.filters.date_from_label]
-fr = "Du"
 en = "From"
 
 [explorer.filters.date_to_label]
-fr = "Au"
 en = "To"
 
 [explorer.filters.selected_count]
-fr = "{n} sél."
 en = "{n} sel."
 
 [explorer.filters.match_id]
-fr = "ID match…"
 en = "Match ID…"
 
 [explorer.filters.context]
-fr = "Contexte"
 en = "Context"
 
 [explorer.filters.context_all]
-fr = "Tous"
 en = "All"
 
 [explorer.filters.context_solo]
-fr = "Solo"
 en = "Solo"
 
 [explorer.filters.context_squad]
-fr = "Escouade"
 en = "Squad"
 
 [explorer.filters.experience_type]
-fr = "Type d'expérience"
 en = "Experience type"
 
 [explorer.filters.playlist]
-fr = "Sélection"
 en = "Playlist"
 
 [explorer.filters.mode]
-fr = "Mode"
 en = "Mode"
 
 [explorer.filters.map]
-fr = "Carte"
 en = "Map"
 
 [explorer.filters.reset]
-fr = "Réinitialiser les filtres"
 en = "Reset filters"
 
 # ─── Mode Matchs - Résultats ───────────────────────────────────────────────
 
 [explorer.matches.loading]
-fr = "Chargement des matchs…"
 en = "Loading matches…"
 
 [explorer.matches.error]
-fr = "Impossible de charger les matchs."
 en = "Failed to load matches."
 
 [explorer.matches.retry]
-fr = "Réessayer"
 en = "Retry"
 
 [explorer.matches.count_label]
-fr = "{n, plural, one {# match trouvé} other {# matchs trouvés}}"
 en = "{n, plural, one {# match found} other {# matches found}}"
 
 [explorer.matches.col_date]
-fr = "Date"
 en = "Date"
 
 [explorer.matches.col_map_mode]
-fr = "Carte / Mode"
 en = "Map / Mode"
 
 [explorer.matches.col_outcome]
-fr = "Résultat"
 en = "Outcome"
 
 [explorer.matches.col_score]
-fr = "Score"
 en = "Score"
 
 [explorer.matches.col_score_tooltip]
-fr = "Score final de la partie : l'équipe puis l'équipe adverse."
 en = "Final match score: the team, then the opposing team."
 
 [explorer.matches.col_personal_score]
-fr = "Score personnel"
 en = "Personal score"
 
 [explorer.matches.col_personal_score_tooltip]
-fr = "Points marqués en solo pendant la partie (éliminations, objectifs, assistances) — sans rapport avec le score de l'équipe."
 en = "Points scored solo during the match (kills, objectives, assists) — unrelated to the team score."
 
 [explorer.matches.col_type]
-fr = "Type"
 en = "Type"
 
 [explorer.matches.empty_row]
-fr = "Aucun match trouvé."
 en = "No match found."
 
 [explorer.matches.empty_title]
-fr = "Résultats indisponibles"
 en = "Results unavailable"
 
 [explorer.matches.empty_description]
-fr = "La requête n'a renvoyé aucun tableau de matchs exploitable pour ce scope."
 en = "Query returned no exploitable match table for this scope."
 
 # ─── Filtre outcome ───────────────────────────────────────────────────────────
 
 [explorer.filters.outcome_label]
-fr = "Résultat"
 en = "Outcome"
 
 [explorer.filters.outcome_win]
-fr = "Victoire"
 en = "Win"
 
 [explorer.filters.outcome_loss]
-fr = "Défaite"
 en = "Loss"
 
 [explorer.filters.outcome_tie]
-fr = "Égalité"
 en = "Tie"
 
 # ─── Filtre skill tier ────────────────────────────────────────────────────────
 
 [explorer.filters.skill_tier_label]
-fr = "Tier"
 en = "Tier"
 
 [explorer.filters.skill_tier_disabled]
-fr = "Sélectionne uniquement 'PVP classé' ou 'PVP non classé' dans Type d'expérience pour activer ce filtre"
-en = "Select only 'PVP classé' or 'PVP non classé' in Experience type to enable this filter"
+en = "Select only 'Ranked PvP' or 'Unranked PvP' in Experience type to enable this filter"
 
 [explorer.filters.skill_tier_bronze]
-fr = "Bronze"
 en = "Bronze"
 
 [explorer.filters.skill_tier_silver]
-fr = "Argent"
 en = "Silver"
 
 [explorer.filters.skill_tier_gold]
-fr = "Or"
 en = "Gold"
 
 [explorer.filters.skill_tier_platinum]
-fr = "Platine"
 en = "Platinum"
 
 [explorer.filters.skill_tier_diamond]
-fr = "Diamant"
 en = "Diamond"
 
 [explorer.filters.skill_tier_onyx]
-fr = "Onyx"
 en = "Onyx"
 
 # ─── Filtre perf-tier ─────────────────────────────────────────────────────────
 
 [explorer.filters.perf_tier_label]
-fr = "Performance"
 en = "Performance"
 
 [explorer.filters.perf_tier_excellent]
-fr = "Excellent"
 en = "Excellent"
 
 [explorer.filters.perf_tier_bon]
-fr = "Bon"
 en = "Good"
 
 [explorer.filters.perf_tier_correct]
-fr = "Correct"
 en = "Fair"
 
 [explorer.filters.perf_tier_faible]
-fr = "Faible"
 en = "Poor"
 
 [explorer.filters.perf_tier_mauvais]
-fr = "Mauvais"
 en = "Bad"
 
 # ─── Colonne perf ─────────────────────────────────────────────────────────────
 
 [explorer.matches.col_perf]
-fr = "Perf"
 en = "Perf"
 
 [explorer.matches.perf_no_score]
-fr = "—"
 en = "—"
 
 # ─── Colonnes additionnelles tableau matchs ───────────────────────────────────
 
 [explorer.matches.col_fda]
-fr = "FDA"
 en = "KDA"
 
 [explorer.matches.col_delta_perf]
-fr = "ΔPerf"
 en = "ΔPerf"
 
 [explorer.matches.col_rating]
-fr = "Note"
 en = "Rating"
 
 [explorer.matches.col_rank]
-fr = "Rang"
 en = "Rank"
 
 [explorer.matches.col_team_mmr]
-fr = "MMR équipe"
 en = "Team MMR"
 
 [explorer.matches.col_enemy_mmr]
-fr = "MMR adv."
 en = "Enemy MMR"
 
 [explorer.matches.col_delta_mmr]
-fr = "ΔMMR"
 en = "ΔMMR"
 
 [explorer.matches.col_open]
-fr = "Ouvrir"
 en = "Open"
 
 [explorer.matches.col_waypoint_aria]
-fr = "Ouvrir sur Halo Waypoint"
 en = "Open on Halo Waypoint"
 
 [explorer.matches.sort_by]
-fr = "Trier par {col}"
 en = "Sort by {col}"
 
 [explorer.matches.col_kills]
-fr = "F"
 en = "K"
 
 [explorer.matches.col_kills_long]
-fr = "Frags"
 en = "Kills"
 
 [explorer.matches.col_deaths]
-fr = "D"
 en = "D"
 
 [explorer.matches.col_deaths_long]
-fr = "Morts"
 en = "Deaths"
 
 [explorer.matches.col_assists]
-fr = "A"
 en = "A"
 
 [explorer.matches.col_assists_long]
-fr = "Assistances"
 en = "Assists"
 
 [explorer.matches.col_dominance]
-fr = "Dominance"
 en = "Dominance"
 
 [explorer.matches.col_kda]
-fr = "FDA"
 en = "KDA"
 
 [explorer.matches.col_kda_tooltip]
-fr = "FDA = (Frags + Assistances/3) − Morts ; peut être négatif"
 en = "KDA = (Kills + Assists/3) − Deaths; can be negative"
 
 # ─── Tooltips d'en-tête de colonnes (V72-04, icône ⓘ) ────────────────────────
 
 [explorer.matches.col_squad_tooltip]
-fr = "Partie jouée en solo ou en escouade (au moins un coéquipier connu)."
 en = "Match played solo or as a squad (at least one known teammate)."
 
 [explorer.matches.col_dominance_tooltip]
-fr = "Fait marquant : domination, humiliation, remontada, débandade ou contre-remontada."
 en = "Storyline: domination, humiliation, comeback, collapse or counter-comeback."
 
 [explorer.matches.col_kills_tooltip]
-fr = "Frags réalisés durant le match."
 en = "Kills scored during the match."
 
 [explorer.matches.col_deaths_tooltip]
-fr = "Morts durant le match."
 en = "Deaths during the match."
 
 [explorer.matches.col_assists_tooltip]
-fr = "Assistances : coups portés à un adversaire achevé par un allié."
 en = "Assists: damage on an enemy finished off by a teammate."
 
 [explorer.matches.col_perf_tooltip]
-fr = "Score de performance 0–100 relatif à l'historique du joueur (50 = habituel)."
 en = "Performance score 0–100 relative to the player's own history (50 = usual)."
 
 [explorer.matches.col_delta_perf_tooltip]
-fr = "Écart de performance de ce match par rapport au niveau habituel du joueur."
 en = "This match's performance gap versus the player's usual level."
 
 [explorer.matches.col_rating_tooltip]
-fr = "Type de classement du match : CSR (classé en jeu) ou LUSR (classement maison)."
 en = "Match rating type: CSR (in-game ranked) or LUSR (in-house rating)."
 
 [explorer.matches.col_rank_tooltip]
-fr = "Palier de classement atteint sur ce match, ou progression de placement en cours."
 en = "Ranking tier reached this match, or placement progress if unranked."
 
 [explorer.matches.col_team_mmr_tooltip]
-fr = "Niveau de compétence moyen estimé (MMR) de l'équipe."
 en = "Average estimated skill level (MMR) of the team."
 
 [explorer.matches.col_enemy_mmr_tooltip]
-fr = "Niveau de compétence moyen estimé (MMR) de l'équipe adverse."
 en = "Average estimated skill level (MMR) of the enemy team."
 
 [explorer.matches.col_delta_mmr_tooltip]
-fr = "Écart de MMR entre l'équipe et l'équipe adverse."
 en = "MMR gap between the team and the enemy team."
 
 [explorer.matches.col_duration]
-fr = "Durée"
 en = "Duration"
 
 [explorer.matches.export_csv]
-fr = "Exporter CSV"
 en = "Export CSV"
 
 # ─── Encounter briefing (mode Joueur — KPIs MatchEncountersTable) ─────────────
 
 [explorer.encounter.title]
-fr = "Historique des rencontres"
 en = "Encounter history"
 
 [explorer.encounter.empty]
-fr = "Aucune rencontre antérieure avec ce joueur."
 en = "No prior encounters with this player."
 
 [explorer.encounter.encounters]
-fr = "Rencontres"
 en = "Encounters"
 
 [explorer.encounter.wr_ally]
-fr = "Taux de victoire allié"
 en = "WR as ally"
 
 [explorer.encounter.wr_enemy]
-fr = "Taux de victoire ennemi"
 en = "WR as enemy"
 
 [explorer.encounter.kd_cross]
-fr = "F/D"
 en = "K/D"
 
 [explorer.encounter.ratio]
-fr = "Ratio"
 en = "Ratio"
 
 [explorer.encounter.ratio_tooltip]
-fr = "Ratio frags/morts : frags infligés ÷ morts subies sur l'ensemble des matchs communs"
 en = "Kill/Death ratio: kills dealt ÷ deaths suffered across all shared matches"
 
 [explorer.encounter.last_seen]
-fr = "Vu pour la dernière fois"
 en = "Last seen"
 
 [explorer.matches.col_squad]
-fr = "Contexte"
 en = "Context"
 
 [explorer.matches.squad_solo]
-fr = "Solo"
 en = "Solo"
 
 [explorer.matches.squad_party]
-fr = "Escouade"
 en = "Squad"
 
 [explorer.matches.bot_pill]
-fr = "bot"
 en = "bot"
 
 [explorer.matches.bot_pill_tooltip]
-fr = "Un coéquipier était un bot (humain parti et remplacé)."
 en = "A teammate was a bot (a human player left and was replaced)."
 
 [explorer.matches.outcome_win]
-fr = "Victoire"
 en = "Win"
 
 [explorer.matches.outcome_loss]
-fr = "Défaite"
 en = "Loss"
 
 [explorer.matches.outcome_draw]
-fr = "Égalité"
 en = "Tie"
 
 [explorer.matches.outcome_dnf]
-fr = "Non terminé"
 en = "DNF"
 
 # ─── Tableau mode joueur ──────────────────────────────────────────────────────
 
 [explorer.player.col_role]
-fr = "Rôle"
 en = "Role"
 
 [explorer.player.col_kd]
-fr = "K/D"
 en = "K/D"
 
 [explorer.player.table_as_ally]
-fr = "Équipe alliée"
 en = "Ally team"
 
 [explorer.player.table_as_enemy]
-fr = "Équipe ennemie"
 en = "Enemy team"
 
 # ─── Gamertag search input ────────────────────────────────────────────────
 
 [explorer.search.placeholder]
-fr = "Rechercher un joueur…"
 en = "Search a player…"
 
 [explorer.search.group_configured]
-fr = "Joueurs configurés"
 en = "Configured players"
 
 [explorer.search.group_frequent]
-fr = "Coéquipiers fréquents"
 en = "Frequent teammates"
 
 [explorer.search.group_others]
-fr = "Autres joueurs"
 en = "Other players"
 
 [explorer.search.loading]
-fr = "Recherche…"
 en = "Searching…"
 
 [explorer.search.no_results]
-fr = "Aucun joueur trouvé pour \"{query}\""
 en = "No player found for \"{query}\""
 
 [explorer.search.search_for]
-fr = "Rechercher \"{query}\""
 en = "Search \"{query}\""
 
 [explorer.search.badge_exact]
-fr = "Exact"
 en = "Exact"
 
 # ─── Encart "Profil joueur cible" (target_profile) ────────────────────────
 
 [explorer.target_profile.section_career_title]
-fr = "Carrière complète"
 en = "Career overview"
 
 [explorer.target_profile.section_career_subtitle]
-fr = "via API Halo"
 en = "via Halo API"
 
 [explorer.target_profile.section_sample_title]
-fr = "Sur {count, plural, one {# match joué ensemble} other {# matchs joués ensemble}}"
 en = "Over {count, plural, one {# shared match} other {# shared matches}}"
 
 [explorer.target_profile.results_title]
-fr = "Répartition des résultats"
 en = "Results breakdown"
 
 # ─── Section « matchs joués ensemble » — donuts WR (ensemble / face à lui) +
 # écart de frags cumulé (repris du hub Relations). Repère = moyenne perso historique.
 [explorer.target_profile.wr_together_caption]
-fr = "Taux de victoires ensemble"
 en = "Win rate together"
 
 [explorer.target_profile.wr_versus_caption]
-fr = "Taux de victoires face à lui"
 en = "Win rate against them"
 
 [explorer.target_profile.donut_wins]
-fr = "Victoires"
 en = "Wins"
 
 [explorer.target_profile.donut_losses]
-fr = "Défaites"
 en = "Losses"
 
 [explorer.target_profile.donut_personal_avg]
-fr = "Moy. perso"
 en = "Pers. avg"
 
 [explorer.target_profile.donut_points_unit]
-fr = "pts"
 en = "pts"
 
 [explorer.target_profile.donut_lift_tooltip]
-fr = "Écart entre ce taux de victoire et la moyenne personnelle historique."
 en = "Gap between this win rate and the historical personal average."
 
 [explorer.target_profile.frag_gap_title]
-fr = "Écart de frags cumulé"
 en = "Cumulative frag gap"
 
 [explorer.target_profile.section_sample_empty]
-fr = "Aucun match en commun avec ce joueur — les comparaisons directes apparaîtront après des parties partagées."
 en = "No matches in common with this player yet — direct comparisons will appear after you play shared games."
 
 [explorer.target_profile.no_auth_hint]
-fr = "Connecte un compte Halo pour voir la carrière complète et le profil live de ce joueur."
 en = "Connect a Halo account to see this player's full career and live profile."
 
 # Badges par section live (Lot A3 — fin de la dégradation muette). Wording FR
 # sobre demandé par le plan : "Données live indisponibles (authentification)" /
 # "Live partiel". "failed" reprend le même gabarit avec la cause "erreur".
 [explorer.target_profile.live_status.no_auth]
-fr = "Données live indisponibles (authentification)"
 en = "Live data unavailable (authentication)"
 
 [explorer.target_profile.live_status.failed]
-fr = "Données live indisponibles (erreur)"
 en = "Live data unavailable (error)"
 
 [explorer.target_profile.live_status.local_partial]
-fr = "Live partiel"
 en = "Partial live data"
 
 [explorer.target_profile.identity_unknown_title]
-fr = "Identité Spartan non disponible"
 en = "Spartan identity not available"
 
 [explorer.target_profile.identity_unknown_description]
-fr = "Emblème et rang carrière indisponibles pour ce joueur — ses stats sont affichées ci-dessous."
 en = "Emblem and career rank unavailable for this player — their stats are shown below."
 
 [explorer.target_profile.top_medals_title]
-fr = "Top médailles"
 en = "Top medals"
 
 [explorer.target_profile.top_weapons_title]
-fr = "Top armes"
 en = "Top weapons"
 
 [explorer.target_profile.medals_show_more]
-fr = "Voir plus ({count})"
 en = "Show more ({count})"
 
 [explorer.target_profile.medals_show_less]
-fr = "Voir moins"
 en = "Show less"
 
 [explorer.target_profile.time_played_label]
-fr = "Temps de jeu"
 en = "Time played"
 
 [explorer.target_profile.season_csr_title]
-fr = "Classements CSR (saison actuelle)"
 en = "CSR rankings (current season)"
 
 [explorer.target_profile.season_csr_empty]
-fr = "Aucun classement CSR à afficher"
 en = "No CSR rankings to display"
 
 [explorer.target_profile.matches_per_season_title]
-fr = "Matchs par saison"
 en = "Matches per season"
 
 [explorer.target_profile.matches_per_season_empty]
-fr = "Aucun match par saison à afficher"
 en = "No matches per season to display"
 
 [explorer.target_profile.label_matches]
-fr = "Parties"
 en = "Matches"
 
 [explorer.target_profile.label_kda]
-fr = "FDA"
 en = "KDA"
 
 [explorer.target_profile.label_kdr]
-fr = "F/D"
 en = "K/D"
 
 [explorer.target_profile.label_win_rate]
-fr = "Taux de victoire"
 en = "Win rate"
 
 [explorer.target_profile.label_accuracy]
-fr = "Précision"
 en = "Accuracy"
 
 [explorer.target_profile.label_dmg_per_game]
-fr = "Dégâts/match"
 en = "Damage/game"
 
 [explorer.target_profile.label_headshot_rate]
-fr = "Tirs à la tête"
 en = "Headshots"
 
 [explorer.target_profile.label_combat_yield]
-fr = "Rendement combat"
 en = "Combat yield"
 
 [explorer.target_profile.label_kill_types]
-fr = "Répartition des frags"
 en = "Kill types"
 
 [explorer.target_profile.value_unavailable]
-fr = "—"
 en = "—"
 
 [explorer.target_profile.label_perfect_kills]
-fr = "Frags parfaits"
 en = "Perfect kills"
 
 [explorer.target_profile.label_avg_score]
-fr = "Score moyen"
 en = "Avg score"
 
 [explorer.target_profile.cadence_title]
-fr = "Cadence"
 en = "Pace"
 
 [explorer.target_profile.cadence_per_match]
-fr = "Par match"
 en = "Per match"
 
 [explorer.target_profile.cadence_per_minute]
-fr = "Par minute"
 en = "Per minute"
 
 [explorer.target_profile.cadence_frags]
-fr = "Frags"
 en = "Kills"
 
 [explorer.target_profile.cadence_deaths]
-fr = "Morts"
 en = "Deaths"
 
 [explorer.target_profile.cadence_assists]
-fr = "Assistances"
 en = "Assists"
 
 [explorer.target_profile.yield_offensive]
-fr = "Rendement"
 en = "Yield"
 
 [explorer.target_profile.yield_defensive]
-fr = "Résistance"
 en = "Resistance"
 
 [explorer.target_profile.yield_dmg_per_kill]
-fr = "{n} dégâts/frag"
 en = "{n} dmg/kill"
 
 [explorer.target_profile.yield_dmg_per_death]
-fr = "{n} dégâts/mort"
 en = "{n} dmg/death"
 
 [explorer.target_profile.outcome_wins]
-fr = "Victoires"
 en = "Wins"
 
 [explorer.target_profile.outcome_draws]
-fr = "Nuls"
 en = "Draws"
 
 [explorer.target_profile.outcome_losses]
-fr = "Défaites"
 en = "Losses"
 
 # ─── Tableau de matchs : expander 10 → 20 ──────────────────────────────────
 
 [explorer.matches_table.show_all]
-fr = "Voir tout (20 par page)"
 en = "Show all (20 per page)"
 
 [explorer.matches_table.show_less]
-fr = "Réduire (10 lignes)"
 en = "Collapse (10 rows)"
 
 # --- Profil de combat (5 graphes, derniers matchs PvP de la cible) ---
 
 [explorer.combat.title]
-fr = "Profil de combat"
 en = "Combat profile"
 
 [explorer.combat.fda_title]
-fr = "FDA et Frags / Morts / Assistances"
 en = "KDA and Kills / Deaths / Assists"
 
 [explorer.combat.damage_title]
-fr = "Dégâts infligés et subis"
 en = "Damage dealt and taken"
 
 [explorer.combat.score_title]
-fr = "Score et placement"
 en = "Score and placement"
 
 [explorer.combat.spree_title]
-fr = "Folie meurtrière max et frags parfaits"
 en = "Max killing spree and perfect kills"
 
 [explorer.combat.modes_title]
-fr = "Répartition des modes"
 en = "Mode distribution"
 
 [explorer.combat.axis_fda]
-fr = "FDA"
 en = "KDA"
 
 [explorer.combat.axis_count]
-fr = "Nombre"
 en = "Count"
 
 [explorer.combat.axis_placement]
-fr = "Placement"
 en = "Placement"
 
 [explorer.combat.axis_score]
-fr = "Score"
 en = "Score"
 
 [explorer.combat.label_kills]
-fr = "Frags"
 en = "Kills"
 
 [explorer.combat.label_deaths]
-fr = "Morts"
 en = "Deaths"
 
 [explorer.combat.label_assists]
-fr = "Assistances"
 en = "Assists"
 
 [explorer.combat.label_damage_dealt]
-fr = "Dégâts infligés"
 en = "Damage dealt"
 
 [explorer.combat.label_damage_taken]
-fr = "Dégâts subis"
 en = "Damage taken"
 
 [explorer.combat.label_score]
-fr = "Score"
 en = "Score"
 
 [explorer.combat.label_max_spree]
-fr = "Folie meurtrière max"
 en = "Max killing spree"
 
 [explorer.combat.label_perfect_kills]
-fr = "Frags parfaits"
 en = "Perfect kills"
 
 [explorer.combat.mode_unknown]
-fr = "Inconnu"
 en = "Unknown"
 
 # ─── Bandeau de briefing (mode Matchs) ─────────────────────────────────────────
 
 [explorer.briefing.matches_label]
-fr = "Matchs"
 en = "Matches"
 
 [explorer.briefing.win_rate_label]
-fr = "Taux de victoire"
 en = "Win rate"
 
 [explorer.briefing.fda_label]
-fr = "FDA"
 en = "KDA"
 
 [explorer.briefing.perf_label]
-fr = "Perf. moyenne"
 en = "Avg. performance"
 
 [explorer.briefing.duration_total_label]
-fr = "Durée totale"
 en = "Total time"
 
 [explorer.briefing.peak_rank_label]
-fr = "Pic rang"
 en = "Peak rank"
 
 [explorer.briefing.peak_mmr_label]
-fr = "Pic MMR"
 en = "Peak MMR"
 
 [explorer.briefing.vs_baseline]
-fr = "vs habituel"
 en = "vs usual"
 
 [explorer.briefing.low_sample]
-fr = "Échantillon faible ({n} matchs)"
 en = "Small sample ({n} matches)"
 
 # Bascule réduire/afficher de la synthèse (« briefing ») — libellé + aria explicites.
 [explorer.briefing.collapse]
-fr = "Réduire"
 en = "Collapse"
 
 [explorer.briefing.expand]
-fr = "Afficher le résumé"
 en = "Show briefing"
 
 [explorer.briefing.collapse_aria]
-fr = "Masquer le résumé"
 en = "Hide briefing"
 
 [explorer.briefing.expand_aria]
-fr = "Afficher le résumé"
 en = "Show briefing"
 
 # ─── Bandeau briefing : modules conditionnels (Lot C) ──────────────────────────
 
 [explorer.briefing.dim_map]
-fr = "Par carte"
 en = "By map"
 
 [explorer.briefing.dim_mode]
-fr = "Par mode"
 en = "By mode"
 
 [explorer.briefing.dim_playlist]
-fr = "Par sélection"
 en = "By playlist"
 
 [explorer.briefing.dim_matches]
-fr = "{n, plural, one {# match} other {# matchs}}"
 en = "{n, plural, one {# match} other {# matches}}"
 
 [explorer.briefing.ranked_title]
-fr = "Classement"
 en = "Ranking"
 
 [explorer.briefing.ranked_per_match]
-fr = "{delta} pt/match"
 en = "{delta} pt/match"
 
 [explorer.briefing.placement]
-fr = "Placement"
 en = "Placement"
 
 [explorer.briefing.placement_remaining]
-fr = "Placement ({n, plural, one {# match restant} other {# matchs restants}})"
 en = "Placement ({n, plural, one {# match left} other {# matches left}})"
 
 [explorer.briefing.context_split_title]
-fr = "Par contexte"
 en = "By context"
 
 # ─── Bandeau briefing : tuile « Séries marquantes » (socle) et bande « Moments forts » ─
 
 [explorer.briefing.streaks_title]
-fr = "Séries marquantes"
 en = "Notable streaks"
 
 # Abréviations V/D (« {n} V » / « {n} D ») de la valeur de la tuile Séries marquantes.
 [explorer.briefing.streak_wins]
-fr = "{n} V"
 en = "{n} W"
 
 [explorer.briefing.streak_losses]
-fr = "{n} D"
 en = "{n} L"
 
 [explorer.briefing.highlights_title]
-fr = "Moments forts"
 en = "Highlights"
 
 # ─── Bandeau briefing : tooltips de légende (icône i, V3 amendement) ─────────────
@@ -1001,45 +765,34 @@ en = "Highlights"
 # catégories de « Moments forts » validée sur pièces (analysis.ComputeDominanceFlag).
 
 [explorer.briefing.tip_dimensions]
-fr = "Cartes, modes ou sélections où les performances sont les meilleures et les moins bonnes."
 en = "Maps, modes or selections with the best and worst performances."
 
 [explorer.briefing.tip_context]
-fr = "Résultats en solo et en escouade : nombre de matchs, taux de victoire et FDA par contexte."
 en = "Results solo vs in a squad: number of matches, win rate and KDA per context."
 
 [explorer.briefing.tip_win_rate]
-fr = "Part de matchs gagnés dans la sélection. Le ruban sous la valeur répartit victoires, nuls, abandons et défaites ; survol pour le détail chiffré."
 en = "Share of matches won in the selection. The ribbon below the value splits wins, draws, DNFs and losses; hover for the detailed counts."
 
 [explorer.briefing.tip_fda]
-fr = "Frags, Décès, Assistances : indicateur d'impact par match qui valorise frags et assistances et pénalise les décès (pas une simple division frags/décès). La tuile montre, dans la sélection, le plus bas · la moyenne (au centre, en couleur) · le plus haut."
 en = "Kills, Deaths, Assists: a per-match impact indicator that rewards kills and assists and penalises deaths (not a plain kills/deaths division). Across the selection, the tile shows lowest · average (centre, coloured) · highest."
 
 [explorer.briefing.tip_perf]
-fr = "Score de performance de 0 à 100, relatif à l'historique du joueur (50 = niveau habituel). La tuile montre, dans la sélection, le plus bas · la moyenne (au centre, en couleur) · le plus haut."
 en = "Performance score from 0 to 100, relative to the player's own history (50 = usual level). Across the selection, the tile shows lowest · average (centre, coloured) · highest."
 
 [explorer.briefing.tip_duration]
-fr = "Temps de jeu total cumulé sur la sélection."
 en = "Total play time across the selection."
 
 [explorer.briefing.tip_peak_rank]
-fr = "Meilleur palier de classement atteint sur la sélection — pas le palier final."
 en = "Highest ranking tier reached over the selection — not the final tier."
 
 [explorer.briefing.tip_peak_mmr]
-fr = "Meilleur niveau de compétence estimé (MMR) atteint sur la sélection."
 en = "Highest estimated skill level (MMR) reached over the selection."
 
 [explorer.briefing.tip_ranked]
-fr = "Palier de classement en fin de sélection, palier de départ, et moyenne de points de classement gagnés ou perdus par match."
 en = "Ranking tier at the end of the selection, the starting tier, and the average ranking points gained or lost per match."
 
 [explorer.briefing.tip_streaks]
-fr = "Séries extrêmes dans la sélection : la plus longue suite de victoires et la plus longue suite de défaites."
 en = "Extreme streaks in the selection: the longest run of wins and the longest run of losses."
 
 [explorer.briefing.tip_highlights]
-fr = "Matchs marquants : dominations (large victoire), humiliations (large défaite), remontadas (victoire après avoir été mené), débandades (défaite après avoir mené), contre-remontadas (remontée adverse stoppée après avoir mené)."
 en = "Standout matches: dominations (large win), humiliations (large loss), comebacks (win after trailing), collapses (loss after leading), counter-comebacks (opponent's comeback stopped after leading)."

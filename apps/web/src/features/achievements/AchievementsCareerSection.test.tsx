@@ -12,8 +12,8 @@ import type { AchievementsPageResponse } from '@/lib/api/types'
 
 // Mock du store locale (par défaut FR)
 vi.mock('@/stores/appShellStore', () => ({
-  useAppShellStore: (selector: (s: { locale: 'fr' | 'en' }) => unknown) =>
-    selector({ locale: 'fr' }),
+  useAppShellStore: (selector: (s: { locale: 'en' | 'en' }) => unknown) =>
+    selector({ locale: 'en' }),
 }))
 
 // Mock du hook
@@ -46,14 +46,14 @@ describe('AchievementsCareerSection', () => {
     reset({ isLoading: true })
     render(<AchievementsCareerSection playerSlug="jgtm" />, { wrapper })
     // Le titre est toujours affiché
-    expect(screen.getByText('Succès Xbox')).toBeInTheDocument()
+    expect(screen.getByText('Xbox Achievements')).toBeInTheDocument()
   })
 
   it('affiche un message d\'erreur avec bouton réessayer', () => {
     reset({ isError: true })
     render(<AchievementsCareerSection playerSlug="jgtm" />, { wrapper })
-    expect(screen.getByText(/Erreur lors du chargement/)).toBeInTheDocument()
-    expect(screen.getByText('Réessayer')).toBeInTheDocument()
+    expect(screen.getByText(/Failed to load achievements\./)).toBeInTheDocument()
+    expect(screen.getByText('Retry')).toBeInTheDocument()
   })
 
   it('affiche empty state quand total_count=0', () => {
@@ -70,7 +70,7 @@ describe('AchievementsCareerSection', () => {
       },
     })
     render(<AchievementsCareerSection playerSlug="jgtm" />, { wrapper })
-    expect(screen.getByText(/Aucun succès en base/)).toBeInTheDocument()
+    expect(screen.getByText(/No achievements in the database\./)).toBeInTheDocument()
     expect(screen.getByText(/levelup sync-achievements/)).toBeInTheDocument()
   })
 
@@ -88,9 +88,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a1',
             name_en: 'First Blood',
-            name_fr: 'Premier sang',
             description_en: '',
-            description_fr: '',
             gamerscore: 10,
             is_secret: false,
             unlocked: true,
@@ -98,9 +96,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a2',
             name_en: 'Sharpshooter',
-            name_fr: 'Tireur d\'élite',
             description_en: '',
-            description_fr: '',
             gamerscore: 25,
             is_secret: false,
             unlocked: false,
@@ -113,9 +109,9 @@ describe('AchievementsCareerSection', () => {
     expect(screen.getByText('42 / 100')).toBeInTheDocument()
     expect(screen.getByText('800 / 2000 G')).toBeInTheDocument()
     expect(screen.getByText('42.0 %')).toBeInTheDocument()
-    // Cards : noms FR (locale mock = 'fr')
-    expect(screen.getByText('Premier sang')).toBeInTheDocument()
-    expect(screen.getByText('Tireur d\'élite')).toBeInTheDocument()
+    // Cards : noms FR (locale mock = 'en')
+    expect(screen.getByText('First Blood')).toBeInTheDocument()
+    expect(screen.getByText('Sharpshooter')).toBeInTheDocument()
   })
 
   it('rend toutes les cartes (pas de cap : refacto 2026-05 → scroll vertical)', () => {
@@ -125,9 +121,7 @@ describe('AchievementsCareerSection', () => {
     const items = Array.from({ length: 50 }, (_, i) => ({
       achievement_id: `a${i}`,
       name_en: `Ach ${i}`,
-      name_fr: `Succès ${i}`,
       description_en: '',
-      description_fr: '',
       gamerscore: i,
       is_secret: false,
       unlocked: false,
@@ -163,9 +157,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a1',
             name_en: 'Clocking In',
-            name_fr: 'Pointage',
             description_en: '',
-            description_fr: '',
             gamerscore: 10,
             is_secret: false,
             unlocked: false,
@@ -174,9 +166,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a2',
             name_en: 'Zeta',
-            name_fr: 'Zêta',
             description_en: '',
-            description_fr: '',
             gamerscore: 20,
             is_secret: false,
             unlocked: false,
@@ -185,9 +175,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a3',
             name_en: 'Get the Popcorn',
-            name_fr: 'Sortez le pop-corn',
             description_en: '',
-            description_fr: '',
             gamerscore: 30,
             is_secret: false,
             unlocked: false,
@@ -199,19 +187,19 @@ describe('AchievementsCareerSection', () => {
     render(<AchievementsCareerSection playerSlug="jgtm" layout="sidebar" />, { wrapper })
 
     // Multijoueur par défaut : seule la carte MP est visible
-    const categorySelect = screen.getByDisplayValue('Multijoueur')
-    expect(screen.getByText('Pointage')).toBeInTheDocument()
+    const categorySelect = screen.getByDisplayValue('Multiplayer')
+    expect(screen.getByText('Clocking In')).toBeInTheDocument()
     expect(screen.queryByText('Zêta')).not.toBeInTheDocument()
     expect(screen.queryByText('Sortez le pop-corn')).not.toBeInTheDocument()
 
     fireEvent.change(categorySelect, { target: { value: 'all' } })
-    expect(screen.getByText('Pointage')).toBeInTheDocument()
-    expect(screen.getByText('Zêta')).toBeInTheDocument()
-    expect(screen.getByText('Sortez le pop-corn')).toBeInTheDocument()
+    expect(screen.getByText('Clocking In')).toBeInTheDocument()
+    expect(screen.getByText('Zeta')).toBeInTheDocument()
+    expect(screen.getByText('Get the Popcorn')).toBeInTheDocument()
 
     fireEvent.change(categorySelect, { target: { value: 'campaign' } })
-    expect(screen.queryByText('Pointage')).not.toBeInTheDocument()
-    expect(screen.getByText('Zêta')).toBeInTheDocument()
+    expect(screen.queryByText('Clocking In')).not.toBeInTheDocument()
+    expect(screen.getByText('Zeta')).toBeInTheDocument()
   })
 
   it('masque le select catégorie quand aucune entrée n\'a de catégorie (titre sans mapping)', () => {
@@ -228,9 +216,7 @@ describe('AchievementsCareerSection', () => {
           {
             achievement_id: 'a1',
             name_en: 'No Category',
-            name_fr: 'Sans catégorie',
             description_en: '',
-            description_fr: '',
             gamerscore: 10,
             is_secret: false,
             unlocked: false,
@@ -239,11 +225,11 @@ describe('AchievementsCareerSection', () => {
       },
     })
     render(<AchievementsCareerSection playerSlug="jgtm" layout="sidebar" />, { wrapper })
-    expect(screen.queryByDisplayValue('Multijoueur')).not.toBeInTheDocument()
+    expect(screen.queryByDisplayValue('Multiplayer')).not.toBeInTheDocument()
     // Le défaut "multiplayer" ne doit pas filtrer un titre sans mapping : la carte reste visible
-    expect(screen.getByText('Sans catégorie')).toBeInTheDocument()
+    expect(screen.getByText('No Category')).toBeInTheDocument()
     // Les filtres statut + tri date restent présents
-    expect(screen.getByDisplayValue('Tous')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Défaut')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('All')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Default')).toBeInTheDocument()
   })
 })

@@ -222,7 +222,7 @@ function Timeline(props: {
               <div key={n.id} className="flex items-stretch">
                 <label
                   className="flex shrink-0 items-center justify-center px-3 hover:bg-accent/30"
-                  aria-label={`Sélectionner ${n.id}`}
+                  aria-label={`Select ${n.id}`}
                 >
                   <input
                     type="checkbox"

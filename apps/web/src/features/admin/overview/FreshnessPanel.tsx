@@ -48,7 +48,7 @@ export function FreshnessPanel() {
             <p className="text-xs text-muted-foreground">
               {tA('admin.freshness.backup_label')}{' '}
               {data.backup.last_backup_at ? (
-                <span title={adminAbsoluteTime(data.backup.last_backup_at, locale)}>
+                <span title={adminAbsoluteTime(data.backup.last_backup_at)}>
                   {adminRelativeTime(data.backup.last_backup_at, locale)}
                 </span>
               ) : (
@@ -102,10 +102,10 @@ function FreshnessRow({ player }: { player: PlayerFreshness }) {
   return (
     <AdminTr>
       <AdminTd className="font-medium text-foreground">{player.gamertag}</AdminTd>
-      <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(player.last_match_at, locale)}>
+      <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(player.last_match_at)}>
         {player.last_match_at ? adminRelativeTime(player.last_match_at, locale) : tA('admin.freshness.never')}
       </AdminTd>
-      <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(player.last_sync_ok_at, locale)}>
+      <AdminTd className="text-xs text-muted-foreground" title={adminAbsoluteTime(player.last_sync_ok_at)}>
         {player.last_sync_ok_at ? adminRelativeTime(player.last_sync_ok_at, locale) : tA('admin.freshness.sync_unknown')}
       </AdminTd>
       <AdminTd>

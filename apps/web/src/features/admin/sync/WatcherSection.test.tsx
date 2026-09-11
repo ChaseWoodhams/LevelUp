@@ -60,7 +60,7 @@ describe('WatcherSection — tri CLIENT par en-têtes (I16)', () => {
   it('clic sur « Joueur » trie alphabétiquement (asc au 1er clic)', () => {
     setup()
     render(<WatcherSection />)
-    const header = screen.getAllByText('Joueur')[0]
+    const header = screen.getAllByText('Player')[0]
     fireEvent.click(header)
     expect(rowOrder(names)).toEqual(['Alpha', 'Bravo', 'Charlie'])
   })

@@ -32,7 +32,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-// Libellés référencés par clé i18n (résolus au rendu) — locale 'fr' fixée dans
+// Libellés référencés par clé i18n (résolus au rendu) — locale 'en' fixée dans
 // beforeEach ⇒ 'Accueil' / 'Solo' / 'Sessions' rendus. Les `to` sont des templates
 // de route typés (title-scoped) ; le mock de Link les résout en URL concrète.
 const SECTIONS: L1Section[] = [
@@ -70,12 +70,12 @@ function setup(pathname = '/t/halo_infinite/players/test-player/home') {
 
 describe('NavL1MobileMenu', () => {
   beforeEach(() => {
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
   })
 
   it('affiche le bouton hamburger', () => {
     setup()
-    expect(screen.getByRole('button', { name: 'Ouvrir le menu de navigation' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open navigation menu' })).toBeInTheDocument()
   })
 
   it('le panneau est fermé au départ (aria-hidden)', () => {
@@ -85,14 +85,14 @@ describe('NavL1MobileMenu', () => {
 
   it('ouvre le panneau au clic sur le hamburger', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: 'Ouvrir le menu de navigation' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open navigation menu' }))
     expect(screen.getByRole('menu')).toHaveAttribute('aria-hidden', 'false')
   })
 
   it('rend les sections et leurs onglets', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: 'Ouvrir le menu de navigation' }))
-    expect(screen.getByRole('menuitem', { name: 'Accueil' })).toHaveAttribute(
+    fireEvent.click(screen.getByRole('button', { name: 'Open navigation menu' }))
+    expect(screen.getByRole('menuitem', { name: 'Home' })).toHaveAttribute(
       'href',
       '/t/halo_infinite/players/test-player/home',
     )
@@ -104,20 +104,20 @@ describe('NavL1MobileMenu', () => {
 
   it('marque la section active via aria-current', () => {
     setup('/t/halo_infinite/players/test-player/home')
-    fireEvent.click(screen.getByRole('button', { name: 'Ouvrir le menu de navigation' }))
-    expect(screen.getByRole('menuitem', { name: 'Accueil' })).toHaveAttribute('aria-current', 'page')
+    fireEvent.click(screen.getByRole('button', { name: 'Open navigation menu' }))
+    expect(screen.getByRole('menuitem', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
   })
 
   it('se ferme au clic sur un lien', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: 'Ouvrir le menu de navigation' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Accueil' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open navigation menu' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Home' }))
     expect(screen.getByRole('menu', { hidden: true })).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('se ferme avec la touche Escape', () => {
     setup()
-    fireEvent.click(screen.getByRole('button', { name: 'Ouvrir le menu de navigation' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open navigation menu' }))
     expect(screen.getByRole('menu')).toHaveAttribute('aria-hidden', 'false')
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.getByRole('menu', { hidden: true })).toHaveAttribute('aria-hidden', 'true')

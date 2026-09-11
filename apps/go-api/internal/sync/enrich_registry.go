@@ -12,7 +12,7 @@
 // Best-effort : si metadata est indisponible ou si l'asset n'a pas de
 // traduction en-US, on retombe sur le comportement historique (UUID brut comme
 // nom) sans casser la sync. Les UI consumers ont leur propre cascade de
-// résolution (cf. analysis.ResolvePairNameFR + applyXxxFRTranslations).
+// résolution (cf. analysis.ResolvePairName + applyXxxFRTranslations).
 //
 // Cf. thought_log 2026-05-09 — root cause des UUIDs bruts visibles dans
 // available_playlists.

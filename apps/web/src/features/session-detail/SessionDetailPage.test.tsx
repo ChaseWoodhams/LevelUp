@@ -109,7 +109,7 @@ describe("SessionDetailPage", () => {
     // (n'a pas été migré vers le pattern TopProgressBar globale appliqué aux autres
     // pages). On vérifie donc que le loader SOIT visible — l'assertion inverse
     // sera réintroduite lorsque le composant sera migré.
-    expect(screen.getByText(/Chargement de la session/i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading session…/i)).toBeInTheDocument();
   });
 
   it("affiche un état vide explicite quand aucune session n’est disponible", async () => {
@@ -130,9 +130,9 @@ describe("SessionDetailPage", () => {
     renderWithProviders(<SessionDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Aucune session disponible")).toBeInTheDocument();
+      expect(screen.getByText("No session available")).toBeInTheDocument();
       expect(
-        screen.getByText(/Aucune session n'a pu être reconstruite/i),
+        screen.getByText(/No session could be reconstructed with the current filters\./i),
       ).toBeInTheDocument();
     });
   });
@@ -148,21 +148,21 @@ describe("SessionDetailPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /Comparer/i }),
+        screen.getByRole("button", { name: /Compare/i }),
       ).toBeInTheDocument();
     });
 
     // La suggestion est maintenant dans le tooltip du bouton Comparer (content =
     // "vs {label} · {reason}") → non rendu dans le DOM avant hover. On vérifie
     // simplement que le bouton Comparer est présent (la suggestion pilote son tooltip).
-    expect(screen.getByText("Détail des matchs")).toBeInTheDocument();
+    expect(screen.getByText("Match details")).toBeInTheDocument();
     expect(screen.getByText("Oddball")).toBeInTheDocument();
     // Le tableau réutilise désormais ExplorerMatchesTable → l'issue est rendue via
     // le manifest explorer (bundlé) : outcome 2 → "Victoire" (FR), pas la clé brute.
-    expect(screen.getByText("Victoire")).toBeInTheDocument();
+    expect(screen.getByText("Win")).toBeInTheDocument();
     // Session solo (with_friends: false) → pas de bouton "Voir les synergies" (V72-09).
     expect(
-      screen.queryByRole("button", { name: /Voir les synergies/i }),
+      screen.queryByRole("button", { name: /squad synergies/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -182,7 +182,7 @@ describe("SessionDetailPage", () => {
     renderWithProviders(<SessionDetailPage />);
 
     const synergiesButton = await screen.findByRole("button", {
-      name: /Voir les synergies/i,
+      name: /squad synergies/i,
     });
 
     fireEvent.click(synergiesButton);
@@ -222,7 +222,7 @@ describe("SessionDetailPage", () => {
               compare_metrics: [
                 {
                   key: "score",
-                  label: "Score perf.",
+                  label: "Perf. score",
                   value_a: "68.5",
                   value_b: "61.0",
                   delta: "7.5",
@@ -240,23 +240,23 @@ describe("SessionDetailPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /Comparer/i }),
+        screen.getByRole("button", { name: /Compare/i }),
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /Comparer/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Compare/i }));
 
     await waitFor(() => {
       // Drawer ouvert : la fermeture se fait via le bouton X (aria
       // "Fermer le panneau de comparaison") + summary compare visible.
       expect(
-        screen.getByRole("button", { name: /Fermer le panneau de comparaison/i }),
+        screen.getByRole("button", { name: /Close comparison panel/i }),
       ).toBeInTheDocument();
       // En-tête L3 du drawer = label "Comparaison" (heading) + sélecteur de session +
       // pills FR de la session comparée (catégorie "Ranked" → "Classé") + KPI "Score perf.".
-      expect(screen.getByRole("heading", { name: "Comparaison" })).toBeInTheDocument();
-      expect(screen.getAllByText("Classé").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("Score perf.").length).toBeGreaterThan(0);
+      expect(screen.getByRole("heading", { name: "Comparison" })).toBeInTheDocument();
+      expect(screen.getAllByText("Ranked").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Perf. score").length).toBeGreaterThan(0);
     });
   });
 
@@ -274,10 +274,10 @@ describe("SessionDetailPage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Erreur lors du chargement de la session/i),
+        screen.getByText(/Failed to load session\./i),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: /Réessayer/i }),
+        screen.getByRole("button", { name: /Retry/i }),
       ).toBeInTheDocument();
     });
   });

@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import type { Template } from '@/lib/prestige'
 
-const mockShellState = { locale: 'fr' as 'fr' | 'en' }
+const mockShellState = { locale: 'en' as 'en' | 'en' }
 vi.mock('@/stores/appShellStore', () => ({
   useAppShellStore: <T,>(selector: (s: typeof mockShellState) => T) => selector(mockShellState),
 }))
@@ -42,7 +42,6 @@ function makeTemplate(over: Partial<Template>): Template {
     eval_type: 'threshold',
     mode_filter: 'universal',
     label_en: 'KDA challenge',
-    label_fr: 'Défi KDA',
     normal_target: 1,
     heroic_target: 1.5,
     legendary_target: 2,
@@ -56,7 +55,7 @@ function makeTemplate(over: Partial<Template>): Template {
 describe('CreateChallengeForm — cooldown UI', () => {
   beforeEach(() => {
     cleanup()
-    mockShellState.locale = 'fr'
+    mockShellState.locale = 'en'
     mockCreate.error = null
     mockSuggested.data = { templates: [] }
   })
@@ -68,23 +67,23 @@ describe('CreateChallengeForm — cooldown UI', () => {
     }
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
-    expect(screen.getByText(/Dispo dans/i)).toBeInTheDocument()
-    const item = screen.getByText('Défi KDA').closest('li')
+    expect(screen.getByText(/Available in/i)).toBeInTheDocument()
+    const item = screen.getByText('KDA challenge').closest('li')
     expect(item).toHaveAttribute('aria-disabled', 'true')
 
     // Clic sur un modèle en cooldown → pas de cible ajustée affichée (non sélectionné).
     fireEvent.click(item as HTMLElement)
-    expect(screen.queryByText(/Cible ajustée/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Adjusted target/i)).not.toBeInTheDocument()
   })
 
   it('rend sélectionnable un modèle sans cooldown', () => {
     mockSuggested.data = { templates: [makeTemplate({ id: 'ok' })] }
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
-    expect(screen.queryByText(/Dispo dans/i)).not.toBeInTheDocument()
-    const item = screen.getByText('Défi KDA').closest('li')
+    expect(screen.queryByText(/Available in/i)).not.toBeInTheDocument()
+    const item = screen.getByText('KDA challenge').closest('li')
     fireEvent.click(item as HTMLElement)
-    expect(screen.getByText(/Cible ajustée/i)).toBeInTheDocument()
+    expect(screen.getByText(/Adjusted target/i)).toBeInTheDocument()
   })
 
   it('affiche un message lisible sur refus cooldown (429)', () => {
@@ -92,6 +91,6 @@ describe('CreateChallengeForm — cooldown UI', () => {
     mockCreate.error = { code: 'cooldown_active', message: 'prestige: cooldown actif sur cette métrique' }
     render(<CreateChallengeForm userId="u1" titleSlug="halo_infinite" />)
 
-    expect(screen.getByText(/Métrique en repos \(cooldown\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/Metric on cooldown/i)).toBeInTheDocument()
   })
 })

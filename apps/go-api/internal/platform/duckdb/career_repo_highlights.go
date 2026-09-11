@@ -55,7 +55,7 @@ func buildHighlightFilterClause(filters domain.CareerHighlightFilters) (string, 
 		}
 		// Comparaison sur la même expression que celle utilisée pour normaliser
 		// côté pool (analysis.NormalizeModeLabel(coalesce(pair_name_fr, pair_name))).
-		parts = append(parts, "COALESCE(NULLIF(r.pair_name_fr, ''), r.pair_name, '') IN ("+strings.Join(ph, ", ")+")")
+		parts = append(parts, "COALESCE(NULLIF(r.pair_name, ''), '') IN ("+strings.Join(ph, ", ")+")")
 	}
 
 	if len(filters.PlaylistNamesRaw) > 0 {
@@ -65,8 +65,8 @@ func buildHighlightFilterClause(filters domain.CareerHighlightFilters) (string, 
 			args = append(args, p)
 		}
 		// Comparaison sur la même expression que celle utilisée pour normaliser
-		// côté pool (COALESCE(playlist_name_fr, playlist_name)).
-		parts = append(parts, "COALESCE(NULLIF(r.playlist_name_fr, ''), r.playlist_name, '') IN ("+strings.Join(ph, ", ")+")")
+		// côté pool (playlist_name).
+		parts = append(parts, "COALESCE(NULLIF(r.playlist_name, ''), '') IN ("+strings.Join(ph, ", ")+")")
 	}
 
 	if len(parts) == 0 {
@@ -284,19 +284,12 @@ func (r *CareerRepo) GetHighlightPool(ctx context.Context) ([]domain.HighlightMa
 	return results, nil
 }
 
-// LoadModeTranslationsFR retourne le mapping EN→FR depuis metadata.mode_name_tr
+// LoadModeNames retourne le mapping EN→FR depuis metadata.mode_name_tr
 // (lang='fr'). Best-effort : silencieusement vide si Metadata absent ou table
 // non trouvée. Le SQL vit dans mode_name_tr.go, source unique du littéral
 // (garde-rail no_mode_name_tr_literal_test.go).
-func (r *CareerRepo) LoadModeTranslationsFR(ctx context.Context, modeENs []string) (map[string]string, error) {
-	if len(modeENs) == 0 || r.pdb == nil || r.pdb.Metadata == nil {
-		return nil, nil
-	}
-	out, err := queryModeNameTrFR(ctx, r.pdb.Metadata, modeENs)
-	if err != nil {
-		return nil, fmt.Errorf("CareerRepo.LoadModeTranslationsFR: %w", err)
-	}
-	return out, nil
+func (r *CareerRepo) LoadModeNames(ctx context.Context, modeENs []string) (map[string]string, error) {
+	return nil, nil
 }
 
 // LoadPlaylistAssetTranslationsFR retourne le mapping playlist_id→nom FR via
@@ -307,7 +300,7 @@ func (r *CareerRepo) LoadPlaylistAssetTranslationsFR(ctx context.Context, playli
 		return nil, nil
 	}
 	out, err := NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(
-		ctx, "playlist", playlistIDs, PreferredLangsForLocale("fr"),
+		ctx, "playlist", playlistIDs, PreferredAssetLanguages(),
 	)
 	if err != nil && isTableNotFoundErr(err) {
 		return nil, nil

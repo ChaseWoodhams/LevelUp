@@ -203,16 +203,16 @@ export interface PalmaresText {
   }
 }
 
-export function normalizePalmaresLocale(locale?: string | null): Locale {
-  return locale === 'en' ? 'en' : 'fr'
+export function normalizePalmaresLocale(): Locale {
+  return 'en'
 }
 
 function t(loc: Locale, key: PalmaresManifestKey): string {
   return formatMessage(palmaresManifest, key, loc)
 }
 
-export function getPalmaresText(locale?: string | null): PalmaresText {
-  const loc = normalizePalmaresLocale(locale)
+export function getPalmaresText(): PalmaresText {
+  const loc = normalizePalmaresLocale()
   return {
     intlLocale: t(loc, 'palmares.intl_locale'),
     page: {

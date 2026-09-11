@@ -98,7 +98,7 @@ func NewStore(dir string, ttl time.Duration, secret string) *Store {
 // New crée une nouvelle session avec un ID UUID v4.
 func (s *Store) New() *domain.SessionData {
 	now := time.Now().Unix()
-	locale := "fr"
+	locale := "en"
 	return &domain.SessionData{
 		SessionID:    uuid.New().String(),
 		CreatedAt:    now,

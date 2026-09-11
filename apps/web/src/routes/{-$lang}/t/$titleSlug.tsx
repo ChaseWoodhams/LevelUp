@@ -21,6 +21,7 @@ import {
   applyActiveTitle,
   resolveTitleGate,
   isKnownLocale,
+  replaceLangSegment,
   withLangSegment,
   type TitleGate,
 } from '@/lib/title-routing'
@@ -41,7 +42,6 @@ function TitleLayout() {
   const currentTitleSlug = useAppShellStore((s) => s.currentTitleSlug)
   const isTitleSwitching = useAppShellStore((s) => s.isTitleSwitching)
   const locale = useAppShellStore((s) => s.locale)
-  const setLocale = useAppShellStore((s) => s.setLocale)
   const [applyFailed, setApplyFailed] = useState(false)
 
   const gate = resolveTitleGate(titleSlug, availableTitles, isBootstrapped)
@@ -101,29 +101,15 @@ function TitleLayout() {
       })
   }, [diverges, titleSlug, isTitleSwitching, applyFailed, navigate])
 
-  // Réconciliation locale←segment (D-12, Phase 5a) — effet SÉPARÉ de la convergence
-  // titre (responsabilités indépendantes). Segment `lang` présent (locale connue) ET
-  // ≠ locale du store → FORCE la locale via setLocale (setApiLocale pousse le header
-  // X-LevelUp-Locale + set store). Segment ABSENT (lang undefined) OU déjà aligné →
-  // NO-OP STRICT : la locale session/bootstrap reste inchangée (comportement actuel).
-  // Un segment non-locale (ex. /xyz/t/…) est ignoré (isKnownLocale) : le gate titre
-  // traite les URLs aberrantes, la locale ne bascule pas sur du bruit.
-  //
-  // Invalidation (audit D-12) : TOUTES les clés de payloads localisés portent `locale`
-  // DANS leur clé (home, seasonPass, teammates, sessionDetail, field-mappings,
-  // releaseNotes, leaderboard-catalog) → le set store re-clé et TanStack refetch tout
-  // seul : la CLÉ EST l'invalidation, jamais de queryClient.clear() global ni
-  // d'invalidation ciblée depuis cet effet.
-  //
-  // Ordre au fresh-load /en/t/… : initTitleFromLocation pose déjà le header 'en' au
-  // boot ; hydrateFromBootstrap ré-écrit ensuite la locale SESSION (ex. fr) → cet
-  // effet re-run post-hydratation et re-force 'en'. Convergence en un cycle (lang ==
-  // locale → l'effet ressort), même patron déclaratif que la convergence titre ; une
-  // ré-hydratation ultérieure (refocus) est ré-absorbée de la même façon.
+  // Old language-prefixed links (`/fr/t/…`) are normalised to the only supported URL
+  // variant, through lib/title-routing, the single owner of /t/ parsing.
   useEffect(() => {
-    if (!lang || !isKnownLocale(lang) || lang === locale) return
-    setLocale(lang)
-  }, [lang, locale, setLocale])
+    if (!lang || isKnownLocale(lang)) return
+    const englishPath = replaceLangSegment(location.pathname, 'en')
+    if (englishPath === location.pathname) return
+    const hash = location.hash ? `#${location.hash}` : ''
+    router.history.replace(englishPath + location.searchStr + hash)
+  }, [lang, location.hash, location.pathname, location.searchStr, router])
 
   // Émission du segment de langue par défaut (I10) — CHOKEPOINT central. Quand l'URL
   // title-scoped n'a PAS de segment `lang` (bookmark nu « /t/… », lien pleine page

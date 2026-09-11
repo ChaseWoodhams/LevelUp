@@ -15,11 +15,11 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 50
 
 [assets.challenge_tier.heroic]
-labels = { en = "Heroic", fr = "Héroïque" }
+labels = { en = "Heroic" }
 color_token = "challenge.heroic"
 display_order = 20
 `)
@@ -38,8 +38,8 @@ display_order = 20
 	if !ok {
 		t.Fatal("Get(mode, ranked) introuvable")
 	}
-	if lbl, _ := got.Label("fr"); lbl != "Classé" {
-		t.Errorf("Label fr = %q, want Classé", lbl)
+	if lbl, _ := got.Label("en"); lbl != "Ranked" {
+		t.Errorf("Label en = %q, want Ranked", lbl)
 	}
 	if got.DisplayOrder != 50 {
 		t.Errorf("DisplayOrder = %d, want 50", got.DisplayOrder)
@@ -61,15 +61,15 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.mode.bbb]
-labels = { en = "BBB", fr = "BBB" }
+labels = { en = "BBB" }
 display_order = 30
 
 [assets.mode.aaa]
-labels = { en = "AAA", fr = "AAA" }
+labels = { en = "AAA" }
 display_order = 10
 
 [assets.mode.ccc]
-labels = { en = "CCC", fr = "CCC" }
+labels = { en = "CCC" }
 display_order = 20
 `)
 	set, err := LoadAssetsFromBytes("test.toml", doc)
@@ -95,7 +95,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 50
 `)
 	set, _ := LoadAssetsFromBytes("test.toml", doc)
@@ -119,7 +119,7 @@ func TestLoadAssetsFromBytes_LabelFallbackToID(t *testing.T) {
 func TestLoadAssetsFromBytes_MissingMeta(t *testing.T) {
 	doc := []byte(`
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 50
 `)
 	_, err := LoadAssetsFromBytes("test.toml", doc)
@@ -138,15 +138,15 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked" }
+labels = { fr = "Classé" }
 display_order = 50
 `)
 	_, err := LoadAssetsFromBytes("test.toml", doc)
 	if err == nil {
-		t.Fatal("expected error for missing FR label")
+		t.Fatal("expected error for missing EN label")
 	}
-	if !strings.Contains(err.Error(), "label FR manquant") {
-		t.Errorf("error = %v, want label FR manquant", err)
+	if !strings.Contains(err.Error(), "label EN manquant") {
+		t.Errorf("error = %v, want label EN manquant", err)
 	}
 }
 
@@ -157,11 +157,11 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.mode.aaa]
-labels = { en = "AAA", fr = "AAA" }
+labels = { en = "AAA" }
 display_order = 10
 
 [assets.mode.bbb]
-labels = { en = "BBB", fr = "BBB" }
+labels = { en = "BBB" }
 display_order = 10
 `)
 	_, err := LoadAssetsFromBytes("test.toml", doc)
@@ -215,7 +215,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.season.season1]
-labels = { en = "Heroes of Reach", fr = "Heroes of Reach" }
+labels = { en = "Heroes of Reach" }
 display_order = 10
 start_date = "2021-12-08T00:00:00Z"
 end_date   = "2022-05-03T00:00:00Z"
@@ -250,7 +250,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.season.s_current]
-labels = { en = "Current", fr = "Courante" }
+labels = { en = "Current" }
 display_order = 999
 start_date = "2026-04-01T00:00:00Z"
 `)
@@ -277,7 +277,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.season.bad]
-labels = { en = "Bad", fr = "Bad" }
+labels = { en = "Bad" }
 display_order = 10
 start_date = "2022-05-03"
 `)
@@ -297,7 +297,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.season.bad]
-labels = { en = "Bad", fr = "Bad" }
+labels = { en = "Bad" }
 display_order = 10
 start_date = "2022-05-03T00:00:00Z"
 end_date   = "2022-01-01T00:00:00Z"
@@ -318,7 +318,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 50
 `)
 	set, err := LoadAssetsFromBytes("test.toml", doc)
@@ -345,7 +345,7 @@ title_slug = "smoke"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 10
 `)
 	if err := os.WriteFile(tomlPath, doc, 0o644); err != nil {

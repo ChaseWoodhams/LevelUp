@@ -159,7 +159,7 @@ export function MatchRankBadge({ rank, hadBotTeammate = false }: MatchRankBadgeP
       <div className="flex-1">
         <p className="text-xs text-muted-foreground uppercase tracking-wide">{rank.rating_type}</p>
         <div className="flex items-baseline gap-2 mt-0.5">
-          <span className="text-lg font-bold text-foreground">{localizeTierLabel(rank.tier_label, locale)}</span>
+          <span className="text-lg font-bold text-foreground">{localizeTierLabel(rank.tier_label)}</span>
           {rank.numeric_value != null && (
             <span className="text-sm text-muted-foreground">{rank.numeric_value.toFixed(0)} pts</span>
           )}

@@ -1,6 +1,6 @@
 /**
  * COPIED FILE — origin: apps/web/src/features/match-replay/canvasInk.ts
- * Origin at commit: 2044b7139 — the commit that last changed it, so
+ * Origin at commit: 677574859 — the commit that last changed it, so
  * `git diff 2044b7139 HEAD -- <origin>` is what the origin has learnt since.
  *
  * Byte-identical to the origin below this header, and src/copies.guard.test.ts
@@ -36,7 +36,7 @@ export function readInk(name: InkVar): string {
   if (typeof document === 'undefined') return ''
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
   if (!value) {
-    log.error(`replay-ink:${name}`, `Variable de mise en page "${name}" absente du thème.`)
+    log.error(`replay-ink:${name}`, `Layout variable "${name}" missing from the theme.`)
     return ''
   }
   return value

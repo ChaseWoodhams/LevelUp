@@ -81,10 +81,10 @@ func TestMatchHistoryService_GetPage_PropagatesIsWithFriendsAndExperience(t *tes
 	for _, it := range resp.Table.Items {
 		byID[it.MatchID] = it
 	}
-	if got := byID["solo"]; got.IsWithFriends || got.ExperienceTypeLabel != "PVP non classé" {
+	if got := byID["solo"]; got.IsWithFriends || got.ExperienceTypeLabel != "Unranked PvP" {
 		t.Errorf("solo: IsWithFriends=%v ExperienceTypeLabel=%q", got.IsWithFriends, got.ExperienceTypeLabel)
 	}
-	if got := byID["squad"]; !got.IsWithFriends || got.ExperienceTypeLabel != "PVP classé" {
+	if got := byID["squad"]; !got.IsWithFriends || got.ExperienceTypeLabel != "Ranked PvP" {
 		t.Errorf("squad: IsWithFriends=%v ExperienceTypeLabel=%q", got.IsWithFriends, got.ExperienceTypeLabel)
 	}
 	if got := byID["pve"]; got.IsWithFriends || got.ExperienceTypeLabel != "PVE" {
@@ -113,7 +113,7 @@ func TestMatchHistoryService_GetPage_ExperienceLabelsLocaleAware(t *testing.T) {
 	wantEN := map[string]string{
 		expTypePVPUnranked: "Unranked PvP",
 		expTypePVPRanked:   "Ranked PvP",
-		expTypePVE:         "PvE",
+		expTypePVE:         "PVE",
 	}
 	req := domain.MatchHistoryQueryRequest{Pagination: domain.PaginationRequest{Page: 1, PageSize: 20}}
 

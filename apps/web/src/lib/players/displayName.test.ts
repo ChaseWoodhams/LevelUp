@@ -24,10 +24,10 @@ describe('isXuidLike', () => {
 
 describe('maskedPlayerLabel', () => {
   it('utilise les 4 derniers chars', () => {
-    expect(maskedPlayerLabel('2533274800000001')).toBe('Joueur 0001')
+    expect(maskedPlayerLabel('2533274800000001')).toBe('Player 0001')
   })
   it('retombe sur la valeur entière si trop courte', () => {
-    expect(maskedPlayerLabel('xy')).toBe('Joueur xy')
+    expect(maskedPlayerLabel('xy')).toBe('Player xy')
   })
 })
 
@@ -36,21 +36,21 @@ describe('displayPlayerName', () => {
     expect(displayPlayerName('JGtm', '2533274800000001')).toBe('JGtm')
   })
   it('masque quand le gamertag est vide', () => {
-    expect(displayPlayerName('', '2533274800000001')).toBe('Joueur 0001')
-    expect(displayPlayerName(null, '2533274800000002')).toBe('Joueur 0002')
-    expect(displayPlayerName(undefined, '2533274800000003')).toBe('Joueur 0003')
+    expect(displayPlayerName('', '2533274800000001')).toBe('Player 0001')
+    expect(displayPlayerName(null, '2533274800000002')).toBe('Player 0002')
+    expect(displayPlayerName(undefined, '2533274800000003')).toBe('Player 0003')
   })
   it('masque quand un xuid brut a fuité dans le champ gamertag (donnée corrompue)', () => {
     expect(displayPlayerName('2533274800000004', '2533274800000004')).toBe(
-      'Joueur 0004',
+      'Player 0004',
     )
     expect(displayPlayerName('xuid(2533274800000005)', '2533274800000005')).toBe(
-      'Joueur 0005',
+      'Player 0005',
     )
   })
-  it('retourne "Joueur inconnu" sans gamertag ni xuid', () => {
-    expect(displayPlayerName(null, null)).toBe('Joueur inconnu')
-    expect(displayPlayerName('', '')).toBe('Joueur inconnu')
+  it('retourne "Unknown player" sans gamertag ni xuid', () => {
+    expect(displayPlayerName(null, null)).toBe('Unknown player')
+    expect(displayPlayerName('', '')).toBe('Unknown player')
   })
   it('INVARIANT : ne retourne JAMAIS une valeur au format xuid brut', () => {
     const cases: Array<[string | null, string | null]> = [

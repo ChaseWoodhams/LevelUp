@@ -98,7 +98,7 @@ export function buildHistogramOption(
   opts: BuildOpts = {},
 ): EChartsCoreOption {
   const { colorToken, xAxisLabel, yAxisLabel: yLabelOpt, formatBin = defaultFormatBin } = opts
-  const yAxisLabel = yLabelOpt ?? 'Matchs'
+  const yAxisLabel = yLabelOpt ?? 'Matches'
   if (series.length === 0) {
     return { backgroundColor: CHART_BG }
   }

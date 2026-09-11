@@ -80,65 +80,6 @@ export interface PrestigeText {
   momentMatches: string
 }
 
-const FR: PrestigeText = {
-  objectiveSquadBadge: 'Escouade',
-  objectivePPTooltip: 'Points de Prestige gagnés à la complétion',
-  objectiveBadgeAlt: 'Objectif',
-  arcCompleted: 'Accompli',
-  arcPreset: 'Préréglage',
-  arcTotalPPTooltip: "Points de Prestige cumulés des objectifs de l'arc",
-  arcBonusBadge: 'bonus',
-  arcBonusPPTooltip:
-    "Bonus de complétion de l'arc, crédité une fois toutes les étapes terminées — en plus des PP de chaque objectif.",
-  formNewChallenge: 'Nouveau défi',
-  formCancel: 'Annuler',
-  formModeHybrid: 'Hybride',
-  formModeAuto: 'Automatique',
-  formFieldMetric: 'Métrique',
-  formFieldTarget: 'Cible',
-  formFieldWindow: 'Fenêtre',
-  windowSessions: 'Sessions',
-  windowRollingDays: 'Jours glissants',
-  windowDeadline: 'Échéance',
-  formFieldDate: 'Date (AAAA-MM-JJ)',
-  formFieldValue: 'Valeur',
-  formFieldCadence: 'Cadence',
-  cadenceFree: 'Libre',
-  cadenceDaily: 'Quotidien',
-  cadenceWeekly: 'Hebdomadaire',
-  cadenceMonthly: 'Mensuel',
-  formFieldLabel: 'Libellé (optionnel)',
-  formLabelPlaceholder: 'Ex. Slayer Niv. 2',
-  formLoadingSuggestions: 'Chargement des suggestions…',
-  formNoTemplates: 'Aucun modèle disponible. Bascule en mode libre pour créer un défi personnalisé.',
-  formHybridHint: 'Choisis un modèle ; ajuste la cible si tu veux.',
-  formFieldAdjustedTarget: 'Cible ajustée',
-  formGenerating: 'Génération des propositions…',
-  formAutoHint: '3 défis tirés du catalogue, à accepter directement.',
-  formAcceptHeroic: 'Accepter (Héroïque : {target})',
-  formCreating: 'Création…',
-  formCreate: 'Créer le défi',
-  cooldownBadge: 'Dispo dans {time}',
-  cooldownUnitHour: 'h',
-  cooldownUnitDay: 'j',
-  cooldownErrorMessage: 'Métrique en repos (cooldown) — réessaie plus tard.',
-  arcDeleteButton: 'Supprimer',
-  arcDeleteTitle: 'Supprimer l\'arc « {title} » ?',
-  arcDeleteWithObjectives: 'Supprimer aussi les {n} objectifs',
-  arcDeleteKeepObjectives: 'Garder les objectifs (les détacher)',
-  arcDeleteCancel: 'Annuler',
-  arcFormNew: 'Nouvel arc',
-  arcFormTitle: 'Titre',
-  arcFormTitlePlaceholder: 'Ex. Ascension du Spartan',
-  arcFormDescription: 'Description (optionnelle)',
-  arcFormDescriptionPlaceholder: 'Ex. Enchaîne les objectifs pour gravir les paliers.',
-  arcFormCreate: "Créer l'arc",
-  momentAchieved: 'Atteint',
-  momentBaseline: 'Référence',
-  momentDelta: 'Évolution',
-  momentMatches: 'matchs',
-}
-
 const EN: PrestigeText = {
   objectiveSquadBadge: 'Squad',
   objectivePPTooltip: 'Prestige Points earned on completion',
@@ -199,5 +140,5 @@ const EN: PrestigeText = {
 }
 
 export function getPrestigeText(locale: ManifestLocale): PrestigeText {
-  return locale === 'en' ? EN : FR
+  return locale === 'en' ? EN : EN
 }

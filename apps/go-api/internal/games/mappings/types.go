@@ -6,11 +6,8 @@ import (
 	"levelup/go-api/internal/games/canonical"
 )
 
-// LocaleEN et LocaleFR sont les locales obligatoires.
-const (
-	LocaleEN = "en"
-	LocaleFR = "fr"
-)
+// LocaleEN is the only supported application locale.
+const LocaleEN = "en"
 
 // FieldMapping est la projection d'une section [fields.X] du TOML.
 type FieldMapping struct {
@@ -30,22 +27,16 @@ type FieldMapping struct {
 //
 // Chaîne de fallback : locale demandée → en → key as string.
 func (m FieldMapping) Label(locale string) (label string, usedFallback bool) {
-	if v, ok := m.Labels[locale]; ok && v != "" {
-		return v, false
-	}
 	if v, ok := m.Labels[LocaleEN]; ok && v != "" {
-		return v, true
+		return v, locale != LocaleEN
 	}
 	return string(m.Key), true
 }
 
 // Description retourne la description pour la locale demandée + fallback.
 func (m FieldMapping) Description(locale string) (string, bool) {
-	if v, ok := m.Descriptions[locale]; ok && v != "" {
-		return v, false
-	}
 	if v, ok := m.Descriptions[LocaleEN]; ok && v != "" {
-		return v, true
+		return v, locale != LocaleEN
 	}
 	return "", true
 }

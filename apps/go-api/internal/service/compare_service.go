@@ -85,13 +85,13 @@ type csrSummary struct {
 
 // csrUnrankedLabel : libellé quand le CSR a bien été RÉCUPÉRÉ mais que le joueur
 // n'est pas classé — à distinguer du libellé vide (= non récupéré → N/A côté front).
-const csrUnrankedLabel = "Non classé"
+const csrUnrankedLabel = "Unranked"
 
 // fetchCSRSummary récupère les CSR du joueur (live, tout xuid) et en extrait le
 // meilleur courant + le meilleur all-time avec leurs libellés tier ("Platine IV",
 // "Onyx"). Tri-état porté par le libellé :
 //   - "" (label vide)        → données NON récupérées (pas d'auth/erreur) → N/A.
-//   - "Non classé"           → récupéré mais joueur non classé.
+//   - "Unranked"           → récupéré mais joueur non classé.
 //   - "Or III" / "Onyx" etc. → classé.
 func (s *CompareService) fetchCSRSummary(ctx context.Context, xuid string) csrSummary {
 	if s.csr == nil || xuid == "" || s.currentSeasonID == "" {
@@ -102,7 +102,7 @@ func (s *CompareService) fetchCSRSummary(ctx context.Context, xuid string) csrSu
 		logBestEffortErr(ctx, "CompareService: CSR saison non disponible", err, "xuid", xuid)
 		return csrSummary{} // échec fetch → non récupéré
 	}
-	// Récupéré : on part de "Non classé" et on remplace par le tier si classé.
+	// Récupéré : on part de "Unranked" et on remplace par le tier si classé.
 	out := csrSummary{currentLabel: csrUnrankedLabel, allTimeLabel: csrUnrankedLabel}
 	for _, c := range csrs {
 		if c.Current.Value > out.currentValue {
@@ -436,7 +436,7 @@ func metricAvailability(key string, value float64, isLocal, isLocalSample bool) 
 	if key == compareMetricCareerRank {
 		// Disponible dès value>0 : rang connu côté A (local/live) comme côté B
 		// non-local (fetch live). (Le CSR est traité à part dans buildMetrics, via
-		// son libellé, pour distinguer "Non classé" de "non récupéré".)
+		// son libellé, pour distinguer "Unranked" de "non récupéré".)
 		return value > 0
 	}
 	if athMetrics[key] {
@@ -504,7 +504,7 @@ func buildMetrics(a, b domain.NormalizedPlayerStats, effectiveHpToKill float64) 
 	rows := make([]domain.CompareMetricRow, 0, len(defs))
 	for _, d := range defs {
 		// CSR : la disponibilité est portée par le LIBELLÉ (tri-état) pour distinguer
-		// "Non classé" (récupéré) de N/A (non récupéré). dispX == "" → non récupéré.
+		// "Unranked" (récupéré) de N/A (non récupéré). dispX == "" → non récupéré.
 		isCSR := d.key == compareMetricCSR || d.key == compareMetricCSRAllTime
 		aAvail := metricAvailability(d.key, d.va, a.IsLocal, a.IsLocalSample)
 		bAvail := metricAvailability(d.key, d.vb, b.IsLocal, b.IsLocalSample)
@@ -518,7 +518,7 @@ func buildMetrics(a, b domain.NormalizedPlayerStats, effectiveHpToKill float64) 
 			continue
 		}
 		// Si la métrique est disponible des deux côtés mais vaut 0 partout, on masque
-		// (pas d'info utile) — SAUF le CSR, où "Non classé" des deux côtés reste informatif.
+		// (pas d'info utile) — SAUF le CSR, où "Unranked" des deux côtés reste informatif.
 		if !isCSR && aAvail && bAvail && d.va == 0 && d.vb == 0 {
 			continue
 		}

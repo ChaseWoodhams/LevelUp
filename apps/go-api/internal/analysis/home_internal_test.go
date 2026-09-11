@@ -24,7 +24,7 @@ func srRankCatalog() *mappings.RankCatalog {
 		}
 		entries = append(entries, mappings.RankEntry{
 			ID:         n,
-			Title:      map[string]string{mappings.LocaleEN: label, mappings.LocaleFR: label},
+			Title:      map[string]string{mappings.LocaleEN: label},
 			Subtitle:   map[string]string{},
 			Tier:       map[string]string{},
 			XPRequired: xp,
@@ -95,8 +95,8 @@ func TestBuildHomeCareerRank_NoCatalog_FallbackRangN(t *testing.T) {
 	if got == nil {
 		t.Fatal("buildHomeCareerRank = nil")
 	}
-	if got.RankTitle != "Rang 147" {
-		t.Errorf("RankTitle = %q, want 'Rang 147' (fallback sans catalog)", got.RankTitle)
+	if got.RankTitle != "Rank 147" {
+		t.Errorf("RankTitle = %q, want 'Rank 147' (fallback sans catalog)", got.RankTitle)
 	}
 }
 

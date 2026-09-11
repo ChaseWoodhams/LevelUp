@@ -82,8 +82,8 @@ describe('hasPerfPlacementSignal', () => {
 
 describe('PlacementPendingCell', () => {
   it('variant="rating" (défaut) : badge image unranked_N (N=done*10/total) + alt "En placement" FR + tooltip restants', () => {
-    render(<PlacementPendingCell row={row({ placement_done: 3, placement_total: 10 })} locale="fr" />)
-    const img = screen.getByAltText('En placement')
+    render(<PlacementPendingCell row={row({ placement_done: 3, placement_total: 10 })} locale="en" />)
+    const img = screen.getByAltText('In placement')
     expect(img).toHaveAttribute('src', expect.stringContaining('unranked_3.png'))
     expect(img).toHaveAttribute('title', expect.stringContaining('7'))
   })
@@ -94,15 +94,15 @@ describe('PlacementPendingCell', () => {
   })
 
   it('dernier match de placement (done === total) → badge unranked_9 (clamp) + tooltip "0" (pas négatif)', () => {
-    render(<PlacementPendingCell row={row({ placement_done: 10, placement_total: 10 })} locale="fr" />)
-    const img = screen.getByAltText('En placement')
+    render(<PlacementPendingCell row={row({ placement_done: 10, placement_total: 10 })} locale="en" />)
+    const img = screen.getByAltText('In placement')
     expect(img).toHaveAttribute('src', expect.stringContaining('unranked_9.png'))
     expect(img).toHaveAttribute('title', expect.stringContaining('0'))
   })
 
   it('variant="rating" : mapping proportionnel sur seuil CSR=5 (done=3/5 → unranked_6, comme les cards Accueil)', () => {
-    render(<PlacementPendingCell row={row({ placement_done: 3, placement_total: 5 })} locale="fr" />)
-    const img = screen.getByAltText('En placement')
+    render(<PlacementPendingCell row={row({ placement_done: 3, placement_total: 5 })} locale="en" />)
+    const img = screen.getByAltText('In placement')
     expect(img).toHaveAttribute('src', expect.stringContaining('unranked_6.png'))
   })
 
@@ -110,11 +110,11 @@ describe('PlacementPendingCell', () => {
     render(
       <PlacementPendingCell
         row={row({ perf_placement_done: 8, perf_placement_total: 10 })}
-        locale="fr"
+        locale="en"
         variant="perf"
       />,
     )
-    const el = screen.getByText('En placement')
+    const el = screen.getByText('In placement')
     expect(el).toHaveAttribute('title', expect.stringContaining('2'))
   })
 
@@ -123,11 +123,11 @@ describe('PlacementPendingCell', () => {
     render(
       <PlacementPendingCell
         row={row({ placement_done: 1, placement_total: 10, perf_placement_done: 9, perf_placement_total: 10 })}
-        locale="fr"
+        locale="en"
         variant="perf"
       />,
     )
-    const el = screen.getByText('En placement')
+    const el = screen.getByText('In placement')
     expect(el).toHaveAttribute('title', expect.stringContaining('1'))
     expect(el.getAttribute('title')).not.toContain('9 ')
   })

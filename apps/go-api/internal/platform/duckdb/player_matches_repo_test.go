@@ -566,8 +566,9 @@ func TestPlayerMatchesRepo_Load_PairModeHydrated(t *testing.T) {
 	if pm.DefaultLabel != "Slayer" {
 		t.Errorf("PairMode.DefaultLabel want %q, got %q", "Slayer", pm.DefaultLabel)
 	}
-	if got := pm.Labels["fr"]; got != "Assassin" {
-		t.Errorf("PairMode.Labels[fr] want %q (pair_name_fr), got %q", "Assassin", got)
+	// English-only: the legacy "fr" label mirrors pair_name, never pair_name_fr.
+	if got := pm.Labels["fr"]; got != "Slayer" {
+		t.Errorf("PairMode.Labels[fr] want %q (mirrors pair_name), got %q", "Slayer", got)
 	}
 	if got := pm.Labels["en"]; got != "Slayer" {
 		t.Errorf("PairMode.Labels[en] want %q (pair_name), got %q", "Slayer", got)

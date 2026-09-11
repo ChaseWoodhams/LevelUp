@@ -106,7 +106,7 @@ function LastCycleBanner({
     return <p className="text-xs text-muted-foreground/70">{tA('admin.convergence.no_cycle_ever')}</p>
   }
   return (
-    <p className="text-xs text-muted-foreground" title={adminAbsoluteTime(display.at, locale)}>
+    <p className="text-xs text-muted-foreground" title={adminAbsoluteTime(display.at)}>
       {tA(lastCycleLabelKey(display.kind))} : {adminRelativeTime(display.at, locale)}
     </p>
   )

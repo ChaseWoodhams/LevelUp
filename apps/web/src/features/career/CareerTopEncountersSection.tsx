@@ -51,7 +51,7 @@ export function CareerTopEncountersSection() {
       {!isLoading && !isError && (
         <MatchEncountersTable
           rows={data?.items ?? []}
-          locale={locale === 'en' ? 'en' : 'fr'}
+          locale={'en'}
           onPlayerClick={handlePlayerClick}
           hideCardWrapper
         />

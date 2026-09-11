@@ -135,7 +135,6 @@ export interface UseSquadPresetsOptions {
    *  Vide tant que le header n'est pas résolu (dégradation gracieuse transitoire). */
   currentPlayerXuid: string
   hasLinkedIdentity: boolean
-  locale: string
   /** Coéquipiers actuellement sélectionnés (pour « enregistrer la compo »). */
   selectedRows: TeammateRow[]
   /** Labels (playlists/modes) du filtre courant → trie en tête les escouades
@@ -155,11 +154,10 @@ export function useSquadPresets({
   playerSlug,
   currentPlayerXuid,
   hasLinkedIdentity,
-  locale,
   selectedRows,
   activeContextLabels,
 }: UseSquadPresetsOptions): UseSquadPresetsResult {
-  const t = SQUAD_PRESETS_STRINGS[locale === 'en' ? 'en' : 'fr']
+  const t = SQUAD_PRESETS_STRINGS['en']
   const [manageMode, setManageMode] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')

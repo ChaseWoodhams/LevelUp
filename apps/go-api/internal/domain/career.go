@@ -79,7 +79,7 @@ type CareerRankSummary struct {
 	IsMaxRank        bool       `json:"is_max_rank"`
 	RecordedAt       *time.Time `json:"recorded_at"`
 	RankImageURL     *string    `json:"rank_image_url,omitempty"`
-	NextRankNameFR   string     `json:"next_rank_name_fr,omitempty"`
+	NextRankNameFR   string     `json:"-"`
 	NextRankNameEN   string     `json:"next_rank_name_en,omitempty"`
 	NextRankImageURL *string    `json:"next_rank_image_url,omitempty"`
 }
@@ -97,7 +97,7 @@ type HeroProgress struct {
 	Percentage      float64 `json:"percentage"`
 	CurrentRank     int     `json:"current_rank"`
 	TotalRanks      int     `json:"total_ranks"`
-	MaxRankNameFR   string  `json:"max_rank_name_fr,omitempty"`
+	MaxRankNameFR   string  `json:"-"`
 	MaxRankNameEN   string  `json:"max_rank_name_en,omitempty"`
 }
 

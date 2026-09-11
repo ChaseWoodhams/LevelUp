@@ -32,7 +32,7 @@ type canonicalAssetTranslations struct {
 	variantNamesEN  map[string]string
 	pairNamesEN     map[string]string
 	mapImageURLs    map[string]string
-	modeNamesFR     map[string]string
+	modeNames       map[string]string
 }
 
 func (r *HomeRepo) EnrichCanonicalAssetTranslations(ctx context.Context, rows []canonical.PlayerMatchRow) error {
@@ -85,10 +85,10 @@ func (r *HomeRepo) resolveCanonicalAssetTranslations(
 	ctx context.Context, rows []canonical.PlayerMatchRow,
 ) canonicalAssetTranslations {
 	t := canonicalAssetTranslations{
-		mapNames:      r.resolveAssetNames(ctx, "map", collectCanonicalAssetIDsNeedingFR(rows, "map"), "fr"),
-		playlistNames: r.resolveAssetNames(ctx, "playlist", collectCanonicalAssetIDsNeedingFR(rows, "playlist"), "fr"),
-		variantNames:  r.resolveAssetNames(ctx, "game_variant", collectCanonicalAssetIDsNeedingFR(rows, "game_variant"), "fr"),
-		pairNames:     r.resolveAssetNames(ctx, "pair", collectCanonicalAssetIDsNeedingFR(rows, "pair"), "fr"),
+		mapNames:      r.resolveAssetNames(ctx, "map", collectCanonicalAssetIDsNeedingFR(rows, "map"), "en"),
+		playlistNames: r.resolveAssetNames(ctx, "playlist", collectCanonicalAssetIDsNeedingFR(rows, "playlist"), "en"),
+		variantNames:  r.resolveAssetNames(ctx, "game_variant", collectCanonicalAssetIDsNeedingFR(rows, "game_variant"), "en"),
+		pairNames:     r.resolveAssetNames(ctx, "pair", collectCanonicalAssetIDsNeedingFR(rows, "pair"), "en"),
 	}
 
 	// match_registry.{*}_name peut avoir été synced en FR-localisé selon le
@@ -109,7 +109,7 @@ func (r *HomeRepo) resolveCanonicalAssetTranslations(
 	}
 	t.mapImageURLs = mapImageURLs
 
-	t.modeNamesFR = r.loadCanonicalModeNamesFR(ctx, rows, t.pairNames)
+	t.modeNames = nil
 	return t
 }
 
@@ -137,8 +137,8 @@ func (r *HomeRepo) loadCanonicalModeNamesFR(
 	for k := range modeENSet {
 		modeENList = append(modeENList, k)
 	}
-	modeNamesFR, _ := r.loadHomeModeNameTranslations(ctx, modeENList)
-	return modeNamesFR
+	modeNames, _ := r.loadHomeModeNameTranslations(ctx, modeENList)
+	return modeNames
 }
 
 // applyCanonicalAssetFRBatch applique applyCanonicalAssetFR aux 3 assets Map/Playlist/GameVariant.
@@ -188,7 +188,7 @@ func (r *HomeRepo) applyCanonicalMapIconURL(m *canonical.AssetReference, t canon
 	}
 }
 
-// applyCanonicalPairModeFR applique la cascade ResolvePairNameFR (mode_name_tr → asset → raw).
+// applyCanonicalPairModeFR applique la cascade ResolvePairName (mode_name_tr → asset → raw).
 func applyCanonicalPairModeFR(pair *canonical.AssetReference, t canonicalAssetTranslations) {
 	if pair == nil {
 		return
@@ -196,11 +196,11 @@ func applyCanonicalPairModeFR(pair *canonical.AssetReference, t canonicalAssetTr
 	if pair.Labels == nil {
 		pair.Labels = map[string]string{}
 	}
-	if fr := analysis.ResolvePairNameFR(
+	if fr := analysis.ResolvePairName(
 		pair.DefaultLabel,
 		pair.Labels["fr"],
 		t.pairNames[pair.ID],
-		t.modeNamesFR,
+		t.modeNames,
 	); fr != "" {
 		pair.Labels["fr"] = fr
 	}

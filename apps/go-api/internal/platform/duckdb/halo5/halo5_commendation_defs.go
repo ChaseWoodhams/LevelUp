@@ -10,7 +10,6 @@ import (
 	"database/sql"
 	"strings"
 
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/games/canonical"
 )
 
@@ -58,10 +57,7 @@ func (s *Halo5CommendationDefSource) LookupCommendations(ctx context.Context, id
 	}
 	// Expression de nom locale-aware : EN privilégie name_en, FR (défaut) name_fr,
 	// avec repli sur l'autre langue si la colonne préférée est vide.
-	nameExpr := `COALESCE(NULLIF(name_fr, ''), name_en)`
-	if ctxkeys.Locale(ctx) == "en" {
-		nameExpr = `COALESCE(NULLIF(name_en, ''), name_fr)`
-	}
+	nameExpr := `COALESCE(NULLIF(name_en, ''), '')`
 	q := `SELECT commendation_id,
 	             ` + nameExpr + ` AS name,
 	             COALESCE(icon_url, '') AS icon_url,

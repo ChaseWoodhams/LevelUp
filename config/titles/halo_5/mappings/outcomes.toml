@@ -9,21 +9,21 @@ title_slug     = "halo_5"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Victory", fr = "Victoire" }
+labels = { en = "Victory" }
 color_token = "outcome.positive"
 raw_code = 2
 
 [outcomes.loss]
-labels = { en = "Defeat", fr = "Défaite" }
+labels = { en = "Defeat" }
 color_token = "outcome.negative"
 raw_code = 3
 
 [outcomes.tie]
-labels = { en = "Tie", fr = "Égalité" }
+labels = { en = "Tie" }
 color_token = "outcome.neutral"
 raw_code = 1
 
 [outcomes.dnf]
-labels = { en = "DNF", fr = "Abandon" }
+labels = { en = "DNF" }
 color_token = "outcome.neutral"
 raw_code = 4

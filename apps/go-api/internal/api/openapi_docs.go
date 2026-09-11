@@ -56,7 +56,7 @@ var docsCSP = strings.Join([]string{
 
 // docsHTML — page Stoplight Elements pointant sur le document vivant.
 const docsHTML = `<!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="referrer" content="no-referrer">

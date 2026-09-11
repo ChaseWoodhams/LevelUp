@@ -5,7 +5,6 @@
  * remplacement de `{plural}` par 's' si n > 1, vide sinon. Suffisant pour
  * la complexité actuelle ; on migrera à intl-messageformat si plural complexe.
  */
-import type { Locale } from '@/lib/i18n/locale'
 import { intlLocale } from '@/lib/formatters'
 
 /**
@@ -27,11 +26,11 @@ export function interpolate(
 }
 
 /** Formate une date ISO en JJ/MM/AAAA (FR) ou MM/DD/YYYY (EN). */
-export function formatAscensionDate(iso: string | null | undefined, locale: Locale): string {
+export function formatAscensionDate(iso: string | null | undefined): string {
   if (!iso) return ''
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleDateString(intlLocale(locale), {
+  return d.toLocaleDateString(intlLocale(), {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

@@ -96,7 +96,7 @@ describe('useDeleteMedia', () => {
 
     await waitFor(() => expect(toast.error).toHaveBeenCalled(), { timeout: 2000 })
     const [message] = vi.mocked(toast.error).mock.calls[0] ?? []
-    expect(String(message)).toMatch(/supprimer/i)
+    expect(String(message)).toMatch(/delete/i)
     expect(toast.success).not.toHaveBeenCalled()
   })
 })

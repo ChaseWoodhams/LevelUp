@@ -46,11 +46,11 @@ describe('héritage du segment lang (2g)', () => {
     // ÉMET la locale via le param `lang`, l'URL porte le segment — puis il est hérité.
     const router = routerAt('/t/halo_infinite/players/x/home')
     await router.load()
-    const fr = router.buildLocation({
+    const haloInfinite = router.buildLocation({
       to: '/{-$lang}/t/$titleSlug/players/$playerSlug/home',
-      params: { lang: 'fr', titleSlug: 'halo_infinite', playerSlug: 'y' },
+      params: { lang: 'en', titleSlug: 'halo_infinite', playerSlug: 'y' },
     })
-    expect(fr.pathname).toBe('/fr/t/halo_infinite/players/y/home')
+    expect(haloInfinite.pathname).toBe('/en/t/halo_infinite/players/y/home')
 
     const en = router.buildLocation({
       to: '/{-$lang}/t/$titleSlug/players/$playerSlug/home',

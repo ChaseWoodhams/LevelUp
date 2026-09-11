@@ -240,12 +240,14 @@ func TestLoadMatchCandidatesForMedia_LocaleAware(t *testing.T) {
 	if len(frResp.Candidates) != 1 {
 		t.Fatalf("FR: got %d candidats, want 1", len(frResp.Candidates))
 	}
+	// English-only: a legacy "fr" request still gets the English names; the French
+	// mode_name_tr and asset_translations rows seeded above never surface.
 	frC := frResp.Candidates[0]
-	if frC.ModeName == nil || *frC.ModeName != "Assassin" {
-		t.Errorf("FR mode = %v, want Assassin (mode_name_tr)", frC.ModeName)
+	if frC.ModeName == nil || *frC.ModeName != "Slayer" {
+		t.Errorf("legacy-locale mode = %v, want Slayer", frC.ModeName)
 	}
-	if frC.PlaylistName == nil || *frC.PlaylistName != "Slayer classé" {
-		t.Errorf("FR playlist = %v, want Slayer classé (asset_translations FR)", frC.PlaylistName)
+	if frC.PlaylistName == nil || *frC.PlaylistName != "Ranked Slayer" {
+		t.Errorf("legacy-locale playlist = %v, want Ranked Slayer", frC.PlaylistName)
 	}
 
 	enResp, err := repo.LoadMatchCandidatesForMedia(ctxkeys.WithLocale(context.Background(), "en"), "/clip.mp4", 15)

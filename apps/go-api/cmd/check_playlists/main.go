@@ -14,14 +14,14 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
-	rows, err := db.Query(`SELECT DISTINCT playlist_id, playlist_name, playlist_name_fr FROM match_registry WHERE playlist_id IS NOT NULL LIMIT 20`)
+	rows, err := db.Query(`SELECT DISTINCT playlist_id, playlist_name FROM match_registry WHERE playlist_id IS NOT NULL LIMIT 20`)
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var id, name, nameFR sql.NullString
-		rows.Scan(&id, &name, &nameFR)
-		fmt.Printf("id=%-40s  en=%-30s  fr=%s\n", id.String, name.String, nameFR.String)
+		var id, name sql.NullString
+		rows.Scan(&id, &name)
+		fmt.Printf("id=%-40s  name=%s\n", id.String, name.String)
 	}
 }

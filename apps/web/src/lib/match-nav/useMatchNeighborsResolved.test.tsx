@@ -33,7 +33,6 @@ vi.mock('@/lib/api/client', () => ({
   // getApiTitleSlug) : le mock doit exposer ces exports sinon l'import du store échoue.
   getApiTitleSlug: () => 'halo_infinite',
   setApiTitleSlug: vi.fn(),
-  setApiLocale: vi.fn(),
 }))
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -108,7 +107,7 @@ describe('useMatchNeighborsResolved', () => {
     // Le matchId 'inconnu' n'est pas dans matchIds → fallback API
     expect(result.current.source).toBe('api')
     // Observabilité (Phase 3) : le fallback est signalé en dev (avant : silencieux).
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('absent du contexte'))
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('missing from the context'))
     warnSpy.mockRestore()
   })
 

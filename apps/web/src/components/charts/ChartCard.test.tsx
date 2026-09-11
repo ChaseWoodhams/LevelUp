@@ -34,7 +34,7 @@ describe('ChartCard', () => {
   it('error sans message affiche fallback humain', () => {
     const error = new Error()
     render(<ChartCard {...baseProps} error={error} />)
-    expect(screen.getByTestId('chart-card-error').textContent).toBe('Erreur de chargement')
+    expect(screen.getByTestId('chart-card-error').textContent).toBe('Loading error')
   })
 
   it('rend l\'etat empty quand series est vide', () => {

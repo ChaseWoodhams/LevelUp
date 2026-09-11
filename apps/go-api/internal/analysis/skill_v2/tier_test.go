@@ -133,16 +133,16 @@ func TestFormatTierLabel(t *testing.T) {
 	}{
 		{1.0, "Bronze I"},
 		{20.0, "Bronze VI"}, // (20-0)/3.5+1 = 5.71+1 → clamp 6
-		{22.0, "Or I"},      // borne inclusive
-		{22.5, "Or II"},
-		{23.52, "Or IV"}, // JGtm
-		{24.99, "Or VI"},
-		{25.0, "Platine I"},  // Platine 2 sous-paliers (width 0.4)
-		{25.5, "Platine II"}, // (25.5-25)/0.4 = 1.25 → 2
-		{25.8, "Diamant I"},  // borne Diamant (3 sous-paliers, width 0.4)
-		{26.0, "Diamant I"},  // (26-25.8)/0.4 = 0.5 → 1
-		{26.17, "Diamant I"}, // Madina BTB → (26.17-25.8)/0.4 = 0.925 → 1
-		{26.5, "Diamant II"}, // (26.5-25.8)/0.4 = 1.75 → 2
+		{22.0, "Gold I"},    // inclusive boundary
+		{22.5, "Gold II"},
+		{23.52, "Gold IV"}, // JGtm
+		{24.99, "Gold VI"},
+		{25.0, "Platinum I"},  // Platinum 2 sub-tiers (width 0.4)
+		{25.5, "Platinum II"}, // (25.5-25)/0.4 = 1.25 → 2
+		{25.8, "Diamond I"},   // Diamond boundary (3 sub-tiers, width 0.4)
+		{26.0, "Diamond I"},   // (26-25.8)/0.4 = 0.5 → 1
+		{26.17, "Diamond I"},  // Madina BTB → (26.17-25.8)/0.4 = 0.925 → 1
+		{26.5, "Diamond II"},  // (26.5-25.8)/0.4 = 1.75 → 2
 		{27.0, "Onyx"},
 		{45.0, "Onyx"},
 	}

@@ -17,7 +17,7 @@ vi.mock('echarts-for-react', () => ({
   default: () => <div data-testid="echarts-mock" />,
 }))
 
-const T = getSquadText('fr')
+const T = getSquadText('en')
 
 function pt(
   order: number,

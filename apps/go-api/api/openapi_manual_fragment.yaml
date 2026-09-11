@@ -153,7 +153,7 @@ paths:
         N'expose jamais le contenu complet de session.
 
         **Invariants :**
-        - `locale` ∈ {fr, en} si fourni
+        - `locale` ∈ {en} si fourni
         - `player_slug` doit référencer un slug existant
         - Retourne 404 si le slug est inconnu
       requestBody:
@@ -1361,9 +1361,6 @@ paths:
   /admin/monitoring/data-quality:
     get:
       parameters:
-        - name: locale
-          in: query
-          description: Locale cible du compteur untranslated_modes (défaut fr).
       responses:
         '200':
           description: Compteurs qualité données
@@ -1379,9 +1376,6 @@ paths:
               - untranslated_modes
               - orphan_playlists
               - orphan_xuids
-        - name: locale
-          in: query
-          description: Locale cible des modes sans traduction (défaut fr).
         - name: offset
           in: query
           description: Décalage de pagination serveur (défaut 0, rétrocompatible).
@@ -1733,12 +1727,6 @@ paths:
   /titles/{slug}/field-mappings:
     get:
       parameters:
-        - name: locale
-          in: query
-          schema:
-            enum:
-              - fr
-              - en
       responses:
         '200':
           description: Field mappings
@@ -2434,7 +2422,6 @@ components:
         locale:
           type: string
           enum:
-            - fr
             - en
           nullable: true
         hints_visible:
@@ -2990,8 +2977,6 @@ components:
           type: array
           items:
             type: string
-        locale:
-          type: string
         filter_exact_composition:
           type: boolean
           default: false
@@ -3103,12 +3088,10 @@ components:
         lang:
           type: string
           enum:
-            - fr
             - en
         discord_lang:
           type: string
           enum:
-            - fr
             - en
         user_timezone:
           type: string

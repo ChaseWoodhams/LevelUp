@@ -22,10 +22,10 @@ func TestSquadModeResolution_ResolvesUUIDViaAssetAndModeNameTr(t *testing.T) {
 		},
 	}
 	repo := &mockSquadRepo{
-		assetFR: map[string]map[string]string{
+		assetNames: map[string]map[string]string{
 			"pair": {"pair-1": "Arena:Slayer on Aquarius"},
 		},
-		modeFR: map[string]string{"Slayer": "Assassin"},
+		modeNames: map[string]string{"Slayer": "Slayer"},
 	}
 
 	enrichSquadMatchAssets(context.Background(), repo, rows)
@@ -34,7 +34,7 @@ func TestSquadModeResolution_ResolvesUUIDViaAssetAndModeNameTr(t *testing.T) {
 	if len(hist) != 1 {
 		t.Fatalf("want 1 row, got %d", len(hist))
 	}
-	if hist[0].ModeUI != "Assassin" {
+	if hist[0].ModeUI != "Slayer" {
 		t.Errorf("ModeUI = %q, want \"Assassin\" (résolu via asset + mode_name_tr)", hist[0].ModeUI)
 	}
 	// PairName (fallback front) ne doit jamais rester l'UUID brut.
@@ -82,9 +82,9 @@ func TestSquadModeResolution_GameVariantFallbackWhenNoPairName(t *testing.T) {
 		},
 	}
 	repo := &mockSquadRepo{
-		assetFR: map[string]map[string]string{
+		assetNames: map[string]map[string]string{
 			// Résolution game_variant_id → nom FR (asset_translations).
-			"game_variant": {gvID: "Capture du drapeau"},
+			"game_variant": {gvID: "Capture the Flag"},
 		},
 	}
 
@@ -94,7 +94,7 @@ func TestSquadModeResolution_GameVariantFallbackWhenNoPairName(t *testing.T) {
 	if len(hist) != 1 {
 		t.Fatalf("want 1 row, got %d", len(hist))
 	}
-	if hist[0].ModeUI != "Capture du drapeau" {
+	if hist[0].ModeUI != "Capture the Flag" {
 		t.Errorf("ModeUI = %q, want \"Capture du drapeau\" (fallback game_variant)", hist[0].ModeUI)
 	}
 }
@@ -113,7 +113,7 @@ func TestSquadModeResolution_PairNamePreferredOverGameVariant(t *testing.T) {
 		},
 	}
 	repo := &mockSquadRepo{
-		assetFR: map[string]map[string]string{
+		assetNames: map[string]map[string]string{
 			// Un nom de game_variant divergent : NE DOIT PAS être utilisé.
 			"game_variant": {"gv-ignored": "Mode Variante Technique"},
 		},

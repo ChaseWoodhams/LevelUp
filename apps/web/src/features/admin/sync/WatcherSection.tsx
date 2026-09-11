@@ -91,7 +91,7 @@ export function WatcherSection() {
                     ? adminRelativeTime(data.last_event_at, locale)
                     : tA('admin.watcher.no_event_yet')
                 }`}
-                title={data.last_event_at ? adminAbsoluteTime(data.last_event_at, locale) : undefined}
+                title={data.last_event_at ? adminAbsoluteTime(data.last_event_at) : undefined}
               />
             )}
           </div>
@@ -166,13 +166,13 @@ function WatcherPlayersTable({
               </td>
               <td
                 className="px-3 py-2 text-xs text-muted-foreground"
-                title={adminAbsoluteTime(p.state_since, locale)}
+                title={adminAbsoluteTime(p.state_since)}
               >
                 {adminRelativeTime(p.state_since, locale)}
               </td>
               <td
                 className="px-3 py-2 text-xs text-muted-foreground"
-                title={p.last_event_at ? adminAbsoluteTime(p.last_event_at, locale) : undefined}
+                title={p.last_event_at ? adminAbsoluteTime(p.last_event_at) : undefined}
               >
                 {p.last_event_at ? adminRelativeTime(p.last_event_at, locale) : '—'}
               </td>

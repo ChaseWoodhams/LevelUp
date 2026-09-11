@@ -298,7 +298,7 @@ export function NavL1() {
   // (lien « Administration » ci-dessous, gardé pour les admins).
   // Libellés localisés (FR/EN) via le bundle Settings partagé — alimentent à la
   // fois le dropdown desktop et le drawer mobile.
-  const st = getSettingsText(locale)
+  const st = getSettingsText()
   const settingsTabs: SettingsTabItem[] = [
     { key: 'appearance', label: st.tabAppearance, tab: 'appearance' },
     { key: 'analyse', label: st.tabAnalyse, tab: 'analyse' },

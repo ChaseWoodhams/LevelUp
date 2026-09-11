@@ -29,7 +29,7 @@ function fieldDto(label: string): FieldMappingDTO {
 const HALO_INFINITE_MAPPINGS: FieldMappingsResponse = {
   title_slug: 'halo_infinite',
   schema_version: 1,
-  locale: 'fr',
+  locale: 'en',
   fields: {
     kills: fieldDto('Frags'),
     deaths: fieldDto('Morts'),
@@ -45,7 +45,7 @@ const HALO_INFINITE_MAPPINGS: FieldMappingsResponse = {
 const SYNTHETIC_TITLE_B_MAPPINGS: FieldMappingsResponse = {
   title_slug: 'synthetic_title_b',
   schema_version: 1,
-  locale: 'fr',
+  locale: 'en',
   fields: {
     kills: fieldDto('Frags'),
     deaths: fieldDto('Pertes'),

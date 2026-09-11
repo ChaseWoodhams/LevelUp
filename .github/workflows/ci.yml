@@ -551,10 +551,9 @@ jobs:
 
       - name: Start backend in demo mode
         working-directory: apps/go-api
-        # LEVELUP_DEMO_LOCALE=fr : la vitrine démo force l'anglais par défaut (audience
-        # internationale) ; les specs E2E vérifient l'UI FR → on pinne la locale française.
+        # The demo always runs the English-only application contract.
         run: |
-          LEVELUP_DEMO_MODE=true LEVELUP_DEMO_LOCALE=fr LEVELUP_API_PORT=8000 ./levelup-api &
+          LEVELUP_DEMO_MODE=true LEVELUP_API_PORT=8000 ./levelup-api &
           echo "Backend PID: $!"
           # Attendre que l'API réponde (max 30s)
           for _ in $(seq 1 30); do
@@ -563,7 +562,6 @@ jobs:
           done
         env:
           LEVELUP_DEMO_MODE: "true"
-          LEVELUP_DEMO_LOCALE: "fr"
 
       - name: Start frontend dev server
         # NE PAS définir VITE_API_BASE_URL : il remplacerait le préfixe `/api/v1` du

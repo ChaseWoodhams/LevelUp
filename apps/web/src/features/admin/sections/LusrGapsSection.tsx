@@ -133,7 +133,6 @@ function Stat({ label, value, accent }: { label: string; value: number; accent?:
 
 function GuardrailLine({
   g,
-  locale,
   tA,
 }: {
   g: AdminLusrGuardrailHealth
@@ -153,7 +152,7 @@ function GuardrailLine({
       <span>
         {tA('admin.lusr.guardrail_last_audit')} :{' '}
         {g.last_audit_at
-          ? new Date(g.last_audit_at).toLocaleString(intlLocale(locale))
+          ? new Date(g.last_audit_at).toLocaleString(intlLocale())
           : tA('admin.lusr.guardrail_never')}
       </span>
     </div>

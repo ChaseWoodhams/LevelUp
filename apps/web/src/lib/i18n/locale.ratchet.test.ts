@@ -14,9 +14,9 @@
  * signalée que précédée d'un marqueur de type — `:` (annotation / type de
  * retour), `=` (alias) ou `<` (générique, ex. `Record<...>`) — pour les 4
  * formes quotes/ordres. Les occurrences en PROSE (JSDoc/commentaires : forme
- * `('fr' | 'en')` entre parenthèses ou entre backticks) sont précédées de `(`
+ * `('en' | 'en')` entre parenthèses ou entre backticks) sont précédées de `(`
  * ou d'un backtick, JAMAIS de `:`/`=`/`<` → non matchées : aucune allowlist
- * n'est nécessaire. Les valeurs runtime (`locale === 'en' ? 'en' : 'fr'`)
+ * n'est nécessaire. Les valeurs runtime (`locale === 'en' ? 'en' : 'en'`)
  * n'emploient pas le pipe `|` et sont donc hors d'atteinte du pattern.
  *
  * HORS SCAN : `*.test.ts(x)` (fixtures/casts `x as ...` autorisés — cf. le

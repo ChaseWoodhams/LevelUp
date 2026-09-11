@@ -33,7 +33,7 @@ type SquadMatchRow struct {
 	MapUI     string
 	// PairName : libellé EN brut du mode depuis match_registry (peut être un
 	// UUID si la metadata n'a pas de traduction — résolu via la cascade
-	// canonique analysis.ResolvePairNameFR, cf. buildSquadMatchHistory).
+	// canonique analysis.ResolvePairName, cf. buildSquadMatchHistory).
 	PairName string
 	// PairNameFR : pair_name_fr depuis match_registry (NULL/'' fréquent → la
 	// cascade FR le re-résout via asset_translations[pair_id] + mode_name_tr).

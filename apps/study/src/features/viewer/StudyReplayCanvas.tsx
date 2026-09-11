@@ -163,7 +163,7 @@ function TrailWindow({
 }: {
   chosen: number | null
   onPick: (ms: number | null) => void
-  text: (typeof VIEWER_TEXT)['fr']
+  text: (typeof VIEWER_TEXT)['en']
 }) {
   return (
     <>
@@ -184,7 +184,7 @@ function TrailWindow({
 }
 
 /** floorLabels names the altitude bands, in the order `floorOf` numbers them. */
-function floorLabels(t: (typeof REPLAY_TEXT)['fr']): string[] {
+function floorLabels(t: (typeof REPLAY_TEXT)['en']): string[] {
   return [t.floorLow, t.floorMid, t.floorHigh].slice(0, FLOOR_BANDS)
 }
 

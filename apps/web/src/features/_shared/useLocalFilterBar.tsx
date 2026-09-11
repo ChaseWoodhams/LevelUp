@@ -159,13 +159,11 @@ export function useLocalFilterBar({ playerSlug, labels, viewLabels }: UseLocalFi
     let unranked = 0
     let total = 0
     for (const o of opts) {
-      // CONTRAT (GH5-2) : on matche sur o.VALUE (FR canonique), jamais o.label —
-      // le backend localise désormais le LABEL (Ranked PvP / Unranked PvP sous EN)
-      // mais garde la Value FR. Substring 'non classé' testé AVANT 'classé'.
+      // Match the English value returned by the backend, rather than the label.
       const v = o.value.toLowerCase()
-      if (v.includes('non classé') || v.includes('non-classé') || v.includes('unranked')) {
+      if (v.includes('unranked')) {
         unranked += o.count
-      } else if (v.includes('classé') || v.includes('ranked')) {
+      } else if (v.includes('ranked')) {
         ranked += o.count
       }
       total += o.count

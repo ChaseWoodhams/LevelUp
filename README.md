@@ -199,8 +199,6 @@ make web
 
 **Detailed docs**: [docs/INSTALL.md](docs/INSTALL.md)
 
-**French README**: [docs/FR/README.md](docs/FR/README.md)
-
 ---
 
 ## Configuration
@@ -247,8 +245,6 @@ This env var takes precedence over the bundled ID.
 | [FAQ.md](docs/FAQ.md) | Frequently asked questions |
 | [COMMENDATIONS.md](docs/COMMENDATIONS.md) | Commendations system (architecture & usage) |
 | [COMMENDATIONS_REFERENCE.md](docs/COMMENDATIONS_REFERENCE.md) | Full commendations reference |
-
-French docs: [docs/FR/](docs/FR/)
 
 Archived docs (not translated): [docs/archive/](docs/archive/)
 

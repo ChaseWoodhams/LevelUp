@@ -216,16 +216,16 @@ func TestNormalizeChallengeLang(t *testing.T) {
 		in   string
 		want string
 	}{
-		{in: "fr", want: langFR},
-		{in: "fr-FR", want: langFR},
-		{in: "FR-fr", want: langFR},
-		{in: "  fr  ", want: langFR},
+		{in: "fr", want: langEN},
+		{in: "fr-FR", want: langEN},
+		{in: "FR-fr", want: langEN},
+		{in: "  fr  ", want: langEN},
 		{in: "en", want: langEN},
 		{in: "en-US", want: langEN},
 		{in: "EN-us", want: langEN},
-		{in: "de", want: langFR},    // défaut = FR
-		{in: "", want: langFR},      // défaut = FR
-		{in: "es-ES", want: langFR}, // défaut = FR
+		{in: "de", want: langEN},    // défaut = FR
+		{in: "", want: langEN},      // défaut = FR
+		{in: "es-ES", want: langEN}, // défaut = FR
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
@@ -237,21 +237,11 @@ func TestNormalizeChallengeLang(t *testing.T) {
 }
 
 func TestChallengeLanguageCandidates(t *testing.T) {
-	tests := []struct {
-		name string
-		lang string
-		want []string
-	}{
-		{name: "FR", lang: langFR, want: []string{langFR, "fr"}},
-		{name: "EN", lang: langEN, want: []string{langEN, "en-GB", "en"}},
-		{name: "autre avec région", lang: "es-ES", want: []string{"es-ES", "es"}},
-		{name: "autre sans région", lang: "pt", want: []string{"pt", "pt"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := challengeLanguageCandidates(tt.lang)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("challengeLanguageCandidates(%q) = %v, want %v", tt.lang, got, tt.want)
+	want := []string{langEN, "en-GB", "en"}
+	for _, lang := range []string{"", "en", "en-US", "fr", "fr-FR", "de"} {
+		t.Run(lang, func(t *testing.T) {
+			if got := challengeLanguageCandidates(lang); !reflect.DeepEqual(got, want) {
+				t.Fatalf("challengeLanguageCandidates(%q) = %v, want %v", lang, got, want)
 			}
 		})
 	}
@@ -276,9 +266,9 @@ func TestResolveChallengeLocalizedValue(t *testing.T) {
 		},
 		{
 			name: "translation FR exacte",
-			data: map[string]any{"translations": map[string]any{langFR: "Défi FR", "en-US": "EN challenge"}},
+			data: map[string]any{"translations": map[string]any{"en-US": "EN challenge"}},
 			lang: "fr",
-			want: "Défi FR",
+			want: "EN challenge",
 		},
 		{
 			name: "translation EN via candidat en-US",
@@ -294,9 +284,9 @@ func TestResolveChallengeLocalizedValue(t *testing.T) {
 		},
 		{
 			name: "translation vide ignorée -> fallback value",
-			data: map[string]any{"translations": map[string]any{langFR: "   "}, "value": "brut"},
-			lang: "fr",
-			want: "brut",
+			data: map[string]any{"translations": map[string]any{"en-US": "   "}, "value": "raw"},
+			lang: "en",
+			want: "raw",
 		},
 		{
 			name: "aucune translation -> fallback obj value",

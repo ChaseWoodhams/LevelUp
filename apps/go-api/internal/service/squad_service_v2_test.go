@@ -567,17 +567,17 @@ func TestFilterRowsByCascade_NilPlaylistExcluded(t *testing.T) {
 func TestFilterRowsByCascade_ExperienceFilter(t *testing.T) {
 	t.Parallel()
 	rows := []canonical.PlayerMatchRow{
-		rowWithExperience("pvp-nc", false, false), // PVP non classé
-		rowWithExperience("pvp-c", true, false),   // PVP classé
+		rowWithExperience("pvp-nc", false, false), // Unranked PvP
+		rowWithExperience("pvp-c", true, false),   // Ranked PvP
 		rowWithExperience("pve", false, true),     // PVE
 	}
 
-	got := filterRowsByCascade(rows, []string{"PVP non classé"}, nil, nil, nil)
+	got := filterRowsByCascade(rows, []string{"Unranked PvP"}, nil, nil, nil)
 	if len(got) != 1 || got[0].Summary.MatchID != "pvp-nc" {
 		t.Errorf("want only pvp-nc, got %v", matchIDs(got))
 	}
 
-	got2 := filterRowsByCascade(rows, []string{"PVE", "PVP classé"}, nil, nil, nil)
+	got2 := filterRowsByCascade(rows, []string{"PVE", "Ranked PvP"}, nil, nil, nil)
 	if len(got2) != 2 {
 		t.Errorf("want 2 rows (PVE+ranked), got %d", len(got2))
 	}
@@ -607,7 +607,7 @@ func TestFilterRowsByCascade_CombinedFilters(t *testing.T) {
 		}(),
 	}
 
-	got := filterRowsByCascade(rows, []string{"PVP classé"}, []string{"Arène classée"}, nil, nil)
+	got := filterRowsByCascade(rows, []string{"Ranked PvP"}, []string{"Arène classée"}, nil, nil)
 	if len(got) != 1 || got[0].Summary.MatchID != "m1" {
 		t.Errorf("only m1 is ranked + Arène classée, got %v", matchIDs(got))
 	}

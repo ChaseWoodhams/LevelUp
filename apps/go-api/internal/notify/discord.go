@@ -150,7 +150,7 @@ func readSettingsMap(path string) map[string]any {
 // (globale ou globale+overlay résolue). Logique partagée par LoadNotifyConfig et
 // LoadNotifyConfigForTitle (une seule source de vérité).
 func notifyConfigFromMap(settingsPath string, s map[string]any) NotifyConfig {
-	cfg := NotifyConfig{Lang: "fr", SettingsPath: settingsPath}
+	cfg := NotifyConfig{Lang: "en", SettingsPath: settingsPath}
 	if s == nil || !boolVal(s, "discord_notifications_enabled") {
 		return cfg
 	}
@@ -168,7 +168,7 @@ func notifyConfigFromMap(settingsPath string, s map[string]any) NotifyConfig {
 		url = ""
 	}
 	cfg.WebhookURL = url
-	cfg.Lang = strValDefault(s, "discord_lang", "fr")
+	cfg.Lang = "en"
 	cfg.NotifySync = boolValDefault(s, "discord_notify_sync", true)
 	cfg.NotifyBackfill = boolValDefault(s, "discord_notify_backfill", true)
 	cfg.NotifyFriends = boolValDefault(s, "discord_notify_friends", true)
@@ -272,8 +272,8 @@ func SendWebhookCtx(ctx context.Context, webhookURL string, payload WebhookPaylo
 // I18n inline
 // ─────────────────────────────────────────────────────────────────────────────
 
-// discordStrings contient toutes les chaînes bilingues FR/EN.
-// Structure : map[clé]map[lang]template
+// discordStrings contains the English Discord templates.
+// The nested map shape remains for compatibility with the existing T helper.
 //
 // EXEMPTION EMOJIS (D2, revue 2026-07-17) : les emojis ci-dessous sont le CONTENU des
 // messages Discord (payload produit envoyé au webhook), PAS de la décoration de code
@@ -281,135 +281,116 @@ func SendWebhookCtx(ctx context.Context, webhookURL string, payload WebhookPaylo
 // (CLAUDE.md) — au même titre qu'un libellé UI. Convention locale préexistante du fichier ;
 // toute décoration de code (logs, commentaires, sortie CLI) reste, elle, sans emoji.
 var discordStrings = map[string]map[string]string{
-	"discord_outcome_draw": {"fr": "Égalité", "en": "Draw"},
-	"discord_outcome_win":  {"fr": "Victoire", "en": "Win"},
-	"discord_outcome_loss": {"fr": "Défaite", "en": "Loss"},
-	"discord_outcome_quit": {"fr": "Abandon", "en": "Quit"},
+	"discord_outcome_draw": {"en": "Draw"},
+	"discord_outcome_win":  {"en": "Win"},
+	"discord_outcome_loss": {"en": "Loss"},
+	"discord_outcome_quit": {"en": "Quit"},
 
-	"discord_op_sync_delta": {"fr": "Sync delta", "en": "Delta sync"},
-	"discord_op_sync_full":  {"fr": "Sync complète", "en": "Full sync"},
-	"discord_op_backfill":   {"fr": "Backfill", "en": "Backfill"},
+	"discord_op_sync_delta": {"en": "Delta sync"},
+	"discord_op_sync_full":  {"en": "Full sync"},
+	"discord_op_backfill":   {"en": "Backfill"},
 
 	"discord_completed_in": {
-		"fr": "**{status}  {op}** terminée en **{duration}**",
 		"en": "**{status}  {op}** completed in **{duration}**",
 	},
 	"discord_players_matches": {
-		"fr": "👥  {players} joueur(s)  ·  {matches} match(s) traité(s)",
 		"en": "👥  {players} player(s)  ·  {matches} match(es) processed",
 	},
 	"discord_matches_synced": {
-		"fr": "**+{count}** match(s) synchronisé(s)",
 		"en": "**+{count}** match(es) synced",
 	},
 	"discord_matches_processed": {
-		"fr": "**{count}** match(s) retraité(s)",
 		"en": "**{count}** match(es) reprocessed",
 	},
-	"discord_data_complete":   {"fr": "✅  Données complètes", "en": "✅  Data complete"},
-	"discord_data_incomplete": {"fr": "⚠️   **{count}** match(s) avec données incomplètes", "en": "⚠️   **{count}** match(es) with incomplete data"},
-	"discord_error_field":     {"fr": "⛔  Erreur : {error}", "en": "⛔  Error: {error}"},
+	"discord_data_complete":   {"en": "✅  Data complete"},
+	"discord_data_incomplete": {"en": "⚠️   **{count}** match(es) with incomplete data"},
+	"discord_error_field":     {"en": "⛔  Error: {error}"},
 
-	"discord_bf_lusr":            {"fr": "🏅  {count} LUSR calculé(s)", "en": "🏅  {count} LUSR computed"},
-	"discord_bf_medals":          {"fr": "🥇  {count} médaille(s)", "en": "🥇  {count} medal(s)"},
-	"discord_bf_events":          {"fr": "🎬  {count} temps fort(s)", "en": "🎬  {count} highlight event(s)"},
-	"discord_bf_csr":             {"fr": "📈  {count} CSR récupéré(s)", "en": "📈  {count} CSR fetched"},
-	"discord_bf_sessions":        {"fr": "📅  {count} session(s) recalculée(s)", "en": "📅  {count} session(s) updated"},
-	"discord_bf_citations":       {"fr": "💬  {count} citation(s)", "en": "💬  {count} citation(s)"},
-	"discord_bf_kvp":             {"fr": "⚔️  {count} paire(s) tueur-victime", "en": "⚔️  {count} killer-victim pair(s)"},
-	"discord_bf_personal_scores": {"fr": "🎯  {count} score(s) perso", "en": "🎯  {count} personal score(s)"},
-	"discord_bf_perf_scores":     {"fr": "⚡  {count} score(s) de perf", "en": "⚡  {count} perf score(s)"},
-	"discord_bf_aliases":         {"fr": "👤  {count} alias(es)", "en": "👤  {count} alias(es)"},
-	"discord_bf_pve":             {"fr": "🤖  {count} stat(s) PvE", "en": "🤖  {count} PvE stat(s)"},
+	"discord_bf_lusr":            {"en": "🏅  {count} LUSR computed"},
+	"discord_bf_medals":          {"en": "🥇  {count} medal(s)"},
+	"discord_bf_events":          {"en": "🎬  {count} highlight event(s)"},
+	"discord_bf_csr":             {"en": "📈  {count} CSR fetched"},
+	"discord_bf_sessions":        {"en": "📅  {count} session(s) updated"},
+	"discord_bf_citations":       {"en": "💬  {count} citation(s)"},
+	"discord_bf_kvp":             {"en": "⚔️  {count} killer-victim pair(s)"},
+	"discord_bf_personal_scores": {"en": "🎯  {count} personal score(s)"},
+	"discord_bf_perf_scores":     {"en": "⚡  {count} perf score(s)"},
+	"discord_bf_aliases":         {"en": "👤  {count} alias(es)"},
+	"discord_bf_pve":             {"en": "🤖  {count} PvE stat(s)"},
 
-	"discord_disk_warn_title":     {"fr": "💾  Disque serveur : espace faible", "en": "💾  Server disk: low space"},
-	"discord_disk_critical_title": {"fr": "🚨  Disque serveur : espace CRITIQUE", "en": "🚨  Server disk: CRITICAL space"},
-	"discord_disk_ok_title":       {"fr": "✅  Disque serveur : espace rétabli", "en": "✅  Server disk: space recovered"},
+	"discord_disk_warn_title":     {"en": "💾  Server disk: low space"},
+	"discord_disk_critical_title": {"en": "🚨  Server disk: CRITICAL space"},
+	"discord_disk_ok_title":       {"en": "✅  Server disk: space recovered"},
 	"discord_disk_alert_desc": {
-		"fr": "Le volume de données est rempli à **{used_pct} %** — **{free}** libres sur {total} (`{path}`). Libérer de l'espace avant saturation (incident du 2026-07-13 : prod down disque plein).",
 		"en": "Data volume is **{used_pct}%** full — **{free}** free of {total} (`{path}`). Free up space before saturation.",
 	},
 	"discord_disk_ok_desc": {
-		"fr": "Le volume de données est revenu sous les seuils d'alerte : **{free}** libres sur {total} ({used_pct} % utilisés).",
 		"en": "Data volume is back under alert thresholds: **{free}** free of {total} ({used_pct}% used).",
 	},
 
 	// Relais coach externe (opt-in) — embed technique sobre.
-	"discord_coach_title":    {"fr": "🎯  LevelUp — Signal coach", "en": "🎯  LevelUp — Coach signal"},
-	"discord_coach_player":   {"fr": "Joueur", "en": "Player"},
-	"discord_coach_category": {"fr": "Catégorie", "en": "Category"},
-	"discord_coach_details":  {"fr": "Détails", "en": "Details"},
-	"discord_coach_link":     {"fr": "Ouvrir dans LevelUp", "en": "Open in LevelUp"},
+	"discord_coach_title":    {"en": "🎯  LevelUp — Coach signal"},
+	"discord_coach_player":   {"en": "Player"},
+	"discord_coach_category": {"en": "Category"},
+	"discord_coach_details":  {"en": "Details"},
+	"discord_coach_link":     {"en": "Open in LevelUp"},
 
-	"discord_reauth_title": {"fr": "🔑  Reconnexion Xbox requise", "en": "🔑  Xbox reconnection required"},
+	"discord_reauth_title": {"en": "🔑  Xbox reconnection required"},
 	"discord_reauth_desc": {
-		"fr": "Le jeton de **{gamertag}** a expiré — la synchronisation est en pause. Reconnecte ton compte Xbox dans LevelUp.",
 		"en": "Token for **{gamertag}** expired — sync is paused. Reconnect your Xbox account in LevelUp.",
 	},
 
-	"discord_last_match": {"fr": "Dernier match", "en": "Last match"},
-	"discord_ranked_tag": {"fr": "Classé", "en": "Ranked"},
+	"discord_last_match": {"en": "Last match"},
+	"discord_ranked_tag": {"en": "Ranked"},
 	// discord_footer retiré : le footer est dérivé du nom du titre (descripteur),
 	// cf. discordFooterText() dans labels.go (source unique, évite la 2e copie).
-	"discord_title":         {"fr": "🎮  LevelUp — {op}", "en": "🎮  LevelUp — {op}"},
-	"discord_time_range":    {"fr": "🕐  `{t_start}`  →  `{t_end}`", "en": "🕐  `{t_start}`  →  `{t_end}`"},
-	"discord_kda":           {"fr": "{k}F / {d}D / {a}A", "en": "{k}K / {d}D / {a}A"},
-	"discord_squad_match":   {"fr": "🎮 Match en escouade", "en": "🎮 Squad match"},
-	"discord_squad_friends": {"fr": "👥 Amis : {friends}", "en": "👥 Friends: {friends}"},
+	"discord_title":         {"en": "🎮  LevelUp — {op}"},
+	"discord_time_range":    {"en": "🕐  `{t_start}`  →  `{t_end}`"},
+	"discord_kda":           {"en": "{k}K / {d}D / {a}A"},
+	"discord_squad_match":   {"en": "🎮 Squad match"},
+	"discord_squad_friends": {"en": "👥 Friends: {friends}"},
 
-	"discord_up_to_date_sync":         {"fr": "Déjà à jour", "en": "Already up to date"},
-	"discord_no_new_matches":          {"fr": "Aucun nouveau match", "en": "No new matches"},
-	"discord_no_matches_to_reprocess": {"fr": "Aucun match à retraiter", "en": "Nothing to reprocess"},
-	"discord_all_up_to_date":          {"fr": "Tout déjà à jour", "en": "All up to date"},
-	"discord_player_count":            {"fr": "👥  {count} joueur(s)", "en": "👥  {count} player(s)"},
+	"discord_up_to_date_sync":         {"en": "Already up to date"},
+	"discord_no_new_matches":          {"en": "No new matches"},
+	"discord_no_matches_to_reprocess": {"en": "Nothing to reprocess"},
+	"discord_all_up_to_date":          {"en": "All up to date"},
+	"discord_player_count":            {"en": "👥  {count} player(s)"},
 
 	// Version
 	"discord_version_title": {
-		"fr": "🚀 LevelUp v{version} — Nouvelle version déployée",
 		"en": "🚀 LevelUp v{version} — New version deployed",
 	},
 	keyDiscordVersionFooter: {
-		"fr": "LevelUp · Mise à jour automatique",
 		"en": "LevelUp · Auto-update",
 	},
 
 	// §6.B — Flow ami (Squad/Sessions overhaul)
 	"discord_friend_added_title": {
-		"fr": "👤 Nouvel ami ajouté",
 		"en": "👤 New friend added",
 	},
 	"discord_friend_added_desc": {
-		"fr": "{gamertag} a été ajouté à ta liste d'amis. Les sessions de jeu communes seront automatiquement reclassées en escouade.",
 		"en": "{gamertag} has been added to your friends list. Shared sessions will be automatically reclassified as squad.",
 	},
 	"discord_friend_sync_title": {
-		"fr": "🔄 Sessions amis mises à jour",
 		"en": "🔄 Friend sessions updated",
 	},
 	"discord_friend_sync_desc_one": {
-		"fr": "{promoted} match a été reclassé en escouade-amis pour {slug}.",
 		"en": "{promoted} match reclassified as squad-friends for {slug}.",
 	},
 	"discord_friend_sync_desc_many": {
-		"fr": "{promoted} matchs ont été reclassés en escouade-amis pour {slug}.",
 		"en": "{promoted} matches reclassified as squad-friends for {slug}.",
 	},
 }
 
-// T traduit une clé Discord selon la langue donnée.
-// Les tokens {key} sont remplacés par les valeurs de args.
-func T(key, lang string, args ...any) string {
-	if lang == "" {
-		lang = "fr"
-	}
+// T resolves an English Discord template. The language argument remains in the
+// signature for compatibility with existing callers; it cannot select another
+// locale. Tokens {key} are replaced by the values in args.
+func T(key, _ string, args ...any) string {
 	entry, ok := discordStrings[key]
 	if !ok {
 		return key
 	}
-	tmpl, ok := entry[lang]
-	if !ok {
-		tmpl = entry["fr"] // fallback français
-	}
+	tmpl := entry["en"]
 	if len(args) == 0 || len(args)%2 != 0 {
 		return tmpl
 	}
@@ -422,7 +403,6 @@ func T(key, lang string, args ...any) string {
 	return tmpl
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Helpers lecture app_settings.json
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -950,22 +950,26 @@ func TestHomeRepo_LoadHomeMatches_FallsBackToMetadataAssetTranslations(t *testin
 		t.Fatalf("UPDATE shared.match_registry: %v", err)
 	}
 
+	// en-US rows resolve the empty legacy columns; a fr-FR row for the same map proves
+	// French is never picked, even when it is the only other language present.
 	inserts := []struct {
 		assetID   string
 		assetType string
+		lang      string
 		name      string
 	}{
-		{assetID: "map-curfew", assetType: "map", name: "Couvre-feu"},
-		{assetID: "pair-team-slayer", assetType: "pair", name: "Slayer en équipe"},
-		{assetID: "variant-arena-slayer", assetType: "game_variant", name: "Assassin : Arène"},
-		{assetID: "playlist-quick-play", assetType: "playlist", name: "Partie rapide"},
+		{assetID: "map-curfew", assetType: "map", lang: "en-US", name: "Curfew"},
+		{assetID: "map-curfew", assetType: "map", lang: "fr-FR", name: "Couvre-feu"},
+		{assetID: "pair-team-slayer", assetType: "pair", lang: "en-US", name: "Team Slayer"},
+		{assetID: "variant-arena-slayer", assetType: "game_variant", lang: "en-US", name: "Arena Slayer"},
+		{assetID: "playlist-quick-play", assetType: "playlist", lang: "en-US", name: "Quick Play"},
 	}
 	for _, insert := range inserts {
 		if _, err := pdb.Metadata.Exec(ctx, `
 			INSERT INTO asset_translations (asset_id, asset_type, lang, name, description, fetched_at)
-			VALUES (?, ?, 'fr-FR', ?, '', now())
-		`, insert.assetID, insert.assetType, insert.name); err != nil {
-			t.Fatalf("INSERT asset_translations (%s): %v", insert.assetType, err)
+			VALUES (?, ?, ?, ?, '', now())
+		`, insert.assetID, insert.assetType, insert.lang, insert.name); err != nil {
+			t.Fatalf("INSERT asset_translations (%s %s): %v", insert.assetType, insert.lang, err)
 		}
 	}
 
@@ -977,17 +981,17 @@ func TestHomeRepo_LoadHomeMatches_FallsBackToMetadataAssetTranslations(t *testin
 	if len(rows) != 1 {
 		t.Fatalf("attendu 1 match, obtenu %d", len(rows))
 	}
-	if rows[0].MapNameFR != "Couvre-feu" {
-		t.Fatalf("MapNameFR = %q, want Couvre-feu", rows[0].MapNameFR)
+	if rows[0].MapNameFR != "Curfew" {
+		t.Fatalf("MapNameFR = %q, want Curfew", rows[0].MapNameFR)
 	}
-	if rows[0].PairNameFR != "Slayer en équipe" {
-		t.Fatalf("PairNameFR = %q, want Slayer en équipe", rows[0].PairNameFR)
+	if rows[0].PairNameFR != "Team Slayer" {
+		t.Fatalf("PairNameFR = %q, want Team Slayer", rows[0].PairNameFR)
 	}
-	if rows[0].GameVariantNameFR != "Assassin : Arène" {
-		t.Fatalf("GameVariantNameFR = %q, want Assassin : Arène", rows[0].GameVariantNameFR)
+	if rows[0].GameVariantNameFR != "Arena Slayer" {
+		t.Fatalf("GameVariantNameFR = %q, want Arena Slayer", rows[0].GameVariantNameFR)
 	}
-	if rows[0].PlaylistNameFR != "Partie rapide" {
-		t.Fatalf("PlaylistNameFR = %q, want Partie rapide", rows[0].PlaylistNameFR)
+	if rows[0].PlaylistNameFR != "Quick Play" {
+		t.Fatalf("PlaylistNameFR = %q, want Quick Play", rows[0].PlaylistNameFR)
 	}
 }
 

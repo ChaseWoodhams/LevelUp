@@ -18,22 +18,14 @@ package replay
 // client web doit gérer. L'ajout de champs OPTIONNELS (omitempty) ne casse pas le client
 // et n'incrémente pas la version ; seul un changement cassant le fait.
 //
-// v2 (2026-08-02, lot 3.1/3.2) : les trois tables de libellés deviennent BILINGUES
-// (`{en, fr}` au lieu d'une chaîne) et le type d'un lancer de grenade devient son RANG
-// (`rank`) au lieu d'un nom. Motif : les catalogues étaient codés en Go, dont deux en
-// français — ce qui interdisait l'anglais autant qu'un second titre — et les grenades
-// étaient nommées deux fois, différemment, sur la même fiche.
+// v2 (2026-08-02, lot 3.1/3.2) : the three label tables use structured labels and the
+// type of a grenade throw is its RANK (`rank`) rather than a name. The catalogues are
+// supplied by the title configuration so the artifact is deterministic and English.
 const SchemaVersion = 2
 
-// Label est un libellé affichable dans les deux langues du produit.
-//
-// POURQUOI DEUX LANGUES DANS L'ARTEFACT, et pas une résolution au service : l'artefact
-// est construit UNE FOIS, hors ligne, et servi tel quel — la locale, elle, change à
-// chaque requête. Y figer une seule langue reviendrait à choisir la langue du lecteur au
-// moment du décodage d'un film.
+// Label is an English display label stored in the replay artifact.
 type Label struct {
 	En string `json:"en"`
-	Fr string `json:"fr"`
 }
 
 // WeaponLabel est le libellé d'une arme, plus l'EFFET de rendu de ses tirs.
@@ -44,7 +36,6 @@ type Label struct {
 // n'a plus à savoir ce qu'est un Ravager.
 type WeaponLabel struct {
 	En string `json:"en"`
-	Fr string `json:"fr"`
 	// Fx est la famille de RENDU du tir (ballistic, plasma, light, shock, explosive,
 	// melee, needles). Vide = arme non catégorisée : le client dessine le trait neutre,
 	// jamais l'effet d'une arme voisine.

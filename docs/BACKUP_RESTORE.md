@@ -1,7 +1,4 @@
 # Backup & Restore — LevelUp
-
-French version: [FR/BACKUP_RESTORE.md](FR/BACKUP_RESTORE.md)
-
 LevelUp stores all data in DuckDB files under `data/titles/<slug>/`. There are **two complementary backup paths**:
 
 | Path | What it protects | Format | Driven by |

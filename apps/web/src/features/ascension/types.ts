@@ -64,11 +64,9 @@ export interface MilestoneItem {
   metric: string
   threshold: number
   title_en: string
-  title_fr: string
   icon?: string
   /** Description lisible localisée de la condition du jalon (A9). Vide si le
    *  jalon n'a pas de condition explicite → aucune ligne affichée. */
-  condition_fr?: string
   condition_en?: string
   earned: boolean
   earned_at?: string | null
@@ -109,7 +107,6 @@ export interface EngagementSnapshot {
 
 export interface SkillRatingSnapshot {
   tier_name: string
-  tier_name_fr: string
   sub_tier: number
   label: string
   mu: number
@@ -142,9 +139,7 @@ export interface SuggestedChallenge {
   historical_streak: number
   is_arc_step: boolean
   arc_id?: string
-  label_fr?: string
   label_en?: string
-  description_fr?: string
   description_en?: string
 }
 

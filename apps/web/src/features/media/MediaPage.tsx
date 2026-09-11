@@ -7,7 +7,6 @@ import { useParams } from '@tanstack/react-router'
 import { Card, CardContent } from '@/components/ui/card'
 import type { LabelValue, MediaItemRow, MediaQueryRequest } from '@/lib/api/types'
 import { useAppShellStore } from '@/stores/appShellStore'
-import type { ManifestLocale } from '@/lib/i18n/format'
 import { intlLocale } from '@/lib/formatters'
 import { MediaLightbox, MediaThumbnailCard } from './MediaViewer'
 import { buildOwnerColorMap } from './mediaOwnerColors'
@@ -68,9 +67,9 @@ function itemTimestamp(item: MediaItemRow): number | null {
   return Number.isNaN(t) ? null : t
 }
 
-function buildSessionGroups(items: MediaItemRow[], text: MediaText, locale: ManifestLocale): MediaGroup[] {
+function buildSessionGroups(items: MediaItemRow[], text: MediaText): MediaGroup[] {
   if (items.length === 0) return []
-  const formatter = new Intl.DateTimeFormat(intlLocale(locale), {
+  const formatter = new Intl.DateTimeFormat(intlLocale(), {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -151,11 +150,11 @@ function buildSimpleGroups(items: MediaItemRow[], groupBy: string, text: MediaTe
   return order.map((key) => map.get(key) as MediaGroup)
 }
 
-function buildGroups(items: MediaItemRow[], groupBy: string, text: MediaText, locale: ManifestLocale): MediaGroup[] {
+function buildGroups(items: MediaItemRow[], groupBy: string, text: MediaText): MediaGroup[] {
   if (!groupBy || items.length === 0) {
     return [{ key: '__all__', label: '', items }]
   }
-  if (groupBy === 'session') return buildSessionGroups(items, text, locale)
+  if (groupBy === 'session') return buildSessionGroups(items, text)
   return buildSimpleGroups(items, groupBy, text)
 }
 
@@ -165,7 +164,7 @@ export function MediaPage() {
   const currentPlayerGamertag = useAppShellStore(
     (s) => s.currentPlayer?.gamertag ?? s.availablePlayers.find((p) => p.player_slug === playerSlug)?.gamertag,
   )
-  const text = getMediaText(locale)
+  const text = getMediaText()
   const [page, setPage] = useState(1)
   const [kindFilter, setKindFilter] = useState('')
   // Défaut explicite = joueur courant sélectionné. [] = tous les auteurs (pas de filtre player_slug).
@@ -225,7 +224,7 @@ export function MediaPage() {
   const totalPages = pagination ? Math.ceil(pagination.total / PAGE_SIZE) : 1
 
   const groups = useMemo(
-    () => buildGroups(mediaItems, groupBy, text, locale),
+    () => buildGroups(mediaItems, groupBy, text),
     [mediaItems, groupBy, text, locale],
   )
 

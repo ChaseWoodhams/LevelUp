@@ -27,25 +27,21 @@ func (r *MetadataRepo) ListMapsByTitle(
 		SELECT DISTINCT ON (m.name_canonical)
 		       m.map_asset_id                                     AS asset_id,
 		       COALESCE(at_en.name, m.name_canonical, '')         AS name_en,
-		       COALESCE(at_fr.name, '')                           AS name_fr
+		       COALESCE(at_en.name, m.name_canonical, '')         AS name_fr
 		FROM maps_catalog m
 		LEFT JOIN asset_translations at_en
 		    ON at_en.asset_id   = m.map_asset_id
 		   AND at_en.asset_type = 'map'
 		   AND at_en.lang       = 'en-US'
-		LEFT JOIN asset_translations at_fr
-		    ON at_fr.asset_id   = m.map_asset_id
-		   AND at_fr.asset_type = 'map'
-		   AND at_fr.lang       = 'fr-FR'
 		WHERE m.title_slug = ?
 		  AND COALESCE(m.name_canonical, '') NOT LIKE '% - %'
 		  AND (? = ''
 		       OR lower(COALESCE(at_en.name, m.name_canonical, '')) LIKE lower('%' || ? || '%')
-		       OR lower(COALESCE(at_fr.name, ''))                    LIKE lower('%' || ? || '%'))
+		       )
 		ORDER BY m.name_canonical, at_en.name
 	`
 
-	rows, err := r.meta.Query(ctx, query, titleID, search, search, search)
+	rows, err := r.meta.Query(ctx, query, titleID, search, search)
 	if err != nil {
 		return nil, fmt.Errorf("ListMapsByTitle: %w", err)
 	}
@@ -71,17 +67,16 @@ func (r *MetadataRepo) ListWeaponsByTitle(
 	search string,
 ) ([]canonical.AssetMeta, error) {
 	query := `
-		SELECT weapon_id::VARCHAR           AS id,
+		SELECT weapon_id::VARCHAR AS id,
 		       name_en,
-		       COALESCE(name_fr, '')        AS name_fr
+		       COALESCE(name_en, '') AS name_fr
 		FROM weapon_labels
 		WHERE ? = ''
-		   OR lower(name_en)                LIKE lower('%' || ? || '%')
-		   OR lower(COALESCE(name_fr, ''))  LIKE lower('%' || ? || '%')
+		   OR lower(name_en) LIKE lower('%' || ? || '%')
 		ORDER BY name_en
 	`
 
-	rows, err := r.meta.Query(ctx, query, search, search, search)
+	rows, err := r.meta.Query(ctx, query, search, search)
 	if err != nil {
 		return nil, fmt.Errorf("ListWeaponsByTitle: %w", err)
 	}
@@ -116,23 +111,22 @@ func (r *MetadataRepo) ListMedalsByTitle(
 	_ string,
 	search string,
 ) ([]canonical.AssetMeta, error) {
-	// mt_loc lié à fr-FR via medalTranslationJoinsSQL("fr") ; les expressions FR
+	// The English translation join is the only public label source.
 	// proviennent du helper, les expressions EN n'utilisent que mt_en + md.*.
-	labelFR, descFR := medalLabelDescCoalesceSQL("fr")
+	labelEN, descEN := medalLabelDescCoalesceSQL()
 	query := `
 		SELECT md.medal_name_id::VARCHAR AS id,
 		       COALESCE(NULLIF(TRIM(mt_en.name),''), NULLIF(TRIM(md.name_en),''), '')        AS name_en,
-		       ` + labelFR + `                                                              AS name_fr,
+		       ` + labelEN + `                                                              AS name_fr,
 		       COALESCE(NULLIF(TRIM(mt_en.description),''), NULLIF(TRIM(md.description_en),''), '') AS description_en,
-		       ` + descFR + `                                                               AS description_fr
+		       ` + descEN + `                                                               AS description_fr
 		FROM medal_definitions md
-		` + medalTranslationJoinsSQL("fr") + `
+		` + medalTranslationJoinsSQL() + `
 		WHERE ? = ''
-		   OR lower(COALESCE(md.name_en, ''))               LIKE lower('%' || ? || '%')
-		   OR lower(COALESCE(md.name_fr, ''))               LIKE lower('%' || ? || '%')
+		   OR lower(COALESCE(md.name_en, '')) LIKE lower('%' || ? || '%')
 		ORDER BY md.name_en
 	`
-	rows, err := r.meta.Query(ctx, query, search, search, search)
+	rows, err := r.meta.Query(ctx, query, search, search)
 	if err != nil {
 		return nil, fmt.Errorf("ListMedalsByTitle: %w", err)
 	}

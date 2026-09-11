@@ -79,7 +79,7 @@ const baseHeader: MatchViewHeader = {
   map_ui: 'Aquarius',
   map_id: undefined,
   mode_ui: 'Slayer',
-  playlist_label: 'Classée',
+  playlist_label: 'Ranked',
   performance_display: '76',
   performance_color: undefined,
   performance_color_token: 'perf-tier-2',
@@ -114,24 +114,24 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.getByText('Slayer sur Aquarius')).toBeInTheDocument()
     expect(screen.getByText('Victoire')).toBeInTheDocument()
     expect(screen.getByText('87 - 62')).toBeInTheDocument()
-    expect(screen.getByText('Classée')).toBeInTheDocument()
+    expect(screen.getByText('Ranked')).toBeInTheDocument()
     expect(screen.getByText('76')).toBeInTheDocument()
     // tier_label baké "Diamond 1" (EN, cas H5) localisé en FR → "Diamant 1",
     // affiché 2× : libellé du rang + label bas-gauche de la barre.
-    expect(screen.getAllByText('Diamant 1').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Diamond 1').length).toBeGreaterThan(0)
     expect(screen.getByText('CSR 1452')).toBeInTheDocument()
     expect(screen.getByText('▲ +34')).toBeInTheDocument()
     expect(screen.getByText('Performance')).toBeInTheDocument()
-    expect(screen.getByText('Rang')).toBeInTheDocument()
+    expect(screen.getByText('Rank')).toBeInTheDocument()
     // Action labels FR (boutons courts)
-    expect(screen.getByText('Copier ID')).toBeInTheDocument()
-    expect(screen.getByText('Exclure')).toBeInTheDocument()
+    expect(screen.getByText('Copy ID')).toBeInTheDocument()
+    expect(screen.getByText('Exclude')).toBeInTheDocument()
   })
 
   it('affiche les libellés EN quand locale=en', () => {
@@ -160,7 +160,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     // Le fallback : nom de map (deux occurrences possibles via alt + texte)
@@ -179,14 +179,14 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
-    const badge = screen.getByText('Prolongation')
+    const badge = screen.getByText('Overtime')
     expect(badge).toBeInTheDocument()
     expect(badge.closest('[data-testid="narrative-badge"]')).toHaveAttribute(
       'title',
-      'Prolongation : +0:43',
+      'Overtime: +0:43',
     )
   })
 
@@ -217,10 +217,10 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
-    expect(screen.queryByText('Prolongation')).toBeNull()
+    expect(screen.queryByText('Overtime')).toBeNull()
   })
 
   it('match exclu : affiche le bouton "Réactiver"', () => {
@@ -232,10 +232,10 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
-    expect(screen.getByText('Réactiver')).toBeInTheDocument()
+    expect(screen.getByText('Reactivate')).toBeInTheDocument()
   })
 
   it('rating_type=none : ne rend pas la section rang', () => {
@@ -253,7 +253,7 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.queryByText('Rang')).toBeNull()
@@ -268,13 +268,13 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     // Avant clic : un seul bouton "Exclure" (celui du header).
-    fireEvent.click(screen.getByRole('button', { name: 'Exclure' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Exclude' }))
     expect(screen.getByRole('alertdialog')).toBeInTheDocument()
-    expect(screen.getByText('Exclure ce match ?')).toBeInTheDocument()
+    expect(screen.getByText('Exclude this match?')).toBeInTheDocument()
     expect(setExclusionMutateMock).not.toHaveBeenCalled()
   })
 
@@ -287,15 +287,15 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Exclure' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Exclude' }))
     // Après ouverture du dialog : deux boutons "Exclure" — header + footer.
     // Le footer (dans le dialog) a `variant=destructive` mais aria-name reste "Exclure".
     const dialog = screen.getByRole('alertdialog')
     const confirmBtn = Array.from(dialog.querySelectorAll('button')).find(
-      (b) => b.textContent?.trim() === 'Exclure',
+      (b) => b.textContent?.trim() === 'Exclude',
     )
     expect(confirmBtn).toBeDefined()
     fireEvent.click(confirmBtn!)
@@ -315,12 +315,12 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
-    const btn = screen.getByRole('button', { name: 'Exclure' })
+    const btn = screen.getByRole('button', { name: 'Exclude' })
     expect(btn).toBeDisabled()
-    expect(btn).toHaveAttribute('title', expect.stringMatching(/classés/i))
+    expect(btn).toHaveAttribute('title', expect.stringMatching(/Ranked matches cannot be excluded/i))
     fireEvent.click(btn)
     expect(setExclusionMutateMock).not.toHaveBeenCalled()
     expect(screen.queryByRole('alertdialog')).toBeNull()
@@ -335,10 +335,10 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
-    const btn = screen.getByRole('button', { name: 'Réactiver' })
+    const btn = screen.getByRole('button', { name: 'Reactivate' })
     expect(btn).not.toBeDisabled()
   })
 
@@ -351,17 +351,17 @@ describe('MatchHeaderCard', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
-    expect(screen.getByRole('button', { name: 'Retirer des favoris' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remove from favorites' })).toBeInTheDocument()
   })
 })
 
 // LOT 1.2/1.3 — PAS DE LIEN VERS UNE PAGE VIDE. La route de rejeu répond 404 quand
 // aucun artefact n'a été construit ; le lien n'apparaît donc QUE sur `replay_available`.
 describe('MatchHeaderCard — lien vers le rejeu 2D', () => {
-  function renderHeader(header: MatchViewHeader, locale: 'fr' | 'en') {
+  function renderHeader(header: MatchViewHeader, locale: 'en' | 'en') {
     return renderWithQueryClient(
       <MatchHeaderCard
         header={header}
@@ -375,24 +375,18 @@ describe('MatchHeaderCard — lien vers le rejeu 2D', () => {
   }
 
   it("n'affiche AUCUN lien quand le match n'a pas d'artefact", () => {
-    renderHeader({ ...baseHeader, replay_available: false }, 'fr')
-    expect(screen.queryByText('Rejeu 2D')).not.toBeInTheDocument()
+    renderHeader({ ...baseHeader, replay_available: false }, 'en')
+    expect(screen.queryByText('2D replay')).not.toBeInTheDocument()
   })
 
   it("n'affiche aucun lien quand le champ est absent (titre sans rejeu)", () => {
-    renderHeader(baseHeader, 'fr')
-    expect(screen.queryByText('Rejeu 2D')).not.toBeInTheDocument()
+    renderHeader(baseHeader, 'en')
+    expect(screen.queryByText('2D replay')).not.toBeInTheDocument()
   })
 
-  it('affiche le lien FR quand l’artefact existe', () => {
-    renderHeader({ ...baseHeader, replay_available: true }, 'fr')
-    expect(screen.getByText('Rejeu 2D')).toBeInTheDocument()
-  })
-
-  it('affiche le lien EN quand l’artefact existe', () => {
+  it('affiche le lien quand l’artefact existe', () => {
     renderHeader({ ...baseHeader, replay_available: true }, 'en')
     expect(screen.getByText('2D replay')).toBeInTheDocument()
-    expect(screen.queryByText('Rejeu 2D')).not.toBeInTheDocument()
   })
 })
 
@@ -418,7 +412,7 @@ describe('MatchHeaderCard — barre de progression du rang', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     const base = screen.getByTestId('rank-progress-base')
@@ -445,7 +439,7 @@ describe('MatchHeaderCard — barre de progression du rang', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.getByTestId('rank-progress-base').style.width).toBe('0%')
@@ -467,7 +461,7 @@ describe('MatchHeaderCard — barre de progression du rang', () => {
         matchId="m1"
         playerSlug="MonGT"
         matchTitle="Slayer sur Aquarius"
-        locale="fr"
+        locale="en"
       />,
     )
     expect(screen.queryByTestId('rank-progress-base')).toBeNull()
@@ -487,10 +481,10 @@ describe('MatchNavigationBar', () => {
 
   it('rendu fallback API : affiche compteur sans contextLabel ni bouton sortir', () => {
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     expect(screen.getByText('Match 2/4')).toBeInTheDocument()
-    expect(screen.queryByText(/Sortir du contexte/)).toBeNull()
+    expect(screen.queryByText(/Exit context/)).toBeNull()
   })
 
   it('rendu router-state : affiche contextLabel + lien sortir', () => {
@@ -498,14 +492,14 @@ describe('MatchNavigationBar', () => {
       data: { previous_match_id: 'p', next_match_id: 'n', current_index: 0, total_matches: 12 },
       isPending: false,
       source: 'router-state',
-      contextLabel: 'Classée · 7 derniers jours',
+      contextLabel: 'Ranked · Last 7 days',
       navContext: { source: 'history', matchIds: ['m1', 'p', 'n'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
-    expect(screen.getByText('Classée · 7 derniers jours')).toBeInTheDocument()
-    expect(screen.getByText(/Sortir du contexte ↩/)).toBeInTheDocument()
+    expect(screen.getByText('Ranked · Last 7 days')).toBeInTheDocument()
+    expect(screen.getByText(/Exit context ↩/)).toBeInTheDocument()
   })
 
   it('clic prev/next : propage le navContext courant au helper', () => {
@@ -517,9 +511,9 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'session', matchIds: ['next-id', 'm1', 'prev-id'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Match suivant' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Next match' }))
     expect(navigateToMatchMock).toHaveBeenCalledWith(
       'next-id',
       expect.objectContaining({ source: 'session', matchIds: ['next-id', 'm1', 'prev-id'] }),
@@ -531,13 +525,13 @@ describe('MatchNavigationBar', () => {
       data: { previous_match_id: 'p', next_match_id: 'n', current_index: 0, total_matches: 3 },
       isPending: false,
       source: 'router-state',
-      contextLabel: 'Top matchs',
+      contextLabel: 'Top matches',
       navContext: { source: 'history', matchIds: ['m1', 'p', 'n'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
-    fireEvent.click(screen.getByText(/Sortir du contexte ↩/))
+    fireEvent.click(screen.getByText(/Exit context ↩/))
     expect(clearNavContextMock).toHaveBeenCalledWith('m1')
   })
 
@@ -559,12 +553,12 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'home_recent', matchIds: ['m1'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
-    expect(screen.getByText('Matchs récents 12/47')).toBeInTheDocument()
+    expect(screen.getByText('Recent matches 12/47')).toBeInTheDocument()
     // Pas de fragment "·" suivi du label brut puisque le descriptor est intégré
     expect(screen.queryByText('Match 12/47')).toBeNull()
-    expect(screen.getByText(/Sortir du contexte ↩/)).toBeInTheDocument()
+    expect(screen.getByText(/Exit context ↩/)).toBeInTheDocument()
   })
 
   it('descriptor `with_player` : compteur intégré "Matchs avec X"', () => {
@@ -576,9 +570,9 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'session', matchIds: ['m1'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
-    expect(screen.getByText('Matchs avec CoolMate 1/18')).toBeInTheDocument()
+    expect(screen.getByText('With CoolMate matches 1/18')).toBeInTheDocument()
   })
 
   it('descriptor `session` : intègre la date+heure courte', () => {
@@ -591,10 +585,10 @@ describe('MatchNavigationBar', () => {
       navContext: { source: 'session', matchIds: ['m1'] },
     }
     renderWithQueryClient(
-      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="fr" />,
+      <MatchNavigationBar playerSlug="MonGT" matchId="m1" locale="en" />,
     )
     // On vérifie le préfixe + la date + le total — l'heure dépend de la TZ du runner
-    expect(screen.getByText(/Matchs de la session du \d{2}\/\d{2}\/\d{2} à \d{2}:\d{2} 3\/9/)).toBeInTheDocument()
+    expect(screen.getByText(/From session of \d{2}\/\d{2}\/\d{2} at \d{2}:\d{2}\s?(AM|PM) matches 3\/9/)).toBeInTheDocument()
   })
 
   it('descriptor `recent` (EN) : "Recent matches X/Y" capitalisé', () => {

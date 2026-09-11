@@ -73,7 +73,7 @@ describe('HomePage — navigation cards Sessions récentes', () => {
   it('card solo → Timeseries + épingle la session dans soloFilterStore', async () => {
     renderWithProviders(<HomePage />)
     const card = await screen.findByRole('button', {
-      name: `Voir le détail de la session ${SOLO_LABEL}`,
+      name: `View session details for ${SOLO_LABEL}`,
     })
     fireEvent.click(card)
 
@@ -86,7 +86,7 @@ describe('HomePage — navigation cards Sessions récentes', () => {
   it('card escouade → /squad avec session + coéquipiers (joints par virgule)', async () => {
     renderWithProviders(<HomePage />)
     const card = await screen.findByRole('button', {
-      name: `Voir le détail de la session ${SQUAD_LABEL}`,
+      name: `View session details for ${SQUAD_LABEL}`,
     })
     fireEvent.click(card)
 
@@ -115,7 +115,7 @@ describe('HomePage — navigation cards Sessions récentes', () => {
     )
     renderWithProviders(<HomePage />)
     const card = await screen.findByRole('button', {
-      name: `Voir le détail de la session ${SQUAD_LABEL}`,
+      name: `View session details for ${SQUAD_LABEL}`,
     })
     fireEvent.click(card)
 

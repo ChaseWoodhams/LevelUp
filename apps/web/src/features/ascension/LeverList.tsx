@@ -85,11 +85,11 @@ function LeverCard({ lever: lev, t }: { lever: PatternLever; t: AscensionText })
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         {hasCurrent && (
           <span>
-            {t.leverCurrent ?? 'Actuel'} <strong className="text-foreground">{fmt(lev.current_val)}</strong>
-            {' → '}{t.leverTarget ?? 'Cible'} <strong className="text-foreground">{fmt(lev.target_val)}</strong>
+            {t.leverCurrent ?? 'Current'} <strong className="text-foreground">{fmt(lev.current_val)}</strong>
+            {' → '}{t.leverTarget ?? 'Target'} <strong className="text-foreground">{fmt(lev.target_val)}</strong>
           </span>
         )}
-        <span className={hasCurrent ? '' : 'ml-auto'}>~{lev.horizon} {t.leverHorizonMatches ?? 'matchs'}</span>
+        <span className={hasCurrent ? '' : 'ml-auto'}>~{lev.horizon} {t.leverHorizonMatches ?? 'matches'}</span>
       </div>
     </div>
   )

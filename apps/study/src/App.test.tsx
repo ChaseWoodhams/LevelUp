@@ -59,21 +59,13 @@ describe('the landing screen', () => {
   it('offers a way in rather than opening on data about no match', () => {
     stubArchive([])
     render(<App />)
-    expect(screen.getByLabelText('Identifiant du match')).toBeDefined()
+    expect(screen.getByLabelText('Match identifier')).toBeDefined()
     expect(document.querySelector('canvas')).toBeNull()
   })
 
-  it('gives the document the language the reader chose', () => {
+  it('gives the document its language and its title', () => {
     stubArchive([])
     render(<App />)
-    expect(document.documentElement.lang).toBe('fr')
-    expect(document.title).toBe('LevelUp — Étude')
-  })
-
-  it('follows the reader into English, page title included', () => {
-    stubArchive([])
-    render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: 'en' }))
     expect(document.documentElement.lang).toBe('en')
     expect(document.title).toBe('LevelUp — Study')
   })
@@ -94,7 +86,7 @@ describe('the archive browser', () => {
     const link = await screen.findByRole('link', { name: 'Cliffhanger' })
     expect(link.getAttribute('href')).toBe('#/match/000d5950-8b0e-4a2c-9a1f-1c2d3e4f5a6b')
     // The coverage is read BEFORE the match is opened: that is what the column is for.
-    expect(screen.getByText('86 %')).toBeDefined()
+    expect(screen.getByText('86%')).toBeDefined()
     // Scoped to the table: the player's name is also one of the filter's options, which is the
     // point of building the filters out of what the archive actually holds.
     expect(within(screen.getByRole('table')).getByText('JGtm')).toBeDefined()
@@ -116,7 +108,7 @@ describe('the archive browser', () => {
   it('says an empty archive is empty rather than showing a table with nothing in it', async () => {
     stubArchive([])
     render(<App />)
-    expect(await screen.findByText('Aucun match archivé pour l’instant')).toBeDefined()
+    expect(await screen.findByText('Nothing archived yet')).toBeDefined()
     expect(document.querySelector('table')).toBeNull()
   })
 
@@ -127,7 +119,7 @@ describe('the archive browser', () => {
       }),
     )
     render(<App />)
-    expect(await screen.findByText('L’archive est momentanément tenue par une capture')).toBeDefined()
+    expect(await screen.findByText('A capture is holding the archive')).toBeDefined()
   })
 })
 
@@ -153,7 +145,7 @@ describe('the sample artifact', () => {
     render(<App />)
     // The fixture runs 600 frames at 100 ms; the first death closes a life at frame 260.
     fireEvent.keyDown(window, { key: '.' })
-    expect(screen.getByLabelText('Chronomètre du rejeu').textContent).toContain('0:26')
+    expect(screen.getByLabelText('Replay clock').textContent).toContain('0:26')
   })
 
   it('leaves the scrubber its own arrow keys', () => {
@@ -161,8 +153,8 @@ describe('the sample artifact', () => {
     render(<App />)
     // A range input steps itself on an arrow. Acting on it here too would be two seeks for
     // one press.
-    fireEvent.keyDown(screen.getByLabelText('Temps de match'), { key: 'ArrowRight' })
-    expect(screen.getByLabelText('Chronomètre du rejeu').textContent).toContain('0:00')
+    fireEvent.keyDown(screen.getByLabelText('Match time'), { key: 'ArrowRight' })
+    expect(screen.getByLabelText('Replay clock').textContent).toContain('0:00')
   })
 
   it('still jumps on a key the scrubber has no use for', () => {
@@ -170,8 +162,8 @@ describe('the sample artifact', () => {
     render(<App />)
     // Treating the scrubber as a text field — which its tag alone suggests — would kill every
     // shortcut for as long as the reader had touched it.
-    fireEvent.keyDown(screen.getByLabelText('Temps de match'), { key: '.' })
-    expect(screen.getByLabelText('Chronomètre du rejeu').textContent).toContain('0:26')
+    fireEvent.keyDown(screen.getByLabelText('Match time'), { key: '.' })
+    expect(screen.getByLabelText('Replay clock').textContent).toContain('0:26')
   })
 })
 
@@ -180,7 +172,7 @@ describe('an archived match', () => {
     vi.stubGlobal('fetch', () => new Promise<Response>(() => {}))
     go('#/match/000d5950')
     render(<App />)
-    expect(screen.getByText('Lecture de l’archive…')).toBeDefined()
+    expect(screen.getByText('Reading the archive…')).toBeDefined()
   })
 
   it('answers an unknown identifier with words, not with a spinner', async () => {
@@ -191,7 +183,7 @@ describe('an archived match', () => {
     )
     go('#/match/deadbeef')
     render(<App />)
-    expect(await screen.findByText('Aucun match archivé sous cet identifiant')).toBeDefined()
+    expect(await screen.findByText('No archived match under that identifier')).toBeDefined()
     expect(document.querySelector('canvas')).toBeNull()
   })
 
@@ -205,7 +197,7 @@ describe('an archived match', () => {
     go('#/match/000d5950')
     render(<App />)
     // The version found is named: it is what tells a stale artifact apart from a stale viewer.
-    expect(await screen.findByText(/version de schéma 99/)).toBeDefined()
+    expect(await screen.findByText(/schema version 99/)).toBeDefined()
     expect(document.querySelector('canvas')).toBeNull()
   })
 })

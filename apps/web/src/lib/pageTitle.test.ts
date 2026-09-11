@@ -1,31 +1,25 @@
 /// <reference types="node" />
 // @vitest-environment node
 /**
- * Tests — resolvePageTitle (I18, 2026-07-24 : titres d'onglet locale-aware).
+ * Tests — resolvePageTitle (I18, 2026-07-24: browser tab titles).
  *
- * Deux blocs :
- *  1. Cas unitaires (comportement par pathname/locale, nuance Citations/Commendations,
- *     fallback conservé).
- *  2. Garde-rail ratchet — balaie `src/routes/**` (même convention que
- *     `lib/title-routing/no-title-literals.ratchet.test.ts`) : CHAQUE route réelle
- *     (déclare `component:`, hors layouts purs et redirections transitoires — cf.
- *     exclusions documentées) doit résoudre un titre NON-fallback dans les DEUX
- *     locales. Une nouvelle route sans entrée dans `pageTitle.ts` fait échouer ce test.
+ * Two blocks:
+ *  1. Unit cases (behaviour per pathname, the Citations/Commendations nuance, the kept
+ *     fallback).
+ *  2. Ratchet guard-rail — scans `src/routes/**` (same convention as
+ *     `lib/title-routing/no-title-literals.ratchet.test.ts`): EVERY real route
+ *     (declares `component:`, excluding pure layouts and transitional redirects — see
+ *     the documented exclusions) must resolve a NON-fallback title. A new route without
+ *     an entry in `pageTitle.ts` fails this test.
  */
 import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { resolvePageTitle } from './pageTitle'
 import { routeTemplateSuffix } from './title-routing'
-import type { Locale } from './i18n/locale'
-
-const LOCALES: readonly Locale[] = ['fr', 'en']
 
 describe('resolvePageTitle (URLs title-scoped)', () => {
   it('override par suffixe joueur (forme courte /t/)', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/jgtm/stats/timeseries', 'fr')).toBe(
-      'LevelUp - Séries temporelles',
-    )
     expect(resolvePageTitle('/t/halo_infinite/players/jgtm/stats/timeseries', 'en')).toBe(
       'LevelUp - Time series',
     )
@@ -36,59 +30,42 @@ describe('resolvePageTitle (URLs title-scoped)', () => {
   })
 
   it('titre dérivé d’un item de nav (accueil)', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/home', 'fr')).toBe('LevelUp - Accueil')
     expect(resolvePageTitle('/t/halo_infinite/players/x/home', 'en')).toBe('LevelUp - Home')
   })
 
   it('page de match', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/matches/abc-123', 'fr')).toBe('LevelUp - Match')
+    expect(resolvePageTitle('/t/halo_infinite/players/x/matches/abc-123', 'en')).toBe('LevelUp - Match')
   })
 
   it('racine joueur nue → Accueil', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x', 'fr')).toBe('LevelUp - Accueil')
     expect(resolvePageTitle('/t/halo_infinite/players/x', 'en')).toBe('LevelUp - Home')
   })
 
   it('page statique (agnostique)', () => {
-    expect(resolvePageTitle('/settings', 'fr')).toBe('LevelUp - Paramètres')
     expect(resolvePageTitle('/settings', 'en')).toBe('LevelUp - Settings')
-    expect(resolvePageTitle('/', 'fr')).toBe('LevelUp - Accueil')
     expect(resolvePageTitle('/', 'en')).toBe('LevelUp - Home')
   })
 
   it('suffixe/pathname inconnu → LevelUp (fallback conservé)', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/zzz-inconnu', 'fr')).toBe('LevelUp')
     expect(resolvePageTitle('/t/halo_infinite/players/x/zzz-inconnu', 'en')).toBe('LevelUp')
-    expect(resolvePageTitle('/zzz-static-inconnu', 'fr')).toBe('LevelUp')
+    expect(resolvePageTitle('/zzz-static-inconnu', 'en')).toBe('LevelUp')
   })
 
   it('nuance Citations (moteur dérivé Infinite) vs Commendations (natif H5)', () => {
-    // Même mot FR (« Citations » est le terme officiel Halo FR pour les deux) ; l'EN
-    // diverge selon la ROUTE (/career/citations vs /career/commendations), jamais selon
-    // le titre effectivement actif — même logique que l'ex-effet local de
-    // UnifiedCitationsPage, désormais supprimé.
-    expect(resolvePageTitle('/t/halo_infinite/players/x/career/citations', 'fr')).toBe('LevelUp - Citations')
+    // The title follows the ROUTE (/career/citations vs /career/commendations), never the
+    // title actually active.
     expect(resolvePageTitle('/t/halo_infinite/players/x/career/citations', 'en')).toBe('LevelUp - Citations')
-    expect(resolvePageTitle('/t/halo_5/players/x/career/commendations', 'fr')).toBe('LevelUp - Citations')
     expect(resolvePageTitle('/t/halo_5/players/x/career/commendations', 'en')).toBe('LevelUp - Commendations')
   })
 
   it('trous comblés (I18) : /career/medals et /squad/dynamique', () => {
-    expect(resolvePageTitle('/t/halo_infinite/players/x/career/medals', 'fr')).toBe('LevelUp - Médailles')
     expect(resolvePageTitle('/t/halo_infinite/players/x/career/medals', 'en')).toBe('LevelUp - Medals')
-    expect(resolvePageTitle('/t/halo_infinite/players/x/squad/dynamique', 'fr')).toBe('LevelUp - Dynamique')
     expect(resolvePageTitle('/t/halo_infinite/players/x/squad/dynamique', 'en')).toBe('LevelUp - Dynamics')
   })
 
   it('trous comblés (I18) : sous-onglets Administration (ex-pattern `/admin` ancré, ne matchait aucun enfant)', () => {
-    expect(resolvePageTitle('/admin/management', 'fr')).toBe('LevelUp - Administration — Gestion')
     expect(resolvePageTitle('/admin/management', 'en')).toBe('LevelUp - Administration — Management')
     expect(resolvePageTitle('/admin/system', 'en')).toBe('LevelUp - Administration — System')
-  })
-
-  it('changement de locale seul (sans navigation) fait varier le titre pour un même pathname', () => {
-    const pathname = '/t/halo_infinite/players/x/career/season-pass'
-    expect(resolvePageTitle(pathname, 'fr')).not.toBe(resolvePageTitle(pathname, 'en'))
   })
 })
 
@@ -178,11 +155,9 @@ describe('garde-rail : toutes les routes réelles ont un titre (anti-régression
     expect(fixtures.length).toBeGreaterThan(30)
   })
 
-  it.each(fixtures)('$file → titre non-fallback (FR + EN)', ({ routeId }) => {
+  it.each(fixtures)('$file → non-fallback title', ({ routeId }) => {
     const pathname = toTestPathname(routeId)
-    for (const locale of LOCALES) {
-      const title = resolvePageTitle(pathname, locale)
-      expect(title, `pathname=${pathname} locale=${locale} routeId=${routeId}`).not.toBe('LevelUp')
-    }
+    const title = resolvePageTitle(pathname, 'en')
+    expect(title, `pathname=${pathname} routeId=${routeId}`).not.toBe('LevelUp')
   })
 })

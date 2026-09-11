@@ -145,8 +145,8 @@ describe('SeasonPassPage', () => {
 
     expect(screen.getByTestId('season-pass-active-tier-progress-fill')).toHaveStyle({ width: '30%' })
     expect(screen.getByTestId('season-pass-active-tier-progress-current')).toHaveTextContent('300 XP')
-    expect(screen.getByTestId('season-pass-active-tier-progress-target')).toHaveTextContent('1 000 XP')
-    expect(screen.getByText('Autres passes')).toBeInTheDocument()
+    expect(screen.getByTestId('season-pass-active-tier-progress-target')).toHaveTextContent('1,000 XP')
+    expect(screen.getByText('Other passes')).toBeInTheDocument()
     expect(screen.getByText('Operation Beta')).toBeInTheDocument()
     } finally {
       Object.defineProperty(HTMLElement.prototype, 'scrollTo', {

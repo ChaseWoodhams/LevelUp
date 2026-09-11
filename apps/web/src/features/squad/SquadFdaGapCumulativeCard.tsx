@@ -82,7 +82,7 @@ export function SquadFdaGapCumulativeCard({
         <span className="flex items-center gap-1.5">
           {t.fdaGap.title}
           <InfoTooltip
-            content={<FdaGapTooltipText locale={t.intlLocale.startsWith('en') ? 'en' : 'fr'} />}
+            content={<FdaGapTooltipText locale={t.intlLocale.startsWith('en') ? 'en' : 'en'} />}
           />
         </span>
       }

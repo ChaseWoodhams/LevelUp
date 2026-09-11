@@ -13,7 +13,7 @@
  *
  * Ce script ne valide pas les placeholders ICU : la validation runtime est
  * faite par intl-messageformat lors du t(). Le script verifie seulement :
- *   - Toute cle a `fr` ET `en` (echec sinon)
+ *   - Toute clé a une valeur `en` non vide (échec sinon)
  *   - Pas de cle vide
  */
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
@@ -27,11 +27,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const MANIFESTS_DIR = join(__dirname, '..', 'src', 'lib', 'i18n', 'manifests')
 const OUTPUT_DIR = join(__dirname, '..', 'src', 'lib', 'i18n', 'generated')
 
-const REQUIRED_LOCALES = ['fr', 'en']
+const REQUIRED_LOCALES = ['en']
 
 /**
- * Aplatit un objet TOML imbrique en map<dotted_key, {fr, en}>.
- * Ex: {common: {period: {all: {fr, en}}}} -> {"common.period.all": {fr, en}}.
+ * Aplatit un objet TOML imbriqué en map<dotted_key, {en}>.
+ * Ex: {common: {period: {all: {en}}}} -> {"common.period.all": {en}}.
  */
 function flattenManifest(obj, prefix = '') {
   const out = {}
@@ -49,7 +49,7 @@ function flattenManifest(obj, prefix = '') {
         if (extras.length > 0) {
           throw new Error(`manifest leaf "${path}" has unsupported locales: ${extras.join(', ')}`)
         }
-        out[path] = { fr: v.fr, en: v.en }
+        out[path] = { en: v.en }
       } else {
         Object.assign(out, flattenManifest(v, path))
       }
@@ -71,9 +71,8 @@ function generateTSModule(domainName, flat) {
   lines.push(`export const ${constName} = {`)
   for (const key of sortedKeys) {
     const v = flat[key]
-    const fr = JSON.stringify(v.fr)
     const en = JSON.stringify(v.en)
-    lines.push(`  ${JSON.stringify(key)}: { fr: ${fr}, en: ${en} },`)
+    lines.push(`  ${JSON.stringify(key)}: { en: ${en} },`)
   }
   lines.push('} as const')
   lines.push('')

@@ -45,17 +45,17 @@ func TestLoad_CatalogueReelDuTitre(t *testing.T) {
 	// Les deux langues sont obligatoires PARTOUT : un artefact est construit une fois et
 	// servi aux deux locales.
 	for i, g := range cat.Grenades {
-		if g.En == "" || g.Fr == "" {
+		if g.En == "" {
 			t.Errorf("rang de grenade %d incomplet : %+v", i, g)
 		}
 	}
 	for idx, a := range cat.Abilities {
-		if a.En == "" || a.Fr == "" {
+		if a.En == "" {
 			t.Errorf("capacité %d incomplète : %+v", idx, a)
 		}
 	}
 	for fam, w := range cat.Weapons {
-		if w.En == "" || w.Fr == "" {
+		if w.En == "" {
 			t.Errorf("famille %08X : libellé incomplet %+v", fam, w)
 		}
 	}

@@ -313,8 +313,8 @@ func TestFormatTierLabel_Onyx(t *testing.T) {
 
 func TestFormatTierLabel_Unranked(t *testing.T) {
 	got := FormatTierLabel(100)
-	if got != "Non classé" {
-		t.Errorf("got %q, want Non classé", got)
+	if got != "Unranked" {
+		t.Errorf("got %q, want Unranked", got)
 	}
 }
 

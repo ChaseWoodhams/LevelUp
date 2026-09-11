@@ -74,16 +74,16 @@ describe('buildHistogramOption', () => {
   it('expose xAxisLabel + yAxisLabel sur les axes', () => {
     const opt = buildHistogramOption(
       makeSeries([{ binStart: 0, binEnd: 1, count: 1 }]),
-      { xAxisLabel: 'K/D', yAxisLabel: 'Matchs' },
+      { xAxisLabel: 'K/D', yAxisLabel: 'Matches' },
     ) as OptionShape
     expect(opt.xAxis?.name).toBe('K/D')
-    expect(opt.yAxis?.name).toBe('Matchs')
+    expect(opt.yAxis?.name).toBe('Matches')
   })
 
-  it('par défaut yAxisLabel = "Matchs"', () => {
+  it('par défaut yAxisLabel = "Matches"', () => {
     const opt = buildHistogramOption(
       makeSeries([{ binStart: 0, binEnd: 1, count: 1 }]),
     ) as OptionShape
-    expect(opt.yAxis?.name).toBe('Matchs')
+    expect(opt.yAxis?.name).toBe('Matches')
   })
 })

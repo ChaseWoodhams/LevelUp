@@ -54,8 +54,8 @@ vi.mock('@/features/settings/queries', () => ({
 // availableTitles vide → useCapability (FeatureGate) fail-open : le bloc Médias est rendu.
 vi.mock('@/stores/appShellStore', () => ({
   useAppShellStore: (
-    selector: (s: { locale: 'fr' | 'en'; availableTitles: unknown[]; currentTitleSlug: string }) => unknown,
-  ) => selector({ locale: 'fr', availableTitles: [], currentTitleSlug: 'halo_infinite' }),
+    selector: (s: { locale: 'en' | 'en'; availableTitles: unknown[]; currentTitleSlug: string }) => unknown,
+  ) => selector({ locale: 'en', availableTitles: [], currentTitleSlug: 'halo_infinite' }),
 }))
 
 // Enfants de l'onglet Général mockés : on ne teste ici que la structure des rangées.
@@ -89,30 +89,30 @@ describe('MatchViewPage — match_not_found (pas encore synchronisé)', () => {
     hoisted.matchView.error = { code: 'match_not_found', message: 'match introuvable : m1' }
     renderWithProviders(<MatchViewPage />)
 
-    expect(screen.getByText('Match pas encore synchronisé')).toBeInTheDocument()
+    expect(screen.getByText('Match not synced yet')).toBeInTheDocument()
     expect(
-      screen.getByText(/n'est pas encore présent dans la base locale/),
+      screen.getByText(/This match isn't in the local database yet\. If it was just played, it will show up here after the next sync — check back in a few minutes\. Also double-check that the match link is correct\./),
     ).toBeInTheDocument()
     // Pas l'écran d'erreur générique (pageErrorTitle) ni le bouton Réessayer.
-    expect(screen.queryByText('Match introuvable ou erreur de chargement.')).not.toBeInTheDocument()
-    expect(screen.queryByText('Réessayer')).not.toBeInTheDocument()
+    expect(screen.queryByText('Match not found or load error.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Retry')).not.toBeInTheDocument()
   })
 
   it('propose des actions de navigation (Accueil / Précédent / Mes matchs)', () => {
     hoisted.matchView.error = { code: 'match_not_found', message: 'match introuvable : m1' }
     renderWithProviders(<MatchViewPage />)
 
-    expect(screen.getByRole('button', { name: 'Accueil' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Précédent' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Mes matchs' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'My matches' })).toBeInTheDocument()
   })
 
   it('conserve la branche existante match_not_participant (ADR 0029, non régressée)', () => {
     hoisted.matchView.error = { code: 'match_not_participant', message: 'non participant' }
     renderWithProviders(<MatchViewPage />)
 
-    expect(screen.getByText('Match indisponible')).toBeInTheDocument()
-    expect(screen.queryByText('Match pas encore synchronisé')).not.toBeInTheDocument()
+    expect(screen.getByText('Match unavailable')).toBeInTheDocument()
+    expect(screen.queryByText('Match not synced yet')).not.toBeInTheDocument()
   })
 })
 
@@ -146,6 +146,6 @@ describe('MatchViewPage — onglet Général : structure des rangées', () => {
     const mediaCard = mediaTab.closest('.rounded-lg') as HTMLElement
     expect(mediaCard.parentElement).toBe(summaryStack)
     expect(summaryStack.lastElementChild).toBe(mediaCard)
-    expect(screen.getByText('Médias')).toBeInTheDocument()
+    expect(screen.getByText('Media')).toBeInTheDocument()
   })
 })

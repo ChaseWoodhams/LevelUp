@@ -5,20 +5,20 @@ import (
 	"testing"
 )
 
-func TestBuildCoachEmbed_BasicFR(t *testing.T) {
+func TestBuildCoachEmbed_BasicEnglish(t *testing.T) {
 	embed := BuildCoachEmbed(CoachEmbedInput{
 		Category: "milestone_unlocked",
 		Severity: "success",
 		Player:   "JGtm",
 		Params:   map[string]any{"metric": "kills", "value": 100},
-		Lang:     "fr",
+		Lang:     "en",
 	}, nil)
 
-	if embed.Title != T("discord_coach_title", "fr") {
+	if embed.Title != T("discord_coach_title", "en") {
 		t.Errorf("title = %q", embed.Title)
 	}
-	if embed.Description != "Palier débloqué" {
-		t.Errorf("description = %q ; want humanized FR label", embed.Description)
+	if embed.Description != "Milestone unlocked" {
+		t.Errorf("description = %q ; want English label", embed.Description)
 	}
 	if embed.Color != colorSuccess {
 		t.Errorf("color = %d ; want colorSuccess", embed.Color)
@@ -31,11 +31,11 @@ func TestBuildCoachEmbed_BasicFR(t *testing.T) {
 	var hasPlayer, hasCategory, hasDetails bool
 	for _, f := range embed.Fields {
 		switch f.Name {
-		case T("discord_coach_player", "fr"):
+		case T("discord_coach_player", "en"):
 			hasPlayer = f.Value == "JGtm"
-		case T("discord_coach_category", "fr"):
+		case T("discord_coach_category", "en"):
 			hasCategory = f.Value == "milestone_unlocked"
-		case T("discord_coach_details", "fr"):
+		case T("discord_coach_details", "en"):
 			hasDetails = strings.Contains(f.Value, "metric") && strings.Contains(f.Value, "value")
 		}
 	}
@@ -61,7 +61,7 @@ func TestBuildCoachEmbed_EN(t *testing.T) {
 func TestBuildCoachEmbed_UnknownCategoryFallback(t *testing.T) {
 	embed := BuildCoachEmbed(CoachEmbedInput{
 		Category: "totally_unknown_cat",
-		Lang:     "fr",
+		Lang:     "en",
 	}, nil)
 	// Fallback : clé brute, pas de panic.
 	if embed.Description != "totally_unknown_cat" {
@@ -81,11 +81,11 @@ func TestBuildCoachEmbed_ParamsSortedAndCapped(t *testing.T) {
 	embed := BuildCoachEmbed(CoachEmbedInput{
 		Category: "pattern_lever",
 		Params:   params,
-		Lang:     "fr",
+		Lang:     "en",
 	}, nil)
 	var details string
 	for _, f := range embed.Fields {
-		if f.Name == T("discord_coach_details", "fr") {
+		if f.Name == T("discord_coach_details", "en") {
 			details = f.Value
 		}
 	}
@@ -103,10 +103,10 @@ func TestBuildCoachEmbed_ParamsSortedAndCapped(t *testing.T) {
 }
 
 func TestBuildCoachEmbed_LinkFieldOptional(t *testing.T) {
-	withLink := BuildCoachEmbed(CoachEmbedInput{Category: "personal_record", AppURL: "https://x/y", Lang: "fr"}, nil)
+	withLink := BuildCoachEmbed(CoachEmbedInput{Category: "personal_record", AppURL: "https://x/y", Lang: "en"}, nil)
 	var found bool
 	for _, f := range withLink.Fields {
-		if f.Name == T("discord_coach_link", "fr") && f.Value == "https://x/y" {
+		if f.Name == T("discord_coach_link", "en") && f.Value == "https://x/y" {
 			found = true
 		}
 	}
@@ -114,28 +114,24 @@ func TestBuildCoachEmbed_LinkFieldOptional(t *testing.T) {
 		t.Error("champ lien attendu quand AppURL renseigné")
 	}
 
-	noLink := BuildCoachEmbed(CoachEmbedInput{Category: "personal_record", Lang: "fr"}, nil)
+	noLink := BuildCoachEmbed(CoachEmbedInput{Category: "personal_record", Lang: "en"}, nil)
 	for _, f := range noLink.Fields {
-		if f.Name == T("discord_coach_link", "fr") {
+		if f.Name == T("discord_coach_link", "en") {
 			t.Error("champ lien inattendu quand AppURL vide")
 		}
 	}
 }
 
-// TestCoachCategoryLabel_LangFallback : lang vide → défaut FR (un relais sans lang
-// configuré doit rester humanisé, pas retomber sur la clé brute) ; catégorie
-// inconnue → clé brute ; catégorie vide → "-" (jamais un libellé vide dans l'embed).
-func TestCoachCategoryLabel_LangFallback(t *testing.T) {
-	if got := coachCategoryLabel("milestone_unlocked", ""); got != "Palier débloqué" {
-		t.Errorf("lang vide → libellé FR par défaut attendu, obtenu %q", got)
+// TestCoachCategoryLabel_Fallback: known category → English label; unknown category →
+// raw key; empty category → "-" (never an empty label in the embed).
+func TestCoachCategoryLabel_Fallback(t *testing.T) {
+	if got := coachCategoryLabel("milestone_unlocked"); got != coachLabelMilestoneUnlocked {
+		t.Errorf("known category -> English label expected, got %q", got)
 	}
-	if got := coachCategoryLabel("milestone_unlocked", "es"); got != "Palier débloqué" {
-		t.Errorf("lang non gérée → repli FR attendu, obtenu %q", got)
-	}
-	if got := coachCategoryLabel("cat_inconnue", "fr"); got != "cat_inconnue" {
+	if got := coachCategoryLabel("cat_inconnue"); got != "cat_inconnue" {
 		t.Errorf("catégorie inconnue → clé brute attendue, obtenu %q", got)
 	}
-	if got := coachCategoryLabel("", "fr"); got != "-" {
+	if got := coachCategoryLabel(""); got != "-" {
 		t.Errorf("catégorie vide → \"-\" attendu, obtenu %q", got)
 	}
 }

@@ -22,7 +22,7 @@ interface Props {
 
 export function CareerSummaryCard({ summary, heroProgress, projections }: Props) {
   const locale = useAppShellStore((s) => s.locale) as ManifestLocale
-  const intlLocale = toIntlLocale(locale)
+  const intlLocale = toIntlLocale()
 
   if (!summary) {
     return (
@@ -34,8 +34,7 @@ export function CareerSummaryCard({ summary, heroProgress, projections }: Props)
     )
   }
 
-  const nextRankName =
-    locale === 'fr' ? summary.next_rank_name_fr : summary.next_rank_name_en
+  const nextRankName = summary.next_rank_name_en
 
   return (
     <Card>

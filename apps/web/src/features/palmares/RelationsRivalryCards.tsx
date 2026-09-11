@@ -21,7 +21,6 @@ import {
 } from '@/components/charts/OutcomeSequenceTape'
 import { formatPercent } from '@/lib/formatters'
 import type { RelationRivalry } from '@/lib/api/types'
-import { useAppShellStore } from '@/stores/appShellStore'
 
 import { CumulativeFragGapChart } from './CumulativeFragGapChart'
 import { normalizePalmaresLocale, type PalmaresText } from './i18n'
@@ -126,7 +125,7 @@ export function RelationsRivalryCards({
   t: MomentsText
   onMatchClick?: (matchId: string) => void
 }) {
-  const locale = normalizePalmaresLocale(useAppShellStore((s) => s.locale))
+  const locale = normalizePalmaresLocale()
   if (rivalries.length === 0) {
     return <p className="text-sm text-muted-foreground">{t.rivalriesEmpty}</p>
   }

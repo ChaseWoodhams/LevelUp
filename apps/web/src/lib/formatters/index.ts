@@ -23,7 +23,6 @@ export { displayRatingLabel, formatRankDelta } from './rating'
 export { formatOffensiveConversion, formatDefensiveResistance, effectiveDmgPerFrag } from './combatYield'
 export {
   dowLabels,
-  DOW_LABELS_FR,
   DOW_LABELS_EN,
   HOUR_LABELS,
   calendarChartText,

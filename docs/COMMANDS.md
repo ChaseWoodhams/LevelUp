@@ -1,7 +1,4 @@
 # Common commands — LevelUp
-
-French version: [FR/COMMANDS.md](FR/COMMANDS.md)
-
 > Cheat-sheet for the current stack: Go backend (`apps/go-api`) + React/Vite frontend (`apps/web`).
 > Operational tooling is the `levelup` CLI (`apps/go-api/cmd/levelup`). Make targets live in the
 > root `Makefile`. DuckDB access requires CGO (see [Tests](#tests)).

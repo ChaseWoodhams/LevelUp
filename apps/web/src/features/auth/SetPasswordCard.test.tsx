@@ -16,8 +16,8 @@ describe('SetPasswordCard', () => {
     const { container } = renderWithProviders(<SetPasswordCard />)
     fireEvent.change(container.querySelector('#set-pwd')!, { target: { value: 'Abcd1234' } })
     fireEvent.change(container.querySelector('#set-pwd-confirm')!, { target: { value: 'Different9' } })
-    fireEvent.click(screen.getByRole('button', { name: /Enregistrer/i }))
-    expect(screen.getByText(/ne correspondent pas/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Save/i }))
+    expect(screen.getByText(/do not match/i)).toBeInTheDocument()
   })
 
   it('enregistre et affiche la confirmation', async () => {
@@ -25,15 +25,15 @@ describe('SetPasswordCard', () => {
     const { container } = renderWithProviders(<SetPasswordCard />)
     fireEvent.change(container.querySelector('#set-pwd')!, { target: { value: 'Abcd1234' } })
     fireEvent.change(container.querySelector('#set-pwd-confirm')!, { target: { value: 'Abcd1234' } })
-    fireEvent.click(screen.getByRole('button', { name: /Enregistrer/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Save/i }))
     await waitFor(() => {
-      expect(screen.getByText(/enregistré/i)).toBeInTheDocument()
+      expect(screen.getByText(/saved/i)).toBeInTheDocument()
     })
   })
 
   it('titre « Changer » si un mot de passe existe déjà', () => {
     useAppShellStore.setState({ hasPassword: true })
     renderWithProviders(<SetPasswordCard />)
-    expect(screen.getByText(/Changer ton mot de passe/i)).toBeInTheDocument()
+    expect(screen.getByText(/Change your password/i)).toBeInTheDocument()
   })
 })

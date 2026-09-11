@@ -12,7 +12,7 @@ import { intlLocale } from '@/lib/formatters'
 import type { ManifestLocale } from '@/lib/i18n/format'
 import type { CitationDisplayItem } from '@/lib/citations/types'
 
-export function CitationCard({ item, locale }: { item: CitationDisplayItem; locale: ManifestLocale }) {
+export function CitationCard({ item}: { item: CitationDisplayItem; locale: ManifestLocale }) {
   const hasTiers = item.tierCount > 0
   // Tailles par source (parité visuelle avec les pages d'origine) — classes littérales
   // pour rester détectables par le JIT Tailwind.
@@ -59,7 +59,7 @@ export function CitationCard({ item, locale }: { item: CitationDisplayItem; loca
         </span>
       ) : native ? (
         <span className="text-sm font-semibold leading-none text-foreground">
-          {item.total.toLocaleString(intlLocale(locale))}
+          {item.total.toLocaleString(intlLocale())}
         </span>
       ) : null}
     </div>

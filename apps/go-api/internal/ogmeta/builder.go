@@ -17,7 +17,6 @@ import (
 type Locale string
 
 const (
-	LocaleFR Locale = "fr"
 	LocaleEN Locale = "en"
 )
 
@@ -81,18 +80,12 @@ func withImage(m Meta, origin string) Meta {
 	return m
 }
 
-func defaultTitle(loc Locale) string {
-	if loc == LocaleEN {
-		return SiteName + " — Halo stats"
-	}
-	return SiteName + " — Stats Halo"
+func defaultTitle(_ Locale) string {
+	return SiteName + " — Halo stats"
 }
 
-func defaultDescription(loc Locale) string {
-	if loc == LocaleEN {
-		return "Your Halo stats dashboard: KDR, win rate, sessions, medals and more."
-	}
-	return "Ton dashboard de statistiques Halo : KDR, taux de victoire, sessions, medailles et plus."
+func defaultDescription(_ Locale) string {
+	return "Your Halo stats dashboard: KDR, win rate, sessions, medals and more."
 }
 
 func playerTitle(gamertag, titleLabel string, loc Locale) string {
@@ -104,10 +97,7 @@ func playerTitle(gamertag, titleLabel string, loc Locale) string {
 	if label == "" {
 		return fmt.Sprintf("%s — %s", gt, SiteName)
 	}
-	if loc == LocaleEN {
-		return fmt.Sprintf("%s — %s stats · %s", gt, label, SiteName)
-	}
-	return fmt.Sprintf("%s — Stats %s · %s", gt, label, SiteName)
+	return fmt.Sprintf("%s — %s stats · %s", gt, label, SiteName)
 }
 
 // playerDescription assemble les KPIs disponibles en une phrase compacte.
@@ -118,16 +108,9 @@ func playerDescription(k KPIInput, loc Locale) string {
 		parts = append(parts, fmt.Sprintf("KDR %.2f", *k.KDR))
 	}
 	wr := k.WinRate * 100
-	if loc == LocaleEN {
-		parts = append(parts, fmt.Sprintf("%.0f%% win rate", wr))
-		if k.TotalMatches > 0 {
-			parts = append(parts, fmt.Sprintf("%d matches", k.TotalMatches))
-		}
-	} else {
-		parts = append(parts, fmt.Sprintf("%.0f %% de victoires", wr))
-		if k.TotalMatches > 0 {
-			parts = append(parts, fmt.Sprintf("%d matchs", k.TotalMatches))
-		}
+	parts = append(parts, fmt.Sprintf("%.0f%% win rate", wr))
+	if k.TotalMatches > 0 {
+		parts = append(parts, fmt.Sprintf("%d matches", k.TotalMatches))
 	}
 	if len(parts) == 0 {
 		return defaultDescription(loc)
@@ -228,34 +211,13 @@ func IsCrawler(userAgent string) bool {
 	return false
 }
 
-// LocaleFromParams resout la locale d'un apercu de lien. Un parametre de requete
-// ?lang= explicite (fr/en) PRIME sur l'Accept-Language : le crawler social envoie
-// SA propre langue (souvent en/absente), pas celle du partageur — un lien portant
-// ?lang=fr permet donc a l'auteur du partage de figer la langue de la carte. Vide
-// ou inconnu -> repli sur l'Accept-Language (ParseLocale, defaut FR).
+// LocaleFromParams keeps the old preview API seam while returning the only
+// supported locale.
 func LocaleFromParams(queryLang, acceptLanguage string) Locale {
-	switch strings.ToLower(strings.TrimSpace(queryLang)) {
-	case "en":
-		return LocaleEN
-	case "fr":
-		return LocaleFR
-	}
-	return ParseLocale(acceptLanguage)
+	return LocaleEN
 }
 
-// ParseLocale deduit la locale depuis un en-tete Accept-Language. Defaut FR
-// (audience primaire) ; EN seulement si la langue preferee est l'anglais.
+// ParseLocale keeps the Accept-Language seam for callers that still pass it.
 func ParseLocale(acceptLanguage string) Locale {
-	al := strings.ToLower(strings.TrimSpace(acceptLanguage))
-	if al == "" {
-		return LocaleFR
-	}
-	first := al
-	if i := strings.IndexAny(first, ",;"); i >= 0 {
-		first = first[:i]
-	}
-	if strings.HasPrefix(strings.TrimSpace(first), "en") {
-		return LocaleEN
-	}
-	return LocaleFR
+	return LocaleEN
 }

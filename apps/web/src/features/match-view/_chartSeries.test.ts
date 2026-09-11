@@ -50,8 +50,8 @@ describe('antagonistStackedSeries', () => {
       { killer_xuid: 'X1', killer_gamertag: '', victim_xuid: 'X2', victim_gamertag: '', kill_count: 1 },
     ]
     const series = antagonistStackedSeries(pairs)
-    expect(series[0].datapoints[0].category).toBe('Joueur X1')
-    expect(series[0].datapoints[0].components).toEqual({ 'Joueur X2': 1 })
+    expect(series[0].datapoints[0].category).toBe('Player X1')
+    expect(series[0].datapoints[0].components).toEqual({ 'Player X2': 1 })
   })
 })
 
@@ -132,11 +132,11 @@ describe('allPlayersFragDiffSeries', () => {
     expect(series[1].colorToken).toBe('outcome-loss')
   })
 
-  it("fallback `Joueur XXXX` quand l'xuid n'est pas dans la map", () => {
+  it("fallback `Player XXXX` quand l'xuid n'est pas dans la map", () => {
     const events: MatchHighlightEvent[] = [
       { event_type: 'kill', event_time_ms: 1000, actor_xuid: 'XX_unknown_aaaa', target_xuid: null, weapon_id: null },
     ]
     const series = allPlayersFragDiffSeries(events, new Map(), null)
-    expect(series[0].meta?.gamertag).toBe('Joueur aaaa')
+    expect(series[0].meta?.gamertag).toBe('Player aaaa')
   })
 })

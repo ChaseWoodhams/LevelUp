@@ -1091,7 +1091,7 @@ func buildAPIV1Deps(r chi.Router, in apiV1Inputs) apiV1Deps {
 		if hiRanks == nil || hiRanks.TitleSlug() != titleSlug {
 			return "", false
 		}
-		return hiRanks.FullLabel(rankID, mappings.LocaleFR)
+		return hiRanks.FullLabel(rankID, mappings.LocaleEN)
 	})
 
 	// MT-09 (PMT-12) : factory player-scoped de Halo enregistrée par SLUG (clé de

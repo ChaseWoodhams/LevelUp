@@ -107,8 +107,8 @@ func TestServeIndexWithOG_DefaultCard(t *testing.T) {
 	if !strings.Contains(body, `content="https://demo.lvelup.info/og-default.png"`) {
 		t.Errorf("og:image non reecrit a l'origine:\n%s", body)
 	}
-	if !strings.Contains(body, "Stats Halo") {
-		t.Errorf("carte generique attendue:\n%s", body)
+	if !strings.Contains(body, "Halo stats") {
+		t.Errorf("expected generic English card:\n%s", body)
 	}
 	if strings.Contains(body, `content="OLD"`) {
 		t.Errorf("bloc OG non remplace:\n%s", body)
@@ -173,7 +173,7 @@ func TestOGMetaFromHome_NoContextXUID_PinsPageXUID(t *testing.T) {
 	svc := &ctxCapturingHomeService{page: &domain.HomePageResponse{Hero: domain.HomeHeroCard{PlayerName: "JGtm"}}}
 
 	meta, ok := ogMetaFromHome(context.Background(), svc, pageXUID, "JGtm",
-		"https://lvelup.info", "/players/jgtm/home", ogmeta.LocaleFR)
+		"https://lvelup.info", "/players/jgtm/home", ogmeta.LocaleEN)
 
 	if !ok {
 		t.Fatal("ogMetaFromHome doit réussir avec un HomeService qui rend une page")
@@ -195,7 +195,7 @@ func TestOGMetaFromHome_ForeignContextXUID_OverriddenByPage(t *testing.T) {
 	ctx := ctxkeys.WithHaloXUID(context.Background(), ambientXUID)
 
 	if _, ok := ogMetaFromHome(ctx, svc, pageXUID, "JGtm",
-		"https://lvelup.info", "/players/jgtm/home", ogmeta.LocaleFR); !ok {
+		"https://lvelup.info", "/players/jgtm/home", ogmeta.LocaleEN); !ok {
 		t.Fatal("ogMetaFromHome doit réussir")
 	}
 	if svc.seenXUID != pageXUID {

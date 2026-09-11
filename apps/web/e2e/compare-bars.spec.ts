@@ -37,7 +37,7 @@ const BOOTSTRAP = {
   available_titles: [
     { slug: 'halo_infinite', name: 'Halo Infinite', status: 'active', capabilities: ['matchmaking'], is_default: true },
   ],
-  locale: 'fr',
+  locale: 'en',
   hints_visible_default: true,
   feature_flags: { v7_enabled: true, media_enabled: true, demo_mode: true, discord_configured: false, tailscale_enabled: false },
   capabilities: {

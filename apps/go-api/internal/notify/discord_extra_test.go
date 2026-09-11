@@ -49,8 +49,8 @@ func TestLoadNotifyConfig_MissingFile(t *testing.T) {
 	if cfg.WebhookURL != "" {
 		t.Fatal("expected empty webhook for missing file")
 	}
-	if cfg.Lang != "fr" {
-		t.Fatalf("expected fr, got %s", cfg.Lang)
+	if cfg.Lang != "en" {
+		t.Fatalf("expected en, got %s", cfg.Lang)
 	}
 }
 

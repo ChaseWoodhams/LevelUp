@@ -151,7 +151,6 @@ function ExplorerTargetFragV2({
 function TopArmes({
   weapons,
   title,
-  locale,
   hoveredClass,
   onClassHover,
 }: {
@@ -161,7 +160,7 @@ function TopArmes({
   hoveredClass: string | null
   onClassHover: (c: string | null) => void
 }) {
-  const numberLocale = intlLocale(locale)
+  const numberLocale = intlLocale()
   const maxKills = Math.max(1, ...weapons.map((w) => w.kills))
   return (
     <div className="flex flex-col gap-2">
@@ -199,8 +198,8 @@ function TopArmes({
 
 // ─── Top armes (à droite du donut) ───────────────────────────────────────────
 
-function WeaponsTop({ weapons, locale, t }: { weapons: ExplorerWeaponKill[]; locale: Locale; t: TFn }) {
-  const numberLocale = intlLocale(locale)
+function WeaponsTop({ weapons, t }: { weapons: ExplorerWeaponKill[]; locale: Locale; t: TFn }) {
+  const numberLocale = intlLocale()
   const maxKills = Math.max(1, ...weapons.map((w) => w.kills))
   return (
     <div className="flex flex-col gap-2">
@@ -209,7 +208,7 @@ function WeaponsTop({ weapons, locale, t }: { weapons: ExplorerWeaponKill[]; loc
       </span>
       <ol className="flex flex-col gap-2">
         {weapons.map((w, i) => {
-          const name = locale === 'en' ? w.label_en || w.label_fr : w.label_fr || w.label_en
+          const name = w.label_en
           const pct = Math.round((w.kills / maxKills) * 100)
           return (
             <li key={w.weapon_id} className="flex flex-col gap-1">
@@ -243,7 +242,7 @@ function WeaponsTop({ weapons, locale, t }: { weapons: ExplorerWeaponKill[]; loc
  */
 export function ExplorerTargetOutcome({ sampleStats }: ExplorerTargetSampleStatsProps) {
   const appLocale = useAppShellStore((s) => s.locale)
-  const locale = intlLocale(appLocale)
+  const locale = intlLocale()
   const t: TFn = (key, values) => formatMessage(explorerManifest, key, appLocale, values)
   if (sampleStats.wins + sampleStats.draws + sampleStats.losses === 0) return null
   return (
@@ -268,7 +267,7 @@ export function ExplorerTargetOutcome({ sampleStats }: ExplorerTargetSampleStats
  */
 export function ExplorerTargetSampleKpis({ sampleStats }: ExplorerTargetSampleStatsProps) {
   const appLocale = useAppShellStore((s) => s.locale)
-  const locale = intlLocale(appLocale)
+  const locale = intlLocale()
   const t: TFn = (key, values) => formatMessage(explorerManifest, key, appLocale, values)
   const providesDamageTaken = useProvidesDamageTaken()
   const dash = t('explorer.target_profile.value_unavailable')

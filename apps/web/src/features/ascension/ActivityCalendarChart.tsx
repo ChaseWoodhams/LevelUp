@@ -98,7 +98,7 @@ interface BuildOpts {
 export function buildActivityCalendarOption(opts: BuildOpts): EChartsCoreOption {
   const { since, until, days, locale } = opts
   const tc = getEChartsThemeColors()
-  const DOW = dowLabels(locale)
+  const DOW = dowLabels()
   const chartTxt = calendarChartText(locale)
   const t = getAscensionText(locale)
 

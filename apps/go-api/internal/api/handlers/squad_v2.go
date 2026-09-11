@@ -78,7 +78,7 @@ type squadV2PageOutput struct{ Body *domain.SquadPageV2Response }
 // Query params :
 //   - teammates        : CSV de gamertags (max 3, optionnel)
 //   - period           : "all" | "2y" | "1y" | "1m" | "1w" (défaut "all")
-//   - experience_types : CSV de types d'expérience (ex: "PVP classé,PVE")
+//   - experience_types : CSV de types d'expérience (ex: "Ranked PvP,PVE")
 //   - playlists        : CSV de noms de playlist FR (ex: "Partie rapide")
 //   - maps             : CSV de noms de carte FR (ex: "Décharge")
 //

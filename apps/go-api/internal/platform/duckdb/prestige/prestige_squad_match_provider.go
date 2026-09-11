@@ -22,26 +22,26 @@ import (
 	"levelup/go-api/internal/prestige"
 )
 
-// ModeTranslatorFR traduit une liste de libellés de mode EN normalisés vers leur
+// ModeTranslator traduit une liste de libellés de mode EN normalisés vers leur
 // forme FR (metadata.mode_name_tr, lang='fr'). Signature alignée sur
-// duckdb.SquadRepo.LoadModeTranslationsFR — SOURCE UNIQUE du littéral SQL
+// duckdb.SquadRepo.LoadModeNames — SOURCE UNIQUE du littéral SQL
 // mode_name_tr : ne pas redupliquer la requête ici (règle ≤2 copies).
-type ModeTranslatorFR func(ctx context.Context, modeENs []string) (map[string]string, error)
+type ModeTranslator func(ctx context.Context, modeENs []string) (map[string]string, error)
 
-// PlaylistTranslatorFR traduit une liste de playlist_id (UUID metadata) vers leur
+// PlaylistTranslator traduit une liste de playlist_id (UUID metadata) vers leur
 // nom FR (metadata.asset_translations, asset_type='playlist'). Signature alignée
 // sur duckdb.SquadRepo.LoadAssetTranslationsFR("playlist", ids) — même résolveur
 // par IDENTIFIANT que la page Carrière (ResolveAssetNamesBulk), qui comble le
 // trou de données où match_registry.playlist_name_fr est vide pour certaines
 // playlists (« Quick Play », « Big Team Battle » — V72-10 suite).
-type PlaylistTranslatorFR func(ctx context.Context, playlistIDs []string) (map[string]string, error)
+type PlaylistTranslator func(ctx context.Context, playlistIDs []string) (map[string]string, error)
 
 // PrestigeSquadMatchProvider lit match_participants pour l'évaluation des défis
 // d'escouade.
 type PrestigeSquadMatchProvider struct {
 	reader               duckdb.SharedReader
-	translateModesFR     ModeTranslatorFR     // optionnel : résolution FR des modes de l'indice escouade
-	translatePlaylistsFR PlaylistTranslatorFR // optionnel : résolution FR des playlists par id (comble le trou name_fr vide)
+	translateModesFR     ModeTranslator     // optionnel : résolution FR des modes de l'indice escouade
+	translatePlaylistsFR PlaylistTranslator // optionnel : résolution FR des playlists par id (comble le trou name_fr vide)
 }
 
 // NewPrestigeSquadMatchProvider construit le provider depuis un duckdb.SharedReader
@@ -50,23 +50,23 @@ func NewPrestigeSquadMatchProvider(reader duckdb.SharedReader) *PrestigeSquadMat
 	return &PrestigeSquadMatchProvider{reader: reader}
 }
 
-// WithModeTranslatorFR injecte la résolution FR canonique des modes de l'indice
+// WithModeTranslator injecte la résolution FR canonique des modes de l'indice
 // escouade (« Slayer » → « Assassin »), pour que l'API serve des libellés prêts à
 // afficher en contexte FR (parité home / match-view / historique). Best-effort :
 // sans traducteur, ou s'il échoue, l'indice reste en EN (jamais vide). Chaînable.
-func (p *PrestigeSquadMatchProvider) WithModeTranslatorFR(fn ModeTranslatorFR) *PrestigeSquadMatchProvider {
+func (p *PrestigeSquadMatchProvider) WithModeTranslator(fn ModeTranslator) *PrestigeSquadMatchProvider {
 	p.translateModesFR = fn
 	return p
 }
 
-// WithPlaylistTranslatorFR injecte la résolution FR par IDENTIFIANT des
+// WithPlaylistTranslator injecte la résolution FR par IDENTIFIANT des
 // playlists de l'indice escouade (comble le trou « Quick Play »/« Big Team
 // Battle » dont match_registry.playlist_name_fr est vide — V72-10 suite, même
 // mécanisme que career : résolution par playlist_id via asset_translations,
 // jamais par nom). Best-effort : sans traducteur, ou s'il échoue, le libellé
-// COALESCE(playlist_name_fr, playlist_name) existant est conservé (jamais
+// playlist_name existant est conservé (jamais
 // vide). Chaînable.
-func (p *PrestigeSquadMatchProvider) WithPlaylistTranslatorFR(fn PlaylistTranslatorFR) *PrestigeSquadMatchProvider {
+func (p *PrestigeSquadMatchProvider) WithPlaylistTranslator(fn PlaylistTranslator) *PrestigeSquadMatchProvider {
 	p.translatePlaylistsFR = fn
 	return p
 }
@@ -227,8 +227,8 @@ func (p *PrestigeSquadMatchProvider) SquadUsualContexts(ctx context.Context, ros
 		)
 		SELECT
 			COALESCE(r.playlist_id, '')                                    AS playlist_id,
-			COALESCE(NULLIF(r.playlist_name_fr, ''), r.playlist_name, '') AS playlist,
-			COALESCE(NULLIF(r.pair_name_fr, ''), r.pair_name, '')         AS mode
+			COALESCE(NULLIF(r.playlist_name, ''), '') AS playlist,
+			COALESCE(NULLIF(r.pair_name, ''), '')         AS mode
 		FROM cm
 		JOIN v_match_full r ON r.match_id = cm.match_id
 	`, sqlInPlaceholders(len(rosterXUIDs)), len(rosterXUIDs), limit)

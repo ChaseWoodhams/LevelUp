@@ -131,10 +131,10 @@ func TestExplorerRepo_GetTargetRecentMatches_H5AssetFallback(t *testing.T) {
 	); err != nil {
 		t.Fatalf("seed participant h5m1: %v", err)
 	}
-	// asset_translations fr-FR pour la map et le game_variant (mode).
+	// en-US asset_translations for the map and the game_variant (mode).
 	for _, ins := range [][]any{
-		{"d67fdcb9-map", assetTypeMap, "fr-FR", "Tidal"},
-		{"257a305e-gv", assetTypeGameVariant, "fr-FR", "Assassin"},
+		{"d67fdcb9-map", assetTypeMap, "en-US", "Tidal"},
+		{"257a305e-gv", assetTypeGameVariant, "en-US", "Slayer"},
 	} {
 		if _, err := pdb.Metadata.Exec(ctx,
 			`INSERT INTO asset_translations (asset_id, asset_type, lang, name, description, fetched_at)
@@ -154,8 +154,8 @@ func TestExplorerRepo_GetTargetRecentMatches_H5AssetFallback(t *testing.T) {
 	if rows[0].MapUI != "Tidal" {
 		t.Errorf("map_ui = %q, want Tidal (résolu via asset_translations map_id)", rows[0].MapUI)
 	}
-	if rows[0].ModeUI != "Assassin" {
-		t.Errorf("mode_ui = %q, want Assassin (résolu via asset_translations game_variant)", rows[0].ModeUI)
+	if rows[0].ModeUI != "Slayer" {
+		t.Errorf("mode_ui = %q, want Slayer (resolved via asset_translations game_variant)", rows[0].ModeUI)
 	}
 }
 

@@ -41,9 +41,9 @@ export function getMatchCardOutcomeStyle(tone: string | null | undefined): Match
 const NARRATIVE_LABELS: Record<string, string> = {
   dominant:         'DOMINATION',
   humiliation:      'HUMILIATION',
-  remontada:        'REMONTADA',
-  debacle:          'DÉBÂCLE',
-  contre_remontada: 'CONTRE-REMONTADA',
+  remontada:        'COMEBACK',
+  debacle:          'COLLAPSE',
+  contre_remontada: 'COUNTER-COMEBACK',
 }
 
 export function getMatchNarrativeBadgeMeta(type: string | null | undefined): MatchNarrativeBadgeMeta | null {

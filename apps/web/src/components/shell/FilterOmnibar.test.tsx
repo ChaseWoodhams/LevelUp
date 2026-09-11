@@ -43,8 +43,8 @@ function buildResolved(): FilterContextResolved {
   return {
     effective: DEFAULT_EFFECTIVE,
     available_options: {
-      experience_types: [{ label: 'PVP non classé', value: 'PVP non classé', count: 8 }],
-      playlists: [{ label: 'Arène classée', value: 'Arène classée', count: 8 }],
+      experience_types: [{ label: 'Unranked PvP', value: 'Unranked PvP', count: 8 }],
+      playlists: [{ label: 'Ranked Arena', value: 'Ranked Arena', count: 8 }],
       modes: [{ label: 'Slayer', value: 'Slayer', count: 8 }],
       maps: [{ label: 'Recharge', value: 'Recharge', count: 8 }],
     },
@@ -70,18 +70,18 @@ function buildResolved(): FilterContextResolved {
 describe('FilterOmnibar', () => {
   beforeEach(() => {
     // Locale pinnée : les libellés (Filtres, périodes, « N matchs », Analyser)
-    // sont désormais résolus via le manifest i18n (GH-4) — on fige 'fr' pour que
+    // sont désormais résolus via le manifest i18n (GH-4) — on fige 'en' pour que
     // les assertions FR ci-dessous soient explicites, pas dépendantes du défaut.
-    useAppShellStore.setState({ locale: 'fr' })
+    useAppShellStore.setState({ locale: 'en' })
     useGlobalFilterStore.getState().resetFilters()
     useGlobalFilterStore.getState().setResolvedContext(buildResolved())
   })
 
   it('affiche les 3 pills (Filtres / Période / Session)', () => {
     renderWithProviders(<FilterOmnibar />)
-    expect(screen.getByRole('button', { name: /^filtres/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /toutes les périodes/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /toutes les sessions/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Filters/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /All periods/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /All sessions/i })).toBeInTheDocument()
   })
 
   it('pill Session masquée s\'il n\'y a aucune session', () => {
@@ -89,30 +89,30 @@ describe('FilterOmnibar', () => {
     empty.session_options.all_sessions = []
     useGlobalFilterStore.getState().setResolvedContext(empty)
     renderWithProviders(<FilterOmnibar />)
-    expect(screen.queryByRole('button', { name: /toutes les sessions/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /All sessions/i })).not.toBeInTheDocument()
   })
 
   it('click sur pill Session ouvre le popover avec recherche', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /toutes les sessions/i }))
+    fireEvent.click(screen.getByRole('button', { name: /All sessions/i }))
     // SessionMultiSelect (refacto 2026-05) : placeholder "Rechercher…" + checkbox
     // par session + bouton "Valider" différé.
-    expect(screen.getByPlaceholderText(/rechercher/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/Search…/i)).toBeInTheDocument()
     expect(screen.getByText('01/04/2026 21:00')).toBeInTheDocument()
     expect(screen.getByText('15/03/2026 18:00')).toBeInTheDocument()
   })
 
   it('sélection d\'une session + Valider + Analyser déclenche setFilterContext + auto-derive', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /toutes les sessions/i }))
+    fireEvent.click(screen.getByRole('button', { name: /All sessions/i }))
     // Click sur le label de la session → toggle la checkbox associée.
     fireEvent.click(screen.getByText('15/03/2026 18:00'))
     // Pending uniquement — store pas encore mis à jour
     expect(useGlobalFilterStore.getState().filterContext.sessions!.picked_sessions).toEqual([])
     // Confirm sélection via "Valider" (validation différée du multi-select)
-    fireEvent.click(screen.getByRole('button', { name: /^valider$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Apply$/i }))
     // Commit via Analyser (commit pending → store global)
-    fireEvent.click(screen.getByRole('button', { name: /analyser/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Analyze/i }))
     const ctx = useGlobalFilterStore.getState().filterContext
     // Le nouveau composant utilise des labels de session, pas des IDs.
     expect(ctx.sessions!.picked_sessions).toEqual(['15/03/2026 18:00'])
@@ -121,8 +121,8 @@ describe('FilterOmnibar', () => {
 
   it('recherche filtre les sessions affichées', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /toutes les sessions/i }))
-    const search = screen.getByPlaceholderText(/rechercher/i)
+    fireEvent.click(screen.getByRole('button', { name: /All sessions/i }))
+    const search = screen.getByPlaceholderText(/Search…/i)
     fireEvent.change(search, { target: { value: '01/04' } })
     expect(screen.getByText('01/04/2026 21:00')).toBeInTheDocument()
     expect(screen.queryByText('15/03/2026 18:00')).not.toBeInTheDocument()
@@ -130,11 +130,11 @@ describe('FilterOmnibar', () => {
 
   it('click sur pill Période ouvre le popover avec presets', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /toutes les périodes/i }))
-    expect(screen.getByText('7 jours')).toBeInTheDocument()
-    expect(screen.getByText('30 jours')).toBeInTheDocument()
-    expect(screen.getByText('90 jours')).toBeInTheDocument()
-    expect(screen.getByText('Toutes')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /All periods/i }))
+    expect(screen.getByText('7 days')).toBeInTheDocument()
+    expect(screen.getByText('30 days')).toBeInTheDocument()
+    expect(screen.getByText('90 days')).toBeInTheDocument()
+    expect(screen.getByText('All')).toBeInTheDocument()
   })
 
   it('preset Période 30 jours + Analyser pose une période et auto-derive mode=period', () => {
@@ -143,12 +143,12 @@ describe('FilterOmnibar', () => {
       gap_minutes: DEFAULT_GAP_MINUTES,
     })
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /période/i }))
-    fireEvent.click(screen.getByText('30 jours'))
+    fireEvent.click(screen.getByRole('button', { name: /Period/i }))
+    fireEvent.click(screen.getByText('30 days'))
     // Pending uniquement — store pas encore mis à jour
     expect(useGlobalFilterStore.getState().filterContext.sessions!.picked_sessions).toEqual(['s1'])
     // Commit via Analyser
-    fireEvent.click(screen.getByRole('button', { name: /analyser/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Analyze/i }))
     const ctx = useGlobalFilterStore.getState().filterContext
     expect(ctx.period!.start_date).not.toBeNull()
     expect(ctx.filter_mode).toBe('period')
@@ -157,16 +157,16 @@ describe('FilterOmnibar', () => {
 
   it('click sur pill Filtres ouvre le popover avec 4 groupes', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /^filtres/i }))
-    expect(screen.getByText('Sélections')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^Filters/i }))
+    expect(screen.getByText('Playlists')).toBeInTheDocument()
     expect(screen.getByText('Modes')).toBeInTheDocument()
-    expect(screen.getByText('Cartes')).toBeInTheDocument()
-    expect(screen.getByText(/Type d'expérience/i)).toBeInTheDocument()
+    expect(screen.getByText('Maps')).toBeInTheDocument()
+    expect(screen.getByText(/Experience type/i)).toBeInTheDocument()
   })
 
   it('toggle cascade + Analyser déclenche setFilterContext', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /^filtres/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Filters/i }))
     // Le label inclut maintenant le count (ex: "Slayer 8") — on cible
     // l'option par son texte et on remonte au label parent.
     const slayerLabel = screen.getByText('Slayer').closest('label')!
@@ -174,31 +174,31 @@ describe('FilterOmnibar', () => {
     // Pending uniquement — store pas encore mis à jour
     expect(useGlobalFilterStore.getState().filterContext.cascade!.modes).not.toContain('Slayer')
     // Commit via Analyser
-    fireEvent.click(screen.getByRole('button', { name: /analyser/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Analyze/i }))
     expect(useGlobalFilterStore.getState().filterContext.cascade!.modes).toContain('Slayer')
   })
 
   it('badge de count affiché sur la pill Filtres quand cascade active', () => {
     useGlobalFilterStore.getState().setCascade({
       experience_types: [],
-      playlists: ['Arène classée'],
+      playlists: ['Ranked Arena'],
       modes: ['Slayer'],
       maps: [],
     })
     renderWithProviders(<FilterOmnibar />)
-    const filtresPill = screen.getByRole('button', { name: /^filtres/i })
+    const filtresPill = screen.getByRole('button', { name: /^Filters/i })
     expect(filtresPill).toHaveTextContent('2')
   })
 
   it('bouton Réinitialiser visible seulement si filtres actifs', () => {
     renderWithProviders(<FilterOmnibar />)
-    expect(screen.queryByRole('button', { name: /réinitialiser/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Reset/i })).not.toBeInTheDocument()
     useGlobalFilterStore.getState().setSessions({
       picked_sessions: ['s1'],
       gap_minutes: DEFAULT_GAP_MINUTES,
     })
     renderWithProviders(<FilterOmnibar />)
-    expect(screen.getAllByRole('button', { name: /réinitialiser/i }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: /Reset/i }).length).toBeGreaterThan(0)
   })
 
   it('Réinitialiser remet le store au défaut', () => {
@@ -207,7 +207,7 @@ describe('FilterOmnibar', () => {
       gap_minutes: DEFAULT_GAP_MINUTES,
     })
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /réinitialiser/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Reset/i }))
     const ctx = useGlobalFilterStore.getState().filterContext
     expect(ctx.sessions!.picked_sessions).toEqual([])
   })
@@ -217,7 +217,7 @@ describe('FilterOmnibar', () => {
     resolved.counts.total_matches_after_filters = 23
     useGlobalFilterStore.getState().setResolvedContext(resolved)
     renderWithProviders(<FilterOmnibar />)
-    expect(screen.getByText(/23 matchs/)).toBeInTheDocument()
+    expect(screen.getByText(/23 matches/)).toBeInTheDocument()
   })
 
   it('options à count=0 sont repliées sous "+ N indisponibles"', () => {
@@ -233,7 +233,7 @@ describe('FilterOmnibar', () => {
     ]
     useGlobalFilterStore.getState().setResolvedContext(resolved)
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /^filtres/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^Filters/i }))
 
     // Firefight (count > 0) visible, les 4 autres repliées
     expect(screen.getByText('Firefight')).toBeInTheDocument()
@@ -244,8 +244,8 @@ describe('FilterOmnibar', () => {
 
   it('Escape ferme le popover ouvert', () => {
     renderWithProviders(<FilterOmnibar />)
-    fireEvent.click(screen.getByRole('button', { name: /toutes les sessions/i }))
-    expect(screen.getByPlaceholderText(/rechercher/i)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /All sessions/i }))
+    expect(screen.getByPlaceholderText(/Search…/i)).toBeInTheDocument()
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByPlaceholderText(/rechercher/i)).not.toBeInTheDocument()
   })
@@ -255,7 +255,7 @@ describe('FilterOmnibar', () => {
   it('bouton « Copier le lien » visible avec un store urlEnabled (solo)', () => {
     renderWithProviders(<FilterOmnibar />)
     expect(
-      screen.getByRole('button', { name: /copier le lien avec les filtres/i }),
+      screen.getByRole('button', { name: /Copy link with filters/i }),
     ).toBeInTheDocument()
   })
 
@@ -273,7 +273,7 @@ describe('FilterOmnibar', () => {
     // L'URL attendue = celle que le store construit à la demande (identique à
     // l'appel du handler : même filterContext, même window.location).
     const expected = useGlobalFilterStore.getState().buildShareUrl()
-    fireEvent.click(screen.getByRole('button', { name: /copier le lien avec les filtres/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Copy link with filters/i }))
     expect(writeText).toHaveBeenCalledWith(expected)
   })
 })

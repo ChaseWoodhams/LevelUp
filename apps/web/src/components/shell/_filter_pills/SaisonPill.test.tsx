@@ -15,10 +15,10 @@ import type { SeasonEntry } from '@/lib/i18n/fieldMappings'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { SaisonPill } from './SaisonPill'
 
-// Libellés résolus par clé i18n (GH2-B1) — locale 'fr' épinglée pour les
+// Libellés résolus par clé i18n (GH2-B1) — locale 'en' épinglée pour les
 // assertions historiques FR ; le bloc « i18n EN » bascule explicitement en 'en'.
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 function makeSeasons(): SeasonEntry[] {
@@ -78,7 +78,7 @@ describe('SaisonPill — trigger', () => {
         onSelectSeason={vi.fn()}
       />,
     )
-    expect(screen.getByRole('button', { name: /Saison/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Season/ })).toBeInTheDocument()
   })
 
   it('affiche "S6 — Spirit of Fire" quand S6 est active', () => {
@@ -121,7 +121,7 @@ describe('SaisonPill — popover folding', () => {
       />,
     )
 
-    const dialog = screen.getByRole('dialog', { name: /Choix de la saison/ })
+    const dialog = screen.getByRole('dialog', { name: /Season selector/ })
 
     // S2/S4/S6 visibles d'office avec leur count
     expect(within(dialog).getByText('Lone Wolves')).toBeInTheDocument()
@@ -132,7 +132,7 @@ describe('SaisonPill — popover folding', () => {
     expect(within(dialog).getByText('(8)')).toBeInTheDocument()
 
     // Le summary indique 2 saisons indisponibles
-    expect(within(dialog).getByText(/\+ 2 saisons sans matchs/)).toBeInTheDocument()
+    expect(within(dialog).getByText(/\+ 2 seasons without matches/)).toBeInTheDocument()
 
     // S1 et S3 ne sont PAS visibles avant click sur le summary (présentes dans le DOM
     // mais cachées par <details>). On vérifie quand même qu'elles sont rendues
@@ -222,7 +222,7 @@ describe('SaisonPill — onClear', () => {
       />,
     )
 
-    const btn = screen.getByRole('button', { name: 'Toutes saisons' })
+    const btn = screen.getByRole('button', { name: 'All seasons' })
     fireEvent.click(btn)
     expect(onClear).toHaveBeenCalledTimes(1)
     expect(onClose).toHaveBeenCalledTimes(1)
@@ -240,7 +240,7 @@ describe('SaisonPill — onClear', () => {
         onClear={vi.fn()}
       />,
     )
-    const btn = screen.getByRole('button', { name: 'Toutes saisons' })
+    const btn = screen.getByRole('button', { name: 'All seasons' })
     expect(btn).toBeDisabled()
   })
 })
@@ -275,6 +275,5 @@ describe('SaisonPill — i18n EN (GH2-B1)', () => {
     // Folding EN (2 saisons à count=0), plus aucun libellé FR.
     expect(within(dialog).getByText(/\+ 2 seasons without matches/)).toBeInTheDocument()
     expect(within(dialog).queryByText(/sans matchs/)).not.toBeInTheDocument()
-    expect(within(dialog).queryByText('Toutes saisons')).not.toBeInTheDocument()
   })
 })

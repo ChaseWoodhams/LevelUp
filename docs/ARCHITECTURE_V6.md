@@ -1,7 +1,4 @@
 # Architecture LevelUp v6 — DuckDB Shared Matches + i18n Assets
-
-French version: [FR/ARCHITECTURE_V6.md](FR/ARCHITECTURE_V6.md)
-
 > **Version** : 6.3.0 — **Mise à jour** : 2026-04-12
 
 LevelUp uses a DuckDB v6 architecture based on **shared matches** and **centralized i18n via `asset_translations`**:
@@ -27,13 +24,13 @@ data/
 
 ### metadata.duckdb
 
-- `asset_translations`: localized names for maps, playlists, pairs and game variants — 14 BCP-47 languages (`en-US`, `fr-FR`, …) — **added v6.3** — populated by the Go metadata migrations (`internal/games/halo_infinite/migrations/`) during metadata seeding
+- `asset_translations`: canonical English names for maps, playlists, pairs and game variants; historical translated rows remain only for upgrade compatibility — **added v6.3**
 - `challenge_definitions`: versioned Halo challenge definitions (`challenge_path` + `content_hash`) with category, difficulty, threshold and XP rewards
-- `challenge_translations`: localized challenge titles and descriptions in all languages exposed by the CMS (BCP-47, `en-US` fallback)
-- `weapon_labels`: weapon_id (filmshell UBIGINT) → `name_en`, `name_fr` — added v5.4
+- `challenge_translations`: English challenge titles and descriptions from the CMS
+- `weapon_labels`: weapon_id (filmshell UBIGINT) → `name_en` (the historical second column is compatibility-only) — added v5.4
 - `career_ranks`: rank tier definitions
 - `citation_mappings`: medal → citation mappings
-- `mode_name_tr` / `mode_*`: game mode translations (legacy overrides, superseded by `asset_translations` for map/playlist/pair/variant names)
+- `mode_name_tr` / `mode_*`: historical game mode translation tables retained for upgrades; runtime reads use English asset names
 
 ### shared_matches_v2.duckdb
 
@@ -42,7 +39,7 @@ Core tables:
 - `match_participants`: per-player stats for all matches
 
 SQL views (`ensure_resolution_views()`):
-- `v_match_full`: `match_registry` enriched with i18n names from `meta.asset_translations` — 8 LEFT JOINs (en-US + fr-FR × map/playlist/pair/variant). Columns: `map_name`, `map_name_fr`, `game_variant_name`, `game_variant_name_fr`, etc.
+- `v_match_full`: `match_registry` enriched with English names from `meta.asset_translations`. Historical translated columns remain available only where an upgrade requires them.
 - `v_gamertag_lookup`: XUID → current gamertag (FULL OUTER JOIN `xuid_aliases` + `match_participants` + `match_kill_events_latest`)
 
 > `v_killer_victim_full` was **dropped on 2026-08-02** and is no longer a guaranteed v6 view.
@@ -179,7 +176,7 @@ Consequence: the log event `mappings_hot_reloaded` from plan §8.1 is intentiona
 
 ### HTTP API (always mounted since 2026-08-02)
 
-- `GET /api/v1/titles/{slug}/field-mappings?locale=fr` — exposes the
+- GET /api/v1/titles/{slug}/field-mappings ? exposes the English FieldMappingSet with ETag and Cache-Control: max-age=300.
   `FieldMappingSet` of a title with ETag + `Cache-Control: max-age=300`.
 
 > Note: the former proof-of-concept route `GET /api/v1/titles/{slug}/preview/career`

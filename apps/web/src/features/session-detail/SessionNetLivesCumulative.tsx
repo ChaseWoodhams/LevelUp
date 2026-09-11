@@ -27,7 +27,6 @@ import { cumulativeSigned, meanOfValid } from '@/lib/charts/cumulativeSeries'
 import { netLives } from '@/lib/charts/netLives'
 import { divergentZeroGradient } from '@/lib/charts/divergentZeroGradient'
 import { useEffectiveHpToKill, substituteHpToken, useProvidesDamageTaken } from '@/lib/damage/effectiveHp'
-import { useAppShellStore } from '@/stores/appShellStore'
 import type { SessionDetailMatchRow } from '@/lib/api/types'
 
 import { sessionMatchAxisLabel, useSessionT } from './_shared'
@@ -148,7 +147,6 @@ interface Props {
 export function SessionNetLivesCumulative({ title, matches, height = 280, yDomain }: Props) {
   const providesDamageTaken = useProvidesDamageTaken()
   const hp = useEffectiveHpToKill()
-  const locale = useAppShellStore((s) => s.locale)
   const t = useSessionT()
 
   const points = useMemo(
@@ -164,7 +162,7 @@ export function SessionNetLivesCumulative({ title, matches, height = 280, yDomai
   // Titre sans dégâts subis (ex. Halo 5) → masquage silencieux (pas de carte vide).
   if (!providesDamageTaken) return null
 
-  const nf = new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'fr-FR', {
+  const nf = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
     signDisplay: 'always',

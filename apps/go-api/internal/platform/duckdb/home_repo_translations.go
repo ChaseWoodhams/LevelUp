@@ -22,10 +22,10 @@ func (r *HomeRepo) enrichHomeMatchTranslations(ctx context.Context, matches []le
 		return
 	}
 
-	mapNames := r.resolveAssetNames(ctx, "map", collectMissingHomeAssetIDs(matches, "map"), "fr")
-	pairNames := r.resolveAssetNames(ctx, "pair", collectMissingHomeAssetIDs(matches, "pair"), "fr")
-	gameVariantNames := r.resolveAssetNames(ctx, "game_variant", collectMissingHomeAssetIDs(matches, "game_variant"), "fr")
-	playlistNames := r.resolveAssetNames(ctx, "playlist", collectMissingHomeAssetIDs(matches, "playlist"), "fr")
+	mapNames := r.resolveAssetNames(ctx, "map", collectMissingHomeAssetIDs(matches, "map"), "en")
+	pairNames := r.resolveAssetNames(ctx, "pair", collectMissingHomeAssetIDs(matches, "pair"), "en")
+	gameVariantNames := r.resolveAssetNames(ctx, "game_variant", collectMissingHomeAssetIDs(matches, "game_variant"), "en")
+	playlistNames := r.resolveAssetNames(ctx, "playlist", collectMissingHomeAssetIDs(matches, "playlist"), "en")
 
 	// Pattern asset kinds : lookup local_path par (title_id, map_id) dans
 	// map_images_registry (peuplé par cmd/migrate-static-maps). Le name n'est
@@ -50,7 +50,7 @@ func (r *HomeRepo) enrichHomeMatchTranslations(ctx context.Context, matches []le
 	for k := range modeENSet {
 		modeENList = append(modeENList, k)
 	}
-	modeNamesFR, _ := r.loadHomeModeNameTranslations(ctx, modeENList)
+	modeNames := map[string]string{}
 
 	for i := range matches {
 		if needsHomeAssetTranslation(matches[i].MapNameFR, matches[i].MapName) {
@@ -61,14 +61,14 @@ func (r *HomeRepo) enrichHomeMatchTranslations(ctx context.Context, matches []le
 		if matches[i].MapID != "" {
 			matches[i].MapImageURL = mapImageURLs[matches[i].MapID]
 		}
-		// Pair / Mode : cascade unifiée via analysis.ResolvePairNameFR (mode_name_tr
+		// Pair / Mode : cascade unifiée via analysis.ResolvePairName (mode_name_tr
 		// puis re-lookup via asset_translations puis raw fallback). Source unique de
 		// vérité partagée avec match_history et filters (cf. thought_log 2026-05-09).
-		if fr := analysis.ResolvePairNameFR(
+		if fr := analysis.ResolvePairName(
 			matches[i].PairName,
 			matches[i].PairNameFR,
 			pairNames[matches[i].PairID],
-			modeNamesFR,
+			modeNames,
 		); fr != "" {
 			matches[i].PairNameFR = fr
 		}
@@ -206,7 +206,7 @@ func (r *HomeRepo) resolveAssetNames(ctx context.Context, assetType string, asse
 		return nil
 	}
 	out, err := NewMetadataRepoFromDB(r.pdb.Metadata).ResolveAssetNamesBulk(
-		ctx, assetType, assetIDs, PreferredLangsForLocale(locale),
+		ctx, assetType, assetIDs, PreferredAssetLanguages(),
 	)
 	if err != nil && !isTableNotFoundErr(err) {
 		slog.WarnContext(ctx, "home: resolveAssetNames failed",
@@ -220,10 +220,7 @@ func (r *HomeRepo) resolveAssetNames(ctx context.Context, assetType string, asse
 // Le SQL vit dans mode_name_tr.go, source unique du littéral (garde-rail
 // no_mode_name_tr_literal_test.go).
 func (r *HomeRepo) loadHomeModeNameTranslations(ctx context.Context, modeENNames []string) (map[string]string, error) {
-	if len(modeENNames) == 0 {
-		return nil, nil
-	}
-	return queryModeNameTrFR(ctx, r.pdb.Metadata, modeENNames)
+	return nil, nil
 }
 
 func needsHomeAssetTranslation(labelFR, labelEN string) bool {

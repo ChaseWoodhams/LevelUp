@@ -51,7 +51,7 @@ function setTitleCaps(caps: string[]) {
 }
 
 beforeEach(() => {
-  useAppShellStore.setState({ locale: 'fr' })
+  useAppShellStore.setState({ locale: 'en' })
 })
 
 afterEach(() => {
@@ -63,13 +63,13 @@ describe('SquadSynergiesPage — empty states', () => {
   it('no_selection : wording analyse, pas de contenu', () => {
     mockSquadContext({ selectedRows: [], confirmedGamertags: [] })
     renderWithProviders(<SquadSynergiesPage />)
-    expect(screen.getByText(/Choisis 1 à 3 coéquipiers/)).toBeInTheDocument()
+    expect(screen.getByText(/Pick 1 to 3 teammates/)).toBeInTheDocument()
   })
 
   it('invalid_selection : message dédié', () => {
     mockSquadContext({ selectedRows: [], confirmedGamertags: ['ghost'] })
     renderWithProviders(<SquadSynergiesPage />)
-    expect(screen.getByText(/Aucune donnée commune/)).toBeInTheDocument()
+    expect(screen.getByText(/No shared data/)).toBeInTheDocument()
   })
 
   it('avec rows : rend sans erreur', () => {
@@ -87,7 +87,7 @@ describe('SquadSynergiesPage — empty states', () => {
       confirmedGamertags: ['A', 'B'],
     })
     renderWithProviders(<SquadSynergiesPage />)
-    expect(screen.getByText('Écart cumulé au FDA attendu')).toBeInTheDocument()
+    expect(screen.getByText('Cumulative KDA gap to expected')).toBeInTheDocument()
   })
 
   it('capability expected_stats absente (Halo 5) → card Écart FDA masqué', () => {
@@ -97,6 +97,6 @@ describe('SquadSynergiesPage — empty states', () => {
       confirmedGamertags: ['A', 'B'],
     })
     renderWithProviders(<SquadSynergiesPage />)
-    expect(screen.queryByText('Écart cumulé au FDA attendu')).toBeNull()
+    expect(screen.queryByText('Cumulative KDA gap to expected')).toBeNull()
   })
 })

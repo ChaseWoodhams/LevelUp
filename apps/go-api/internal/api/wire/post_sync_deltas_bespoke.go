@@ -36,10 +36,10 @@ func SetRankLabelResolver(fn RankLabelResolver) {
 	rankLabelResolver = fn
 }
 
-// resolveCareerRankNameFR retourne le libellé FR du rang rankID si le
+// resolveCareerRankName retourne le libellé FR du rang rankID si le
 // résolveur est câblé et le connaît ; sinon retombe sur fallbackEN
 // (CurrentRankName, baké EN — dégradation gracieuse, jamais de panic/vide).
-func resolveCareerRankNameFR(titleSlug string, rankID int, fallbackEN string) string {
+func resolveCareerRankName(titleSlug string, rankID int, fallbackEN string) string {
 	if rankLabelResolver == nil {
 		return fallbackEN
 	}
@@ -67,7 +67,7 @@ func emitCareerRankDelta(
 			"slug", slug, "rank", after.CurrentRank)
 		return
 	}
-	rankNameFR := resolveCareerRankNameFR(titleSlug, after.CurrentRank, after.CurrentRankName)
+	rankNameFR := resolveCareerRankName(titleSlug, after.CurrentRank, after.CurrentRankName)
 	if err := emitter.Emit(ctx, notifications.EmitInput{
 		Category: notifications.CategoryCareerRank,
 		Severity: notifications.SeveritySuccess,

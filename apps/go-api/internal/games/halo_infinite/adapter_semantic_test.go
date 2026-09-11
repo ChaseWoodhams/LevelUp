@@ -13,7 +13,7 @@ title_slug     = "halo_infinite"
 schema_version = 7
 
 [fields.kills]
-labels        = { en = "Kills", fr = "Éliminations" }
+labels        = { en = "Kills" }
 storage_unit  = "count"
 display_unit  = "count"
 format        = "integer"
@@ -78,7 +78,7 @@ func TestSemanticAdapter_Ranks_PassThrough(t *testing.T) {
 	t.Parallel()
 	set, _ := mappings.LoadFieldsFromBytes("x.toml", []byte(minimalToml))
 	custom := mappings.NewRankCatalog("halo_infinite", []mappings.RankEntry{
-		{ID: 1, Title: map[string]string{"en": "Bronze 1", "fr": "Bronze 1"}},
+		{ID: 1, Title: map[string]string{"en": "Bronze 1"}},
 	})
 	a := NewSemanticAdapter(set, custom, nil, nil)
 	if a.Ranks() != custom {
@@ -109,7 +109,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [assets.mode.ranked]
-labels = { en = "Ranked", fr = "Classé" }
+labels = { en = "Ranked" }
 display_order = 10
 `)
 	assets, err := mappings.LoadAssetsFromBytes("a.toml", assetsToml)
@@ -122,7 +122,7 @@ title_slug = "halo_infinite"
 schema_version = 1
 
 [outcomes.win]
-labels = { en = "Win", fr = "Victoire" }
+labels = { en = "Win" }
 color_token = "outcome.positive"
 `)
 	outcomes, err := mappings.LoadOutcomesFromBytes("o.toml", outcomesToml)
@@ -142,7 +142,7 @@ color_token = "outcome.positive"
 	if !ok {
 		t.Fatal("Get(mode, ranked) introuvable")
 	}
-	if lbl, _ := got.Label("fr"); lbl != "Classé" {
-		t.Errorf("Label fr = %q", lbl)
+	if lbl, _ := got.Label("en"); lbl != "Ranked" {
+		t.Errorf("Label en = %q", lbl)
 	}
 }

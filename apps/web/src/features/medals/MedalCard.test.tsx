@@ -30,32 +30,32 @@ function medal(over: Partial<MedalSummaryItem>): MedalSummaryItem {
 
 describe('MedalCard', () => {
   it('count===0 : compteur en token destructive (rouge) + aria « jamais obtenue » + icône estompée', () => {
-    const { container } = render(<MedalCard item={medal({ count: 0, difficulty_key: 'heroic' })} locale="fr" />)
+    const { container } = render(<MedalCard item={medal({ count: 0, difficulty_key: 'heroic' })} locale="en" />)
     const counter = screen.getByText('0')
     expect(counter.className).toContain('text-destructive')
     expect(counter.className).not.toContain('text-foreground')
-    expect(container.querySelector('[aria-label="Jamais obtenue"]')).toBeTruthy()
+    expect(container.querySelector('[aria-label="Never earned"]')).toBeTruthy()
     expect(container.querySelector('.opacity-60')).toBeTruthy()
     // Rareté Halo Infinite (heroic) → pastille affichée.
-    expect(screen.getByText('Héroïque')).toBeTruthy()
+    expect(screen.getByText('Heroic')).toBeTruthy()
   })
 
   it('count>0 : compteur en token foreground (pas destructive) + aria « obtenue N fois »', () => {
     const { container } = render(
-      <MedalCard item={medal({ count: 5, difficulty_key: 'legendary', name: 'Assassin' })} locale="fr" />,
+      <MedalCard item={medal({ count: 5, difficulty_key: 'legendary', name: 'Assassin' })} locale="en" />,
     )
     const counter = screen.getByText('5')
     expect(counter.className).toContain('text-foreground')
     expect(counter.className).not.toContain('text-destructive')
-    expect(container.querySelector('[aria-label="Obtenue 5 fois"]')).toBeTruthy()
-    expect(screen.getByText('Légendaire')).toBeTruthy()
+    expect(container.querySelector('[aria-label="Earned 5 times"]')).toBeTruthy()
+    expect(screen.getByText('Legendary')).toBeTruthy()
   })
 
   it('Halo 5 (difficulty_key numérique) : AUCUNE pastille de rareté factice', () => {
-    render(<MedalCard item={medal({ count: 3, difficulty_key: '2', name: 'Assassinat' })} locale="fr" />)
+    render(<MedalCard item={medal({ count: 3, difficulty_key: '2', name: 'Assassinat' })} locale="en" />)
     expect(screen.getByText('3')).toBeTruthy()
-    expect(screen.queryByText('Héroïque')).toBeNull()
-    expect(screen.queryByText('Légendaire')).toBeNull()
+    expect(screen.queryByText('Heroic')).toBeNull()
+    expect(screen.queryByText('Legendary')).toBeNull()
     expect(screen.queryByText('Mythique')).toBeNull()
     expect(screen.queryByText('Normale')).toBeNull()
   })

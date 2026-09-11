@@ -125,7 +125,7 @@ export function DetectionsPanel() {
       columnHelper.accessor('last_seen', {
         header: () => tA('admin.detections.col_last'),
         cell: (info) => (
-          <span className="text-xs text-muted-foreground" title={adminAbsoluteTime(info.getValue(), locale)}>
+          <span className="text-xs text-muted-foreground" title={adminAbsoluteTime(info.getValue())}>
             {adminRelativeTime(info.getValue(), locale)}
           </span>
         ),

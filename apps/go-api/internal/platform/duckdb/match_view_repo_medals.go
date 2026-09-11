@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"levelup/go-api/internal/ctxkeys"
 	"levelup/go-api/internal/domain"
 )
 
@@ -75,15 +74,14 @@ func (r *MatchViewRepo) lookupMedalMeta(ctx context.Context, medalIDs []int64) m
 	if len(medalIDs) == 0 || r.pdb.Metadata == nil {
 		return result
 	}
-	locale := ctxkeys.Locale(ctx)
-	labelExpr, descExpr := medalLabelDescCoalesceSQL(locale)
+	labelExpr, descExpr := medalLabelDescCoalesceSQL()
 	q, args, ok := buildLookupQuery(
 		`SELECT md.medal_name_id,
 		        `+labelExpr+` AS label,
 		        `+descExpr+` AS description,
 		        COALESCE(NULLIF(TRIM(md.difficulty),''), 'Normal') AS difficulty
 		 FROM medal_definitions md
-		 `+medalTranslationJoinsSQL(locale)+`
+		 `+medalTranslationJoinsSQL()+`
 		 WHERE md.medal_name_id IN (%s)`,
 		medalIDs,
 	)

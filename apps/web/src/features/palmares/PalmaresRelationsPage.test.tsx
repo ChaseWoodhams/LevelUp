@@ -41,8 +41,8 @@ describe('PalmaresRelationsPage', () => {
     })
 
     // Hero : binôme + bête noire (gamertags issus de l'overview du mock).
-    expect(screen.getByText('Binôme')).toBeInTheDocument()
-    expect(screen.getByText('Bête noire')).toBeInTheDocument()
+    expect(screen.getByText('Duo partner')).toBeInTheDocument()
+    expect(screen.getByText('Nemesis')).toBeInTheDocument()
 
     // Tableau : toutes les relations récurrentes.
     expect(screen.getAllByText('DuoAlpha').length).toBeGreaterThan(0)
@@ -59,7 +59,7 @@ describe('PalmaresRelationsPage', () => {
 
     // Le mock ne contient aucune relation strictement "alliée" pure mais tous
     // ont teammate_matches > 0, donc le filtre "Alliés" garde les 3 joueurs.
-    fireEvent.click(screen.getByRole('button', { name: 'Alliés' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Allies' }))
     expect(screen.getAllByText('DuoAlpha').length).toBeGreaterThan(0)
   })
 
@@ -71,7 +71,7 @@ describe('PalmaresRelationsPage', () => {
     })
 
     // Le badge apparaît dans la card hero enrichie + le tableau ; tous en style solid.
-    const badges = screen.getAllByText('Duo gagnant')
+    const badges = screen.getAllByText('Winning duo')
     expect(badges.length).toBeGreaterThan(0)
     expect(badges[0].closest('[data-testid="narrative-badge"]')?.getAttribute('data-solid')).toBe('true')
   })
@@ -96,7 +96,7 @@ describe('PalmaresRelationsPage', () => {
     })
 
     // DuoAlpha porte le badge cross-jeu (Halo 5) → le chip « Multi-jeux » apparaît.
-    const crossChip = screen.getByRole('button', { name: 'Multi-jeux' })
+    const crossChip = screen.getByRole('button', { name: 'Multi-game' })
     fireEvent.click(crossChip)
 
     // Seule la relation cross-jeu (DuoAlpha) reste ; QueueGhost (mono-titre)
@@ -168,13 +168,13 @@ describe('PalmaresRelationsPage', () => {
     })
 
     // Défaut = masqué : le bouton propose de LES INCLURE.
-    const toggle = screen.getByRole('button', { name: 'Inclure les coéquipiers' })
+    const toggle = screen.getByRole('button', { name: 'Include teammates' })
     expect(toggle).toHaveAttribute('aria-pressed', 'false')
 
     // Bascule → libellé « inclus » + aria-pressed true.
     fireEvent.click(toggle)
     expect(
-      screen.getByRole('button', { name: 'Coéquipiers inclus' }),
+      screen.getByRole('button', { name: 'Teammates included' }),
     ).toHaveAttribute('aria-pressed', 'true')
   })
 
@@ -202,7 +202,7 @@ describe('PalmaresRelationsPage', () => {
 
     // Contrôle Vue solo/escouade + bouton Analyser présents.
     expect(screen.getByTestId('relations-view-dropdown')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Analyser' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
   })
 
   it('affiche la section Moments & Rivalités en permanence', async () => {
@@ -214,7 +214,7 @@ describe('PalmaresRelationsPage', () => {
 
     // Permanent (plus de toggle) : la donnée du mock arrive d'office → titre Rivaux + rival.
     await waitFor(() => {
-      expect(screen.getByText('Rivaux')).toBeInTheDocument()
+      expect(screen.getAllByText('Rivals').length).toBeGreaterThan(0)
     })
     expect(screen.getAllByText('NemesisBravo').length).toBeGreaterThan(0)
   })
@@ -266,7 +266,7 @@ describe('PalmaresRelationsPage', () => {
     renderWithProviders(<PalmaresRelationsPage />)
 
     const rank = await screen.findByTestId('nemesis-current-rank')
-    expect(rank).toHaveTextContent('Rang actuel')
+    expect(rank).toHaveTextContent('Current rank')
     // Onyx (palier ouvert) → suffixe de la valeur CSR.
     expect(rank).toHaveTextContent('Onyx 1523')
     // Le libellé du rang est rendu dans un badge coloré (token sémantique).
@@ -280,9 +280,9 @@ describe('PalmaresRelationsPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('palmares-relations-overview')).toBeInTheDocument()
     })
-    expect(screen.getByText('Bête noire')).toBeInTheDocument()
+    expect(screen.getByText('Nemesis')).toBeInTheDocument()
     expect(screen.queryByTestId('nemesis-current-rank')).not.toBeInTheDocument()
-    expect(screen.queryByText('Rang actuel')).not.toBeInTheDocument()
+    expect(screen.queryByText('Current rank')).not.toBeInTheDocument()
   })
 
   it('envoie un FilterContextInput segmenté (vue Escouade) après « Analyser »', async () => {
@@ -298,8 +298,8 @@ describe('PalmaresRelationsPage', () => {
 
     // Ouvre le dropdown Vue, sélectionne Escouade, puis Analyser.
     fireEvent.click(screen.getByTestId('relations-view-dropdown').querySelector('button')!)
-    fireEvent.click(await screen.findByRole('button', { name: 'Escouade' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Analyser' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Squad' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Analyze' }))
 
     await waitFor(() => {
       expect(bodies.some((b) => b.match_context === 'squad')).toBe(true)

@@ -101,7 +101,7 @@ export function ChartCard<T = unknown>({
   series,
   loading,
   error,
-  emptyMessage = 'Aucune donnée à afficher',
+  emptyMessage = 'No data to display',
   height = 320,
   fluid = false,
   buildOption,
@@ -213,7 +213,7 @@ function ChartCardError({ error, height, fluid }: { error: Error; height: number
       data-testid="chart-card-error"
       role="alert"
     >
-      {error.message || 'Erreur de chargement'}
+      {error.message || 'Loading error'}
     </div>
   )
 }

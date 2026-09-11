@@ -20,7 +20,7 @@ on:
     # MISE EN GARDE — NE JAMAIS élargir à `docs/**` :
     #   - le Dockerfile fait `COPY docs /app/docs` ;
     #   - `docs/CHANGELOG.md` (handlers/changelog.go) et
-    #     `docs/RELEASE_NOTES.md` + `docs/FR/RELEASE_NOTES.md`
+    #     `docs/RELEASE_NOTES.md`
     #     (service/release_notes_service.go) sont lus AU RUNTIME par l'API.
     # Ignorer `docs/**` ferait servir en prod des notes de version périmées sans
     # aucun signal. Seul `docs/adr/**` est ignoré : vérifié, aucun code ne lit ce

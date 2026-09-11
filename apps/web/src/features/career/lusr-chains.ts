@@ -8,7 +8,7 @@ import type { SemanticToken } from '@/lib/accessibility'
  * `h5_arena`, cf. internal/games/halo_5/lusr_chain.go).
  *
  * Rôle (multi-titre) : pour un titre listé ici, on AFFICHE toujours ses groupes
- * connus — même non classés (« Non classé »). Un titre absent de la map → connus
+ * connus — même non classés (« Unranked »). Un titre absent de la map → connus
  * vides → on n'affiche QUE les groupes réellement présents dans la donnée
  * (dérivés des checkpoints). Le seul littéral toléré est la clé `halo_infinite`
  * (config par-titre, pas data-path).
@@ -51,7 +51,7 @@ export function knownLusrGroupsForTitle(titleSlug: string): readonly string[] {
  * dans la donnée mais non connus, triés alpha pour stabilité).
  *
  * Garantit le no-op Halo Infinite : si `dataGroups` ⊆ connus, on rend exactement
- * les 4 groupes connus dans le même ordre qu'avant (« Non classé » inclus).
+ * les 4 groupes connus dans le même ordre qu'avant (« Unranked » inclus).
  */
 export function resolveLusrGroupsForDisplay(
   titleSlug: string,

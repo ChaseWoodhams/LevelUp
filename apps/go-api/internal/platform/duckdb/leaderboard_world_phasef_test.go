@@ -20,10 +20,10 @@ func TestPlaylistName_Cascade(t *testing.T) {
 		want       string
 	}{
 		// FR
-		{"FR officiel prioritaire", arenaRankedID, "fr", "Arène Officielle", "Official Arena", "Ranked Arena", "Arène Officielle"},
-		{"FR curé bat le canonical EN", arenaRankedID, "fr", "", "", "Ranked Arena", "Arène classée"},
-		{"FR canonical EN si pas de curé", "unknown-pl-id", "fr", "", "", "Big Team Social", "Big Team Social"},
-		{"FR id brut en dernier recours", "unknown-pl-id", "fr", "", "", "", "unknown-pl-id"},
+		{"English name from official catalog", arenaRankedID, "fr", "Arène Officielle", "Official Arena", "Ranked Arena", "Official Arena"},
+		{"English canonical fallback", arenaRankedID, "fr", "", "", "Ranked Arena", "Ranked Arena"},
+		{"English canonical name", "unknown-pl-id", "fr", "", "", "Big Team Social", "Big Team Social"},
+		{"raw id fallback", "unknown-pl-id", "fr", "", "", "", "unknown-pl-id"},
 		// EN
 		{"EN officiel prioritaire", arenaRankedID, "en", "Arène Officielle", "Official Arena", "Ranked Arena", "Official Arena"},
 		{"EN curé bat le canonical", arenaRankedID, "en", "Arène classée", "", "Big Team Social", "Ranked Arena"},

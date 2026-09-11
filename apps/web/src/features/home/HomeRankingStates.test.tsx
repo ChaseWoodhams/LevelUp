@@ -77,8 +77,8 @@ describe('Home ranking states', () => {
       expect(screen.getByTestId('home-highest-csr-unranked')).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId('home-highest-csr-detail')).toHaveTextContent('En placement')
-    expect(screen.getByTestId('home-highest-lusr-detail')).toHaveTextContent('Non classé')
+    expect(screen.getByTestId('home-highest-csr-detail')).toHaveTextContent('Placement')
+    expect(screen.getByTestId('home-highest-lusr-detail')).toHaveTextContent('Unranked')
   })
 
   it('affiche un état vide explicite quand aucun classement n’est disponible', async () => {
@@ -94,7 +94,7 @@ describe('Home ranking states', () => {
       expect(screen.getByTestId('home-skill-peaks-empty')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Aucun classement disponible')).toBeInTheDocument()
+    expect(screen.getByText('No rankings available')).toBeInTheDocument()
   })
 
   it('affiche le placement CSR backend-driven via measurement_matches_remaining (mai 2026)', async () => {
@@ -211,8 +211,8 @@ describe('Home ranking states', () => {
       expect(screen.getByTestId('home-highest-csr-badge')).toBeInTheDocument()
     })
 
-    // Format fr-FR : espace insécable entre milliers (1 450, pas 1,450).
-    expect(screen.getByTestId('home-highest-csr-value').textContent?.replace(/\s/g, '')).toBe('1450')
+    // en-US format: comma as the thousands separator.
+    expect(screen.getByTestId('home-highest-csr-value').textContent?.replace(/\s/g, '')).toBe('1,450')
     expect(screen.getByTestId('home-highest-csr-tier')).toHaveTextContent('Onyx')
   })
 
@@ -238,7 +238,7 @@ describe('Home ranking states', () => {
     renderWithProviders(<HomePage />)
 
     await waitFor(() => {
-      expect(screen.getByTestId('home-highest-csr-tier')).toHaveTextContent('Diamant 5')
+      expect(screen.getByTestId('home-highest-csr-tier')).toHaveTextContent('Diamond 5')
     })
     // La ligne de valeur (et son « — ») n'est PAS rendue quand le CSR est tier-only.
     expect(screen.queryByTestId('home-highest-csr-value')).toBeNull()
@@ -272,8 +272,8 @@ describe('Home ranking states', () => {
     // Barre à 50 % ; extrémités = rating (gauche) + sous-palier suivant (droite) ; palier courant à gauche.
     expect(screen.getByTestId('home-highest-csr-tier-progress-fill')).toHaveStyle({ width: '50%' })
     expect(screen.getByTestId('home-highest-csr-value').textContent?.replace(/\s/g, '')).toBe('730')
-    expect(screen.getByTestId('home-highest-csr-next-tier')).toHaveTextContent('Or IV')
-    expect(screen.getByTestId('home-highest-csr-tier')).toHaveTextContent('Or III')
+    expect(screen.getByTestId('home-highest-csr-next-tier')).toHaveTextContent('Gold IV')
+    expect(screen.getByTestId('home-highest-csr-tier')).toHaveTextContent('Gold III')
   })
 
   it('affiche un état indisponible si la privacy rend l’historique incomplet', async () => {
@@ -293,6 +293,6 @@ describe('Home ranking states', () => {
       expect(screen.getByTestId('home-skill-peaks-empty')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Classements indisponibles')).toBeInTheDocument()
+    expect(screen.getByText('Rankings unavailable')).toBeInTheDocument()
   })
 })

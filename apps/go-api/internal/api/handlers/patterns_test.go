@@ -105,9 +105,9 @@ func TestGetPatterns_ByMapLabelsResolvedOrFallback(t *testing.T) {
 				t.Errorf("carte connue: label = %q, want Aquarius", p.Label)
 			}
 		case mapUnknownID:
-			// Repli FR (locale par défaut) + id court, jamais le GUID complet.
-			if !strings.HasPrefix(p.Label, "Carte inconnue (") {
-				t.Errorf("carte inconnue: label = %q, want repli « Carte inconnue »", p.Label)
+			// English fallback plus a short id, never the full GUID.
+			if !strings.HasPrefix(p.Label, "Unknown map (") {
+				t.Errorf("unknown map: label = %q, want English fallback", p.Label)
 			}
 			if strings.Contains(p.Label, mapUnknownID) {
 				t.Errorf("le repli ne doit jamais contenir le GUID complet: %q", p.Label)

@@ -100,7 +100,7 @@ export function enrichParams(
   // inchangé tout nom inconnu (placement, libellé brut).
   for (const key of ['next_tier_name', 'tier', 'previous_tier'] as const) {
     if (typeof out[key] === 'string') {
-      out[key] = localizeTierLabel(out[key] as string, locale)
+      out[key] = localizeTierLabel(out[key] as string)
     }
   }
   // Arrondit les valeurs de métriques flottantes à 2 décimales. Le backend

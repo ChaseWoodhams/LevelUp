@@ -21,10 +21,9 @@
  * échoue si le slug n'apparaît pas dans la clé ; toute nouvelle fabrique non classée
  * (title-scopée vs agnostique documentée) y fait échouer la complétude.
  *
- * locale dans la clé — QUAND ? En plus du titre, si le serveur bake un libellé localisé
- * (header X-LevelUp-Locale) dans le payload (ex. `home`, `medals`, `seasonPass`). Sans
- * `locale` en clé, un fetch background survivant à la bascule de langue reste dans
- * l'ancienne langue. Modèle : `home` (playerSlug + titleSlug + locale).
+ * The application has one locale, so locale is intentionally absent from query
+ * keys. Title-specific payloads still include `titleSlug` wherever the server
+ * response depends on the active game.
  */
 
 export const queryKeys = {
@@ -70,7 +69,7 @@ export const queryKeys = {
   careerCSRs: (playerSlug: string, titleSlug: string, season?: string) =>
     ['career', playerSlug, titleSlug, 'csrs', season ?? ''] as const,
 
-  // Achievements Xbox (bilingues EN/FR, statiques après backfill) — par titre (jeu).
+  // Xbox achievements, static after backfill, scoped by title.
   achievements: (playerSlug: string, titleSlug: string) =>
     ['achievements', playerSlug, titleSlug] as const,
 
@@ -123,24 +122,14 @@ export const queryKeys = {
   engagementSquadSession: (playerSlug: string, titleSlug: string, matchIds: string[], teammates: string[]) =>
     ['engagement', 'squad-session', playerSlug, titleSlug, matchIds.join(','), teammates.join(',')] as const,
 
-  // Accueil / Home (Slice 5)
-  // Le titre courant fait partie de la clé : la réponse /pages/home est
-  // spécifique au titre (Spartan ID, playlists récentes, rangs). Sans lui, un
-  // switch de titre servait les données périmées du titre précédent (la clé ne
-  // changeant pas, TanStack Query réutilisait le cache pendant le staleTime).
-  // La LOCALE fait aussi partie de la clé : le backend baque les libellés
-  // localisés (titres de défis, noms de map/mode) dans le payload selon le header
-  // X-LevelUp-Locale à l'instant du fetch. Sans la locale dans la clé, un switch
-  // de langue laissait le cache (y compris le fetch background prefetch/poll)
-  // baké dans l'ancienne langue — invalidation naturelle à la bascule.
-  home: (playerSlug: string, titleSlug: string, locale: string) =>
-    ['home', playerSlug, titleSlug, locale] as const,
+  // Home (Slice 5). The active title is part of the key because the response
+  // contains title-specific identity, playlists, and ranks.
+  home: (playerSlug: string, titleSlug: string) =>
+    ['home', playerSlug, titleSlug] as const,
 
-  // Palmares
-  // Locale dans la clé : mêmes libellés backend-bakés (nom du pass, titres de
-  // défis de saison) selon X-LevelUp-Locale — cf. commentaire `home` ci-dessus.
-  seasonPass: (playerSlug: string, titleSlug: string, locale: string) =>
-    ['palmares', playerSlug, titleSlug, 'season-pass', locale] as const,
+  // Season pass, scoped by title.
+  seasonPass: (playerSlug: string, titleSlug: string) =>
+    ['palmares', playerSlug, titleSlug, 'season-pass'] as const,
   // Relations / social (followers) — stockage shared_social PAR TITRE.
   palmaresRelations: (playerSlug: string, titleSlug: string) =>
     ['palmares', playerSlug, titleSlug, 'relations'] as const,
@@ -149,8 +138,8 @@ export const queryKeys = {
   // exactComposition : l'option « composition exacte » change la POPULATION servie
   // (matchs commencés ensemble vs composition exclusive) — sans elle dans la clé,
   // le cache resservirait les nombres de l'autre réglage.
-  teammates: (playerSlug: string, titleSlug: string, filterHash: string, selectedGts: string[], sessionLabels: string[] = [], locale = '', exactComposition = false) =>
-    ['teammates', playerSlug, titleSlug, filterHash, [...selectedGts].sort().join(','), [...sessionLabels].sort().join(','), locale, exactComposition] as const,
+  teammates: (playerSlug: string, titleSlug: string, filterHash: string, selectedGts: string[], sessionLabels: string[] = [], exactComposition = false) =>
+    ['teammates', playerSlug, titleSlug, filterHash, [...selectedGts].sort().join(','), [...sessionLabels].sort().join(','), exactComposition] as const,
   /** Préfixe broad — invalide toutes les queries teammates (ex. après ajout d'ami).
    *  Title-agnostic PAR DESIGN (balaie tous les joueurs/titres). */
   teammatesAll: ['teammates'] as const,
@@ -173,24 +162,17 @@ export const queryKeys = {
     ['media', playerSlug, titleSlug, 'audio-config'] as const,
   feedVersion: ['media', 'feed-version'] as const,
 
-  // Citations (Slice 2B) — locale dans la clé : le backend bake les libellés de
-  // citations localisés (X-LevelUp-Locale) dans le payload. Sans elle, un fetch
-  // background survivant à la bascule de langue reste dans l'ancienne langue —
-  // cf. commentaire `home` ci-dessus (même motif).
-  citations: (playerSlug: string, titleSlug: string, filterHash: string, locale: string) =>
-    ['citations', playerSlug, titleSlug, filterHash, locale] as const,
+  // Citations (Slice 2B), scoped by title and filter.
+  citations: (playerSlug: string, titleSlug: string, filterHash: string) =>
+    ['citations', playerSlug, titleSlug, filterHash] as const,
 
-  // Médailles (sous-page Carrière) — locale dans la clé : le backend bake les
-  // libellés/descriptions de médailles localisés (X-LevelUp-Locale). Pas de
-  // filterHash : le filtre obtenues/non-obtenues + le tri sont 100% client.
-  medals: (playerSlug: string, titleSlug: string, locale: string) =>
-    ['medals', playerSlug, titleSlug, locale] as const,
+  // Medals (Career subpage), scoped by title. Filtering and sorting are client-side.
+  medals: (playerSlug: string, titleSlug: string) =>
+    ['medals', playerSlug, titleSlug] as const,
 
-  // Totaux à vie des commendations natives (Halo 5, AXE B) — par titre. Locale
-  // dans la clé : le backend bake les libellés/descriptions de commendations
-  // localisés (X-LevelUp-Locale) — cf. commentaire `home` ci-dessus.
-  commendationTotals: (playerSlug: string, titleSlug: string, locale: string) =>
-    ['commendation-totals', playerSlug, titleSlug, locale] as const,
+  // Lifetime native commendation totals (Halo 5), scoped by title.
+  commendationTotals: (playerSlug: string, titleSlug: string) =>
+    ['commendation-totals', playerSlug, titleSlug] as const,
 
   // Timeseries (Slice 3B) — 'solo' dans la clé pour invalider tout cache pré-fix
   timeseries: (playerSlug: string, titleSlug: string, filterHash: string) =>
@@ -204,9 +186,8 @@ export const queryKeys = {
     sessionLabel: string,
     compareSessionLabel: string,
     enableCompare: boolean,
-    locale: string,
   ) =>
-    ['session-detail', playerSlug, titleSlug, filterHash, sessionLabel, compareSessionLabel, enableCompare, locale] as const,
+    ['session-detail', playerSlug, titleSlug, filterHash, sessionLabel, compareSessionLabel, enableCompare] as const,
 
   // Compare joueur vs joueur (Sprint 54-C)
   comparePlayer: (playerSlug: string, titleSlug: string, targetGamertag: string) =>
@@ -221,14 +202,12 @@ export const queryKeys = {
     spec?: Record<string, unknown> | null,
   ) => ['match-neighbors', playerSlug, titleSlug, matchId, spec ?? null] as const,
 
-  // Classement (CSR mondial + stats communautaires)
+  // Leaderboard (global CSR and community statistics).
   leaderboard: (playerSlug: string, titleSlug: string, category?: string, season?: string, playlist?: string) =>
     ['leaderboard', playerSlug, titleSlug, category ?? '', season ?? '', playlist ?? ''] as const,
-  // Locale dans la clé : le catalogue bake les display_name (saisons/playlists) localisés
-  // selon X-LevelUp-Locale — cf. commentaire `home` ci-dessus. La clé EST l'invalidation à
-  // la bascule de langue (plus d'invalidation ciblée depuis le layout titre).
-  leaderboardCatalog: (playerSlug: string, titleSlug: string, locale: string) =>
-    ['leaderboard-catalog', playerSlug, titleSlug, locale] as const,
+  // The catalog contains title-specific season and playlist display names.
+  leaderboardCatalog: (playerSlug: string, titleSlug: string) =>
+    ['leaderboard-catalog', playerSlug, titleSlug] as const,
 
   // Notifications in-app (per-player) — stockage shared_social PAR TITRE (routes
   // notifications title-scopées /t/{slug}/…) → le titre scope les clés feuilles.
@@ -368,7 +347,7 @@ export const queryKeys = {
 
   // Clés feature diverses ex-inline (L5, CLAUDE.md n°13) — centralisées ici.
   changelog: ['changelog'] as const,
-  releaseNotes: (lang: string) => ['release-notes', lang] as const,
+  releaseNotes: () => ['release-notes'] as const,
   feedbackSimilarIssues: (query: string) =>
     ['feedback-drawer', 'similar-issues', query] as const,
   mediaMatchCandidates: (

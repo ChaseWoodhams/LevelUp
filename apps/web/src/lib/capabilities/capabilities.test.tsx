@@ -146,6 +146,6 @@ describe('RouteCapabilityGate', () => {
       </RouteCapabilityGate>,
     )
     expect(screen.queryByText('page-carriere')).not.toBeInTheDocument()
-    expect(screen.getByText('Indisponible pour ce titre')).toBeInTheDocument()
+    expect(screen.getByText('Not available for this title')).toBeInTheDocument()
   })
 })

@@ -28,11 +28,11 @@ type AchievementsSummary struct {
 type AchievementEntry struct {
 	AchievementID   string     `json:"achievement_id"`
 	NameEN          string     `json:"name_en"`
-	NameFR          string     `json:"name_fr"`
+	NameFR          string     `json:"-"`
 	DescriptionEN   string     `json:"description_en"`
-	DescriptionFR   string     `json:"description_fr"`
+	DescriptionFR   string     `json:"-"`
 	LockedDescEN    string     `json:"locked_desc_en,omitempty"`
-	LockedDescFR    string     `json:"locked_desc_fr,omitempty"`
+	LockedDescFR    string     `json:"-"`
 	Gamerscore      int        `json:"gamerscore"`
 	ImageURL        string     `json:"image_url,omitempty"`
 	IsSecret        bool       `json:"is_secret"`

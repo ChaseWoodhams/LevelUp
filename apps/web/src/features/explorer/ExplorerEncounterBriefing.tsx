@@ -44,7 +44,7 @@ function wrAccent(wr: number | null | undefined): SemanticToken {
 
 interface Props {
   stats: ExplorerEncounterStats
-  /** Locale UI ('fr' | 'en') — défaut 'fr' si autre valeur. */
+  /** Locale UI ('en' | 'en') — défaut 'en' si autre valeur. */
   locale: string
 }
 
@@ -62,26 +62,6 @@ function formatKDRatio(kills: number | null | undefined, deaths: number | null |
   if (kills == null || deaths == null) return '—'
   if (deaths === 0) return kills > 0 ? '∞' : '—'
   return (kills / deaths).toFixed(2)
-}
-
-function formatRelativeFR(iso: string): string {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return '—'
-  const diffMs = Date.now() - date.getTime()
-  const minutes = Math.round(diffMs / 60_000)
-  if (minutes < 1) return "à l'instant"
-  if (minutes < 60) return `il y a ${minutes} min`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return hours <= 1 ? 'il y a 1 h' : `il y a ${hours} h`
-  const days = Math.round(hours / 24)
-  if (days === 1) return 'hier'
-  if (days < 7) return `il y a ${days} j`
-  const weeks = Math.round(days / 7)
-  if (weeks < 5) return weeks <= 1 ? 'il y a 1 sem.' : `il y a ${weeks} sem.`
-  const months = Math.round(days / 30)
-  if (months < 12) return months <= 1 ? 'il y a 1 mois' : `il y a ${months} mois`
-  const years = Math.round(days / 365)
-  return years <= 1 ? 'il y a 1 an' : `il y a ${years} ans`
 }
 
 function formatRelativeEN(iso: string): string {
@@ -136,11 +116,11 @@ function KpiCard({ label, value, detail, accent }: KpiCardProps) {
 
 // ─── Composant principal ─────────────────────────────────────────────────────
 
-export function ExplorerEncounterBriefing({ stats, locale }: Props) {
-  const manifestLocale: Locale = locale === 'en' ? 'en' : 'fr'
+export function ExplorerEncounterBriefing({ stats }: Props) {
+  const manifestLocale: Locale = 'en'
   const t = (key: ExplorerManifestKey, values?: Record<string, string | number>) =>
     formatMessage(explorerManifest, key, manifestLocale, values)
-  const formatRelative = manifestLocale === 'en' ? formatRelativeEN : formatRelativeFR
+  const formatRelative = formatRelativeEN
 
   const ally = stats.ally_count ?? null
   const enemy = stats.enemy_count ?? null
@@ -157,7 +137,7 @@ export function ExplorerEncounterBriefing({ stats, locale }: Props) {
             label={t('explorer.encounter.encounters')}
             value={
               ally != null && enemy != null
-                ? <AllyEnemySplitBar allyCount={ally} enemyCount={enemy} locale={manifestLocale} />
+                ? <AllyEnemySplitBar allyCount={ally} enemyCount={enemy} />
                 : stats.count_together
             }
             accent="outcome-draw"
@@ -172,7 +152,7 @@ export function ExplorerEncounterBriefing({ stats, locale }: Props) {
                 </span>
                 {ally != null && (
                   <span className="text-xs font-normal text-muted-foreground">
-                    {ally} {manifestLocale === 'en' ? 'matches' : 'matchs'}
+                    {ally} {'matches'}
                   </span>
                 )}
               </span>
@@ -189,7 +169,7 @@ export function ExplorerEncounterBriefing({ stats, locale }: Props) {
                 </span>
                 {enemy != null && (
                   <span className="text-xs font-normal text-muted-foreground">
-                    {enemy} {manifestLocale === 'en' ? 'matches' : 'matchs'}
+                    {enemy} {'matches'}
                   </span>
                 )}
               </span>
@@ -201,7 +181,7 @@ export function ExplorerEncounterBriefing({ stats, locale }: Props) {
             label={t('explorer.encounter.kd_cross')}
             value={
               stats.kills_dealt != null && stats.deaths_suffered != null
-                ? <KDSplitBar kills={stats.kills_dealt} deaths={stats.deaths_suffered} locale={manifestLocale} />
+                ? <KDSplitBar kills={stats.kills_dealt} deaths={stats.deaths_suffered} />
                 : <span className="font-mono">{formatKDCross(stats.kills_dealt, stats.deaths_suffered)}</span>
             }
             accent={cmpAccent(stats.kills_dealt, stats.deaths_suffered)}

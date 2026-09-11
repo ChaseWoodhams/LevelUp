@@ -10,789 +10,608 @@
 # ─── Locale Intl ───────────────────────────────────────────────────────────
 
 [palmares.intl_locale]
-fr = "fr-FR"
 en = "en-GB"
 
 # ─── Page header ───────────────────────────────────────────────────────────
 
 [palmares.page.title]
-fr = "Palmarès"
 en = "Palmares"
 
 [palmares.page.subtitle]
-fr = "Classements, relations de jeu, passes saisonniers et comparaison joueur à joueur regroupés dans un même hub."
 en = "Ranked standings, play relationships, seasonal passes and player-vs-player comparison grouped into one hub."
 
 # ─── États transverses ─────────────────────────────────────────────────────
 
 [palmares.errors.retry]
-fr = "Réessayer"
 en = "Retry"
 
 [palmares.empty.unavailable_title]
-fr = "Palmarès indisponible"
 en = "Palmares unavailable"
 
 [palmares.empty.unavailable_description]
-fr = "Aucune réponse exploitable n'a été renvoyée pour cette page."
 en = "No exploitable response returned for this page."
 
 # ─── Relations - États ─────────────────────────────────────────────────────
 
 [palmares.relations.unavailable_title]
-fr = "Relations indisponibles"
 en = "Relations unavailable"
 
 [palmares.relations.unavailable_description]
-fr = "Les agrégats relationnels n'ont pas pu être chargés pour ce joueur."
 en = "Relationship aggregates could not be loaded for this player."
 
 [palmares.relations.empty_title]
-fr = "Aucune relation exploitable"
 en = "No meaningful relationships yet"
 
 [palmares.relations.empty_description]
-fr = "Il faut au moins quelques matchs répétés contre ou avec les mêmes joueurs pour faire émerger les liens."
 en = "You need a few repeated encounters with the same players before relationship patterns become useful."
 
 # ─── Relations - Hero (binôme / bête noire / noyau dur) ─────────────────────
 
 [palmares.relations.hero.top_ally_title]
-fr = "Binôme"
 en = "Duo partner"
 
 [palmares.relations.hero.top_ally_empty]
-fr = "Pas encore de binôme"
 en = "No duo partner yet"
 
 [palmares.relations.hero.top_nemesis_title]
-fr = "Bête noire"
 en = "Nemesis"
 
 [palmares.relations.hero.top_nemesis_empty]
-fr = "Pas encore de bête noire"
 en = "No nemesis yet"
 
 [palmares.relations.hero.core_title]
-fr = "Noyau dur"
 en = "Inner circle"
 
 [palmares.relations.hero.core_unit]
-fr = "joueurs"
 en = "players"
 
 [palmares.relations.hero.matches_played]
-fr = "{count} matchs"
 en = "{count} matches"
 
 # Légende de contexte du donut de taux de victoire (carte binôme / bête noire) —
 # explicite ce que représente le % du donut central.
 [palmares.relations.hero.win_qual_ally]
-fr = "Taux de victoires ensemble"
 en = "Win rate together"
 
 [palmares.relations.hero.win_qual_enemy]
-fr = "Taux de victoires face à lui"
 en = "Win rate against them"
 
 # Série en cours (chip de la carte bête noire) — « de suite » (pas « d'affilée »).
 [palmares.relations.hero.streak_wins]
-fr = "{count} victoires de suite"
 en = "{count} wins in a row"
 
 [palmares.relations.hero.streak_losses]
-fr = "{count} défaites de suite"
 en = "{count} losses in a row"
 
 # Volume d'affrontements (carte bête noire) — matchs joués en adversaire.
 [palmares.relations.hero.duels]
-fr = "{count} affrontements"
 en = "{count} clashes"
 
 # Rang CSR courant de la bête noire (lot relations-G, best-effort classé)
 [palmares.relations.hero.current_rank]
-fr = "Rang actuel"
 en = "Current rank"
 
 # Signature de la bête noire : le FDA moyen de CE JOUEUR quand il est ton
 # adversaire (sa domination) — pas le tien. Symétrique du binôme.
 [palmares.relations.hero.kda_against]
-fr = "Son FDA contre toi"
 en = "Their KDA against you"
 
 # ─── Relations - Chips de filtre ──────────────────────────────────────────
 
 [palmares.relations.chip.all]
-fr = "Tous"
 en = "All"
 
 [palmares.relations.chip.core]
-fr = "Noyau dur"
 en = "Inner circle"
 
 [palmares.relations.chip.allies]
-fr = "Alliés"
 en = "Allies"
 
 [palmares.relations.chip.rivals]
-fr = "Rivaux"
 en = "Rivals"
 
 [palmares.relations.chip.recent]
-fr = "Vus récemment"
 en = "Seen recently"
 
 [palmares.relations.chip.cross]
-fr = "Multi-jeux"
 en = "Multi-game"
 
 # ─── Relations - Barre de segmentation serveur (Phase 2) ───────────────────
 
 [palmares.relations.filters.experience]
-fr = "Expérience"
 en = "Experience"
 
 [palmares.relations.filters.experience_all]
-fr = "Toutes"
 en = "All"
 
 [palmares.relations.filters.experience_ranked]
-fr = "Classé"
 en = "Ranked"
 
 [palmares.relations.filters.experience_unranked]
-fr = "Non classé"
 en = "Unranked"
 
 [palmares.relations.filters.playlists]
-fr = "Sélection"
 en = "Playlist"
 
 [palmares.relations.filters.modes]
-fr = "Modes"
 en = "Modes"
 
 [palmares.relations.filters.view]
-fr = "Contexte"
 en = "Context"
 
 [palmares.relations.filters.view_all]
-fr = "Tous"
 en = "All"
 
 [palmares.relations.filters.view_solo]
-fr = "Solo"
 en = "Solo"
 
 [palmares.relations.filters.view_squad]
-fr = "Escouade"
 en = "Squad"
 
 [palmares.relations.filters.analyser]
-fr = "Analyser"
 en = "Analyze"
 
 [palmares.relations.filters.reset]
-fr = "Réinitialiser"
 en = "Reset"
 
 # Toggle des relations purement coéquipières (enemy_matches === 0 : jamais
 # rencontrées en adversaire). Libellé selon l'état : action (OFF) / état (ON).
 [palmares.relations.filters.include_never_faced]
-fr = "Inclure les coéquipiers"
 en = "Include teammates"
 
 [palmares.relations.filters.never_faced_included]
-fr = "Coéquipiers inclus"
 en = "Teammates included"
 
 [palmares.relations.table.previous]
-fr = "Précédent"
 en = "Previous"
 
 [palmares.relations.table.next]
-fr = "Suivant"
 en = "Next"
 
 # ─── Relations - Tableau (en-têtes colonnes) ──────────────────────────────
 
 [palmares.relations.table.player]
-fr = "Joueur"
 en = "Player"
 
 # Intro de l'aide (i) de l'en-tête Joueur, au-dessus de la légende détaillée.
 [palmares.relations.table.badges_info]
-fr = "Ce que signifie chaque pastille :"
 en = "What each pill means:"
 
 # ─── Relations - Légende détaillée des badges (aide ⓘ du tableau) ───────────
 # Une description par type de pastille (le libellé vient du manifest squad
 # narrative.encounter.*). Seuils alignés sur analysis/relations + analysis/narrative.
 [palmares.relations.badge_legend.ally_plus]
-fr = "Coéquipier fiable : au moins 65 % de victoires ensemble."
 en = "Reliable teammate: at least 65% wins together."
 
 [palmares.relations.badge_legend.duo_gagnant]
-fr = "Binôme performant : ≥ 60 % de victoires sur ≥ 10 matchs ensemble."
 en = "Strong duo: ≥ 60% wins over ≥ 10 matches together."
 
 [palmares.relations.badge_legend.tough_enemy]
-fr = "Il te tue bien plus qu'il ne tombe (plus de 2 morts pour 1 frag)."
 en = "Kills you far more than you kill them (over 2 deaths per frag)."
 
 [palmares.relations.badge_legend.coriace]
-fr = "Adversaire rarement battu : ≤ 35 % de victoires face à lui."
 en = "Rarely beaten opponent: ≤ 35% wins against them."
 
 [palmares.relations.badge_legend.proie_favorite]
-fr = "Duels dominés : ratio de frags ≥ 1,5 contre lui."
 en = "Dominated duels: frag ratio ≥ 1.5 against them."
 
 [palmares.relations.badge_legend.cameleon]
-fr = "Autant coéquipier qu'adversaire au fil des matchs."
 en = "As often a teammate as an opponent over time."
 
 [palmares.relations.badge_legend.de_longue_date]
-fr = "Relation ancienne (≥ 6 mois) ou très fréquente (≥ 80 matchs)."
 en = "Long-standing (≥ 6 months) or very frequent (≥ 80 matches)."
 
 [palmares.relations.badge_legend.recrue]
-fr = "Croisé récemment (≤ 30 jours) mais déjà plusieurs matchs."
 en = "Met recently (≤ 30 days) but already several matches."
 
 [palmares.relations.badge_legend.ordinal]
-fr = "Nombre total de matchs joués avec ou contre lui."
 en = "Total number of matches played with or against them."
 
 [palmares.relations.badge_legend.cross_game]
-fr = "Aussi croisé sur un autre jeu (Halo 5, etc.)."
 en = "Also crossed paths on another game (Halo 5, etc.)."
 
 [palmares.relations.badge_legend.cross_game_name]
-fr = "Multi-jeux"
 en = "Multi-game"
 
 [palmares.relations.table.link]
-fr = "Lien"
 en = "Link"
 
 [palmares.relations.table.encounters]
-fr = "Rencontres"
 en = "Encounters"
 
 [palmares.relations.table.win_rate_ally]
-fr = "Taux de victoire allié"
 en = "Win rate as ally"
 
 [palmares.relations.table.win_rate_enemy]
-fr = "Taux de victoire ennemi"
 en = "Win rate as enemy"
 
 [palmares.relations.table.frags_deaths]
-fr = "Frags / Morts"
 en = "Frags / Deaths"
 
 # Unités courtes pour la légende sous les barres composites des cartes hero.
 [palmares.relations.table.frags_unit]
-fr = "frags"
 en = "frags"
 
 [palmares.relations.table.deaths_unit]
-fr = "morts"
 en = "deaths"
 
 # Légende de la barre composite du binôme : matchs joués en équipe (gauche) vs
 # matchs joués contre lui (droite).
 [palmares.relations.table.allies_unit]
-fr = "en équipe"
 en = "as a team"
 
 [palmares.relations.table.adversaries_unit]
-fr = "affrontements"
 en = "clashes"
 
 [palmares.relations.table.ratio]
-fr = "Ratio"
 en = "Ratio"
 
 # Signature du binôme : le FDA moyen de CE JOUEUR quand il est ton coéquipier
 # (sa perf à tes côtés) — pas le tien.
 [palmares.relations.table.kda_together]
-fr = "Son FDA avec toi"
 en = "Their KDA with you"
 
 [palmares.relations.table.last_seen]
-fr = "Vu"
 en = "Last seen"
 
 [palmares.relations.table.ratio_tooltip]
-fr = "Ratio frags/morts : frags infligés ÷ morts subies sur l'ensemble des matchs communs"
 en = "Frags/deaths ratio: frags dealt ÷ deaths suffered across all shared matches"
 
 # ─── Relations - Tooltips d'en-tête (V72-04, icône ⓘ) ───────────────────────
 
 [palmares.relations.table.encounters_tooltip]
-fr = "Matchs joués avec ce joueur, répartis en allié et adversaire."
 en = "Matches played with this player, split into ally and enemy."
 
 [palmares.relations.table.win_rate_ally_tooltip]
-fr = "Taux de victoire des matchs où ce joueur était allié."
 en = "Win rate in matches where this player was an ally."
 
 [palmares.relations.table.win_rate_enemy_tooltip]
-fr = "Taux de victoire des matchs où ce joueur était adversaire."
 en = "Win rate in matches where this player was an opponent."
 
 [palmares.relations.table.frags_deaths_tooltip]
-fr = "Frags infligés à ce joueur et morts subies face à lui, tous matchs confondus."
 en = "Frags dealt to this player and deaths suffered against them, across all matches."
 
 # ─── Relations - Catégorie de lien ─────────────────────────────────────────
 
 [palmares.relations.category.ally]
-fr = "Allié"
 en = "Ally"
 
 [palmares.relations.category.enemy]
-fr = "Ennemi"
 en = "Enemy"
 
 [palmares.relations.category.mixed]
-fr = "Mixte"
 en = "Mixed"
 
 # ─── Relations - Temps relatif (dernière rencontre) ────────────────────────
 
 [palmares.relations.relative.today]
-fr = "aujourd'hui"
 en = "today"
 
 [palmares.relations.relative.yesterday]
-fr = "hier"
 en = "yesterday"
 
 [palmares.relations.relative.days_ago]
-fr = "il y a {count} j"
 en = "{count, plural, one {# day ago} other {# days ago}}"
 
 [palmares.relations.relative.weeks_ago]
-fr = "il y a {count} sem."
 en = "{count, plural, one {# week ago} other {# weeks ago}}"
 
 [palmares.relations.relative.months_ago]
-fr = "il y a {count} mois"
 en = "{count, plural, one {# month ago} other {# months ago}}"
 
 [palmares.relations.relative.years_ago]
-fr = "il y a {count, plural, one {# an} other {# ans}}"
 en = "{count, plural, one {# year ago} other {# years ago}}"
 
 # ─── Relations - Tooltips encounters / frags ───────────────────────────────
 
 [palmares.relations.tooltip.matches_ally]
-fr = "{count} matchs en allié"
 en = "{count} matches as ally"
 
 [palmares.relations.tooltip.matches_enemy]
-fr = "{count} matchs en ennemi"
 en = "{count} matches as enemy"
 
 [palmares.relations.tooltip.frags_dealt]
-fr = "{count} frags infligés"
 en = "{count} frags dealt"
 
 [palmares.relations.tooltip.deaths_suffered]
-fr = "{count} morts subies"
 en = "{count} deaths suffered"
 
 # ─── Relations - Carte résumé noyau dur (KPI) ──────────────────────────────
 
 [palmares.relations.core.with_them]
-fr = "Taux de victoires avec le noyau"
 en = "Win rate with the inner circle"
 
 [palmares.relations.core.lift_tooltip]
-fr = "Écart entre ce taux de victoire et la moyenne personnelle historique."
 en = "Gap between this win rate and the historical personal average."
 
 [palmares.relations.core.seen_this_week]
-fr = "{count} vus cette semaine"
 en = "{count} seen this week"
 
 [palmares.relations.core.recent_form]
-fr = "Derniers matchs"
 en = "Recent matches"
 
 [palmares.relations.core.show_others]
-fr = "voir les {count} autres"
 en = "show {count} more"
 
 [palmares.relations.core.collapse]
-fr = "réduire"
 en = "collapse"
 
 # ─── Relations - Donut de taux de victoire (hero cards) ────────────────────
 # Légende à droite du donut : victoires / défaites de la relation + repère de la
 # moyenne perso historique. Delta signé au centre (unité « pts »).
 [palmares.relations.donut.wins]
-fr = "Victoires"
 en = "Wins"
 
 [palmares.relations.donut.losses]
-fr = "Défaites"
 en = "Losses"
 
 [palmares.relations.donut.personal_avg]
-fr = "Moy. perso"
 en = "Pers. avg"
 
 [palmares.relations.donut.points_unit]
-fr = "pts"
 en = "pts"
 
 # ─── Relations - Filtre vide (chip sans résultat) ──────────────────────────
 
 [palmares.relations.filter_empty_title]
-fr = "Aucune relation dans ce filtre"
 en = "No relation in this filter"
 
 [palmares.relations.filter_empty_description]
-fr = "Essaie un autre filtre pour voir d'autres joueurs récurrents."
 en = "Try another filter to see other recurring players."
 
 # ─── Relations - Moments & Rivalités (Phase 3a) ────────────────────────────
 
 [palmares.relations.moments.section_title]
-fr = "Rythme des rencontres"
 en = "Encounter rhythm"
 
 [palmares.relations.moments.toggle_show]
-fr = "Afficher les moments et rivalités"
 en = "Show moments and rivalries"
 
 [palmares.relations.moments.toggle_hide]
-fr = "Masquer les moments et rivalités"
 en = "Hide moments and rivalries"
 
 [palmares.relations.moments.unavailable]
-fr = "Les moments et rivalités n'ont pas pu être chargés."
 en = "Moments and rivalries could not be loaded."
 
 [palmares.relations.moments.heatmap_empty]
-fr = "Pas encore assez de rencontres pour dresser une carte horaire."
 en = "Not enough encounters yet to build a time-of-day map."
 
 [palmares.relations.moments.heatmap_legend]
-fr = "Matchs communs"
 en = "Shared matches"
 
 # Tooltip d'une cellule du heatmap : joueur / creneau ou jour / nombre de matchs.
 [palmares.relations.moments.tooltip_player]
-fr = "Joueur"
 en = "Player"
 
 [palmares.relations.moments.tooltip_hour_slot]
-fr = "Créneau"
 en = "Time slot"
 
 [palmares.relations.moments.tooltip_day_slot]
-fr = "Jour"
 en = "Day"
 
 # « communs » (et non « ensemble ») : la relation peut être coéquipière OU
 # adverse — meme vocabulaire que la legende du heatmap.
 [palmares.relations.moments.tooltip_matches]
-fr = "Matchs communs"
 en = "Shared matches"
 
 [palmares.relations.moments.tooltip_empty_cell]
-fr = "Aucun match sur ce créneau"
 en = "No match in this slot"
 
 [palmares.relations.moments.rivalries_title]
-fr = "Rivaux"
 en = "Rivals"
 
 [palmares.relations.moments.rivalries_empty]
-fr = "Aucune rivalité marquée pour l'instant (pas assez de matchs en adversaire)."
 en = "No standout rivalry yet (not enough matches as an opponent)."
 
 [palmares.relations.moments.enemy_matches]
-fr = "{count} matchs en adversaire"
 en = "{count} matches as opponent"
 
 [palmares.relations.moments.recent_short]
-fr = "Récent"
 en = "Recent"
 
 [palmares.relations.moments.global_short]
-fr = "Global"
 en = "Overall"
 
 [palmares.relations.moments.rolling_title]
-fr = "Taux de victoire glissant"
 en = "Rolling win rate"
 
 [palmares.relations.moments.cumulative_frag_title]
-fr = "Écart de frags cumulé"
 en = "Cumulative frag gap"
 
 [palmares.relations.moments.outcome_win]
-fr = "Victoire"
 en = "Win"
 
 [palmares.relations.moments.outcome_loss]
-fr = "Défaite"
 en = "Loss"
 
 [palmares.relations.moments.outcome_other]
-fr = "Nul"
 en = "Draw"
 
 [palmares.relations.moments.heatmap_by_hour]
-fr = "Par heure"
 en = "By hour"
 
 [palmares.relations.moments.heatmap_by_day]
-fr = "Par jour"
 en = "By day"
 
 [palmares.relations.moments.day_0]
-fr = "Dim"
 en = "Sun"
 
 [palmares.relations.moments.day_1]
-fr = "Lun"
 en = "Mon"
 
 [palmares.relations.moments.day_2]
-fr = "Mar"
 en = "Tue"
 
 [palmares.relations.moments.day_3]
-fr = "Mer"
 en = "Wed"
 
 [palmares.relations.moments.day_4]
-fr = "Jeu"
 en = "Thu"
 
 [palmares.relations.moments.day_5]
-fr = "Ven"
 en = "Fri"
 
 [palmares.relations.moments.day_6]
-fr = "Sam"
 en = "Sat"
 
 # ─── Season pass - États ──────────────────────────────────────────────────
 
 [palmares.season_pass.unavailable_title]
-fr = "Pass saisonnier indisponible"
 en = "Season pass unavailable"
 
 [palmares.season_pass.unavailable_description]
-fr = "Les données live du battle pass n'ont pas pu être chargées pour cette session."
 en = "Live battle pass data could not be loaded for this session."
 
 [palmares.season_pass.no_passes_title]
-fr = "Aucun pass détecté"
 en = "No pass detected"
 
 [palmares.season_pass.no_passes_description]
-fr = "Aucune progression de pass saisonnier n'a été renvoyée pour ce joueur."
 en = "No seasonal pass progression was returned for this player."
 
 # ─── Season pass - Cards résumé ───────────────────────────────────────────
 
 [palmares.season_pass.active_card]
-fr = "Pass actif"
 en = "Active pass"
 
 [palmares.season_pass.completed_card]
-fr = "Terminés"
 en = "Completed"
 
 [palmares.season_pass.in_progress_card]
-fr = "En cours"
 en = "In progress"
 
 [palmares.season_pass.remaining_passes_card]
-fr = "Pass restants"
 en = "Remaining passes"
 
 [palmares.season_pass.cosmetics_unlocked_card]
-fr = "Cosmétiques débloqués"
 en = "Cosmetics unlocked"
 
 [palmares.season_pass.xp_unlocked_card]
-fr = "XP débloqué"
 en = "XP unlocked"
 
 [palmares.season_pass.loot_card]
-fr = "Butin récolté"
 en = "Loot earned"
 
 [palmares.season_pass.challenges_card]
-fr = "Défis actifs"
 en = "Active challenges"
 
 # ─── Season pass - Section défis ──────────────────────────────────────────
 
 [palmares.season_pass.challenges_title]
-fr = "Défis live"
 en = "Live challenges"
 
 [palmares.season_pass.challenges_unavailable]
-fr = "Défis indisponibles"
 en = "Challenges unavailable"
 
 [palmares.season_pass.completed]
-fr = "Complétés"
 en = "Completed"
 
 [palmares.season_pass.total]
-fr = "Total"
 en = "Total"
 
 [palmares.season_pass.xp_available]
-fr = "XP disponible"
 en = "XP available"
 
 [palmares.season_pass.next_expiry]
-fr = "Prochaine expiration"
 en = "Next expiry"
 
 [palmares.season_pass.no_expiry]
-fr = "Aucune échéance connue"
 en = "No known deadline"
 
 # ─── Season pass - Cartes pass ────────────────────────────────────────────
 
 [palmares.season_pass.premium]
-fr = "Premium"
 en = "Premium"
 
 [palmares.season_pass.active]
-fr = "Actif"
 en = "Active"
 
 [palmares.season_pass.card_rank]
-fr = "Rang"
 en = "Rank"
 
 [palmares.season_pass.card_progress]
-fr = "Progression"
 en = "Progress"
 
 [palmares.season_pass.active_pass_title]
-fr = "Pass actif"
 en = "Active pass"
 
 [palmares.season_pass.selected_pass_title]
-fr = "Pass saisonnier"
 en = "Season pass"
 
 [palmares.season_pass.active_tier_title]
-fr = "Palier actif"
 en = "Active tier"
 
 [palmares.season_pass.active_tier_progress]
-fr = "Progression du palier"
 en = "Tier progress"
 
 [palmares.season_pass.active_tier_fallback]
-fr = "Palier à venir"
 en = "Upcoming tier"
 
 [palmares.season_pass.obtained]
-fr = "Obtenu"
 en = "Unlocked"
 
 [palmares.season_pass.upcoming]
-fr = "À venir"
 en = "Upcoming"
 
 [palmares.season_pass.other_passes_title]
-fr = "Autres passes"
 en = "Other passes"
 
 [palmares.season_pass.back_to_active]
-fr = "Retour au pass actif"
 en = "Back to active pass"
 
 [palmares.season_pass.now_showing]
-fr = "Affiché"
 en = "Showing"
 
 [palmares.season_pass.free_label]
-fr = "gratuit"
 en = "free"
 
 [palmares.season_pass.no_description]
-fr = "Aucune description disponible pour ce pass."
 en = "No description is available for this pass."
 
 [palmares.season_pass.freshness_last_sync]
-fr = "Dernière synchronisation réussie le {date}"
 en = "Last successful synchronization on {date}"
 
 # ─── Season pass - Contenu du pass ───────────────────────────────────────────
 
 [palmares.season_pass.content.armor_label]
-fr = "pièces d'armure"
 en = "armor pieces"
 
 [palmares.season_pass.content.challenge_swaps_label]
-fr = "Relances"
 en = "Swaps"
 
 [palmares.season_pass.content.cosmetics_label]
-fr = "cosmétiques"
 en = "cosmetics"
 
 [palmares.season_pass.content.cosmetics_split_label]
-fr = "cosmétiques"
 en = "cosmetics"
 
 [palmares.season_pass.content.credits_label]
-fr = "cR"
 en = "cR"
 
 [palmares.season_pass.content.rarity_title]
-fr = "Raretés"
 en = "Rarities"
 
 [palmares.season_pass.content.spartan_points_label]
-fr = "Pts Spartan"
 en = "Spartan Pts"
 
 [palmares.season_pass.content.tiers_label]
-fr = "paliers"
 en = "tiers"
 
 [palmares.season_pass.content.type_title]
-fr = "Catégories"
 en = "Item types"
 
 [palmares.season_pass.content.xp_boosts_label]
-fr = "Boosts XP"
 en = "XP Boosts"
 
 # ─── Season pass - Statuts ────────────────────────────────────────────────
 
 [palmares.season_pass.status.active]
-fr = "Actif"
 en = "Active"
 
 [palmares.season_pass.status.in_progress]
-fr = "En cours"
 en = "In progress"
 
 [palmares.season_pass.status.completed]
-fr = "Terminé"
 en = "Completed"
 
 [palmares.season_pass.status.not_started]
-fr = "Non commencé"
 en = "Not started"

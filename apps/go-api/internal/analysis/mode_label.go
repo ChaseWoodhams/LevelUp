@@ -123,11 +123,9 @@ func NormalizeModeLabel(raw string, mapLabels ...string) string {
 // "Slayer on Streets" sur la vue détail est née d'une cascade ad hoc.
 //
 // Retourne nil si les deux sources sont vides après normalisation.
-func ResolveModeUI(pairName, pairNameFR *string) *string {
+func ResolveModeUI(pairName, _ *string) *string {
 	src := ""
-	if pairNameFR != nil && *pairNameFR != "" {
-		src = *pairNameFR
-	} else if pairName != nil {
+	if pairName != nil {
 		src = *pairName
 	}
 	out := NormalizeModeLabel(src)
@@ -149,11 +147,11 @@ func ResolveModeUI(pairName, pairNameFR *string) *string {
 // "- Forge"), on retombe sur la valeur brute trimée au lieu de perdre le libellé.
 // Un pair_name / game_variant réel porte toujours un token de mode, donc ce repli
 // ne se déclenche pas sur les données de production (iso-comportement effectif).
-func ResolveModeUIWithVariant(pairName, pairNameFR, variantName, variantNameFR *string) *string {
-	if v := resolveModeSource(pairNameFR, pairName); v != nil {
+func ResolveModeUIWithVariant(pairName, _, variantName, _ *string) *string {
+	if v := resolveModeSource(nil, pairName); v != nil {
 		return v
 	}
-	return resolveModeSource(variantNameFR, variantName)
+	return resolveModeSource(nil, variantName)
 }
 
 // resolveModeSource prend la première source non vide (préférence au 1er argument

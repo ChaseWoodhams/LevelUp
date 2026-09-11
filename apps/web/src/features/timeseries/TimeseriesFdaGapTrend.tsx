@@ -161,7 +161,7 @@ export interface TimeseriesFdaGapTrendProps {
   title?: ReactNode
   emptyMessage?: string
   labels: FdaGapCumulativeLabels
-  /** Locale d'affichage ('fr' | 'en') pour le formatage du KPI (séparateur décimal). */
+  /** Locale d'affichage ('en' | 'en') pour le formatage du KPI (séparateur décimal). */
   locale: string
 }
 
@@ -215,7 +215,7 @@ export function TimeseriesFdaGapTrend({
       title={
         <span className="flex items-center gap-1.5">
           {title}
-          <InfoTooltip content={<FdaGapTooltipText locale={locale === 'en' ? 'en' : 'fr'} />} />
+          <InfoTooltip content={<FdaGapTooltipText locale={'en'} />} />
         </span>
       }
       option={option}

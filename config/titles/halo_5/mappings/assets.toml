@@ -32,41 +32,41 @@ schema_version = 1
 # =============================================================================
 
 [assets.cadence.daily]
-labels = { en = "Daily", fr = "Quotidien" }
+labels = { en = "Daily" }
 display_order = 10
 
 [assets.cadence.weekly]
-labels = { en = "Weekly", fr = "Hebdomadaire" }
+labels = { en = "Weekly" }
 display_order = 20
 
 [assets.cadence.monthly]
-labels = { en = "Monthly", fr = "Mensuel" }
+labels = { en = "Monthly" }
 display_order = 30
 
 [assets.cadence.free]
-labels = { en = "Free", fr = "Libre" }
+labels = { en = "Free" }
 display_order = 40
 
 [assets.prestige_level."0"]
-labels = { en = "Recruit", fr = "Recrue" }
+labels = { en = "Recruit" }
 display_order = 10
 
 [assets.prestige_level."1"]
-labels = { en = "Soldier", fr = "Soldat" }
+labels = { en = "Soldier" }
 display_order = 20
 
 [assets.prestige_level."2"]
-labels = { en = "Veteran", fr = "Vétéran" }
+labels = { en = "Veteran" }
 display_order = 30
 
 [assets.prestige_level."3"]
-labels = { en = "Specialist", fr = "Spécialiste" }
+labels = { en = "Specialist" }
 display_order = 40
 
 [assets.prestige_level."4"]
-labels = { en = "Elite", fr = "Élite" }
+labels = { en = "Elite" }
 display_order = 50
 
 [assets.prestige_level."5"]
-labels = { en = "Legendary", fr = "Légendaire" }
+labels = { en = "Legendary" }
 display_order = 60

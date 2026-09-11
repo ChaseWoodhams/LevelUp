@@ -251,7 +251,7 @@ function buildXpHistoryOption(
 ): EChartsCoreOption {
   const tc = getEChartsThemeColors()
   const axisBase = getAxisBase(tc)
-  const intlLocale = toIntlLocale(locale)
+  const intlLocale = toIntlLocale()
 
   // Map seriesIndex → meta pour le tooltip custom.
   const metaByIdx = new Map<number, XpSeriesMeta>()

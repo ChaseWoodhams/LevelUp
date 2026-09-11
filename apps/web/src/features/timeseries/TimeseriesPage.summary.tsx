@@ -154,7 +154,7 @@ export function TimeseriesSummaryTab({
             labels={{
               win: outcomeLabels.win,
               loss: outcomeLabels.loss,
-              tie: fieldMappings?.outcomes?.tie?.label ?? 'Égalité',
+              tie: fieldMappings?.outcomes?.tie?.label ?? 'Tie',
               dnf: outcomeLabels.unknown,
             }}
             dominanceLabels={dominanceLabels}
@@ -197,7 +197,7 @@ export function TimeseriesSummaryTab({
       {/* Durée de vie moyenne (gauche) | Assistances (droite) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <TimeseriesAvgLifeTrend
-          title={fieldMappings?.fields['avg_life_seconds']?.label ?? 'Durée de vie moyenne'}
+          title={fieldMappings?.fields['avg_life_seconds']?.label ?? 'Average lifetime'}
           emptyMessage={emptyMsg}
           rows={data.match_rows ?? []}
           lifeLabel={t('timeseries.summary.avg_life_axis')}
@@ -279,7 +279,7 @@ export function TimeseriesSummaryTab({
           fieldMappings?.fields['win_rate']?.label ??
           t('timeseries.summary.win_rate_label')
         }
-        mmrLabel={fieldMappings?.fields['team_mmr']?.label ?? 'MMR équipe'}
+        mmrLabel={fieldMappings?.fields['team_mmr']?.label ?? 'Team MMR'}
         showMmr={hasTeamMmr}
       />
 

@@ -5,7 +5,7 @@ package squadagg
 // packages disjoints après extraction K3b ; ce sont des littéraux de vocabulaire,
 // pas de la logique).
 const (
-	ExpTypePVPRanked   = "PVP classé"
-	ExpTypePVPUnranked = "PVP non classé"
+	ExpTypePVPRanked   = "Ranked PvP"
+	ExpTypePVPUnranked = "Unranked PvP"
 	ExpTypePVE         = "PVE"
 )

@@ -119,7 +119,7 @@ func TestMedalReaders_FRParity_LookupByIDs_vs_ListMedalsByTitle(t *testing.T) {
 	}
 
 	lookup := NewMedalDefinitionsRepo(&PlayerDB{Metadata: db})
-	got, err := lookup.LookupByIDs(ctx, []int64{500}, "fr")
+	got, err := lookup.LookupByIDs(ctx, []int64{500}, "en")
 	if err != nil {
 		t.Fatalf("LookupByIDs(fr): %v", err)
 	}
@@ -134,8 +134,8 @@ func TestMedalReaders_FRParity_LookupByIDs_vs_ListMedalsByTitle(t *testing.T) {
 	for i := range list {
 		if list[i].ID == "500" {
 			listMedal = &canonicalAssetMetaShim{
-				labelFR: list[i].NameFR,
-				descFR:  list[i].DescriptionFR,
+				labelEN: list[i].NameEN,
+				descEN:  list[i].Description,
 			}
 			break
 		}
@@ -145,26 +145,26 @@ func TestMedalReaders_FRParity_LookupByIDs_vs_ListMedalsByTitle(t *testing.T) {
 	}
 
 	// Le label/description résolus par LookupByIDs(fr) sont les valeurs FR.
-	if got[500].Label != "Tir Parfait" {
-		t.Errorf("LookupByIDs(fr) label = %q, want Tir Parfait", got[500].Label)
+	if got[500].Label != "Perfect Kill" {
+		t.Errorf("LookupByIDs(en) label = %q, want Perfect Kill", got[500].Label)
 	}
-	if got[500].Description != "Une élimination sans faille" {
-		t.Errorf("LookupByIDs(fr) description = %q, want Une élimination sans faille", got[500].Description)
+	if got[500].Description != "A flawless takedown" {
+		t.Errorf("LookupByIDs(en) description = %q, want A flawless takedown", got[500].Description)
 	}
 
 	// PARITÉ : ListMedalsByTitle expose les MÊMES valeurs FR (colonnes name_fr /
 	// description_fr de l'AssetMeta).
-	if listMedal.labelFR != got[500].Label {
-		t.Errorf("parité label FR : ListMedalsByTitle=%q, LookupByIDs=%q", listMedal.labelFR, got[500].Label)
+	if listMedal.labelEN != got[500].Label {
+		t.Errorf("English label parity: ListMedalsByTitle=%q, LookupByIDs=%q", listMedal.labelEN, got[500].Label)
 	}
-	if listMedal.descFR != got[500].Description {
-		t.Errorf("parité description FR : ListMedalsByTitle=%q, LookupByIDs=%q", listMedal.descFR, got[500].Description)
+	if listMedal.descEN != got[500].Description {
+		t.Errorf("English description parity: ListMedalsByTitle=%q, LookupByIDs=%q", listMedal.descEN, got[500].Description)
 	}
 }
 
 // canonicalAssetMetaShim isole les champs FR comparés dans le test de parité
 // (évite d'importer le package canonical dans ce fichier de test du package duckdb).
 type canonicalAssetMetaShim struct {
-	labelFR string
-	descFR  string
+	labelEN string
+	descEN  string
 }

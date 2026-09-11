@@ -14,7 +14,6 @@ import type { MediaItemRow } from '@/lib/api/types'
 import { useAppShellStore } from '@/stores/appShellStore'
 import { intlLocale } from '@/lib/formatters'
 import { playerScopedHref, useTitleSlug } from '@/lib/title-routing'
-import type { ManifestLocale } from '@/lib/i18n/format'
 import { AlertDialog } from '@/components/ui/alert-dialog'
 import { MediaLikeButton } from './MediaViewer'
 import { getMediaModalsText } from './i18n-modals'
@@ -69,14 +68,14 @@ const ANIM_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)'
 const WINDOW_RADIUS = 2
 const IMAGE_AUTOCHAIN_DELAY_MS = 7000
 
-function formatHeading(item: MediaItemRow, index: number, total: number, locale: ManifestLocale) {
+function formatHeading(item: MediaItemRow, index: number, total: number) {
   // Format court HH:MM JJ/MM/AA (cohérent avec formatMediaDate des thumbnails).
   const raw = item.capture_end_utc ?? item.match_start_time
   let dateStr: string | null = null
   if (raw) {
     const d = new Date(raw)
     if (!Number.isNaN(d.getTime())) {
-      const loc = intlLocale(locale)
+      const loc = intlLocale()
       const datePart = d.toLocaleDateString(loc, { day: '2-digit', month: '2-digit', year: '2-digit' })
       const timePart = d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' })
       dateStr = `${timePart} ${datePart}`
@@ -163,8 +162,8 @@ function ClipPlayer({ filePath, basename, isCenter, relPos, videoRef, onEnded, a
         video.src = filePath
         return
       }
-      log.warn('hls:unsupported', 'Lecture HLS non supportée par ce navigateur', { filePath })
-      setError('Lecture HLS non supportée par ce navigateur')
+      log.warn('hls:unsupported', 'HLS playback not supported by this browser', { filePath })
+      setError('HLS playback not supported by this browser')
       return
     }
 
@@ -185,14 +184,14 @@ function ClipPlayer({ filePath, basename, isCenter, relPos, videoRef, onEnded, a
       const tracks = data.audioTracks.map((t, i) => ({ id: i, name: t.name || t.lang || `Audio ${i + 1}` }))
       setAudioTracks(tracks)
       setActiveAudio(hls.audioTrack)
-      log.debug('pistes audio reçues', { count: tracks.length, names: tracks.map((t) => t.name) })
+      log.debug('audio tracks received', { count: tracks.length, names: tracks.map((t) => t.name) })
     })
     hls.on(Hls.Events.ERROR, (_evt, data) => {
       if (data.fatal) {
-        log.error('hls:fatal', 'Erreur fatale du flux HLS', {
+        log.error('hls:fatal', 'Fatal HLS stream error', {
           filePath, type: data.type, details: data.details,
         })
-        setError('Erreur de lecture du flux HLS')
+        setError('HLS stream playback error')
       }
     })
     return () => {
@@ -292,10 +291,10 @@ function ClipPlayer({ filePath, basename, isCenter, relPos, videoRef, onEnded, a
           if (isHls) return // les erreurs HLS passent par Hls.Events.ERROR
           const code = e.currentTarget.error?.code
           const msg =
-            code === 4 ? 'Format vidéo non supporté par le navigateur'
-            : code === 3 ? 'Erreur de décodage de la vidéo'
-            : code === 2 ? 'Erreur réseau lors du chargement'
-            : 'Vidéo inaccessible'
+            code === 4 ? 'Video format not supported by the browser'
+            : code === 3 ? 'Video decoding error'
+            : code === 2 ? 'Network error while loading'
+            : 'Video unavailable'
           log.warn('video:decode_error', msg, { filePath, code })
           setError(msg)
         }}
@@ -375,10 +374,9 @@ export function CoverFlowModal({
   onDelete,
   deleteBusy = false,
 }: CoverFlowModalProps) {
-  const locale = useAppShellStore((s) => s.locale)
   const isAdmin = useAppShellStore((s) => s.isAdmin)
   const titleSlug = useTitleSlug()
-  const text = getMediaModalsText(locale)
+  const text = getMediaModalsText()
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   // L'identité de l'item courant est suivie via son file_path (stable),
   // pas via un index (qui peut changer si l'array items est réordonné).
@@ -480,7 +478,7 @@ export function CoverFlowModal({
 
   const total = globalTotal ?? items.length
   const globalIndex = globalIndexOffset + committedIdx
-  const heading = currentItem ? formatHeading(currentItem, globalIndex, total, locale) : ''
+  const heading = currentItem ? formatHeading(currentItem, globalIndex, total) : ''
   const currentHasMatch = Boolean(currentItem?.match_id)
   const isOnCurrentMatchPage = currentHasMatch && currentMatchId === currentItem?.match_id
   const showViewMatchLink = currentHasMatch && !isOnCurrentMatchPage && Boolean(playerSlug) && Boolean(currentItem?.match_id)

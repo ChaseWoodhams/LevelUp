@@ -56,7 +56,7 @@ function render(identity: HomeSpartanIdentity | null) {
     <ExplorerTargetIdentityBanner
       identity={identity}
       gamertag="TargetPlayer"
-      identityUnavailableLabel="Identité Spartan non disponible"
+      identityUnavailableLabel="Spartan identity not available"
       identityUnavailableDescription="Connexion Halo requise."
     />,
   )
@@ -118,7 +118,7 @@ describe('ExplorerTargetIdentityBanner', () => {
     render(null)
 
     expect(screen.getByText('TargetPlayer')).toBeInTheDocument()
-    expect(screen.getByText('Identité Spartan non disponible')).toBeInTheDocument()
+    expect(screen.getByText('Spartan identity not available')).toBeInTheDocument()
     expect(screen.queryByTestId('explorer-target-adornment-image')).toBeNull()
     expect(screen.queryByTestId('explorer-target-emblem')).toBeNull()
   })
@@ -128,7 +128,7 @@ describe('ExplorerTargetIdentityBanner', () => {
   it('affiche la barre de progression carrière dès que career_rank existe (rang normal)', () => {
     render(IDENTITY_FULL) // is_max_rank: false
     expect(screen.getByTestId('explorer-target-rank-progress-fill')).toBeInTheDocument()
-    expect(screen.getByText(/Progression vers/)).toBeInTheDocument()
+    expect(screen.getByText(/Progress towards/)).toBeInTheDocument()
   })
 
   it('au rang max (Héros) : XP de carrière totale à gauche + un SEUL "Rang max"', () => {
@@ -144,7 +144,7 @@ describe('ExplorerTargetIdentityBanner', () => {
     })
     expect(screen.getByTestId('explorer-target-rank-progress-fill')).toBeInTheDocument()
     // Un seul "Rang max" (au bout de la barre composite), pas trois (cf. retour user).
-    expect(screen.getAllByText('Rang max')).toHaveLength(1)
+    expect(screen.getAllByText('Max rank')).toHaveLength(1)
     // L'XP de carrière totale (« le grand nombre ») est affichée, pas « 0 XP ».
     expect(screen.getByText(/XP/)).toBeInTheDocument()
     expect(screen.queryByText('0 XP')).not.toBeInTheDocument()
@@ -156,8 +156,8 @@ describe('ExplorerTargetIdentityBanner', () => {
       highest_csr: { rating_value: 1500, tier_label: 'Onyx', measurement_matches_remaining: 0 },
       highest_lusr: { rating_value: 1600, tier_label: 'Diamant III', measurement_matches_remaining: 0 },
     })
-    expect(screen.getByText('Meilleur CSR')).toBeInTheDocument()
-    expect(screen.getByText('Meilleur LUSR')).toBeInTheDocument()
+    expect(screen.getByText('Highest CSR')).toBeInTheDocument()
+    expect(screen.getByText('Highest LUSR')).toBeInTheDocument()
   })
 })
 
@@ -210,7 +210,7 @@ describe('ExplorerTargetIdentityBanner — portes transitoires fail-closed (anti
     setTitle('halo_infinite', [mkTitle('halo_infinite', [])])
     const { container } = render(null)
     expect(maskSrcs(container)).toHaveLength(0)
-    expect(screen.getByText('Identité Spartan non disponible')).toBeInTheDocument()
+    expect(screen.getByText('Spartan identity not available')).toBeInTheDocument()
   })
 
   it('switch à chaud H5 -> Infinite : aucun asset /titles/halo_5/ ne reste dans le DOM', () => {

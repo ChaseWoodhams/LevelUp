@@ -17,7 +17,7 @@ import { tokenVar, type SemanticToken } from './semantic-tokens'
  */
 export function resolveToken(token: SemanticToken): string {
   if (typeof document === 'undefined') {
-    log.warn(`ssr:${token}`, `resolveToken appelé côté serveur pour "${token}" — retourne chaîne vide`)
+    log.warn(`ssr:${token}`, `resolveToken called server-side for "${token}" — returning an empty string`)
     return ''
   }
 
@@ -28,7 +28,7 @@ export function resolveToken(token: SemanticToken): string {
   if (!value) {
     log.error(
       `unresolved:${token}`,
-      `Token "${token}" non résolu (CSS var absente). applyPalette() a-t-il été appelé ?`,
+      `Token "${token}" unresolved (CSS var missing). Was applyPalette() called?`,
     )
     return ''
   }

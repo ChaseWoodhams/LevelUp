@@ -44,18 +44,18 @@ func TestBuildMatchHeader_LocaleAwareLabels(t *testing.T) {
 		t.Errorf("EN StartTimeLabel = %q, want mois EN (Apr)", hEN.StartTimeLabel)
 	}
 
-	// UI FR → comportement historique préservé.
+	// Legacy locale inputs still produce the English-only contract.
 	hFR := buildMatchHeader(ctxkeys.WithLocale(context.Background(), "fr"), "m1", meta, nil, nil, nil, nil, false)
-	if hFR.MapUI != "Bazar" {
-		t.Errorf("FR MapUI = %q, want %q", hFR.MapUI, "Bazar")
+	if hFR.MapUI != "Bazaar" {
+		t.Errorf("legacy locale MapUI = %q, want %q", hFR.MapUI, "Bazaar")
 	}
-	if hFR.ModeUI != "Assassin en equipe" {
-		t.Errorf("FR ModeUI = %q, want %q", hFR.ModeUI, "Assassin en equipe")
+	if hFR.ModeUI != "Team Slayer" {
+		t.Errorf("legacy locale ModeUI = %q, want %q", hFR.ModeUI, "Team Slayer")
 	}
-	if hFR.PlaylistLabel != "Partie rapide" {
-		t.Errorf("FR PlaylistLabel = %q, want %q", hFR.PlaylistLabel, "Partie rapide")
+	if hFR.PlaylistLabel != "Quick Play" {
+		t.Errorf("legacy locale PlaylistLabel = %q, want %q", hFR.PlaylistLabel, "Quick Play")
 	}
-	if !strings.Contains(hFR.StartTimeLabel, "avr.") {
-		t.Errorf("FR StartTimeLabel = %q, want mois FR (avr.)", hFR.StartTimeLabel)
+	if !strings.Contains(hFR.StartTimeLabel, "Apr") {
+		t.Errorf("legacy locale StartTimeLabel = %q, want English month (Apr)", hFR.StartTimeLabel)
 	}
 }

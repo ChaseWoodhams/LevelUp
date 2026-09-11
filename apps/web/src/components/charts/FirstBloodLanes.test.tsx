@@ -188,10 +188,10 @@ describe('FirstBloodLanes — libellés et tooltips', () => {
     const label = option.yAxis.axisLabel.formatter('Fast', 0)
     const lines = label.split('\n')
     expect(lines[0]).toBe('{gt|Fast}')
-    expect(lines[1]).toBe('{med|méd. }{kill|30s}{med| → }{death|1m00}')
-    expect(lines[2]).toBe("{gapPos|+30s d'avance}")
+    expect(lines[1]).toBe('{med|med. }{kill|30s}{med| → }{death|1m00}')
+    expect(lines[2]).toBe("{gapPos|+30s ahead}")
     // Lane en retard → style rouge et signe moins typographique.
-    expect(option.yAxis.axisLabel.formatter('Slow', 1)).toContain("{gapNeg|−40s d'avance}")
+    expect(option.yAxis.axisLabel.formatter('Slow', 1)).toContain('{gapNeg|−40s ahead}')
   })
 
   it('tooltip item : match, médiane (couverture n/total) et fenêtre d’avance', async () => {
@@ -200,14 +200,14 @@ describe('FirstBloodLanes — libellés et tooltips', () => {
     const [gapS, killS, , medKillS] = option.series
 
     expect(killS.tooltip?.formatter({ data: killS.data[0] })).toBe(
-      'Fast · match m1 · premier frag 20s',
+      'Fast · match m1 · first kill 20s',
     )
     // Fast : 2 premiers frags exploitables sur 3 matchs.
     expect(medKillS.tooltip?.formatter({ data: medKillS.data[0] })).toContain(
-      'médiane premier frag 30s (2/3 matchs)',
+      'median first kill 30s (2/3 matches)',
     )
     expect(gapS.tooltip?.formatter({ data: gapS.data[0] })).toContain(
-      "fenêtre d'avance médiane : +30s",
+      'median advance window: +30s',
     )
   })
 
@@ -242,7 +242,7 @@ describe('FirstBloodLanes — libellés et tooltips', () => {
 describe('FirstBloodLanes — états', () => {
   it('rend le titre par défaut du manifest', async () => {
     await renderChart()
-    expect(screen.getByText('Premier frag / première mort')).toBeTruthy()
+    expect(screen.getByText('First kill / first death')).toBeTruthy()
   })
 
   it('affiche l’état vide quand aucun événement n’est exploitable', () => {
@@ -254,7 +254,7 @@ describe('FirstBloodLanes — états', () => {
       />,
     )
     expect(screen.getByTestId('chart-card-empty')).toBeTruthy()
-    expect(screen.getByText(/Aucun premier frag/)).toBeTruthy()
+    expect(screen.getByText(/No first kill or first death in this scope/)).toBeTruthy()
   })
 
   it('dimensionne la carte sur le nombre de lanes (54 px par bande)', async () => {

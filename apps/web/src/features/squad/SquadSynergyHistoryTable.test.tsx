@@ -67,7 +67,7 @@ afterEach(() => {
   navigateMock.mockClear()
 })
 
-const WAYPOINT_LABEL = 'Ouvrir sur Halo Waypoint'
+const WAYPOINT_LABEL = 'Open on Halo Waypoint'
 
 describe('SquadSynergyHistoryTable — non-régression', () => {
   it('rend les colonnes de base (date, carte, résultat)', () => {
@@ -75,7 +75,7 @@ describe('SquadSynergyHistoryTable — non-régression', () => {
       <SquadSynergyHistoryTable rows={[makeRow()]} playerSlug="Chocoboflor" />,
     )
     expect(screen.getByText('Live Fire')).toBeInTheDocument()
-    expect(screen.getByText('Victoire')).toBeInTheDocument()
+    expect(screen.getByText('Win')).toBeInTheDocument()
   })
 
   it('bloc vide : message noBlockData, pas de crash', () => {
@@ -115,7 +115,7 @@ describe('SquadSynergyHistoryTable — tri CLIENT par en-têtes (I16)', () => {
 
   it('clic sur « Carte » trie alphabétiquement ASC, un 2e clic bascule en DESC', () => {
     renderWithProviders(<SquadSynergyHistoryTable rows={rowsForSort()} playerSlug="me" />)
-    const btn = screen.getByRole('button', { name: 'Trier par Carte' })
+    const btn = screen.getByRole('button', { name: 'Sort by Map' })
     fireEvent.click(btn)
     expect(bodyMapOrder(names)).toEqual(['Alpha', 'Bravo', 'Charlie'])
     expect(btn.closest('th')).toHaveAttribute('aria-sort', 'ascending')

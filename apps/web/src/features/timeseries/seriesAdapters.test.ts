@@ -7,7 +7,6 @@ import {
   heatmapCellsToSeries,
   distributionBucketsToSeries,
   correlationPointsToSeries,
-  DOW_LABELS_FR,
   DOW_LABELS_EN,
 } from './seriesAdapters'
 import type {
@@ -60,11 +59,11 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries(cells, {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     const dps = series[0].datapoints
-    expect(dps[0].y).toBe('Lun')
-    expect(dps[1].y).toBe('Dim')
+    expect(dps[0].y).toBe('Mon')
+    expect(dps[1].y).toBe('Sun')
   })
 
   it('résout day_of_week via dowLabels EN', () => {
@@ -82,7 +81,7 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries(cells, {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     expect(series[0].datapoints[0].x).toBe('09')
     expect(series[0].datapoints[1].x).toBe('22')
@@ -92,7 +91,7 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries(cells, {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     expect(series[0].datapoints[0].value).toBe(3)
     expect(series[0].datapoints[0].detail).toEqual({ avg_kd: 1.4 })
@@ -102,7 +101,7 @@ describe('heatmapCellsToSeries', () => {
     const series = heatmapCellsToSeries([], {
       key: 'k',
       name: 'n',
-      dowLabels: DOW_LABELS_FR,
+      dowLabels: DOW_LABELS_EN,
     })
     expect(series).toHaveLength(1)
     expect(series[0].datapoints).toEqual([])
@@ -111,7 +110,7 @@ describe('heatmapCellsToSeries', () => {
   it('retombe sur le numéro brut si dow hors plage', () => {
     const series = heatmapCellsToSeries(
       [{ day_of_week: 99, hour: 0, count: 1, avg_kd: 0 }],
-      { key: 'k', name: 'n', dowLabels: DOW_LABELS_FR },
+      { key: 'k', name: 'n', dowLabels: DOW_LABELS_EN },
     )
     expect(series[0].datapoints[0].y).toBe('99')
   })
@@ -147,7 +146,7 @@ describe('distributionBucketsToSeries', () => {
 })
 
 describe('correlationPointsToSeries', () => {
-  const labels = { win: 'Victoires', loss: 'Défaites', unknown: 'Inconnu' }
+  const labels = { win: 'Victoires', loss: 'Losses', unknown: 'Inconnu' }
   // P7.1 (revue 2026-04-29) : DTO renommé `label` (composite "kills_vs_kd")
   // → metric_x_key/metric_y_key séparés, et x/y → x_value/y_value.
   // Le caller assemble le composite "metric_x_vs_metric_y" pour filtrer.
@@ -176,7 +175,7 @@ describe('correlationPointsToSeries', () => {
     const series = correlationPointsToSeries(points, 'kills_vs_kd', labels)
     expect(series.map((s) => (s.meta as { gamertag: string }).gamertag)).toEqual([
       'Victoires',
-      'Défaites',
+      'Losses',
       'Inconnu',
     ])
   })

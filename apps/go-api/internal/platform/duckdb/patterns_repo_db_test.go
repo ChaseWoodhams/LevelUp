@@ -220,7 +220,6 @@ func newH5PatternsTestPDB(t *testing.T) *PlayerDB {
 // (= Key = Mode, posé au handler) reste cohérent (F7 étendu à H5, G2).
 func TestPatternsRepo_LoadRows_H5ModeFromVariant(t *testing.T) {
 	repo := NewPatternsRepo(newH5PatternsTestPDB(t))
-
 	rows, err := repo.LoadRows(context.Background(), 50)
 	if err != nil {
 		t.Fatalf("LoadRows: %v", err)
@@ -237,11 +236,11 @@ func TestPatternsRepo_LoadRows_H5ModeFromVariant(t *testing.T) {
 		byMatch[r.MatchID] = r.Mode
 	}
 	// FR-first : "Assassin" (fr-FR de vSlayer), "Bases" (fr-FR de vStrong).
-	if byMatch["h1"] != "Assassin" || byMatch["h2"] != "Assassin" {
-		t.Errorf("Slayer H5 : modes = %q/%q, want Assassin/Assassin", byMatch["h1"], byMatch["h2"])
+	if byMatch["h1"] != "Slayer" || byMatch["h2"] != "Slayer" {
+		t.Errorf("Slayer H5: modes = %q/%q, want Slayer/Slayer", byMatch["h1"], byMatch["h2"])
 	}
-	if byMatch["h3"] != "Bases" {
-		t.Errorf("Strongholds H5 : mode = %q, want Bases", byMatch["h3"])
+	if byMatch["h3"] != "Strongholds" {
+		t.Errorf("Strongholds H5: mode = %q, want Strongholds", byMatch["h3"])
 	}
 }
 

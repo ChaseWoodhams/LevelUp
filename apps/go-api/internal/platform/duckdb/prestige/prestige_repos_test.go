@@ -420,8 +420,9 @@ func TestPrestigeTemplateRepo_ReplaceListGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetByID: %v", err)
 	}
-	if got.LabelFR != "Reste affûté" {
-		t.Errorf("got label %q", got.LabelFR)
+	// English-only: the reader serves label_en, and the legacy LabelFR field mirrors it.
+	if got.LabelEN != "Stay sharp" || got.LabelFR != "Stay sharp" {
+		t.Errorf("got labels en=%q fr=%q, want both %q", got.LabelEN, got.LabelFR, "Stay sharp")
 	}
 }
 

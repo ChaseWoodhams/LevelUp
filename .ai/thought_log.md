@@ -61486,7 +61486,7 @@ the e01d80a1 life split, each now measurable against this check.
 
 ## [2026-09-11] Study archiver: map names from Halo when metadata is locked, and a recapture command
 
-**Status**: In progress (code complete; the real recapture run and the hourly schedule follow).
+**Status**: Complete (real run and hourly schedule recorded under "Real run" below).
 
 **Technical decision**: 139 of the archive's 145 matches were recorded `unsupported_map` with no
 chunks left on disk. Two causes, two fixes.
@@ -61514,8 +61514,19 @@ failures). `go build`, `go vet`, `go test ./cmd/study-archiver`, gofmt 1.26.1,
 (the API refreshed it this morning) and the API's refresh loop reloads the token store, so the
 archiver can run beside it.
 
-**Next step**: build the binary from this commit, run `recapture` on the real archive, then
-schedule `watch` hourly.
+**Real run (2026-09-11, binary built from a83987578)**: `recapture` took 139 candidates in
+~55 min: 30 archived, 0 failed, 109 skipped, every map name resolved online (30/30 archived,
+0 lookup failures). The archive went from 6 to 36 replays (Streets 25, Aquarius 10,
+Behemoth 1). The 109 skips are all `unsupported_map`: maps with no quant bounds in
+`map_quant_bounds.json` — Live Fire 28, Recharge 23, Lattice 19, Origin 13, Vacancy 11,
+Solitude 8, Argyle 5, Empyrean 2. Their chunks are now on disk, so adding bounds (and
+`rebuild`) recovers them without the network. Ground truth over the 36: 0 over-named lives,
+4,105 / 4,909 named (83.6%), gap −5..+13. `watch` is a Windows scheduled task
+(`LevelUp\study-archiver watch`, hourly, `data/study/study-watch.cmd` → `data/study/watch.log`);
+the 12:00 run completed with result 0.
+
+**Next step**: quant bounds for the eight maps above (`cmd/mapquant-build`), then `rebuild` their
+matches.
 
 ---
 
@@ -61546,3 +61557,37 @@ sample). The 10 m replay guard stays as a backstop against mis-decoded records.
 
 **Next step**: rebuild the archived replays so served artifacts carry the full flights; the
 ground-truth check does not cover projectiles, so the bench above is their measure.
+
+---
+
+## [2026-09-11] Team per player entity: read cleanly, but the entity does not name its player
+
+**Status**: In progress (the read is production code; the link to a player is not found).
+
+**Technical decision**: `filmdec.ScanFilmTeamDesignators` exports the ti=9 team read the probes
+established (47-bit header, `consumeDefaultStateTI9`, has-components bit, archetype found by
+component NAME, records that desync are not read). Per slot it keeps every value read and
+reports a team only when all reads agree — no vote.
+
+**Results** (six archived films):
+- Every film: 8 managed-player slots, every read stable (28 to 52 keyframe reads per slot),
+  split 4-4. The first four slots are always team 0 and the last four team 1 (Streets slots
+  1325..1339 step 2, Aquarius 1305..1319). 36e80b83 also has slot 8 with value 2, read once.
+- `TestTeamLinkMeasurement` joined that with the film's player index (`ScanFilmPlayerIndices`,
+  0 disagreements on all six) and the official `team_side`. Both candidate links are REFUTED:
+  slot rank = player index gives designator 0 -> t0:10 / t1:14 and 1 -> t0:14 / t1:9;
+  slot − first slot = player index gives 0 -> t0:9 / t1:11. Chance, not a link.
+- `TestTeamArchetypeDump`: ti=9 has ten components, all cosmetic or team (color override,
+  flags, scoreboard flair, season, campaign progress…). None references a player or a biped.
+  Entities are allocated in team order, so the slot says the team and nothing more.
+
+**Conclusion**: the film's team read cannot be tied to a player from ti=9 alone. The per-player
+entity is ti=5 (`player-respawn-timer-component`, `player-lives-remaining-component`,
+`player-representation-component`, `player-engine-loadout-index-component`); its keyframe
+header is not calibrated (only ti=9 and ti=35 are). A link through ti=5 needs that calibration
+first, then a test against the death feed, which carries xuids (a respawn timer starting at
+each death would tie a ti=5 slot to a player).
+
+**Next step**: replays can take team from the official stats directly (the archive roster
+carries `team_side` per xuid and the film gives xuid -> player index); the film read then
+serves as a 4-4 consistency check, not as the source.

@@ -44,10 +44,11 @@ type Projectile struct {
 // le saut vaut EXACTEMENT l'étendue Y de la carte (52,88 m pour `sgh_streets`, dont les bornes
 // de quantification sont Y ∈ [-23,018 ; 29,867]), l'autre axe ne bougeant pas d'un centimètre —
 // par exemple (14,37 ; -23,00) -> (14,97 ; 29,84) en un seul pas de 100 ms, soit 528 m/s.
-// Jamais sur X, toujours sur Y : le quantum Y repasse d'un bord à l'autre. La cause est en
-// amont, dans la déquantification (`filmdec`), et n'est pas corrigée ici ; ce qui est corrigé
-// ici est la PUBLICATION d'une position fausse, qui faisait tracer au client une ligne droite
-// en travers de toute la carte.
+// Jamais sur X, toujours sur Y : le quantum Y repasse d'un bord à l'autre.
+//
+// FIXED UPSTREAM (2026-09-11): filmdec.unwrapLife now follows the wrap, so the decoded flight
+// continues past the box edge. This guard stays as a backstop against a mis-decoded record,
+// which the unwrap cannot tell apart from a real position.
 //
 // 10 m par pas, soit 100 m/s, laisse passer tout projectile du jeu (une grenade tient sous
 // 20 m/s, une roquette sous 30) et ne coupe que l'impossible.
@@ -59,10 +60,10 @@ const projectileMaxStepM = 10
 // par frame — le premier — plutôt que de moyenner : un projectile suit une parabole, et
 // moyenner deux positions distantes de 100 ms couperait le sommet de l'arc.
 //
-// LE VOL S'ARRÊTE AU PREMIER PAS IMPOSSIBLE, il n'est pas recousu : après un repli du quantum,
-// la suite du vol est du mauvais côté de la carte, et rien ne dit où il est réellement passé.
-// C'est la même règle que celle qui gouverne la fin d'un vol : on publie ce qui est lu, et on
-// s'arrête là où le film cesse d'être lisible.
+// LE VOL S'ARRÊTE AU PREMIER PAS IMPOSSIBLE, il n'est pas recousu. The quantum wrap is already
+// undone by filmdec, so an impossible step here is a mis-decoded record, and nothing says where
+// the projectile really went. Same rule as the end of a flight: publish what is read, stop where
+// the film stops being readable.
 func buildProjectiles(tracks []filmdec.ProjectileTrack, origin, step uint64) ([]Projectile, int) {
 	if len(tracks) == 0 {
 		return nil, 0

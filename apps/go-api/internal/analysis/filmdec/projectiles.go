@@ -138,6 +138,7 @@ func ScanFilmWorldObjects(dir string, wr *Vec3Range, typeIndex int) ([]Projectil
 		// dépendre le premier point — donc la naissance — de l'ordre d'arrivée.
 		sort.Slice(pts, func(i, j int) bool { return lessSample(pts[i], pts[j]) })
 		for _, seg := range splitLives(pts) {
+			unwrapLife(seg, wr)
 			out = append(out, ProjectileTrack{Slot: k.slot, Gen: k.gen, Pts: seg})
 		}
 	}
@@ -207,6 +208,45 @@ func splitLives(pts []ProjectileSample) [][]ProjectileSample {
 	}
 	flush(len(pts))
 	return out
+}
+
+// unwrapLife undoes the quantum wrap along one life, in place.
+//
+// WHY A POSITION WRAPS. `object-position-component` is quantised over the map's box:
+// v = lo + (q+0.5)·(hi−lo)/2^w, and only q mod 2^w travels. An object that leaves the box on
+// one axis therefore reappears on the other side, EXACTLY one extent (hi−lo) away, the other
+// axes untouched. Measured on the archived Streets films: jumps of 52.88 m on Y — the Y extent
+// of `sgh_streets` — in one 16 ms sample, i.e. 3,000 m/s.
+//
+// THE RULE. A step larger than half an extent on an axis is a wrap, and every later sample of
+// the life is shifted by one extent to follow it (several crossings accumulate; a return
+// crossing brings the offset back to zero). Half an extent is safe on every catalogued map: the
+// smallest, Aquarius Z, is 18.1 m, so the threshold is 9 m per sample, where a rocket moves under
+// half a metre. The first sample is taken as read — a life born outside the box stays unknowable.
+//
+// Before this, replay.buildProjectiles cut the flight at the first such step: 359 of 2,115
+// flights on the six archived films.
+func unwrapLife(pts []ProjectileSample, wr *Vec3Range) {
+	var ext, offset [3]float32
+	for a := 0; a < 3; a++ {
+		ext[a] = wr[a].Max - wr[a].Min
+	}
+	prev := [3]float32{}
+	for i := range pts {
+		raw := [3]float32{pts[i].X, pts[i].Y, pts[i].Z}
+		if i > 0 {
+			for a := 0; a < 3; a++ {
+				switch d := raw[a] - prev[a]; {
+				case d > ext[a]/2:
+					offset[a] -= ext[a]
+				case d < -ext[a]/2:
+					offset[a] += ext[a]
+				}
+			}
+		}
+		prev = raw
+		pts[i].X, pts[i].Y, pts[i].Z = raw[0]+offset[0], raw[1]+offset[1], raw[2]+offset[2]
+	}
 }
 
 // projSample porte le slot et la génération le temps du regroupement en vies.

@@ -61516,3 +61516,33 @@ archiver can run beside it.
 
 **Next step**: build the binary from this commit, run `recapture` on the real archive, then
 schedule `watch` hourly.
+
+---
+
+## [2026-09-11] Projectile flights follow the quantum wrap instead of stopping at it
+
+**Status**: Complete.
+
+**Technical decision**: `object-position-component` is quantised over the map's box and only
+q mod 2^w travels, so a projectile leaving the box on one axis reappears exactly one extent
+(hi−lo) away. `replay.buildProjectiles` stopped the flight at that step (`projectileMaxStepM`),
+cutting 27-35% of Streets trajectories short. The fix is in the decoder: `filmdec.unwrapLife`
+runs on each life after `splitLives` and, per axis, treats a step above half an extent as a wrap
+and shifts every later sample by one extent (crossings accumulate; a return crossing cancels).
+Half an extent is safe on all 15 catalogued maps (smallest: Aquarius Z, 18.1 m → 9 m per 16 ms
+sample). The 10 m replay guard stays as a backstop against mis-decoded records.
+
+**Results** (new bench `TestProjectileWrapMeasurement`, six archived films):
+- truncated flights 359 → 19 of 2,115; steps jumping over half an extent 445 → 0.
+- 19,419 points now lie outside the box: on Streets all on Y (both ends of the streets, up to
+  40 m past; never X, where buildings stop shots), on Aquarius a few on Z. Players never leave
+  the box (Streets Y −19.9..17.7), and only 10 at-rest endpoints are outside: these are shots
+  flying down the open street ends and timing out, not landings.
+- Control against invented positions: kink rate (step > 4× the flight's median and > 1 m)
+  0.06 per 1000 steps for flights leaving the box (2/33,342) and for flights staying inside
+  (5/79,510). Identical.
+- `go test ./internal/analysis/filmdec ./internal/analysis/replay` green; the golden fixture is
+  frozen decoded inputs (Cliffhanger, extents 113 m) and is unaffected. 3 new unit tests.
+
+**Next step**: rebuild the archived replays so served artifacts carry the full flights; the
+ground-truth check does not cover projectiles, so the bench above is their measure.

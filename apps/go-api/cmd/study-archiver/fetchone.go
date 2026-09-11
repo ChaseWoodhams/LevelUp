@@ -89,6 +89,9 @@ type outcome struct {
 	Shots      int
 	NamedLives int
 	TotalLives int
+	// GroundTruth compares the built replay with the official match stats (groundtruth.go).
+	// Zero, and not compared, when no artifact was built.
+	GroundTruth groundTruth
 	// Settled marks a match a previous run had already reached a FINAL answer on: either
 	// its artifact is on disk, or its film is permanently expired. Nothing was fetched,
 	// built or written this time. A `failed` or skipped match is NOT settled — those are
@@ -154,7 +157,7 @@ func fetchOneWithStats(ctx context.Context, d deps, matchID string, stats map[st
 	}
 	if out.SkipReason == "" {
 		var buildErr error
-		if out, buildErr = buildArtifact(ctx, d, out, mapInfo); buildErr != nil {
+		if out, buildErr = buildArtifact(ctx, d, out, mapInfo, facts.Roster); buildErr != nil {
 			var refused decodeFailure
 			if !errors.As(buildErr, &refused) {
 				// The decoder produced a document and the DISK refused it. Nothing about
@@ -333,7 +336,11 @@ func downloadFilm(ctx context.Context, d deps, prior matchRecord, out *outcome) 
 //
 // Its two failures are different facts, and the caller has to tell them apart: the
 // decoder's refusal is wrapped in a decodeFailure and gets recorded, the disk's is not.
-func buildArtifact(ctx context.Context, d deps, out outcome, mapInfo matchMap) (outcome, error) {
+//
+// roster is the match's official roster, from its stats: the independent death counts every
+// build is checked against (groundtruth.go).
+func buildArtifact(ctx context.Context, d deps, out outcome, mapInfo matchMap,
+	roster []participantRecord) (outcome, error) {
 	filmDir := d.Paths.FilmChunksDir(out.MatchID)
 	doc, err := runBuild(d.Build, out.MatchID, d.Title, filmDir, d.buildOptions(ctx, mapInfo))
 	if err != nil {
@@ -358,6 +365,8 @@ func buildArtifact(ctx context.Context, d deps, out outcome, mapInfo matchMap) (
 		"path", path, "tracks", out.Tracks, "points", out.Points, "shots", out.Shots,
 		"named_lives", out.NamedLives, "total_lives", out.TotalLives,
 		"frames", doc.FrameCount, "durationMs", doc.DurationMS, "bytes", size)
+	out.GroundTruth = compareGroundTruth(doc, roster)
+	logGroundTruth(ctx, out)
 	return out, nil
 }
 
@@ -373,6 +382,7 @@ func recordOutcome(ctx context.Context, d deps, out outcome, facts matchFacts) e
 		ArtifactPath: out.ArtifactPath,
 		Tracks:       out.Tracks, Points: out.Points, Shots: out.Shots,
 		NamedLives: out.NamedLives, TotalLives: out.TotalLives,
+		GroundTruth: groundTruthColumns(out.GroundTruth),
 	}
 	if out.ArtifactPath != "" {
 		built := time.Now().UTC()
@@ -387,7 +397,7 @@ func recordOutcome(ctx context.Context, d deps, out outcome, facts matchFacts) e
 				"match_id", out.MatchID)
 		}
 	}
-	if err := d.Archive.recordMatch(ctx, rec, facts.Roster); err != nil {
+	if err := d.Archive.recordMatch(ctx, rec, withReplayLives(facts.Roster, out.GroundTruth)); err != nil {
 		return err
 	}
 	slog.InfoContext(ctx, "study-archiver: archive row recorded",

@@ -101,7 +101,17 @@ CREATE TABLE IF NOT EXISTS watchlist (
     last_checked TIMESTAMPTZ
 );
 ALTER TABLE matches ADD COLUMN IF NOT EXISTS team0_score INTEGER;
-ALTER TABLE matches ADD COLUMN IF NOT EXISTS team1_score INTEGER;`
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS team1_score INTEGER;
+-- The replay checked against the official match stats (groundtruth.go). NULL when the match
+-- was not compared, never 0: zero over-named lives is a result, not an absence.
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_players INTEGER;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_expected_lives INTEGER;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_named_lives INTEGER;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_over_named INTEGER;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_missing_lives INTEGER;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_unknown_named INTEGER;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS gt_lives_gap INTEGER;
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS replay_named_lives INTEGER;`
 
 // archive is an open handle on the archive database.
 type archive struct {
@@ -166,6 +176,8 @@ type matchRecord struct {
 	Shots        int
 	NamedLives   int
 	TotalLives   int
+	// GroundTruth is the build's replay-versus-stats comparison (groundtruth.go).
+	GroundTruth groundTruthRecord
 }
 
 // participantRecord is one row of `participants`. Team and outcome come from MATCH
@@ -179,6 +191,9 @@ type participantRecord struct {
 	Kills    *int
 	Deaths   *int
 	Assists  *int
+	// ReplayNamedLives is how many lives the replay named for this player, beside the official
+	// Deaths it is checked against. NULL when the build did not compare this player.
+	ReplayNamedLives *int
 }
 
 // recorded reads back what the archive already knows about a match.
@@ -219,4 +234,44 @@ func (a *archive) recorded(ctx context.Context, matchID string) (matchRecord, bo
 	rec.SkipReason = reason(skip.String)
 	rec.ArtifactPath = artifact.String
 	return rec, true, nil
+}
+
+// roster reads back the official roster recorded for a match. A rebuild never reads the match
+// stats again, so this is what it checks the rebuilt replay against.
+func (a *archive) roster(ctx context.Context, matchID string) ([]participantRecord, error) {
+	rows, err := a.db.SQLDb().QueryContext(ctx, `
+        SELECT xuid, gamertag, team, outcome, kills, deaths, assists
+        FROM participants WHERE match_id = ? ORDER BY xuid`, matchID)
+	if err != nil {
+		return nil, fmt.Errorf("reading the roster of %s: %w", matchID, err)
+	}
+	defer func() { _ = rows.Close() }()
+	var out []participantRecord
+	for rows.Next() {
+		var (
+			p                                     participantRecord
+			gamertag                              sql.NullString
+			team, outcome, kills, deaths, assists sql.NullInt64
+		)
+		if err := rows.Scan(&p.XUID, &gamertag, &team, &outcome, &kills, &deaths, &assists); err != nil {
+			return nil, fmt.Errorf("scanning the roster of %s: %w", matchID, err)
+		}
+		p.Gamertag = gamertag.String
+		p.Team, p.Outcome = nullIntPtr(team), nullIntPtr(outcome)
+		p.Kills, p.Deaths, p.Assists = nullIntPtr(kills), nullIntPtr(deaths), nullIntPtr(assists)
+		out = append(out, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("reading the roster of %s: %w", matchID, err)
+	}
+	return out, nil
+}
+
+// nullIntPtr maps a nullable integer column to *int: NULL stays nil, never 0.
+func nullIntPtr(v sql.NullInt64) *int {
+	if !v.Valid {
+		return nil
+	}
+	n := int(v.Int64)
+	return &n
 }

@@ -46,6 +46,12 @@ func rebuildOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 			"already captured - run fetch-one first", matchID)
 	}
 	out.MapName, out.MapModule = rec.MapName, rec.MapModule
+	// The official roster recorded at capture: what the rebuilt replay is checked against,
+	// without reading the match stats again.
+	roster, err := d.Archive.roster(ctx, matchID)
+	if err != nil {
+		return out, err
+	}
 
 	// The chunks, and the refusal that keeps this command honest.
 	out.ChunksWritten = cachedFilmChunks(d.Paths, matchID)
@@ -63,7 +69,7 @@ func rebuildOne(ctx context.Context, d deps, matchID string) (outcome, error) {
 		return out, recordRebuild(ctx, d, rec, out)
 	}
 
-	if out, err = buildArtifact(ctx, d, out, mapInfo); err != nil {
+	if out, err = buildArtifact(ctx, d, out, mapInfo, roster); err != nil {
 		var refused decodeFailure
 		if !errors.As(err, &refused) {
 			// The disk refused the write: nothing about the match changed, so the row is

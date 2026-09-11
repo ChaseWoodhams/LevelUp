@@ -196,6 +196,10 @@ cd apps/study && npm install && npm run dev                   # http://localhost
 cd apps/study && npm run typecheck && npm run test:run
 ```
 
+Every study-archiver build compares the replay with the official match stats (each player's
+named lives against deaths + 1). After any decoder change, rebuild the archived matches and read
+`status`'s "Replay vs official match stats" section: over-named lives must stay at 0.
+
 `watch` est prévu pour le planificateur de l'OS (horaire), pas en démon : une invocation =
 une passe, puis sortie. `status` et `rebuild` ne font AUCUN appel réseau et ne demandent
 aucun credential. Liste des joueurs suivis : `watchlist.toml` à la racine (git-ignoré,

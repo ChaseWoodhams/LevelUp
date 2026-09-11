@@ -188,6 +188,14 @@ Tracked players: `watchlist.toml` at the repo root (git-ignored; model
 `watchlist.example.toml`). Exit codes: 0 archived, 3 skipped for a named reason, 1 failure,
 2 usage.
 
+**Checking a decoder change against ground truth.** Every build (`fetch-one` or `rebuild`)
+compares the replay with Halo's own match stats: each player's named lives against their
+official deaths + 1. The archive keeps the result (`matches.gt_*`,
+`participants.replay_named_lives`), and `status` prints it under "Replay vs official match
+stats". After changing the decoder, rebuild the archived matches and read that section:
+over-named lives must stay at 0 (a life named after the wrong player); missing lives and the
+lives gap (lives the replay segmented minus lives the stats imply) are the work left.
+
 ### `study-server` — serve (`cmd/study-server`)
 
 ```bash

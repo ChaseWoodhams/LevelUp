@@ -65,6 +65,9 @@ func matchColumnValues(rec matchRecord) []any {
 		nullString(rec.ArtifactPath), rec.BuiltAt, nullString(rec.DecoderRev),
 		rec.Tracks, rec.Points, rec.Shots, rec.NamedLives, rec.TotalLives,
 		rec.Team0Score, rec.Team1Score,
+		rec.GroundTruth.Players, rec.GroundTruth.ExpectedLives, rec.GroundTruth.NamedLives,
+		rec.GroundTruth.OverNamed, rec.GroundTruth.MissingLives, rec.GroundTruth.UnknownNamed,
+		rec.GroundTruth.LivesGap,
 	}
 }
 
@@ -85,6 +88,8 @@ func writeMatchRow(ctx context.Context, tx *sql.Tx, rec matchRecord) error {
                 skip_reason = ?, artifact_path = ?, built_at = ?, decoder_rev = ?,
                 tracks = ?, points = ?, shots = ?, named_lives = ?, total_lives = ?,
                 team0_score = ?, team1_score = ?,
+                gt_players = ?, gt_expected_lives = ?, gt_named_lives = ?, gt_over_named = ?,
+                gt_missing_lives = ?, gt_unknown_named = ?, gt_lives_gap = ?,
                 recorded_at = now()
             WHERE match_id = ?`, args...)
 	} else {
@@ -94,8 +99,9 @@ func writeMatchRow(ctx context.Context, tx *sql.Tx, rec matchRecord) error {
                 match_id, short_id, played_at, map_name, map_module, mode, playlist,
                 duration_ms, source_gamertag, film_state, skip_reason, artifact_path,
                 built_at, decoder_rev, tracks, points, shots, named_lives, total_lives,
-                team0_score, team1_score, recorded_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())`, args...)
+                team0_score, team1_score, gt_players, gt_expected_lives, gt_named_lives,
+                gt_over_named, gt_missing_lives, gt_unknown_named, gt_lives_gap, recorded_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())`, args...)
 	}
 	if err != nil {
 		return fmt.Errorf("recording match %s: %w", rec.MatchID, err)
@@ -112,19 +118,30 @@ func writeMatchRow(ctx context.Context, tx *sql.Tx, rec matchRecord) error {
 // rebuild. Those facts belong to the match, not to the build, and a rebuild has nothing new
 // to say about them.
 //
-// The roster is untouched for the same reason: a rebuild cannot have changed who played.
+// The roster's official columns are untouched for the same reason: a rebuild cannot have
+// changed who played. Only replay_named_lives is refreshed, because that number IS the build's.
 func (a *archive) updateBuild(ctx context.Context, prior matchRecord, out outcome,
 	builtAt *time.Time, decoderRev string) error {
 	state, why := stateAfterRebuild(prior, out)
-	res, err := a.db.Exec(ctx, `
+	gt := groundTruthColumns(out.GroundTruth)
+	tx, err := a.db.SQLDb().BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("archive transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }() // no-op once committed
+	res, err := tx.ExecContext(ctx, `
         UPDATE matches SET
             film_state = ?, skip_reason = ?, artifact_path = ?, built_at = ?, decoder_rev = ?,
             tracks = ?, points = ?, shots = ?, named_lives = ?, total_lives = ?,
+            gt_players = ?, gt_expected_lives = ?, gt_named_lives = ?, gt_over_named = ?,
+            gt_missing_lives = ?, gt_unknown_named = ?, gt_lives_gap = ?,
             recorded_at = now()
         WHERE match_id = ?`,
 		string(state), nullString(string(why)),
 		nullString(out.ArtifactPath), builtAt, nullString(decoderRev),
 		out.Tracks, out.Points, out.Shots, out.NamedLives, out.TotalLives,
+		gt.Players, gt.ExpectedLives, gt.NamedLives, gt.OverNamed,
+		gt.MissingLives, gt.UnknownNamed, gt.LivesGap,
 		out.MatchID)
 	if err != nil {
 		return fmt.Errorf("recording the rebuild of %s: %w", out.MatchID, err)
@@ -134,6 +151,47 @@ func (a *archive) updateBuild(ctx context.Context, prior matchRecord, out outcom
 	// underneath us, which the operator has to be told about rather than left to infer.
 	if n, rErr := res.RowsAffected(); rErr == nil && n == 0 {
 		return fmt.Errorf("recording the rebuild of %s: the archive row disappeared mid-run", out.MatchID)
+	}
+	if err := writeReplayLives(ctx, tx, out.MatchID, out.GroundTruth); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("archive commit (%s): %w", out.MatchID, err)
+	}
+	return nil
+}
+
+// writeReplayLives refreshes, row by row, the replay-named lives of every recorded player of a
+// match: the build's own number beside the official deaths, NULL for a player the build did not
+// compare. The xuids are listed FIRST and the cursor closed before any update, as pruneRoster
+// does.
+func writeReplayLives(ctx context.Context, tx *sql.Tx, matchID string, gt groundTruth) error {
+	rows, err := tx.QueryContext(ctx, `SELECT xuid FROM participants WHERE match_id = ?`, matchID)
+	if err != nil {
+		return fmt.Errorf("listing the roster of %s: %w", matchID, err)
+	}
+	var xuids []string
+	for rows.Next() {
+		var xuid string
+		if err := rows.Scan(&xuid); err != nil {
+			_ = rows.Close()
+			return fmt.Errorf("scanning the roster of %s: %w", matchID, err)
+		}
+		xuids = append(xuids, xuid)
+	}
+	if err := rows.Err(); err != nil {
+		_ = rows.Close()
+		return fmt.Errorf("reading the roster of %s: %w", matchID, err)
+	}
+	if err := rows.Close(); err != nil {
+		return fmt.Errorf("closing the roster cursor of %s: %w", matchID, err)
+	}
+	for _, xuid := range xuids {
+		if _, err := tx.ExecContext(ctx,
+			`UPDATE participants SET replay_named_lives = ? WHERE match_id = ? AND xuid = ?`,
+			replayLivesOf(gt, xuid), matchID, xuid); err != nil {
+			return fmt.Errorf("recording the replay lives of %s in %s: %w", xuid, matchID, err)
+		}
 	}
 	return nil
 }
@@ -160,16 +218,17 @@ func writeParticipant(ctx context.Context, tx *sql.Tx, matchID string, p partici
 	if exists {
 		_, err = tx.ExecContext(ctx, `
             UPDATE participants SET gamertag = ?, team = ?, outcome = ?,
-                   kills = ?, deaths = ?, assists = ?
+                   kills = ?, deaths = ?, assists = ?, replay_named_lives = ?
             WHERE match_id = ? AND xuid = ?`,
 			nullString(p.Gamertag), p.Team, p.Outcome, p.Kills, p.Deaths, p.Assists,
-			matchID, p.XUID)
+			p.ReplayNamedLives, matchID, p.XUID)
 	} else {
 		_, err = tx.ExecContext(ctx, `
-            INSERT INTO participants (match_id, xuid, gamertag, team, outcome, kills, deaths, assists)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            INSERT INTO participants (match_id, xuid, gamertag, team, outcome, kills, deaths, assists,
+                                      replay_named_lives)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			matchID, p.XUID, nullString(p.Gamertag),
-			p.Team, p.Outcome, p.Kills, p.Deaths, p.Assists)
+			p.Team, p.Outcome, p.Kills, p.Deaths, p.Assists, p.ReplayNamedLives)
 	}
 	if err != nil {
 		return fmt.Errorf("recording participant %s of %s: %w", p.XUID, matchID, err)

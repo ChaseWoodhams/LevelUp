@@ -61445,3 +61445,39 @@ reproduced; each is fixed at its cause.
 tests for filters and FR translations ok.
 
 **Next step**: push, let CI rule, take PR #28 out of draft.
+
+---
+
+## [2026-09-11] Study archiver: every replay build checked against the official match stats
+
+**Status**: Complete.
+
+**Technical decision**: the replay names each life after the victim the film's death feed
+reports; Halo's match stats count each player's deaths independently. A player who died N
+times had N + 1 lives, so the two can be compared on every archived match without any new
+capture. `cmd/study-archiver/groundtruth.go` does it right after each build (`fetch-one` from
+the stats it just read, `rebuild` from the roster already in `participants`) and records:
+players compared, expected lives, lives named for them, over-named lives (named beyond
+deaths + 1: a life given to the wrong player, must stay 0), missing lives (the replay refusing
+to guess), lives named after an xuid the stats do not list, and the lives gap (the document's
+own life total minus expected lives: positive = lives split where nobody died, negative =
+merged or missed). Totals live on `matches.gt_*`, each player's count on
+`participants.replay_named_lives` beside the official deaths; NULL, never 0, when a match was
+not compared (no death counts, or no coverage report). The columns are added with
+`ADD COLUMN IF NOT EXISTS` and written with the archive's row-by-row UPDATE pattern;
+`updateBuild` became a transaction so the match row and the players move together. `status`
+gains a "Replay vs official match stats" section (totals, matches with over-named lives, widest
+gaps). The artifact and the OpenAPI contract are unchanged. `docs/COMMANDS.md` and `CLAUDE.md`
+state the workflow: after a decoder change, rebuild and read that section.
+
+**Results**: 8 new tests (the comparison itself, both write paths, NULL when not compared, the
+status summary); `go build`, `go vet`, `go test ./cmd/study-archiver ./cmd/study-server`, gofmt
+1.26.1 and `golangci-lint --new-from-merge-base=origin/main` (0 issues). Real archive, six
+rebuilt matches: 887 of 997 expected lives named (89.0 %), 0 over-named, 110 missing, 0 on
+unlisted players, gap -4 .. +13 (e01d80a1 +13 is the outlier). These rows carry a `-dirty`
+decoder revision because the binary was built from the uncommitted tree; the decoder itself
+did not change.
+
+**Next step**: the missing lives are spread across nearly every player (no match is decided
+by the death quota alone), so the next accuracy work is the per-biped dead-state component and
+the e01d80a1 life split, each now measurable against this check.

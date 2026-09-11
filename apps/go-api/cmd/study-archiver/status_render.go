@@ -36,6 +36,7 @@ func (r statusReport) render(w io.Writer, now time.Time) error {
 	renderBreakdown(tw, "Archived by mode", r.ByMode)
 	renderBreakdown(tw, "Archived by tracked player", r.ByPlayer)
 	renderBreakdown(tw, "Not archived, by reason", r.UnArchived)
+	renderGroundTruth(tw, r.GroundTruth)
 	renderWatchlist(tw, r.Watchlist, now)
 	return tw.Flush()
 }

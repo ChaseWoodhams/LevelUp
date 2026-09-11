@@ -78,6 +78,9 @@ type statusReport struct {
 	// UnArchived breaks down, by named reason, every match that produced no artifact.
 	UnArchived []countedRow
 	Watchlist  []watchlistStatus
+	// GroundTruth sums the replay-versus-stats comparison over archived matches
+	// (status_groundtruth.go).
+	GroundTruth groundTruthSummary
 }
 
 // readStatus gathers the report from an open read-only handle.
@@ -117,6 +120,9 @@ func readStatus(ctx context.Context, db *sql.DB, path string) (statusReport, err
 		return rep, err
 	}
 	if rep.UnArchived, err = countUnArchived(ctx, db); err != nil {
+		return rep, err
+	}
+	if rep.GroundTruth, err = readGroundTruthSummary(ctx, db); err != nil {
 		return rep, err
 	}
 	rep.Watchlist, err = readWatchlistStatus(ctx, db)

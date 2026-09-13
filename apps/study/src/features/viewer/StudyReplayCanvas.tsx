@@ -53,6 +53,8 @@ interface StudyReplayCanvasProps {
   onFrameChange: (frame: number) => void
   /** The archive's key for the map, for the floor's calibrated-image fallback. */
   mapModule: string | null
+  /** The map's display name, looked up first (maps sharing a Forge canvas share a module). */
+  mapName: string | null
 }
 
 export function StudyReplayCanvas({
@@ -65,6 +67,7 @@ export function StudyReplayCanvas({
   anchor,
   onFrameChange,
   mapModule,
+  mapName,
 }: StudyReplayCanvasProps) {
   const t = REPLAY_TEXT[locale]
   const v = VIEWER_TEXT[locale]
@@ -89,6 +92,7 @@ export function StudyReplayCanvas({
     showGrenades,
     trailWindowMs,
     mapModule,
+    mapName,
     floor,
   })
   const floorText = v.floorSource[painter.floorSource]

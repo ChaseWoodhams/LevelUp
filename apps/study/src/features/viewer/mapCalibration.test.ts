@@ -7,7 +7,14 @@
  */
 import { describe, expect, it } from 'vitest'
 
-import { calibrationFor, floorSourceOf, isUsable, type MapImageConfig } from './mapCalibration'
+import {
+  calibrationFor,
+  calibrationForMap,
+  floorSourceOf,
+  isUsable,
+  mapNameKey,
+  type MapImageConfig,
+} from './mapCalibration'
 import { MAP_IMAGES } from './mapImages.config'
 
 const OLYMPUS = { image: '/maps/olympus.png', world: { minX: -60, minY: -40, maxX: 60, maxY: 40 } }
@@ -50,6 +57,40 @@ describe('calibrationFor', () => {
 
   it('answers null against the empty file this app ships with', () => {
     expect(calibrationFor('olympus', MAP_IMAGES)).toBeNull()
+  })
+})
+
+describe('calibrationForMap', () => {
+  const SOLITUDE = { image: '/maps/solitude.png', world: { minX: -30, minY: -40, maxX: 20, maxY: 10 } }
+  const BLANK = { image: '/maps/fo11_blank.png', world: { minX: -231, minY: -227, maxX: 231, maxY: 226 } }
+  const SHARED: MapImageConfig = { 'map:solitude': SOLITUDE, fo11_blank: BLANK, olympus: OLYMPUS }
+
+  it('gives a map on a shared canvas its own floor, not the canvas one', () => {
+    expect(calibrationForMap('Solitude - Ranked', 'fo11_blank', SHARED)).toBe(SOLITUDE)
+  })
+
+  it('falls back to the module for a map with no entry of its own', () => {
+    expect(calibrationForMap('Argyle - Ranked', 'fo11_blank', SHARED)).toBe(BLANK)
+    expect(calibrationForMap('Olympus', 'olympus', SHARED)).toBe(OLYMPUS)
+    expect(calibrationForMap(null, 'olympus', SHARED)).toBe(OLYMPUS)
+  })
+
+  it('never lets a map name match a module key', () => {
+    // A map literally named after a module still looks up `map:<name>` first, then the MODULE it
+    // was recorded with — never the module entry through its name.
+    expect(calibrationForMap('olympus', 'fo11_blank', SHARED)).toBe(BLANK)
+  })
+})
+
+describe('mapNameKey', () => {
+  it('folds case and spacing and drops the playlist suffix', () => {
+    expect(mapNameKey('  Live Fire - Ranked ')).toBe('map:live fire')
+    expect(mapNameKey('Solitude')).toBe('map:solitude')
+  })
+
+  it('answers null when there is no name', () => {
+    expect(mapNameKey(null)).toBeNull()
+    expect(mapNameKey('   ')).toBeNull()
   })
 })
 

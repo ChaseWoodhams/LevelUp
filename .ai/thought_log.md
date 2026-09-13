@@ -61784,3 +61784,9 @@ variant's object extents, floor heights from 1,222 placed-object origins — a l
 **Next step**: rebuild the 74 Forge matches with the new bounds, check ground truth, render the six Forge
 floors from their player cells, and key the viewer's floor images so three maps sharing fo11_blank do not
 share one image.
+
+**Update (viewer keys)**: the study viewer looked a floor image up by `map_module` only, and a Forge map's
+module is its canvas — Solitude, Argyle and Empyrean would share `fo11_blank`'s image, Origin Vagabond's.
+`calibrationForMap(mapName, mapModule)` now tries a `map:<display name>` key (lower case, " - Ranked"
+dropped) before the module; the 343-built maps keep their module keys. `MatchScreen` passes the archive
+row's `map_name` through `ReplayViewer` and `StudyReplayCanvas`. Study typecheck clean, 422/422 tests.

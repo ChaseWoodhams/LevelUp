@@ -29,7 +29,7 @@ import { sceneCanvasHeight } from './canvasFraming'
 import { floorSurfacesOf } from './floorScope'
 import { arcThrowers, ARC_ORIGIN_WINDOW_MS } from './grenadeArcs'
 import {
-  calibrationFor,
+  calibrationForMap,
   floorSourceOf,
   type FloorSource,
   type MapImageCalibration,
@@ -104,6 +104,11 @@ export interface ReplayPainterOptions {
    * what the calibrated-image fallback looks a floor up by.
    */
   mapModule: string | null
+  /**
+   * The match's map DISPLAY name, from the same archive row. Looked up before the module, so maps
+   * built on one shared Forge canvas each find their own floor (cf. `mapNameKey`).
+   */
+  mapName: string | null
   /** Selected altitude band, or null for all. Ignored on a map with no relief. */
   floor: number | null
 }
@@ -140,7 +145,10 @@ export function useReplayPainter(o: ReplayPainterOptions): ReplayPainter {
   // The calibration is looked up from the MAP, and the image is fetched from the calibration:
   // both before the scene, which is what avoids a cycle between "what floor do we draw" and
   // "has its image arrived".
-  const calibration = useMemo(() => calibrationFor(o.mapModule, MAP_IMAGES), [o.mapModule])
+  const calibration = useMemo(
+    () => calibrationForMap(o.mapName, o.mapModule, MAP_IMAGES),
+    [o.mapName, o.mapModule],
+  )
   const mapImage = useMapImage(calibration)
   const scene = useReplayScene(doc, width, calibration, mapImage)
 

@@ -98,6 +98,32 @@ export function calibrationFor(
   return null
 }
 
+/**
+ * mapNameKey is the config key for ONE MAP, as opposed to one module: `map:` + its display name,
+ * folded, without the playlist's " - Ranked" suffix. `null` when the match names no map.
+ *
+ * WHY A SECOND KIND OF KEY. A Forge map is built on a canvas, and the archive's module is that
+ * canvas: Solitude, Argyle and Empyrean all record `fo11_blank`, Origin shares `fo08_wetland` with
+ * Vagabond. A module key would hand all of them one floor. The `map:` prefix keeps the two kinds of
+ * key from ever colliding.
+ */
+export function mapNameKey(mapName: string | null | undefined): string | null {
+  const name = (mapName ?? '').trim().toLowerCase().replace(/\s*-\s*ranked$/, '').trim()
+  return name === '' ? null : `map:${name}`
+}
+
+/**
+ * calibrationForMap finds a match's floor: the entry for its MAP first, then the entry for its
+ * module. Every 343-built map keeps its module key; a map sharing a canvas gets its own `map:` key.
+ */
+export function calibrationForMap(
+  mapName: string | null | undefined,
+  mapModule: string | null | undefined,
+  config: MapImageConfig,
+): MapImageCalibration | null {
+  return calibrationFor(mapNameKey(mapName), config) ?? calibrationFor(mapModule, config)
+}
+
 /** isUsable rejects an entry that cannot be drawn: no image, or corners enclosing no area. */
 export function isUsable(entry: MapImageCalibration | null | undefined): boolean {
   if (!entry || entry.image.trim() === '') return false

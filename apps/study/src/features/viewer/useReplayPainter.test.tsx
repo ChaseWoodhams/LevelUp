@@ -55,6 +55,7 @@ function options(over: Partial<ReplayPainterOptions> = {}): ReplayPainterOptions
     showGrenades: true,
     trailWindowMs: DEFAULT_TRAIL_WINDOW_MS,
     mapModule: null,
+    mapName: null,
     floor: null,
     ...over,
   }

@@ -22,7 +22,11 @@
  *   3. Read off the world x/y of the image's left, right, bottom and top edges — the edges of
  *      the IMAGE, not of the playable area, since the image is stretched onto that rectangle.
  *   4. Add the entry below, keyed by the match's `map_module` (the archive's own key — it is
- *      shown in the browser's row and is stable across renames of the display name).
+ *      shown in the browser's row and is stable across renames of the display name). A Forge
+ *      map is the exception: its module is the CANVAS it was built on, which several maps share
+ *      (Solitude, Argyle and Empyrean all record `fo11_blank`), so it is keyed `map:<name>` —
+ *      the display name, lower case, without " - Ranked" (cf. `mapNameKey`). A `map:` entry is
+ *      looked up before the module one.
  *   5. Reload. The floor line under the map says which fallback is in use; it should now say
  *      the image.
  *

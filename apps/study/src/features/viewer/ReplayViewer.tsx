@@ -61,6 +61,8 @@ interface ReplayViewerProps {
    * belongs to no archived match at all — and it simply means the floor falls through.
    */
   mapModule?: string | null
+  /** The map's display name from the same archive row; looked up before the module. */
+  mapName?: string | null
   /**
    * Zéro de l'horloge du MATCH sur l'axe du document, en ms ; null = non mesuré.
    *
@@ -80,6 +82,7 @@ export function ReplayViewer({
   scoreboard,
   locale,
   mapModule = null,
+  mapName = null,
   matchClockZeroMs = null,
 }: ReplayViewerProps) {
   const coloring = useMemo(() => buildRosterColoring(doc, scoreboard), [doc, scoreboard])
@@ -144,6 +147,7 @@ export function ReplayViewer({
             anchor={anchor}
             onFrameChange={onFrameChange}
             mapModule={mapModule}
+            mapName={mapName}
           />
           <ReplayTimeline
             doc={doc}

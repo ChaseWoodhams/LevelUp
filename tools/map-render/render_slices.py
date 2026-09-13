@@ -26,6 +26,16 @@ CELLS    = arg('--cells','')
 OUTDIR   = arg('--outdir','')
 PALETTE  = arg('--palette','slate')
 CUTS     = [float(c) for c in arg('--cuts','1.2,1.9,2.6,3.3,4.0,4.7,5.4,6.1,7.0,9.5').split(',')]
+# --maxfootprint-frames N drops any mesh whose XY footprint exceeds N frames' area (0 = off, the
+# Streets and Aquarius renders). touches() keeps every object over 40,000 m2 unexamined, and on
+# Recharge that kept five vista terrain meshes (0.8-2.0 km2) and two 93,000 m2 planes under the
+# arena: they painted 85 % of the frame, and player positions mirrored, rotated or shifted still
+# scored 100 % coverage. The arena's own largest mesh is 2,609 m2, under the frame's 3,538 m2.
+MAX_FOOT = float(arg('--maxfootprint-frames','0'))
+# --color-by object (default, the Streets and Aquarius renders) colours each object by its lowest
+# point; --color-by vertex colours each VERTEX by its own world height. One mesh spanning floor to
+# roof (Recharge's building shell, -7.4..11.8 m) otherwise paints every floor it holds near-black.
+COLOR_BY = arg('--color-by','object')
 CAM_Z    = 600.0
 
 def lin(c):
@@ -81,21 +91,48 @@ def touches(pts):
             if (a,b) in near: return True
     return False
 
-base=[]; n_high=0; n_far=0
+base=[]; n_high=0; n_far=0; n_huge=0
 for o in [o for o in bpy.data.objects if o.type=='MESH']:
     pts=[o.matrix_world @ Vector(v) for v in o.bound_box]
     zmin=min(p.z for p in pts)
     if zmin >= PLAY_TOP: drop(o); n_high+=1; continue
+    if MAX_FOOT > 0:
+        foot=(max(p.x for p in pts)-min(p.x for p in pts))*(max(p.y for p in pts)-min(p.y for p in pts))
+        if foot > MAX_FOOT*w*h: drop(o); n_huge+=1; continue
     if not touches(pts): drop(o); n_far+=1; continue
     base.append((o, zmin))
-print('CULL start=%d masters=%d dups=%d abovePlay=%d offArena=%d kept=%d' % (
-    start, n_master, n_dup, n_high, n_far, len(base)), flush=True)
+print('CULL start=%d masters=%d dups=%d abovePlay=%d hugeFootprint=%d offArena=%d kept=%d' % (
+    start, n_master, n_dup, n_high, n_huge, n_far, len(base)), flush=True)
 
 lo_c, hi_c, out_c = PALETTES[PALETTE]
 span=max(RAMP_HI-RAMP_LO,1e-6)
-for o,z in base:
-    t=min(max((z-RAMP_LO)/span,0.0),1.0)
-    o.color=tuple(lin(lo_c[i]+(hi_c[i]-lo_c[i])*t) for i in (0,1,2))+(1.0,)
+if COLOR_BY == 'vertex':
+    import numpy as np
+    lo_v, hi_v = np.array([lin(c) for c in lo_c]), np.array([lin(c) for c in hi_c])
+    n_vert=0
+    for o,_ in base:
+        # Instances share mesh data; per-vertex world heights differ per instance, so each object
+        # gets its own copy before its colour attribute is written.
+        o.data=o.data.copy()
+        me=o.data
+        nv=len(me.vertices)
+        if nv == 0: continue
+        co=np.empty(nv*3, dtype=np.float32); me.vertices.foreach_get('co', co)
+        co=co.reshape(nv,3)
+        m=np.array(o.matrix_world)
+        z=co@m[2,:3]+m[2,3]
+        t=np.clip((z-RAMP_LO)/span,0.0,1.0)[:,None]
+        rgb=lo_v+(hi_v-lo_v)*t
+        rgba=np.hstack([rgb,np.ones((nv,1))]).astype(np.float32).ravel()
+        attr=me.color_attributes.new(name='height', type='FLOAT_COLOR', domain='POINT')
+        attr.data.foreach_set('color', rgba)
+        me.color_attributes.active_color=attr
+        n_vert+=nv
+    print('COLOR by vertex height: %d vertices over %d objects' % (n_vert, len(base)), flush=True)
+else:
+    for o,z in base:
+        t=min(max((z-RAMP_LO)/span,0.0),1.0)
+        o.color=tuple(lin(lo_c[i]+(hi_c[i]-lo_c[i])*t) for i in (0,1,2))+(1.0,)
 
 for o in [o for o in bpy.data.objects if o.type=='CAMERA']: drop(o)
 cd=bpy.data.cameras.new("TopDown"); cd.type='ORTHO'; cd.ortho_scale=max(w,h)
@@ -114,7 +151,7 @@ scene.render.image_settings.file_format='PNG'
 scene.render.image_settings.color_mode='RGBA'
 
 sh=scene.display.shading
-sh.light='FLAT'; sh.color_type='OBJECT'; sh.show_shadows=False
+sh.light='FLAT'; sh.color_type=('VERTEX' if COLOR_BY == 'vertex' else 'OBJECT'); sh.show_shadows=False
 sh.show_cavity=True; sh.cavity_type='BOTH'
 sh.curvature_ridge_factor=0.6; sh.curvature_valley_factor=1.2
 sh.cavity_ridge_factor=0.5; sh.cavity_valley_factor=1.4

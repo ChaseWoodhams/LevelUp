@@ -71,6 +71,32 @@ prints as `max`, or whole upper floors are deleted. The scene itself comes from 
 "Import Level" operator on `<data folder>/levels/<map>.json`, saved to a `.blend` outside
 the repository.
 
+Options added for maps that are not like Streets (every default reproduces the Streets and
+Aquarius assets):
+
+- `MAP_MIN_POINTS=N` (both exporters) keeps only 1 m cells holding N samples. A decoder glitch is
+  a lone sample kilometres away; on Recharge, N=20 keeps 99.98 % of positions and brings the
+  extents from 2.5 km back to the arena.
+- `--maxfootprint-frames N` drops meshes whose footprint exceeds N frames' area. The off-arena
+  cull keeps anything over 40,000 m2 unexamined, which on Recharge meant vista terrain and flat
+  planes filling the frame. 4 is safe: an arena's own largest mesh is well under one frame.
+- `--color-by vertex` colours each vertex by its own height instead of each object by its
+  lowest point, so a shell mesh spanning floor to roof does not paint its floors black.
+- A map whose sbsp box is far larger than its arena (Recharge, Forge canvases) is framed on a
+  plain world rectangle (`--bounds`) around the arena. Still world coordinates, still nothing
+  fitted.
+
+**The coverage check can pass for the wrong reason, and now says so.** `check_coverage.js` also
+scores the same positions mirrored, rotated and shifted. Where the image leaves space around the
+arena (Aquarius: 34 % of the frame drawn) the moved rows fall well below 100 %. Where one mesh
+covers the whole frame (Recharge) they stay at 100 %, the number proves nothing, and the asset
+is accepted only on an overlay of player positions tracing ramps, pads and corridors.
+
+A map with no replays yet (no quant bounds) has no player cells. Its placed objects stand on
+floors, so ekur's Forge import of the map's `.mvar` gives origins to use as a floor-height
+proxy (`ceiling`), and the render runs with no `--cells` (no off-arena cull) and the footprint
+cap. Such an asset is a layout, not a verified floor, until replays exist to overlay.
+
 ## Why a stack of cuts and not one image
 
 A plain top-down render hides every street under its canopy. Three fixes were tried:

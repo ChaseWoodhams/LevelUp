@@ -65,23 +65,65 @@ const defaultLevelsDir = `D:/SteamLibrary/steamapps/common/Halo Infinite/deploy/
 // there are no bounds to read. The pc module is NOT a substitute: tried with a witness on every
 // map readable from both, and Vagabond's pc main BSP is a different, larger box
 // (x −1929..… against −231..231). A pc read would hand Live Fire the wrong box.
+//
+// Lattice, Origin, Vacancy, Solitude, Argyle, Empyrean (2026-09-13): Forge maps, so the module is
+// the CANVAS their variant is built on, as for Vagabond. Their .mvar files (fetched from the public
+// UGC blob store by asset/version id, read from the matches' stats) carry level_ids −992358985,
+// 88891201, 1437677928, and 426470249 for the last three. The same all-three-roots scan, with
+// Origin/Vagabond (88891201 -> fo08_wetland ×2 any, ×4 ds, ×3 pc) and Recharge as controls, gives
+// exactly one module each: fo13_frost (×2, ×2, ×3), fo09_academy (×2, ×2, ×6), fo11_blank
+// (×2, ×6, ×7); every other level module holds these ids at most in one root. Origin shares
+// Vagabond's canvas, so it shares Vagabond's box.
+// forgeCanvases are the Forge canvas modules. Each holds the same two sbsp tags, a 463 m box at
+// 15/15/17 bits and a 3.9 km box at 18/18/18 bits, and which one is the larger tag differs by
+// canvas. Films are quantised on the 463 m box on all of them (2026-09-13,
+// replay/map_bounds_plausibility_measure_test.go): with it, Lattice (fo13_frost) and Solitude,
+// Argyle, Empyrean (fo11_blank) decode their players into 28-49 m arenas; with the 3.9 km box the
+// same films spread 8.35x wider, exactly the ratio of the two extents. Origin (fo08_wetland) and
+// Vacancy (fo09_academy), whose larger tag already is the 463 m box, decode into 39x26 m and
+// 31x35 m arenas.
+var forgeCanvases = map[string]bool{
+	"fo08_wetland": true, "fo09_academy": true, "fo11_blank": true, "fo13_frost": true,
+}
+
+// mainBSP picks the sbsp whose bounds quantise a map's films: the largest tag, except on a Forge
+// canvas, where it is the tag with the smallest XY footprint (see forgeCanvases).
+func mainBSP(module string, bsps []himap.BSP) himap.BSP {
+	if !forgeCanvases[module] {
+		return bsps[0]
+	}
+	best := bsps[0]
+	for _, b := range bsps[1:] {
+		if b.Bounds.Extent(0)*b.Bounds.Extent(1) < best.Bounds.Extent(0)*best.Bounds.Extent(1) {
+			best = b
+		}
+	}
+	return best
+}
+
 var mapModule = map[string]string{
 	"Aquarius":      "ctf_aquarius",
+	"Argyle":        "fo11_blank",
 	"Bazaar":        "ctf_bazaar",
 	"Behemoth":      "va_behemoth",
 	"Breaker":       "ctf_breaker",
 	"Catalyst":      "catalyst",
 	"Chasm":         "chasm",
 	"Cliffhanger":   "ridgeline",
+	"Empyrean":      "fo11_blank",
 	"Forbidden":     "ctf_forbidden",
 	"Forest":        "forest",
 	"Fragmentation": "btb_fragmentation",
 	"Highpower":     "btb_highpower",
 	"Illusion":      "ctf_illusion",
+	"Lattice":       "fo13_frost",
 	"Launch Site":   "va_launchsite",
+	"Origin":        "fo08_wetland",
 	"Prism":         "sgh_crystalcaves",
 	"Recharge":      "sgh_blueprint",
+	"Solitude":      "fo11_blank",
 	"Streets":       "sgh_streets",
+	"Vacancy":       "fo09_academy",
 	"Vagabond":      "fo08_wetland",
 }
 
@@ -126,7 +168,7 @@ func main() {
 			missing++
 			continue
 		}
-		main := bsps[0] // BSP principal = le plus gros tag sbsp
+		main := mainBSP(mod, bsps)
 		if !main.Bounds.Valid() {
 			slog.Error("AABB dégénérée", "carte", name, "module", mod)
 			missing++

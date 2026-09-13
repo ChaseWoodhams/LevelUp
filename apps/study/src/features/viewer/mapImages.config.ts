@@ -100,4 +100,27 @@ export const MAP_IMAGES: MapImageConfig = {
     image: '/maps/ctf_aquarius.png',
     world: { minX: -39.014282, minY: -27.861597, maxX: 38.79729, maxY: 18.353075 },
   },
+  /**
+   * sgh_blueprint ("Recharge") — same pipeline, one difference in the frame. Recharge's sbsp box is
+   * 2.7 x 2.6 km, so the camera is framed on a plain WORLD rectangle around the arena instead:
+   * X[-16, 42] Y[-28, 33], the extents of player positions from 27 archived matches plus a 12 m
+   * margin. It is still world coordinates, still linear, still nothing fitted — only a smaller window
+   * onto the same frame the replay lives in. The player cells behind it keep only 1 m cells holding
+   * >= 20 samples (MAP_MIN_POINTS): 99.98 % of positions, without the lone decoder glitches that
+   * otherwise stretched the extents to 2.5 km.
+   *
+   * THE CHECK IS VISUAL, AND THAT IS STATED ON PURPOSE. One building shell (-7.4..11.8 m) spans
+   * almost the whole window, so every pixel holds geometry: the 1,115,463 real positions score
+   * 100.00 % on drawn geometry, but mirrored, rotated and shifted positions score 100.00 % too, and
+   * the number proves nothing here. What does: player positions drawn over the image trace the spiral
+   * ramp, the two circular pads and the corridors, which a mirror or an offset would not.
+   *
+   * Rendered with `--maxfootprint-frames 4` (five vista terrain meshes of 0.8-2.0 km2 and two
+   * 93,000 m2 planes otherwise filled the window) and `--color-by vertex` (the shell otherwise
+   * painted every floor near-black). No `preferOverStructure`: Recharge replays carry no structure.
+   */
+  sgh_blueprint: {
+    image: '/maps/sgh_blueprint.png',
+    world: { minX: -16, minY: -28, maxX: 42, maxY: 33 },
+  },
 }

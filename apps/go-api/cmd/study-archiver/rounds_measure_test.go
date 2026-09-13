@@ -69,7 +69,8 @@ func TestRoundsInOfficialStats(t *testing.T) {
 			names = append(names, k)
 		}
 		sort.Strings(names)
-		t.Logf("%s mode %q map %q stat blocks %v team scores %v/%v", id[:8], facts.Mode, facts.MapName,
+		t.Logf("%s mode %q map %q (asset %s version %s) stat blocks %v team scores %v/%v", id[:8],
+			facts.Mode, facts.MapName, facts.MapID, facts.MapVersionID,
 			names, derefInt(facts.Team0Score), derefInt(facts.Team1Score))
 		for _, l := range lines {
 			t.Logf("  %s", l)

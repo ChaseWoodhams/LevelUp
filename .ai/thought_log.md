@@ -61743,3 +61743,44 @@ over-count against deaths + 1 is on the three Oddball films only (6 / 1 / 3), wh
 
 **Next step**: backfill-rounds, then rebuild the archive with this decoder and read the
 ground truth — over-named must stay 0.
+
+---
+
+## [2026-09-13] Ranked map floors: Recharge image, Forge canvas bounds, render tools for compact maps
+
+**Status**: In progress (Recharge floor and Forge bounds done; Forge replays rebuilding, their floors and
+Live Fire's follow).
+
+**Technical decision**: the ten ranked arena maps are Streets, Aquarius, Recharge, Live Fire (343 levels)
+and Lattice, Origin, Vacancy, Solitude, Argyle, Empyrean (Forge maps). All ten are imported to `.blend`
+with ekur headlessly (levels via `ekur.importlevel`; Forge maps via `ekur.importforgemap` on each
+variant's `.mvar`, fetched from the public UGC blob store by the asset/version ids in the matches'
+stats). Materials are skipped on Forge imports: the render never uses them.
+
+- **Forge bounds.** The .mvar level_ids give the canvas: Origin 88891201 -> fo08_wetland (Vagabond's),
+  Vacancy 1437677928 -> fo09_academy, Lattice −992358985 -> fo13_frost, Solitude/Argyle/Empyrean
+  426470249 -> fo11_blank, each by the all-three-roots signature with Origin/Vagabond and Recharge as
+  controls. Every canvas module holds the SAME two sbsp tags (463 m box at 15/15/17, 3.9 km box at
+  18/18/18); mapquant-build kept the larger file, which is the 3.9 km box on fo11_blank/fo13_frost. A
+  new bench (`TestMapBoundsPlausibility`) decodes one film per map: with the 3.9 km box players spread
+  230-390 m; with the 463 m box every Forge map decodes into a 28-49 m arena (Lattice 34x30, Solitude
+  28x34, Argyle 29x49, Empyrean 43x29, Origin 39x26, Vacancy 31x35), the spread ratio being 8.35, the
+  ratio of the two extents. `mainBSP` picks the smallest-footprint tag on Forge canvases; the 17
+  existing catalogue entries are byte-identical. `map_objectives.json` gains the six variants.
+- **Recharge floor** (`sgh_blueprint.png`, frame X[-16,42] Y[-28,33], a world rectangle: its sbsp is
+  2.7 km). Three render problems, three opt-in tool changes: `MAP_MIN_POINTS` (lone decoder-glitch
+  samples stretched the cells to 2.5 km; >= 20 samples keeps 99.98 %), `--maxfootprint-frames` (vista
+  terrain and 93,000 m2 planes filled the frame), `--color-by vertex` (one building shell painted every
+  floor black).
+- **The coverage check lied, and now cannot silently.** On Recharge the real positions scored 100 %
+  and so did mirrored, rotated and shifted positions: one mesh covers the whole frame. `check_coverage.js`
+  now prints those moved rows. Recharge is accepted on an overlay of 55,784 positions tracing the spiral
+  ramp, pads and corridors, and its config entry says so.
+
+**Results**: Recharge floor rendered and aligned; study typecheck clean, 155/155 viewer tests.
+Live Fire layout rendered without replays (no bounds: its ds module has no sbsp), frame from its
+variant's object extents, floor heights from 1,222 placed-object origins — a layout, not a verified floor.
+
+**Next step**: rebuild the 74 Forge matches with the new bounds, check ground truth, render the six Forge
+floors from their player cells, and key the viewer's floor images so three maps sharing fo11_blank do not
+share one image.
